@@ -1,0 +1,4 @@
+2017-09-25_12:38:52.686 [http-bio-8088-exec-5] ERROR c.b.u.r.h.DashboardExceptionHandler - Capturing exception with timestamp 1506343132686
+org.apache.catalina.connector.ClientAbortException: java.net.SocketException: Broken pipe (Write failed)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:370)
+	... 118 common frames omitted

@@ -1,0 +1,35 @@
+@import "src/css/variables";
+
+:host {
+  display: inline;
+}
+
+.dropdown-menu {
+  padding: 5px 10px;
+
+  //> div:hover {
+  //  div {
+  //
+  //  }
+  //}
+
+  .level-name {
+    cursor: pointer;
+  }
+
+  .level-name:hover {
+    text-decoration: underline;
+  }
+
+  .level {
+    padding: 0 0 0 3px;
+  }
+
+  .level:hover {
+    border-radius: 0 0 3px 3px;
+  }
+
+  .mouse-select {
+    background: #f0f0f0;
+  }
+}

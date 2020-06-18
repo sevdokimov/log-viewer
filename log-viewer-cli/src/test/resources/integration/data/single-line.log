@@ -1,0 +1,1 @@
+[2017-12-04_13:23:48.324] [main] INFO  c.b.ecosys.executors.HystrixConfig - system.cpu.count=8 (default=8)

@@ -1,0 +1,6 @@
+150101 10:00:01 sdad ( ss
+150101 10:00:02 ) sds
+150101 10:00:03 86400000ms ( 58532ms []) { [], [{58532ms}] }
+150101 10:00:03 ERROR zzz 58532ms errr
+org.apache.catalina.connector.ClientAbortException: java.net.SocketException: Broken pipe (39532ms)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:370)

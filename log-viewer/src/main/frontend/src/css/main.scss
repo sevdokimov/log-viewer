@@ -1,0 +1,334 @@
+/*
+ * Entry point of global application style.
+ * Component-specific style should not go here and be included directly as part of the components.
+ */
+// Theme variables, must be included before the libraries to allow overriding defaults
+$font-family-base: Helvetica Neue,Helvetica,Arial,sans-serif;
+$label-margin-bottom: 0;
+
+@import "src/theme/theme-variables";
+// 3rd party libraries
+@import "node_modules/bootstrap/scss/bootstrap";
+@import "node_modules/@fortawesome/fontawesome-free-webfonts/scss/fontawesome";
+@import "node_modules/@fortawesome/fontawesome-free-webfonts/scss/fa-brands";
+@import "node_modules/@fortawesome/fontawesome-free-webfonts/scss/fa-regular";
+@import "node_modules/@fortawesome/fontawesome-free-webfonts/scss/fa-solid";
+
+@import "node_modules/ngx-toastr/toastr-bs4-alert";
+
+// Theme customization
+@import "src/theme/theme";
+@import "src/css/variables";
+
+html {
+  font-size: 14px;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+.noItems {
+  color: gray;
+  font-style: italic;
+}
+
+.non-bold-label {
+  font-weight: normal;
+}
+
+.tool-button {
+  cursor: pointer;
+  border-radius: $top-element-border-radius;
+  border: 1px solid $top-element-border-color;
+  padding: 2px;
+}
+
+.tool-button-pressed,
+.tool-button:hover {
+  border-color: $top-element-border-color-hover;
+  background: $top-element-hover;
+}
+
+.toolIcon {
+  padding: 3px;
+  box-sizing: border-box;
+  border-radius: $top-element-border-radius;
+  border: 0 solid $top-element-border-color-hover;
+}
+
+.toolIcon:hover {
+  background: $top-element-hover;
+}
+
+.toolIcon:hover,
+.toolIconPressed {
+  padding: 2px;
+  border-width: 1px;
+}
+
+.toolIconPressed {
+  background-color: #c4c4c4 !important;
+}
+
+.tooliconDisabled,
+.tool-button-disabled {
+  cursor: auto;
+  color: #888 !important;
+  filter: grayscale(100%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.tooliconDisabled:hover,
+.tool-button-disabled:hover {
+  background: inherit;
+  padding: 2px;
+  border: none;
+}
+
+.modal-background {
+  background: #000;
+  opacity: 0.2;
+}
+
+.sl-overlay {
+  z-index: 3000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sl-dialog {
+  position: relative;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+
+  z-index: 3001;
+}
+
+.ace_hidden-cursors .ace_cursor {
+  visibility: hidden;
+}
+
+/* Common */
+.in-favorites {
+  color: #bb0;
+}
+
+/* Renderers */
+
+.lv-bracket-active {
+  background: #9cf;
+}
+
+.coll-expander,
+.coll-collapser {
+  cursor: pointer;
+  user-select: none;
+}
+
+.coll-wrapper.expanded .coll-expander {
+  display: none;
+}
+
+.coll-wrapper.collapsed .coll-collapser {
+  display: none;
+}
+
+.coll-wrapper.collapsed .coll-body-1px {
+  height: 1px; /* don't set 0px copy/paste of hidden text will not work */
+  overflow: hidden;
+}
+
+.coll-wrapper.collapsed .coll-body-span {
+  display: inline-block;
+
+  width: 1px; /* don't set 0px copy/paste of hidden text will not work */
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+
+  white-space: nowrap;
+}
+
+/* Java Exception */
+.ex-wrapper {
+  white-space: normal;
+  text-indent: 0;
+  tab-size: 6;
+}
+
+.exception-class {
+  font-weight: bold;
+  white-space: pre-wrap;
+}
+
+.exception-message {
+  color: #502916;
+
+  /* color: #6a3613; */
+  white-space: pre-wrap;
+}
+
+.ex-stacktrace-package,
+.ex-stacktrace-source {
+  color: #444;
+}
+
+.ex-stacktrace-package-home {
+  text-decoration: underline;
+}
+
+.dot-before-class {
+  font-weight: bold;
+  color: #444;
+}
+
+.ex-stacktrace-class {
+  color: #006;
+}
+
+.ex-stacktrace-method {
+  color: #000;
+}
+
+.ex-stacktraces-block {
+  white-space: normal;
+}
+
+.ex-stacktrace-line {
+  white-space: pre-wrap;
+}
+
+.ex-coll-plus-wrapper {
+  position: relative;
+  height: 0;
+  overflow: visible;
+}
+
+.ex-coll-plus-wrapper div,
+.ex-coll-body .coll-collapser,
+.ex-coll-expander-down {
+  left: 27px;
+}
+
+.ex-coll-plus-wrapper div {
+  position: absolute;
+  z-index: 1;
+
+  width: 9px;
+
+  top: -4px;
+  height: 9px;
+
+  background-image: url("../img/expandNode.png");
+  background-repeat: no-repeat no-repeat;
+  background-position: right;
+}
+
+.ex-coll-plus-wrapper div:hover {
+  background-image: url("../img/expandNode-h.png");
+}
+
+.ex-coll-body {
+  position: relative !important;
+}
+
+.ex-coll-body .coll-collapser {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+}
+
+.ex-coll-body .coll-collapser .top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 9px;
+  height: 10px;
+  background-image: url("../img/collapse-top.png");
+  background-repeat: no-repeat no-repeat;
+}
+
+.ex-coll-body .coll-collapser:hover .top {
+  background-image: url("../img/collapse-top-h.png");
+}
+
+.ex-coll-body .coll-collapser .down {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 9px;
+  height: 10px;
+  background-image: url("../img/collapse-down.png");
+  background-repeat: no-repeat no-repeat;
+}
+
+.ex-coll-body .coll-collapser:hover .down {
+  background-image: url("../img/collapse-down-h.png");
+}
+
+.ex-coll-body .coll-collapser:hover .middle {
+  border-right-color: #909090;
+}
+
+.ex-coll-body .coll-collapser .middle {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 4px;
+
+  box-sizing: content-box;
+  border-right: 1px solid #c0c0c0;
+}
+
+.ex-coll-expander-down {
+  position: relative;
+  width: 27px;
+  height: 9px;
+  background-image: url("../img/expand-down.png");
+}
+
+.ex-coll-expander-down:hover {
+  background-image: url("../img/expand-down-h.png");
+}
+
+/* Class name */
+.cls-package-expander {
+  font-weight: bold;
+}
+
+.top-panel-dropdown {
+  display: inline-block;
+
+  > span {
+    display: inline-block;
+    border: 1px solid $top-element-border-color;
+    border-radius: $top-element-border-radius;
+
+    padding: 0 2px;
+    cursor: pointer;
+
+    .fa-caret-down {
+      color: #999;
+    }
+  }
+}
+
+.top-panel-dropdown:hover > span {
+  background: $top-element-hover;
+  border-color: $top-element-border-color-hover;
+}

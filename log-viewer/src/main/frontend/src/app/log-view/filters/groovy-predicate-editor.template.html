@@ -1,0 +1,40 @@
+<div *ngIf="editing">
+    <div class="script-editor-container">
+        <div class="script-editor"
+             behAceEditor
+             [options]="scriptEditorOptions"
+             [text]="filter.predicate.script"
+             (textChanged)="onTextChanged($event)"
+             (keydown)="editorKeyDown($event)"
+             [mode]="'groovy'"
+        >
+        </div>
+    </div>
+    <span class="fa fa-check tool-button" style="color: green;" title="Save (Ctrl+Enter)" (click)="stopEditing()"></span>
+    &nbsp;
+    <span class="fa fa-times tool-button" style="color: red;" title="Revert (Ctrl+Alt+Z)" (click)="revert()"></span>
+</div>
+
+<div *ngIf="!editing" class="view-pane" (click)="startEditing()">
+    <div *ngIf="filter.name" style="display: flex;">
+        <span class="name">{{filter.name}}</span>
+        <span class="script-tail">{{filter.predicate.script}}</span>
+    </div>
+    <div *ngIf="!filter.name">
+        <div *ngIf="filter.predicate.script?.trim()?.length === 0" class="noItems">
+            Script text is empty
+        </div>
+        <div class="script-editor"
+             *ngIf="filter.predicate.script?.trim()?.length > 0"
+             behAceEditor
+             [options]="scriptEditorOptions"
+             [text]="filter.predicate.script"
+             (textChanged)="onTextChanged($event)"
+             (keydown)="editorKeyDown($event)"
+             [readOnly]="true"
+             [disableFocus]="true"
+             [mode]="'groovy'"
+        >
+        </div>
+    </div>
+</div>
