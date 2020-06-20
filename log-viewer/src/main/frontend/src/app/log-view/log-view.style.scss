@@ -1,0 +1,377 @@
+@import "src/css/variables";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  height: 100%;
+}
+
+::ng-deep {
+  .record {
+    word-break: break-all;
+    white-space: pre-wrap;
+    font-size: 13px;
+    font-family: monospace;
+
+    min-height: 15px;
+
+    position: relative;
+
+    color: #111;
+
+    border-top: 1px solid #e8e8e8;
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
+  }
+
+  .record:first-of-type {
+    border-top: 1px solid transparent;
+  }
+
+  .record:last-of-type {
+    border-bottom: 1px solid transparent;
+  }
+  .record:last-of-type:hover {
+    border-bottom-color: #000;
+  }
+
+  .rec-text {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+  }
+
+  .log-label {
+    font-size: 11px;
+    font-family: Arial, Helvetica, sans-serif;
+    word-break: keep-all;
+    white-space: nowrap;
+    padding-right: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .record.labeled .rec-text {
+    padding-left: 0;
+    text-indent: 0;
+  }
+
+  .record.labeled {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .record:hover {
+    border-top-color: #000;
+    border-left-color: #000;
+    border-right-color: #000;
+  }
+
+  .record:hover + .record {
+    border-top-color: #000;
+  }
+
+  .record.selected-line {
+    background-color: #e8e8f8 !important;
+  }
+
+  .record > .filtering-error {
+    position: absolute;
+
+    left: 4px;
+    top: 2px;
+
+    width: 40px;
+    height: 11px;
+    border-radius: 4px;
+    background-color: #800;
+
+    cursor: pointer;
+
+    z-index: 10;
+    opacity: 0.6;
+  }
+
+  .filter-error-text {
+    white-space: pre;
+    font-size: 11px;
+    overflow: auto;
+    font-family: monospace;
+  }
+
+  .record > .filtering-error:hover {
+    opacity: 1;
+  }
+
+  .has-more {
+    padding-left: 1.5px;
+    text-indent: 0;
+    font-style: italic;
+    color: #aaa;
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  .search-result {
+    background: #ee0;
+    color: black;
+  }
+}
+
+.scenario-cfg {
+  margin-bottom: 15px;
+  padding: 3px;
+  border: 1px solid #eee;
+}
+
+#searchBar {
+  background: $top-panel-background;
+  padding: 2px 3px 4px 4px;
+  border-bottom: 1px solid black;
+  border-radius: 4px;
+  flex-grow: 0;
+}
+
+#filterInput {
+  width: 500px;
+  height: auto;
+}
+
+#filterInput:focus {
+  box-shadow: none;
+}
+
+#logPane {
+  flex-grow: 1;
+  height: 100%;
+  overflow: hidden;
+
+  padding: 0 3px;
+}
+
+.loading-placeholder {
+  display: table;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
+
+.loading-placeholder span {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 16px;
+}
+
+.empty-log-message-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.empty-log-message-container > .empty-log-message {
+  position: absolute;
+  top: 30%;
+  width: 100%;
+  text-align: center;
+  transform: translate(0, -100%);
+}
+
+.empty-log-message-container > .file-list {
+  position: absolute;
+  top: 30%;
+  bottom: 0;
+  width: 100%;
+  height: 70%;
+
+  text-align: center;
+}
+
+.file-list > div {
+  display: inline-block;
+  height: 100%;
+  overflow-y: auto;
+  text-align: center;
+  padding-top: 10px;
+}
+
+.file-list > div > table > tr > td {
+  padding-right: 10px;
+}
+
+.file-list > div > table > tr > td {
+  white-space: nowrap;
+}
+
+.file-list > div > table > tr > td:last-child {
+  white-space: normal;
+}
+
+.file-list > div > table {
+  padding-right: 10px;
+  text-align: left;
+}
+
+.file-not-found {
+  color: #777;
+}
+
+.file-error {
+  color: #922;
+}
+
+.file-attr {
+  font-size: 12px;
+  color: #999;
+}
+
+.empty-log-message-container .no-record-msg {
+  font-size: 56px;
+  color: #999;
+}
+
+#rightPanel {
+  position: absolute;
+
+  top: 26px;
+  bottom: 0;
+
+  right: 0;
+
+  width: 26px;
+}
+
+#heightLimiter {
+  max-height: 1px;
+  height: 1px;
+  overflow: visible;
+}
+
+#logView {
+  line-height: normal;
+}
+
+#scrollPane {
+  position: absolute;
+  top: 2px;
+  bottom: 28px; /* 26 + 2 */
+  right: 3px;
+
+  width: 14px;
+
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+
+  overflow: visible;
+
+  cursor: pointer;
+}
+
+#downIcon {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+}
+
+#menu-icon {
+  cursor: pointer;
+}
+
+#scrollPoint {
+  position: relative;
+
+  /*cursor: pointer;*/
+
+  left: -2px;
+
+  top: -11px;
+  /*height: 5px;*/
+  /*width: 100%;*/
+}
+
+#loading-progress-bottom,
+#loading-progress-top {
+  line-height: 15px;
+  visibility: hidden;
+}
+
+.state-opened #loading-progress-bottom,
+.state-opened #loading-progress-top {
+  visibility: visible;
+}
+
+.log-end {
+  height: 15px;
+  font-size: 10px;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
+::ng-deep .selected-line .search-result {
+  background: #ff9534;
+}
+
+.sl-dialog-small {
+  width: 400px;
+  height: 100px;
+  background: white;
+}
+
+.sl-dialog-big {
+  width: 700px;
+  height: 600px;
+  background: white;
+}
+
+.io-error {
+  color: red;
+  white-space: pre;
+  font-size: 11px;
+  padding: 20px;
+}
+
+.favorite-icon {
+  font-size: 13px;
+}
+
+.search-invalid-regex {
+  background-color: #fdd;
+}
+
+.prev-next-panel {
+  padding: 0 3px;
+  white-space: nowrap;
+}
+
+.has-problems-files {
+  color: #e33;
+}
+
+.search-field {
+  display: inline-block;
+
+  input {
+    padding: 1px 5px;
+  }
+
+  .input-group-text {
+    font-size: 14px;
+  }
+
+  .search-option {
+    cursor: pointer;
+  }
+
+  .search-option-selected {
+    color: #000;
+    border-bottom: 3px solid #000;
+  }
+}

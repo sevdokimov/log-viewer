@@ -1,0 +1,36 @@
+<table class="log-table">
+    <tr *ngFor="let l of logs">
+        <td>
+            <span *ngIf="showNodeName" [class.connection-problem]="statuses[l.id]?.errorType === 'ConnectionProblem'">{{l.node}}</span>
+        </td>
+
+        <td class="path">
+            <a href="log?path={{l.url}}">{{l.path}}</a>
+        </td>
+
+        <td>
+            <span *ngIf="statuses[l.id]?.hash" style="color: #080;">connected</span>
+
+            <span [ngSwitch]="statuses[l.id].errorType">
+                <span *ngSwitchCase="'NoSuchFileException'" class="file-not-found">
+                    file not found
+                </span>
+                <span *ngSwitchCase="'AccessDeniedException'" class="file-error" title="Access denied by OS">
+                    access Denied
+                </span>
+                <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error" title="Access denied in application configuration">
+                    access denied <span class="fas fa-wrench"></span>
+                </span>
+                <span *ngSwitchCase="'ConnectionProblem'" class="file-error">
+                    {{statuses[l.id].errorMessage}}
+                </span>
+                <span *ngSwitchCase="'IOException'" class="file-error" [title]="statuses[l.id].errorMessage">
+                    IO Error
+                </span>
+                <span *ngSwitchCase="'NoDateField'" class="file-error" [title]="statuses[l.id].errorMessage">
+                    No date field
+                </span>
+            </span>
+        </td>
+    </tr>
+</table>

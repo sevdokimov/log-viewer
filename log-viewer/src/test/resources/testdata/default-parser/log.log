@@ -1,0 +1,25 @@
+2016-12-02_16:40:47.990 [http-bio-8088-exec-1] DEBUG c.b.security.SecurityController - Filter content took 43 ms, 0 contents are filtered out
+2016-12-02_16:45:26.321 [commons-pool-EvictionTimer] WARN  o.a.commons.dbcp2.BasicDataSource - An internal object pool swallowed an Exception.
+com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException: Communications link failure during rollback(). Transaction resolution unknown.
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+        at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+        at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+        at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+        at com.mysql.jdbc.Util.handleNewInstance(Util.java:404)
+        at com.mysql.jdbc.Util.getInstance(Util.java:387)
+        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:917)
+        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:896)
+        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:885)
+        at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:860)
+        at com.mysql.jdbc.ConnectionImpl.rollback(ConnectionImpl.java:4602)
+        at com.mysql.jdbc.ConnectionImpl.realClose(ConnectionImpl.java:4233)
+        at com.mysql.jdbc.ConnectionImpl.close(ConnectionImpl.java:1531)
+        at org.apache.commons.dbcp2.DelegatingConnection.closeInternal(DelegatingConnection.java:235)
+        at org.apache.commons.dbcp2.PoolableConnection.reallyClose(PoolableConnection.java:243)
+        at org.apache.commons.dbcp2.PoolableConnectionFactory.destroyObject(PoolableConnectionFactory.java:334)
+        at org.apache.commons.pool2.impl.GenericObjectPool.destroy(GenericObjectPool.java:890)
+        at org.apache.commons.pool2.impl.GenericObjectPool.evict(GenericObjectPool.java:800)
+        at org.apache.commons.pool2.impl.BaseGenericObjectPool$Evictor.run(BaseGenericObjectPool.java:1026)
+        at java.util.TimerThread.mainLoop(Timer.java:555)
+        at java.util.TimerThread.run(Timer.java:505)
+2016-12-02_16:51:35.342 [localhost-startStop-1] INFO  com.behavox.core.PluginManager - Plugins search time: 197 ms
