@@ -7,6 +7,7 @@ import {DateFieldRenderer} from '@app/log-view/renderers/date-field-renderer';
 import {MillisecondRenderer} from '@app/log-view/renderers/millisecond-renderer';
 import {DateInMillisecondRenderer} from '@app/log-view/renderers/date-in-millisecond-renderer';
 import {BracketsHighlighter} from '@app/log-view/renderers/brackets-highlighter';
+import {RegexHighlighter} from '@app/log-view/renderers/regex-highlighter';
 
 export class ObjectFactory {
     static createRenderer(rendererType: string, args: any): any {
@@ -19,6 +20,8 @@ export class ObjectFactory {
                 return new DateInMillisecondRenderer(args);
             case 'BracketsHighlighter':
                 return new BracketsHighlighter(args);
+            case 'RegexHighlighter':
+                return new RegexHighlighter(args);
 
             // Field renderers
 
