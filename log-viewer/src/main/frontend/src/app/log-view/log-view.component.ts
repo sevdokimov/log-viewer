@@ -73,6 +73,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     logs: LogFile[] = [];
 
     backendError: string;
+    disconnectMessage: string;
 
     state: State = State.STATE_INIT;
     stateVersion: number = 0;
@@ -121,10 +122,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     private backendEventHandlers = {
         backendError: (event: BackendErrorEvent) => this.fail(event.stacktrace),
 
-        disconnected: () => {
+        disconnected: (disconnectMessage?: string) => {
             if (this.state !== State.STATE_NO_LOGS) {
                 this.modalWindow = 'disconnected';
                 this.state = State.STATE_DISCONNECTED;
+                this.disconnectMessage = disconnectMessage || 'Disconnected';
             }
         },
 

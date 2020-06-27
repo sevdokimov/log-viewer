@@ -2,6 +2,8 @@ package com.logviewer;
 
 import com.logviewer.api.*;
 import com.logviewer.config.LvConfigBase;
+import com.logviewer.data2.FavoriteLogService;
+import com.logviewer.data2.FileFavoriteLogService;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.impl.LvHoconFilterPanelStateProvider;
@@ -19,7 +21,7 @@ import java.nio.file.Paths;
 
 @Import({LvConfigBase.class})
 @Configuration
-public class LvJettyConfig {
+public class LvStandaloneConfig {
 
     public static final String LOG_VIEWER_CONFIG_FILE = "log-viewer.config-file";
 
@@ -78,4 +80,8 @@ public class LvJettyConfig {
         }
     }
 
+    @Bean
+    public FavoriteLogService lvFavoriteLogService(ConfigDirHolder configDir) {
+        return new FileFavoriteLogService(configDir);
+    }
 }

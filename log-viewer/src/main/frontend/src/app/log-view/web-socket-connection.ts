@@ -61,7 +61,12 @@ export class WebSocketConnection implements ConnectionService {
 
         ws.onerror = (event) => {
             if (this.ws === ws) {
-                this.onError(null);
+                let message = null;
+                if (ws.onmessage == null) {
+                    message = 'Failed to open websocket: ' + ws.url;
+                }
+
+                this.onError(message);
             }
         };
 

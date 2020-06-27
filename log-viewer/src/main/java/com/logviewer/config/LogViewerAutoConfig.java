@@ -9,16 +9,14 @@ import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.logLibs.LoggerLibSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@Import({LvConfigBase.class, LvServerConfig.class})
 @Configuration
-public class LogViewerConfig {
+public class LogViewerAutoConfig {
 
     private Map<Path, LogFormat> logFormats;
 
@@ -26,6 +24,7 @@ public class LogViewerConfig {
         Map<Path, LogFormat> logFormats = this.logFormats;
         if (logFormats == null) {
             logFormats = loadConfiguredLogs();
+            this.logFormats = logFormats;
         }
         return logFormats;
     }

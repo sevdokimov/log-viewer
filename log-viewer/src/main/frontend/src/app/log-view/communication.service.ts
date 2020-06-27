@@ -17,7 +17,7 @@ export class CommunicationService implements OnDestroy {
     constructor(private http: HttpClient, private rendererFactory2: RendererFactory2) {
     }
 
-    public close(): void {
+    public close(disconnectMessage?: any): void {
         if (this.connection && !this.disconnected) {
             this.disconnected = true;
             this.connection.close();
@@ -25,7 +25,7 @@ export class CommunicationService implements OnDestroy {
             if (this.eventHandlers) {
                 let disconnectListener = this.eventHandlers['disconnected'];
                 if (disconnectListener) {
-                    disconnectListener();
+                    disconnectListener(disconnectMessage);
                 }
             }
         }
@@ -50,7 +50,7 @@ export class CommunicationService implements OnDestroy {
     private onError(e: any) {
         console.warn('Web socket has disconnected', e);
 
-        this.close();
+        this.close(e);
     }
 
     startup(eventHandlers: { [key: string]: any }) {

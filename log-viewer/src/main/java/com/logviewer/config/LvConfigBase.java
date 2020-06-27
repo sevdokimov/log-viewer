@@ -4,11 +4,12 @@ import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFileNavigationManager;
 import com.logviewer.api.LvFilterStorage;
 import com.logviewer.api.LvPermalinkStorage;
-import com.logviewer.data2.*;
+import com.logviewer.data2.FileWatcherService;
+import com.logviewer.data2.LogService;
+import com.logviewer.data2.RemoteLogChangeListenerService;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.data2.config.ConfigDirHolderImpl;
 import com.logviewer.data2.net.RemoteNodeService;
-import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.impl.LvFileNavigationManagerImpl;
 import com.logviewer.services.FileSystemFilterStorage;
 import com.logviewer.services.LvPermalinkStorageImpl;
@@ -36,11 +37,6 @@ public class LvConfigBase {
     }
 
     @Bean
-    public FavoriteLogService lvFavoriteLogService(ConfigDirHolder configDir) {
-        return new FileFavoriteLogService(configDir);
-    }
-
-    @Bean
     public LvPermalinkStorage lvPermalinkService(ConfigDirHolder configDir) {
         return new LvPermalinkStorageImpl(configDir);
     }
@@ -53,11 +49,6 @@ public class LvConfigBase {
     @Bean
     public LogService lvLogService() {
         return new LogService();
-    }
-
-    @Bean
-    public LvFileAccessManager lvFileAccessManager() {
-        return new LvFileAccessManagerImpl();
     }
 
     @Bean

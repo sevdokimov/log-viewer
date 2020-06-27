@@ -3,6 +3,7 @@ package com.logviewer.web;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Resources;
+import com.logviewer.data2.LogContextHolder;
 import com.logviewer.utils.Utils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -58,7 +59,16 @@ public class LogViewerServlet extends HttpServlet {
     }
 
     protected ApplicationContext getSpringContext() {
-        return (ApplicationContext) getServletConfig().getServletContext().getAttribute(SPRING_CONTEXT_PROPERTY);
+        ApplicationContext appCtx = LogContextHolder.getInstance();
+        if (appCtx != null)
+            return appCtx;
+
+        appCtx = (ApplicationContext) getServletConfig().getServletContext().getAttribute(SPRING_CONTEXT_PROPERTY);
+        if (appCtx != null)
+            return appCtx;
+        
+        throw new IllegalStateException("Spring context not found. Set ApplicationContext to " +
+                "com.logviewer.data2.LogContextHolder.setInstance(appCtx)");
     }
 
     private String getRelativePath(HttpServletRequest req) {

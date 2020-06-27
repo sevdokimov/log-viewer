@@ -9,8 +9,10 @@ import com.logviewer.web.rmt.RemoteInvoker;
 import com.logviewer.web.session.LogSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import javax.annotation.Nonnull;
 import javax.websocket.Endpoint;
 import javax.websocket.*;
 import java.lang.reflect.InvocationTargetException;
@@ -23,13 +25,26 @@ public class LogViewerWebsocket extends Endpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogViewerWebsocket.class);
 
+    @Autowired
+    private ApplicationContext applicationContext;
+    
     @Override
     public void onOpen(Session webSession, EndpointConfig config) {
         LOG.info("Connection opened: {} {}", webSession.getId(), getUserName(webSession));
 
         webSession.setMaxIdleTimeout(0);
 
-        webSession.addMessageHandler(new LogWebSocketHandler(webSession));
+        ApplicationContext context = LogContextHolder.getInstance();
+        if (context == null) {
+            context = applicationContext;
+            
+            if (context == null) {
+                throw new RuntimeException("Spring context not found. Set ApplicationContext to " +
+                        "com.logviewer.data2.LogContextHolder.setInstance(appCtx)");
+            }
+        }
+
+        webSession.addMessageHandler(new LogWebSocketHandler(webSession, context));
     }
 
     @Override
@@ -70,13 +85,11 @@ public class LogViewerWebsocket extends Endpoint {
     private static class LogWebSocketHandler implements MessageHandler.Whole<String> {
         private final LogSession session;
 
-        private WebsocketSessionAdapter sessionAdapter;
+        private final WebsocketSessionAdapter sessionAdapter;
 
-        LogWebSocketHandler(Session webSession) {
+        LogWebSocketHandler(Session webSession, @Nonnull ApplicationContext applicationContext) {
             sessionAdapter = new WebsocketSessionAdapter(webSession);
-
-            ApplicationContext context = LogContextHolder.getInstance();
-            session = LogSession.fromContext(sessionAdapter, context);
+            session = LogSession.fromContext(sessionAdapter, applicationContext);
         }
 
         public void close() {

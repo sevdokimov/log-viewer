@@ -44,7 +44,7 @@ public class StartupJettyCommand extends CommandHandler<StartupJettyCommand.CliS
 
         ApplicationContext appCtx = LogContextHolder.getInstance();
         if (appCtx == null) {
-            appCtx = new AnnotationConfigApplicationContext(LvJettyConfig.class, LvServerConfig.class);
+            appCtx = new AnnotationConfigApplicationContext(LvStandaloneConfig.class, LvServerConfig.class);
             LogContextHolder.setInstance(appCtx);
             closeAppContext = true;
         }
