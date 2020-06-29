@@ -89,5 +89,22 @@
     <scm>
         <connection>scm:git:git@github.com:sevdokimov/log-viewer.git</connection>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>log-viewer</id>
+            <name>Log-viewer repository</name>
+            <url>https://dl.bintray.com/sevdokimov/log-viewer</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>log-viewer</id>
+            <name>Log-viewer repository</name>
+            <url>https://api.bintray.com/maven/sevdokimov/log-viewer/com.logviewer/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
 </project>
