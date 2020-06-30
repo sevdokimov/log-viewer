@@ -40,6 +40,8 @@
                     <descriptors>
                         <descriptor>src/assembly/src.xml</descriptor>
                     </descriptors>
+                    <finalName>log-viewer-${project.version}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
 
                 <executions>
