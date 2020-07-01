@@ -84,7 +84,7 @@ public class FileManagerTest extends AbstractLogTest {
             assertNull(snapshot.getError());
         }
 
-        accessManager.setAllowedPaths(Collections.singletonMap(subdir1, Pattern.compile("a.*").asPredicate()));
+        accessManager.setAllowedPaths(Collections.singletonMap(subdir1, Pattern.compile("a.*")));
 
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir), f -> f.getPath(), subdir1);
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir.getParent()), f -> f.getPath(), tmpDir);

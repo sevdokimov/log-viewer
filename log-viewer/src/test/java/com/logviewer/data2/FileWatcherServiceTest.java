@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class FileWatcherServiceTest {
 
-    private static final int DELAY = 80;
+    private static final int DELAY = 100;
 
     @Test
     public void test() throws IOException, InterruptedException {

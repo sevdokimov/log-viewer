@@ -1,13 +1,13 @@
 package com.logviewer;
 
-import com.logviewer.api.*;
+import com.logviewer.api.LvFilterPanelStateProvider;
+import com.logviewer.api.LvPathResolver;
+import com.logviewer.api.LvUiConfigurer;
 import com.logviewer.config.LvConfigBase;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.FileFavoriteLogService;
 import com.logviewer.data2.config.ConfigDirHolder;
-import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.impl.LvHoconFilterPanelStateProvider;
-import com.logviewer.impl.LvHoconFormatRecognizer;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +18,7 @@ import org.springframework.core.env.Environment;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Import({LvConfigBase.class})
 @Configuration
@@ -47,18 +48,14 @@ public class LvStandaloneConfig {
     }
 
     @Bean
-    public LvFileAccessManager lvFileAccessManager(Config lvHoconConfig) {
-        return new LvFileAccessManagerImpl(lvHoconConfig);
+    public LogManager logManager(Config lvHoconConfig) {
+        List<LogDescriptor> descriptors = LogManager.fromHocon(lvHoconConfig);
+        return new LogManager(descriptors);
     }
 
     @Bean
     public LvFilterPanelStateProvider hoconFilterSet(Config lvHoconConfig) {
         return new LvHoconFilterPanelStateProvider(lvHoconConfig);
-    }
-
-    @Bean
-    public LvFormatRecognizer hoconFormatRecognizer(Config lvHoconConfig) {
-        return new LvHoconFormatRecognizer(lvHoconConfig);
     }
 
     @Bean

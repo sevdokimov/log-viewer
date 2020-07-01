@@ -2,7 +2,7 @@ package com.logviewer.tests.web;
 
 import com.google.common.base.Throwables;
 import com.logviewer.StartupJettyCommand;
-import com.logviewer.config.LvServerConfig;
+import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.LogContextHolder;
@@ -94,7 +94,7 @@ public abstract class AbstractWebTestCase {
     @BeforeClass
     public static void beforeClass() throws Exception {
         if (ctx == null) {
-            ctx = new AnnotationConfigApplicationContext(LvTestConfig.class, LvServerConfig.class);
+            ctx = new AnnotationConfigApplicationContext(LvTestConfig.class, LogViewerServerConfig.class);
 
             testLogService = ctx.getBean(LogService.class);
 

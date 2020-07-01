@@ -2,7 +2,7 @@ package com.logviewer;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.logviewer.config.LvServerConfig;
+import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.web.LogViewerServlet;
 import com.logviewer.web.LogViewerWebsocket;
@@ -44,7 +44,7 @@ public class StartupJettyCommand extends CommandHandler<StartupJettyCommand.CliS
 
         ApplicationContext appCtx = LogContextHolder.getInstance();
         if (appCtx == null) {
-            appCtx = new AnnotationConfigApplicationContext(LvStandaloneConfig.class, LvServerConfig.class);
+            appCtx = new AnnotationConfigApplicationContext(LvStandaloneConfig.class, LogViewerServerConfig.class);
             LogContextHolder.setInstance(appCtx);
             closeAppContext = true;
         }

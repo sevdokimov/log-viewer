@@ -1,5 +1,6 @@
 package com.logviewer.utils;
 
+import javax.annotation.Nonnull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -245,5 +246,33 @@ public class RegexUtils {
         for (int i = 0; i < n; i++) {
             res.append('0');
         }
+    }
+
+    public static Pattern filePattern(@Nonnull String filePattern) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0, len = filePattern.length(); i < len; i++) {
+            char a = filePattern.charAt(i);
+
+            if (a == '*') {
+                if (filePattern.startsWith("**/", i) || filePattern.startsWith("**\\", i)) {
+                    sb.append(".*[/\\\\]?");
+                    i += 2;
+                } else if (filePattern.startsWith("**", i)) {
+                    sb.append(".*");
+                    i++;
+                } else {
+                    sb.append("[^/\\\\]*");
+                }
+            } else if (a == '\\' || a == '/') {
+                sb.append("[\\\\/]");
+            } else if (ESCAPED_CHARACTERS.indexOf(a) > 0) {
+                sb.append('\\').append(a);
+            } else {
+                sb.append(a);
+            }
+        }
+
+        return Pattern.compile(sb.toString(), Pattern.CASE_INSENSITIVE);
     }
 }

@@ -168,7 +168,7 @@ public class FileTreeIntegrationTest extends AbstractWebTestCase {
 
     @Test
     public void testVisibleByPattern() {
-        accessManager().setAllowedPaths(Collections.singletonMap(dataDir, Pattern.compile("(empty|search)\\.log").asPredicate()));
+        accessManager().setAllowedPaths(Collections.singletonMap(dataDir, Pattern.compile("(empty|search)\\.log")));
         ctx.getBean(LvFileNavigationManagerImpl.class).setDefaultDirectory(dataDir);
 
         openUrl("/");

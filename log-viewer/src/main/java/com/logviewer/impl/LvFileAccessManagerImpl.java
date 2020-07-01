@@ -1,7 +1,11 @@
 package com.logviewer.impl;
 
 import com.logviewer.api.LvFileAccessManager;
-import com.typesafe.config.*;
+import com.logviewer.utils.RegexUtils;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -11,24 +15,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class LvFileAccessManagerImpl implements LvFileAccessManager {
 
     public static final String VISIBLE_DIRECTORIES_PATH = "visible-directories";
 
-    private volatile Map<Path, Predicate<String>> allowedPaths;
+    private volatile Map<Path, Pattern> allowedPaths;
 
     public LvFileAccessManagerImpl() {
 
     }
 
     public LvFileAccessManagerImpl(@Nonnull Collection<Path> allowedPaths) {
-        setAllowedPaths(allowedPaths);
-    }
-
-    public LvFileAccessManagerImpl(@Nonnull Map<Path, Predicate<String>> allowedPaths) {
         setAllowedPaths(allowedPaths);
     }
 
@@ -40,7 +39,7 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
 
         for (ConfigValue val : config.getList(VISIBLE_DIRECTORIES_PATH)) {
             if (val.valueType() == ConfigValueType.STRING) {
-                allowedPaths.put(Paths.get((String)val.unwrapped()), x -> true);
+                allowedPaths.put(Paths.get((String)val.unwrapped()), null);
             } else if (val.valueType() == ConfigValueType.OBJECT) {
                 ConfigValue directoryVal = ((ConfigObject) val).get("directory");
                 if (directoryVal == null) {
@@ -49,7 +48,7 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
                 }
                     
                 String directory = directoryVal.unwrapped().toString();
-                Predicate<String> predicate = extractPredicate((ConfigObject) val);
+                Pattern predicate = extractPredicate((ConfigObject) val);
                 allowedPaths.put(Paths.get(directory), predicate);
             } else {
                 throw new IllegalArgumentException(String.format("'%s = [...]' configuration property can contain list " +
@@ -58,15 +57,20 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
         }
     }
 
-    private Predicate<String> extractPredicate(ConfigObject val) {
-        ConfigValue regexpVal = val.getOrDefault("regexp", null);
-        if (regexpVal == null)
-            return x -> true;
+    private Pattern extractPredicate(ConfigObject val) {
+        ConfigValue regexpVal = val.get("regexp");
+        if (regexpVal != null)
+            return Pattern.compile(regexpVal.unwrapped().toString());
 
-        return Pattern.compile(regexpVal.unwrapped().toString()).asPredicate();
+        ConfigValue fileVal = val.get("file");
+        if (fileVal != null) {
+            return RegexUtils.filePattern(fileVal.unwrapped().toString());
+        }
+
+        return null;
     }
 
-    public void setAllowedPaths(@Nonnull Map<Path, Predicate<String>> allowedPaths) {
+    public void setAllowedPaths(@Nonnull Map<Path, Pattern> allowedPaths) {
         this.allowedPaths = new LinkedHashMap<>(allowedPaths);
     }
 
@@ -75,7 +79,7 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
     }
 
     public void setAllowedPaths(@Nonnull Collection<Path> allowedPaths) {
-        LinkedHashMap<Path, Predicate<String>> res = new LinkedHashMap<>();
+        LinkedHashMap<Path, Pattern> res = new LinkedHashMap<>();
         for (Path path : allowedPaths) {
             res.put(path, null);
         }
@@ -88,14 +92,14 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
         if (allowedPaths == null)
             return null;
 
-        for (Map.Entry<Path, Predicate<String>> entry : allowedPaths.entrySet()) {
+        for (Map.Entry<Path, Pattern> entry : allowedPaths.entrySet()) {
             Path allowedPath = entry.getKey();
             if (allowedPath.startsWith(path))
                 return null;
 
             if (path.startsWith(allowedPath)) {
                 String relative = allowedPath.relativize(path).toString();
-                if (entry.getValue() == null || entry.getValue().test(relative)) {
+                if (entry.getValue() == null || entry.getValue().matcher(relative).matches()) {
                     return null;
                 }
 

@@ -1,6 +1,6 @@
 package com.logviewer;
 
-import com.logviewer.config.LvServerConfig;
+import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.*;
 import com.logviewer.data2.net.Node;
@@ -186,7 +186,7 @@ public abstract class AbstractLogTest {
 
     protected void doRemoteTest(@Nonnull Class<?> cfg, @Nonnull RemoteTest test) throws Exception {
         LogService local = createLogServiceWithContext(cfg);
-        LogService remote = createLogServiceWithContext(cfg, LvServerConfig.class);
+        LogService remote = createLogServiceWithContext(cfg, LogViewerServerConfig.class);
 
         test.doTest(local, remote);
     }

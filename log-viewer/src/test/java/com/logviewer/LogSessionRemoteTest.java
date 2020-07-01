@@ -1,6 +1,6 @@
 package com.logviewer;
 
-import com.logviewer.config.LvServerConfig;
+import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.web.dto.RestRecord;
 import com.logviewer.web.dto.RestStatus;
 import com.logviewer.web.dto.events.EventScrollToEdgeResponse;
@@ -23,7 +23,7 @@ public class LogSessionRemoteTest extends LogSessionTest {
 
     @Before
     public void startupServer() {
-        createLogServiceWithContext(MultifileConfiguration.class, LvServerConfig.class);
+        createLogServiceWithContext(MultifileConfiguration.class, LogViewerServerConfig.class);
     }
 
     @Test

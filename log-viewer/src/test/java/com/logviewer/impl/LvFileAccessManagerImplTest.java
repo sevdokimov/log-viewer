@@ -60,6 +60,40 @@ public class LvFileAccessManagerImplTest {
     }
 
     @Test
+    public void testFile() {
+        Config config = ConfigFactory.parseString("{" +
+                "visible-directories: [{directory: \"/tmp/zzz\", file: \"*.png\"}]" +
+                "}");
+
+        LvFileAccessManager accessManager = new LvFileAccessManagerImpl(config);
+        assertNull(accessManager.checkAccess(Paths.get("/")));
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/.png")));
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/ttt.png")));
+
+        assertNotNull(accessManager.checkAccess(Paths.get("/tmp/zzz/ttt.txt")));
+        assertNotNull(accessManager.checkAccess(Paths.get("/tmp/zzz/ssss/ttt.png")));
+
+        config = ConfigFactory.parseString("{" +
+                "visible-directories: [{directory: \"/tmp/zzz\", file: \"**/t.png\"}]" +
+                "}");
+
+        accessManager = new LvFileAccessManagerImpl(config);
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/t.png")));
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/aaa/t.png")));
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/aaa/bbb/t.png")));
+        assertNotNull(accessManager.checkAccess(Paths.get("/tmp/zzz/t.txt")));
+
+        config = ConfigFactory.parseString("{" +
+                "visible-directories: [{directory: \"/tmp/zzz\", file: \"www/**\"}]" +
+                "}");
+
+        accessManager = new LvFileAccessManagerImpl(config);
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/www/t.png")));
+        assertNull(accessManager.checkAccess(Paths.get("/tmp/zzz/www/rrr/t.png")));
+        assertNotNull(accessManager.checkAccess(Paths.get("/tmp/zzz/r/t.txt")));
+    }
+
+    @Test
     public void testInvalidHocon() {
         Config config = ConfigFactory.parseString("{" +
                 "visible-directories: [{d: \"/tmp/zzz\", r: \".+\\\\.log\"}]" +

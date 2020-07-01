@@ -3,11 +3,15 @@ package com.logviewer.utils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class RegexUtilsTest {
 
@@ -132,4 +136,65 @@ public class RegexUtilsTest {
         checkMatches("yyyy-MM-dd zXXX", "2018-01-02 MSK+03:00", "2018-01-02 UTCZ");
     }
 
+    @Test
+    public void testFilePath() {
+        doFilePatternTest("*.png", new String[]{
+                "a.png", "aaaa.PnG", ".png"
+        },
+                "a.txt", "a.pnggggg", "a.png/rrr", "zz/a.png", "ssss/ttt.png");
+
+        doFilePatternTest("fff.*", new String[]{
+                "fff.txt", "FFF.png", "fff."
+        },
+                "a.fff", "zz/fff.txt", "fffff.txt");
+
+        doFilePatternTest("rrr/**/l.log", new String[]{
+                "rrr/l.log", "rrr/aaa/l.log", "rrr/aaa/bbb/l.log"
+        },
+                "l.log", "rrr/aaa/llllll.txt");
+
+        doFilePatternTest("**/l.log", new String[]{
+                "rrr/l.log", "rrr/aaa/l.log", "l.log", "l.LOG",
+        },
+                "l.ttt");
+
+        doFilePatternTest("sss/**", new String[]{
+                "sss/l.log", "sss/aaa/l.log", "SSS/t.log", "SSS\\t.log"
+        },
+                "l.ttt", "ssssss", "sss");
+
+        doFilePatternTest("sss/**", new String[]{
+                "sss/l.log", "sss/aaa/l.log", "SSS/t.log",
+        },
+                "l.ttt", "ssssss", "sss");
+
+
+        doFilePatternTest("sss/**.txt", new String[]{
+                "sss/l.txt", "sss/aaa/l.txt"
+        },
+                "l.txt", "ssssss/t.txt", "sss");
+    }
+
+    private void doFilePatternTest(@Nonnull String pattern, String[] matches, String ... notMatches) {
+        Pattern p1 = RegexUtils.filePattern(pattern);
+        Pattern p2 = RegexUtils.filePattern(pattern.replace('/', '\\'));
+
+        for (String s : matches) {
+            String s2 = s.replace('/', '\\');
+
+            assertTrue(pattern + " !~= " + s, p1.matcher(s).matches());
+            assertTrue(pattern + " !~= " + s, p2.matcher(s).matches());
+            assertTrue(pattern + " !~= " + s2, p1.matcher(s2).matches());
+            assertTrue(pattern + " !~= " + s2, p2.matcher(s2).matches());
+        }
+
+        for (String s : notMatches) {
+            String s2 = s.replace('/', '\\');
+
+            assertFalse(pattern + " ~= " + s, p1.matcher(s).matches());
+            assertFalse(pattern + " ~= " + s, p2.matcher(s).matches());
+            assertFalse(pattern + " ~= " + s, p1.matcher(s2).matches());
+            assertFalse(pattern + " ~= " + s, p2.matcher(s2).matches());
+        }
+    }
 }

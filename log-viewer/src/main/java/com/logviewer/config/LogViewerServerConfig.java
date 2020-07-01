@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-public class LvServerConfig {
+public class LogViewerServerConfig {
 
     @Bean(initMethod = "startup", destroyMethod = "close")
     public LogServer lvLogServer(LogService logService, Environment environment) {
