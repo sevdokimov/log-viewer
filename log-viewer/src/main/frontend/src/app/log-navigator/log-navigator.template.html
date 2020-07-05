@@ -1,0 +1,46 @@
+<div class="container" style="padding-top: 10px;">
+    <div *ngIf="loading.loading">
+        <img src="assets/progress.gif"> Loading log list...
+    </div>
+
+    <div *ngIf="loading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{loading.errorMsg}}</div>
+
+    <div *ngIf="state">
+        <h4>Favorites</h4>
+        <div *ngIf="state.favorites.length === 0" id="no-favorites" class="noItems">
+            No logs in favorites
+        </div>
+
+        <div *ngFor="let l of state.favorites" class="favorite-item" [class.not-exist]="l.size == null">
+            <a [routerLink]="['/log']" [queryParams]="{log: l.path}">{{l.path}}</a>
+            <span class="log-size">
+                <span title="File size">{{l.size | slSize}}</span>,
+                <span title="Modification time">{{l.lastModification | date : 'medium'}}</span>
+            </span>
+            <span class="file-non-exist">
+                file not found
+            </span>
+
+            <span *ngIf="state.favoritesEditable" class="fv-actions-block">
+                <span class="fas fa-times" title="Remove from favorites" (click)="removeFromFavorites(l.path)"></span>
+            </span>
+        </div>
+
+        <hr>
+
+        <form (submit)="openByPath()">
+            <div class="input-group">
+                <input type="text" name="pathToOpen" class="form-control" aria-describedby="basic-addon2" autofocus
+                       [(ngModel)]="pathToOpen" placeholder="Path to log file">
+                <span class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" [disabled]="!pathToOpen || !pathToOpen.trim()"
+                            (click)="openByPath()">Open</button>
+                </span>
+            </div>
+        </form>
+
+        <div *ngIf="state?.treeRoot" id="file-tree" style="padding-top: 10px; display: inline-block; min-width: 300px;">
+            <sl-fs-tree-item *ngFor="let fi of state.treeRoot.items" [deep]="0" [item]="fi"></sl-fs-tree-item>
+        </div>
+    </div>
+</div>

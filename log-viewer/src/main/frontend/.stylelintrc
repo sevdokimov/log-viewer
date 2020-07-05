@@ -1,0 +1,53 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recommended-scss",
+  ],
+  "rules": {
+    "font-family-name-quotes": "always-where-recommended",
+    "function-url-quotes": [
+      "always",
+      {
+        "except": [
+          "empty"
+        ]
+      }
+    ],
+    "selector-attribute-quotes": "always",
+    "string-quotes": "double",
+    "max-nesting-depth": 3,
+    "selector-max-compound-selectors": 3,
+    "declaration-empty-line-before": null,
+    "at-rule-no-vendor-prefix": true,
+    "at-rule-empty-line-before": null,
+    "media-feature-name-no-vendor-prefix": true,
+    "property-no-vendor-prefix": true,
+    "selector-no-vendor-prefix": true,
+    "value-no-vendor-prefix": true,
+    "no-empty-source": null,
+    "selector-class-pattern": "[a-z-]+",
+    "selector-id-pattern": "[a-z-]+",
+    "selector-no-qualifying-type": true,
+    "selector-max-universal": 1,
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": [
+          "ng-deep"
+        ]
+      }
+    ],
+    "unit-whitelist": [
+      "px",
+      "%",
+      "em",
+      "rem",
+      "vw",
+      "vh",
+      "deg",
+      "s"
+    ],
+    "max-empty-lines": 2,
+    "max-line-length": 120
+  }
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.logviewer</groupId>
+    <artifactId>log-parent</artifactId>
+    <packaging>pom</packaging>
+
+    <version>0.1.0-SNAPSHOT</version>
+
+    <properties>
+        <log4j.version>2.13.3</log4j.version>
+    </properties>
+
+    <modules>
+        <module>log-viewer</module>
+        <module>log-viewer-cli</module>
+        <module>log-viewer-spring-boot</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <id>demo-projects</id>
+            <modules>
+                <module>demo/log-generator</module>
+                <module>demo/spring-boot-1.5</module>
+                <module>demo/spring-boot-2.0</module>
+                <module>demo/spring-boot-2.3</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <compilerArgument>-parameters</compilerArgument>
+                    <encoding>UTF-8</encoding>
+                    <target>1.8</target>
+                    <source>1.8</source>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:sevdokimov/log-viewer.git</connection>
+      <tag>HEAD</tag>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>log-viewer</id>
+            <name>Log-viewer repository</name>
+            <url>https://dl.bintray.com/sevdokimov/log-viewer</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>log-viewer</id>
+            <name>Log-viewer repository</name>
+            <url>https://api.bintray.com/maven/sevdokimov/log-viewer/com.logviewer/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
+</project>

@@ -1,0 +1,28 @@
+<configuration>
+    <contextName>Log-viewer</contextName>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+    <jmxConfigurator/>
+
+    <property name="DEFAULT_LOG_FORMAT"
+              value="%date{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${DEFAULT_LOG_FORMAT}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="org.eclipse.jetty" level="WARN"/>
+
+    <logger name="org.springframework.beans.factory.support.DefaultListableBeanFactory" level="WARN" />
+    <logger name="org.springframework.context.annotation.AnnotationConfigApplicationContext" level="WARN" />
+    
+<!--    <logger name="com.logviewerr.data2.FileWatcherService" level="DEBUG"/>-->
+<!--    <logger name="com.logviewerr.web.session.LogChangeNotifier" level="DEBUG"/>-->
+<!--    <logger name="com.logviewerr.web.WebsocketEmulationController" level="DEBUG"/>-->
+
+</configuration>

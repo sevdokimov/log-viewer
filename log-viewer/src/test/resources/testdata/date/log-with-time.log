@@ -1,0 +1,3 @@
+[2018-04-08_23:54:00.330] [SpringScheduler-6] INFO  c.b.s.i.PeriodServiceImpl - No pending periods to process
+[2018-04-08_23:54:00.331] [SpringScheduler-6] INFO  c.b.e.n.LogNotificationService - Event -> Scenario periods execution finished
+[2018-04-08_23:55:00.004] [SpringScheduler-8] INFO  c.b.e.n.LogNotificationService - Event -> Scheduled scenario

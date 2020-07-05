@@ -1,0 +1,265 @@
+<div id="searchBar">
+
+    <div class="search-field">
+        <div class="input-group">
+            <input id="filterInput" type="text"
+                   class="form-control"
+                   placeholder="search..."
+                   [title]="searchRegexError ? searchRegexError : ''"
+                   [class.search-invalid-regex]="searchRegexError"
+                   (keyup)="filterInputKeyUp($event)"
+                   (keydown)="filterInputKeyDown($event)">
+
+            <div class="input-group-append">
+                <span id="match-cases"
+                      class="input-group-text search-option" title="Case insensitive search mode"
+                      (click)="caseSensitiveClick()"
+                      [class.search-option-selected]="searchIgnoreCase">
+                    <i class="fab fa-behance"></i>
+                </span>
+            </div>
+            <div class="input-group-append">
+                <span id="match-regex"
+                      class="input-group-text search-option" title="Regexp mode"
+                      (click)="regexModeClick()"
+                      [class.search-option-selected]="searchRegex">
+                    <i class="far fa-registered"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <i class="fas fa-ad"></i>
+    <span class="prev-next-panel">
+        <img *ngIf="!searchHideUnmatched"
+             id="findPrevArrow" src="img/previousOccurence.png" title="Previous Occurrence (Shift+F3)"
+             class="toolIcon" [class.tooliconDisabled]="!searchPattern"
+             (click)="findNext(-1)">
+        <img *ngIf="!searchHideUnmatched"
+             id="findNextArrow" src="img/nextOccurence.png" title="Next Occurrence (F3)"
+             class="toolIcon" [class.tooliconDisabled]="!searchPattern"
+             (click)="findNext(1)">
+
+        <span *ngIf="searchHideUnmatched" id="applySearchFilterBlock">
+            <img id="applySearchFilter" src="img/apply-search-filter.png" width="20" title="Apply filter (F3)"
+                 class="toolIcon" [class.tooliconDisabled]="!appliedFilterOutdated()"
+                 (click)="applySearchFilter()">
+            
+            <img src="img/nextOccurence.png" class="toolIcon" style="visibility: hidden;">
+        </span>
+    </span>
+
+    <input id="hide-unmatched" type="checkbox"
+           [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()"> <label for="hide-unmatched" class="non-bold-label">Hide unmatched</label>
+
+    <lv-top-filter></lv-top-filter>
+
+    <div style="padding: 0 3px 0 15px; float: right; display: inline-block;">
+        <div class="dropdown" dropdown>
+            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu">
+            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
+                <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
+                <a href="#" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to current position</a>
+                <a href="javascript:void(0)" *ngIf="fwService.editable && logs.length === 1" class="dropdown-item"
+                   (click)="addToFavorites()">
+                    <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
+                    {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div #filtersDd id="filters-dd" dropdown [autoClose]="false"
+         style="float: right;"
+         class="dropdown top-panel-dropdown">
+        <span data-toggle="dropdown" dropdownToggle>Filters <i class="fas fa-caret-down"></i></span>
+        <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
+            <sl-filter-panel (apply)="namedFilterDropDown.hide()"></sl-filter-panel>
+        </div>
+    </div>
+
+    <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown" style="padding-right: 15px; float: right;">
+            <span data-toggle="dropdown" dropdownToggle>
+                <span id="successFileCount" title="Successfully opened files"
+                      [class.has-problems-files]="filesValidCount < logs.length">{{filesValidCount}}</span>
+                /
+                <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
+                logs
+                <i class="fas fa-caret-down"></i>
+            </span>
+        <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
+            <sl-log-list-panel [logs]="logs" [statuses]="statuses"></sl-log-list-panel>
+        </div>
+    </div>
+</div>
+
+<div #logPane id="logPane" (wheel)="wheelRoll($event)" [class.state-opened]="state === 0">
+    <div *ngIf="state === 1" class="loading-placeholder">
+        <span><img src="assets/progress.gif"> Loading...</span>
+    </div>
+    <div *ngIf="state === 3" class="io-error">{{backendError}}</div>
+
+    <div id="heightLimiter">
+        <div #logView id="logView">
+            <div #loadingProgressTop id="loading-progress-top">
+                <img src="img/loader13.gif">
+            </div>
+
+            <div #records id="records" (click)="selectRecord($event)"></div>
+        </div>
+
+        <div *ngIf="hasRecordAfter" id="loading-progress-bottom">
+            <img src="img/loader13.gif">
+        </div>
+
+        <div *ngIf="!hasRecordAfter && (hasRecordBefore || m.length > 0)" class="log-end"> ---------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end
+            ------------------------------- end ------------------------------- end -------------------------------
+            end ------------------------------- end ------------------------------- end --------------
+        </div>
+    </div>
+
+    <div *ngIf="state === 0 && !hasRecordAfter && !hasRecordBefore && m.length === 0" class="empty-log-message-container">
+        <div class="empty-log-message">
+                <span *ngIf="filesErrorCount === 0">
+                    <span *ngIf="filesValidCount === 0" class="no-record-msg">
+                        Log file does not exist
+                    </span>
+                    <span *ngIf="filesValidCount > 0">
+                        <span *ngIf="size === 0" class="no-record-msg">Log is empty</span>
+                        <span *ngIf="size > 0" class="no-record-msg">All records filtered</span>
+                    </span>
+                </span>
+            <span *ngIf="filesErrorCount > 0">
+                    <span *ngIf="filesValidCount > 0" class="no-record-msg">No record to display</span>
+                    <span *ngIf="filesValidCount === 0" class="no-record-msg" style="color: #a22;">Failed to read log</span>
+             </span>
+        </div>
+
+        <div class="file-list">
+            <div>
+                <table cellpadding="0" cellspacing="0">
+                    <tr *ngFor="let l of logs">
+                        <td>
+                            {{l.node}}
+                        </td>
+                        <td>
+                            {{l.path}}
+                        </td>
+                        <td>
+                            <span *ngIf="statuses[l.id].hash">
+                                <span class="file-attr" title="File size = {{statuses[l.id].size}}">{{statuses[l.id].size | slSize}}</span>,
+                                <span class="file-attr" title="Last modification time">{{statuses[l.id].lastModification | date : 'medium'}}</span>
+                            </span>
+                            <span [ngSwitch]="statuses[l.id].errorType">
+                                    <span *ngSwitchCase="'NoSuchFileException'" class="file-not-found">
+                                        File not found
+                                    </span>
+                                    <span *ngSwitchCase="'AccessDeniedException'" class="file-error">
+                                        Access Denied
+                                    </span>
+                                    <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error">
+                                        Access Denied (Application configuration)
+                                    </span>
+                                    <span *ngSwitchCase="'ConnectionProblem'" class="file-error">
+                                        {{statuses[l.id].errorMessage}}
+                                    </span>
+                                    <span *ngSwitchCase="'IOException'" class="file-error">
+                                        IO Error ({{statuses[l.id].errorMessage}})
+                                    </span>
+                                    <span *ngSwitchCase="'NoDateField'" class="file-error">
+                                        {{statuses[l.id].errorMessage}}
+                                    </span>
+                                </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="state === 4" class="empty-log-message-container">
+        <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
+            Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>
+        </div>
+    </div>
+</div>
+
+<div class="sl-overlay" [style.display]="modalWindow === 'findProgress' ? 'block' : 'none'">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-small">
+        <div style="display: table; width: 100%; height: 100%; text-align: center;">
+            <div style="display: table-cell; vertical-align: middle;">
+                <img src="assets/progress.gif"> search... <a href="javascript:void(0)" (click)="cancelSearch()">cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sl-overlay" [style.display]="modalWindow === 'filterChanging' ? 'block' : 'none'">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-small">
+        <div style="display: table; width: 100%; height: 100%; text-align: center;">
+            <div style="display: table-cell; vertical-align: middle;">
+                <img src="assets/progress.gif"> applying filters ...
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="modalWindow === 'disconnected'" class="sl-overlay">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-small">
+        <div style="display: table; width: 100%; height: 100%; text-align: center;">
+            <div style="display: table-cell; vertical-align: middle; color: red;">
+                {{disconnectMessage}}
+            </div> 
+        </div>
+    </div>
+</div>
+
+<div *ngIf="modalWindow === 'brokenLink'" class="sl-overlay">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-small">
+        <div style="padding: 10px 20px 0 20px;">
+            <div style="display: table; width: 100%; height: 100%; text-align: center;">
+                <div style="display: table-cell; vertical-align: middle;">
+                    Failed to restore position by permalink, may be log file has been rewritten.<br>
+                    <button id="brokenLinkGoTail" class="btn btn-default" (click)="goToTailAfterBrokenLink()">Open log tail</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="modalWindow === 'filter-error'" id="filter-error-modal" class="sl-overlay">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: auto;">
+        <div class="d-flex justify-content-end">
+            <button id="close-filtering-error-dialog" class="btn btn-link" (click)="modalWindow = null">Close</button>
+        </div>
+
+        <div class="filter-error-text">
+            Filter error: {{filterErrorText}}
+        </div>
+    </div>
+</div>
