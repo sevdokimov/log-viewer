@@ -12,6 +12,8 @@ machines, all machines must have run LogViewer.
 1. Collapsing secondary information like unmeaning parts of exception stacktraces, full name of logger.
 1. A permanent link to a log position. User can copy a link to the current position and send it to another user. 
 
+[Demo video](https://www.youtube.com/watch?v=1ukLMIqN0i0)
+
 ### Usage
 
 LogViewer can be run as a standalone application and can be embedded to java web application.
