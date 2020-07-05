@@ -1,5 +1,8 @@
 package com.logviewer.tests.web;
 
+import com.logviewer.data2.LogFormat;
+import com.logviewer.logLibs.logback.LogbackLogFormat;
+import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -147,5 +150,28 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         assertEquals("2012.01.01 00:03", join(searchRes));
 
         assertEquals(location, searchRes.get(0).getLocation());
+    }
+
+    @Test
+    public void copyPermalinkLevelFilter() {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new LogbackLogFormat("%d{yyMMdd HH:mm:ss} %p %m%n"));
+
+        openLog("level-logback.log");
+
+        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        WebElement warn = driver.findElementsByCssSelector(".level-drop-down .level-name").stream().filter(r -> r.getText().equals("WARN")).findFirst().get();
+        warn.click();
+
+        waitFor(() -> {
+            return getVisibleRecords().equals("150101 12:00:01 WARN www\n150101 12:00:01 ERROR eee");
+        });
+
+        String link = copyPermalink();
+
+        driver.get(link);
+
+        waitFor(() -> {
+            return getVisibleRecords().equals("150101 12:00:01 WARN www\n150101 12:00:01 ERROR eee");
+        });
     }
 }

@@ -145,8 +145,8 @@ public class LogSession {
             return;
 
         List<RecordPredicate> filters = new ArrayList<>();
-        if (permalink.getFiltersFromFilterPanel() != null)
-            Collections.addAll(filters, permalink.getFiltersFromFilterPanel());
+        if (permalink.getFilterPanelFilters() != null)
+            Collections.addAll(filters, permalink.getFilterPanelFilters());
 
         if (permalink.isHideUnmatched() && permalink.getSearchPattern() != null) {
             filters.add(new NotPredicate(new SubstringPredicate(permalink.getSearchPattern())));

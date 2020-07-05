@@ -24,7 +24,7 @@ public class Permalink {
     private Position selectedLine;
     private int shiftView;
 
-    private RecordPredicate[] filtersFromFilterPanel;
+    private RecordPredicate[] filterPanelFilters;
 
     public SearchPattern getSearchPattern() {
         return searchPattern;
@@ -98,11 +98,11 @@ public class Permalink {
         this.shiftView = shiftView;
     }
 
-    public RecordPredicate[] getFiltersFromFilterPanel() {
-        return filtersFromFilterPanel;
+    public RecordPredicate[] getFilterPanelFilters() {
+        return filterPanelFilters;
     }
 
-    public void setFiltersFromFilterPanel(RecordPredicate[] filtersFromFilterPanel) {
-        this.filtersFromFilterPanel = filtersFromFilterPanel;
+    public void setFilterPanelFilters(RecordPredicate[] filterPanelFilters) {
+        this.filterPanelFilters = filterPanelFilters;
     }
 }
