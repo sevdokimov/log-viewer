@@ -1,0 +1,28 @@
+<div class="prop-list">
+    <div>
+        <span class="key">host:</span> {{log.node}}
+    </div>
+    <div>
+        <span class="key">file:</span> {{log.path}}
+        <sl-file-status [status]="vs.statuses[log.id]" [showErrorMessages]="false"></sl-file-status>
+    </div>
+    <div>
+        <span class="key" title="Date of the log event">timestamp:</span>&nbsp;<span *ngIf="timestamp" class="timestamp">{{timestamp}}</span>
+        <span *ngIf="!timestamp" class="noItems">N/A</span>
+    </div>
+    <div>
+        <span class="key" title="Offset from the begin of the file">offset:</span> {{record.start}}
+    </div>
+</div>
+
+<hr>
+
+<h3>Fields</h3>
+
+<div (click)="fieldClick($event)">
+    <div *ngFor="let field of log.fields">
+        <div class="field">
+            <span class="field-label">{{field.name}} </span> <span #fieldVal class="field-value"></span>
+        </div>
+    </div>
+</div>

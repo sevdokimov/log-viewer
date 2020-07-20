@@ -1,16 +1,4 @@
-import {
-    ChangeDetectorRef,
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    OnChanges,
-    OnInit,
-    Output,
-    SimpleChanges,
-    ViewChild
-} from '@angular/core';
-import {ViewConfigService} from '../view-config.service';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {GroovyPredicate} from '../predicates';
 import {AceEditorDirective} from '@app/utils/ace-editor.directive';
 import {Filter} from '@app/log-view/filter-panel-state.service';
@@ -47,11 +35,6 @@ export class GroovyPredicateEditorComponent implements OnChanges, OnInit {
 
     @ViewChild(AceEditorDirective, {static: false})
     private aceEditor: AceEditorDirective;
-
-    constructor(private changeDetectorRef: ChangeDetectorRef,
-                private viewConfig: ViewConfigService,
-                private el: ElementRef) {
-    }
 
     ngOnInit(): void {
         if (this.forceEditing) {

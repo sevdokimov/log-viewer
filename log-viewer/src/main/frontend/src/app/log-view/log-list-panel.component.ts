@@ -1,5 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {ViewConfigService} from './view-config.service';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {LogFile, RestStatus} from './log-file';
 
 @Component({
@@ -14,11 +13,6 @@ export class LogListPanelComponent implements OnChanges {
     statuses: { [key: string]: RestStatus } = {};
 
     showNodeName: boolean;
-
-    constructor(private changeDetectorRef: ChangeDetectorRef,
-                private viewConfig: ViewConfigService,
-                private el: ElementRef) {
-    }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['logs']) {

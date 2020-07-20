@@ -1,16 +1,21 @@
-import {FieldRenderer} from './renderer';
+import {FieldRenderer, RenderContext} from './renderer';
 import {SlElement} from '@app/utils/sl-element';
 import {Record} from '@app/log-view/record';
 
 export class ClassNameFieldRenderer implements FieldRenderer {
     private static classNameRegex: RegExp = new RegExp(
-        /^((?:[a-zA-Z_\$][a-zA-Z_\$0-9]*\.)+)([a-zA-Z_\$][a-zA-Z_\$0-9]*)$/
+        /^((?:[a-zA-Z_$][a-zA-Z_$0-9]*\.)+)([a-zA-Z_$][a-zA-Z_$0-9]*)$/
     );
 
     constructor(args: any) {
     }
 
-    append(e: HTMLElement, s: string, record: Record): void {
+    append(e: HTMLElement, s: string, record: Record, rendererCtx: RenderContext): void {
+        if (!rendererCtx.compact) {
+            e.append(s);
+            return;
+        }
+
         let res = ClassNameFieldRenderer.classNameRegex.exec(s);
         if (!res) {
             e.append(s);

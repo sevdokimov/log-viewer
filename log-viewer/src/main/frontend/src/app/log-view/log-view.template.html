@@ -78,16 +78,16 @@
     </div>
 
     <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown" style="padding-right: 15px; float: right;">
-            <span data-toggle="dropdown" dropdownToggle>
+            <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
                 <span id="successFileCount" title="Successfully opened files"
-                      [class.has-problems-files]="filesValidCount < logs.length">{{filesValidCount}}</span>
+                      [class.has-problems-files]="vs.filesValidCount < logs.length">{{vs.filesValidCount}}</span>
                 /
                 <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
                 logs
                 <i class="fas fa-caret-down"></i>
             </span>
         <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-            <sl-log-list-panel [logs]="logs" [statuses]="statuses"></sl-log-list-panel>
+            <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses"></sl-log-list-panel>
         </div>
     </div>
 </div>
@@ -104,7 +104,7 @@
                 <img src="img/loader13.gif">
             </div>
 
-            <div #records id="records" (click)="selectRecord($event)"></div>
+            <div #records id="records" (click)="clickRecord($event)" (contextmenu)="contextMenu($event)"></div>
         </div>
 
         <div *ngIf="hasRecordAfter" id="loading-progress-bottom">
@@ -135,18 +135,18 @@
 
     <div *ngIf="state === 0 && !hasRecordAfter && !hasRecordBefore && m.length === 0" class="empty-log-message-container">
         <div class="empty-log-message">
-                <span *ngIf="filesErrorCount === 0">
-                    <span *ngIf="filesValidCount === 0" class="no-record-msg">
+                <span *ngIf="vs.filesErrorCount === 0">
+                    <span *ngIf="vs.filesValidCount === 0" class="no-record-msg">
                         Log file does not exist
                     </span>
-                    <span *ngIf="filesValidCount > 0">
-                        <span *ngIf="size === 0" class="no-record-msg">Log is empty</span>
-                        <span *ngIf="size > 0" class="no-record-msg">All records filtered</span>
+                    <span *ngIf="vs.filesValidCount > 0">
+                        <span *ngIf="vs.size === 0" class="no-record-msg">Log is empty</span>
+                        <span *ngIf="vs.size > 0" class="no-record-msg">All records filtered</span>
                     </span>
                 </span>
-            <span *ngIf="filesErrorCount > 0">
-                    <span *ngIf="filesValidCount > 0" class="no-record-msg">No record to display</span>
-                    <span *ngIf="filesValidCount === 0" class="no-record-msg" style="color: #a22;">Failed to read log</span>
+            <span *ngIf="vs.filesErrorCount > 0">
+                    <span *ngIf="vs.filesValidCount > 0" class="no-record-msg">No record to display</span>
+                    <span *ngIf="vs.filesValidCount === 0" class="no-record-msg" style="color: #a22;">Failed to read log</span>
              </span>
         </div>
 
@@ -161,30 +161,7 @@
                             {{l.path}}
                         </td>
                         <td>
-                            <span *ngIf="statuses[l.id].hash">
-                                <span class="file-attr" title="File size = {{statuses[l.id].size}}">{{statuses[l.id].size | slSize}}</span>,
-                                <span class="file-attr" title="Last modification time">{{statuses[l.id].lastModification | date : 'medium'}}</span>
-                            </span>
-                            <span [ngSwitch]="statuses[l.id].errorType">
-                                    <span *ngSwitchCase="'NoSuchFileException'" class="file-not-found">
-                                        File not found
-                                    </span>
-                                    <span *ngSwitchCase="'AccessDeniedException'" class="file-error">
-                                        Access Denied
-                                    </span>
-                                    <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error">
-                                        Access Denied (Application configuration)
-                                    </span>
-                                    <span *ngSwitchCase="'ConnectionProblem'" class="file-error">
-                                        {{statuses[l.id].errorMessage}}
-                                    </span>
-                                    <span *ngSwitchCase="'IOException'" class="file-error">
-                                        IO Error ({{statuses[l.id].errorMessage}})
-                                    </span>
-                                    <span *ngSwitchCase="'NoDateField'" class="file-error">
-                                        {{statuses[l.id].errorMessage}}
-                                    </span>
-                                </span>
+                            <sl-file-status [status]="vs.statuses[l.id]" [showErrorMessages]="true"></sl-file-status>
                         </td>
                     </tr>
                 </table>
@@ -263,3 +240,21 @@
         </div>
     </div>
 </div>
+
+<div *ngIf="modalWindow === 'event-details'" class="sl-overlay">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+        </div>
+
+        <sl-event-details [record]="recordWithDetails"></sl-event-details>
+    </div>
+</div>
+
+<context-menu #eventContextMenu>
+    <ng-template contextMenuItem (execute)="showEventDetails($event.item)">
+        Event details
+    </ng-template>
+</context-menu>

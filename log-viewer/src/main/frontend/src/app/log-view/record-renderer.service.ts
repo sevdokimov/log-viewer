@@ -1,9 +1,11 @@
 import {Record} from './record';
 import {SlUtils} from '../utils/utils';
 import {Injectable} from '@angular/core';
-import {ViewConfigService} from './view-config.service';
+import {FieldDescr, ViewConfigService} from './view-config.service';
 import {ViewStateService} from './view-state.service';
 import {SlElement} from '../utils/sl-element';
+import {RenderContext} from '@app/log-view/renderers/renderer';
+import * as $ from 'jquery';
 
 @Injectable()
 export class RecordRendererService {
@@ -157,80 +159,85 @@ export class RecordRendererService {
         }
     }
 
-    private render(r: Record): HTMLDivElement {
-        let e: HTMLDivElement = <HTMLDivElement>document.createElement('DIV');
-        e.className = 'rec-text';
+    private textRenderer = (e: HTMLElement, type: string, s: string) => {
+        let renderers = this.viewConfig.getTextRenderers();
 
-        let textRenderer = (e: HTMLElement,
-                            type: string,
-                            s: string) => {
-            let renderers = this.viewConfig.getTextRenderers();
+        if (s.length === 0) {
+            return;
+        }
 
-            if (s.length === 0) {
-                return;
+        let ranges: (string | HTMLElement)[] = [s];
+
+        for (let renderer of renderers) {
+            if (renderer.supportedTypes.find(t => RecordRendererService.startWith(type, t)) == null) {
+                continue;
             }
 
-            let ranges: (string | HTMLElement)[] = [s];
+            let nextRanges = [];
 
-            for (let renderer of renderers) {
-                if (renderer.supportedTypes.find(t => RecordRendererService.startWith(type, t)) == null) {
-                    continue;
-                }
+            let hasStr = false;
 
-                let nextRanges = [];
+            for (let r of ranges) {
+                if (typeof r === 'string') {
+                    let splits = renderer.renderer.tryRender(r, this.textRenderer);
 
-                let hasStr = false;
+                    if (splits && splits.length > 0) {
+                        let idx = 0;
 
-                for (let r of ranges) {
-                    if (typeof r === 'string') {
-                        let splits = renderer.renderer.tryRender(r, textRenderer);
+                        for (let sp of splits) {
+                            SlUtils.assert(sp.start <= sp.end && sp.end <= r.length);
 
-                        if (splits && splits.length > 0) {
-                            let idx = 0;
-
-                            for (let sp of splits) {
-                                SlUtils.assert(sp.start <= sp.end && sp.end <= r.length);
-
-                                if (sp.start > idx) {
-                                    nextRanges.push(r.substring(idx, sp.start));
-                                    hasStr = true;
-                                } else {
-                                    SlUtils.assert(idx === sp.start);
-                                }
-
-                                let len = this.setStrLenAttribute(sp.e);
-                                SlUtils.assert(len === sp.end - sp.start);
-
-                                nextRanges.push(sp.e);
-                                idx = sp.end;
-                            }
-
-                            if (idx < r.length) {
-                                nextRanges.push(r.substring(idx));
+                            if (sp.start > idx) {
+                                nextRanges.push(r.substring(idx, sp.start));
                                 hasStr = true;
+                            } else {
+                                SlUtils.assert(idx === sp.start);
                             }
-                        } else {
-                            nextRanges.push(r);
+
+                            let len = this.setStrLenAttribute(sp.e);
+                            SlUtils.assert(len === sp.end - sp.start);
+
+                            nextRanges.push(sp.e);
+                            idx = sp.end;
+                        }
+
+                        if (idx < r.length) {
+                            nextRanges.push(r.substring(idx));
                             hasStr = true;
                         }
                     } else {
                         nextRanges.push(r);
+                        hasStr = true;
                     }
-                }
-
-                ranges = nextRanges;
-
-                if (!hasStr) { break; }
-            }
-
-            for (let r of ranges) {
-                if (typeof r === 'string') {
-                    e.appendChild(document.createTextNode(r));
                 } else {
-                    e.appendChild(r);
+                    nextRanges.push(r);
                 }
             }
-        };
+
+            ranges = nextRanges;
+
+            if (!hasStr) { break; }
+        }
+
+        for (let r of ranges) {
+            if (typeof r === 'string') {
+                e.appendChild(document.createTextNode(r));
+            } else {
+                e.appendChild(r);
+            }
+        }
+    };
+
+    private render(r: Record): HTMLDivElement {
+        let e: HTMLDivElement = <HTMLDivElement>document.createElement('DIV');
+        e.className = 'rec-text';
+
+        let recPointer = <HTMLDivElement>document.createElement('DIV');
+        recPointer.className = 'rec-pointer';
+        recPointer.title = 'Show event details (Right Mouse click)';
+
+        e.append(recPointer);
+
 
         let log = this.viewConfig.logById[r.logId];
         SlUtils.assert(log != null, 'Unexpected logId: ' + r.logId);
@@ -240,12 +247,14 @@ export class RecordRendererService {
 
         if (r.fieldsOffsetEnd.findIndex(idx => idx >= 0) < 0) {
             // unparsable record
-            textRenderer(e, 'text', s);
+            this.textRenderer(e, 'text', s);
         } else {
             let fieldsCopy = [...log.fields];
             fieldsCopy.sort((a, b) => r.fieldsOffsetStart[a._index] - r.fieldsOffsetStart[b._index] );
 
             let i = 0;
+
+            const rendererCtx: RenderContext = {textRenderer: this.textRenderer, compact: true};
 
             for (let field of fieldsCopy) {
                 let fieldStart = r.fieldsOffsetStart[field._index];
@@ -261,7 +270,7 @@ export class RecordRendererService {
                     e.appendChild(document.createTextNode(s.substring(i, fieldStart)));
                 }
 
-                field._rendererInstance.append(e, s.substring(fieldStart, fieldEnd), r, textRenderer);
+                field._rendererInstance.append(e, s.substring(fieldStart, fieldEnd), r, rendererCtx);
 
                 i = fieldEnd;
             }
@@ -305,6 +314,23 @@ export class RecordRendererService {
         }
 
         return res;
+    }
+
+    renderField(e: HTMLElement, record: Record, field: FieldDescr) {
+        let fieldStart = record.fieldsOffsetStart[field._index];
+        let fieldEnd = record.fieldsOffsetEnd[field._index];
+
+        if (fieldStart === fieldEnd) {
+            return;
+        }
+
+        if (fieldStart > fieldEnd) {
+            throw 'Invalid field positions: ' + JSON.stringify(record);
+        }
+
+        const rendererCtx: RenderContext = {textRenderer: this.textRenderer, compact: false};
+
+        field._rendererInstance.append(e, record.s.substring(fieldStart, fieldEnd), record, rendererCtx);
     }
 
     initLabelWidthIfNeeded(recordParent: HTMLElement) {
@@ -547,6 +573,24 @@ export class RecordRendererService {
     updateSearchResults(record: Record, e: HTMLElement) {
         this.clearHighlighting(e, 'search-result');
         this.addSearchResults(record, e);
+    }
+
+    handleClick(event: MouseEvent): boolean {
+        for (let e = <Element>event.target; e && !e.classList.contains('rec-text'); e = e.parentElement) {
+            if (e.classList.contains('coll-expander')) {
+                $($(e).parents('.coll-wrapper')[0])
+                    .addClass('expanded')
+                    .removeClass('collapsed');
+                return true;
+            }
+
+            if (e.classList.contains('coll-collapser')) {
+                $($(e).parents('.coll-wrapper')[0])
+                    .addClass('collapsed')
+                    .removeClass('expanded');
+                return true;
+            }
+        }
     }
 
     private static startWith(s: string, prefix: string): boolean {

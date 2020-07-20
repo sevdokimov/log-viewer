@@ -4,3 +4,15 @@ $top-element-hover: #d6d6d6;
 $top-element-border-color: #d7d7d7;
 $top-element-border-color-hover: #717171;
 $top-element-border-radius: 2px;
+
+@mixin log-text {
+  word-break: break-all;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: normal;
+  font-family: monospace;
+
+  position: relative;
+
+  color: #111;
+}

@@ -534,7 +534,7 @@ public class Log implements LogView {
         @Override
         public boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException, LogCrashedException {
             if (error != null)
-                throw new IllegalStateException();
+                throw error;
 
             Record record = logIndex.findRecordBound(time, true, this);
             if (record == null)
@@ -549,7 +549,7 @@ public class Log implements LogView {
         @Override
         public boolean processFromTime(long time, Predicate<Record> consumer) throws IOException, LogCrashedException {
             if (error != null)
-                throw new IllegalStateException();
+                throw error;
 
             Record record = logIndex.findRecordBound(time, false, this);
             if (record == null)

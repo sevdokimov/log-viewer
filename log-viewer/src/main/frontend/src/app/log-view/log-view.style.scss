@@ -9,20 +9,34 @@
 
 ::ng-deep {
   .record {
-    word-break: break-all;
-    white-space: pre-wrap;
-    font-size: 13px;
-    font-family: monospace;
+    @include log-text;
 
     min-height: 15px;
-
-    position: relative;
-
-    color: #111;
 
     border-top: 1px solid #e8e8e8;
     border-right: 1px solid transparent;
     border-left: 1px solid transparent;
+
+    .rec-pointer {
+      display: none;
+
+      position: absolute;
+      left: -1px;
+      width: 7px;
+      top: -1px;
+      height: 7px;
+      border-bottom-right-radius: 40px;
+
+      background: #495057;
+
+      cursor: pointer;
+    }
+  }
+
+  .record:hover {
+    .rec-pointer {
+      display: block;
+    }
   }
 
   .record:first-of-type {
@@ -211,19 +225,6 @@
   text-align: left;
 }
 
-.file-not-found {
-  color: #777;
-}
-
-.file-error {
-  color: #922;
-}
-
-.file-attr {
-  font-size: 12px;
-  color: #999;
-}
-
 .empty-log-message-container .no-record-msg {
   font-size: 56px;
   color: #999;
@@ -247,7 +248,7 @@
 }
 
 #logView {
-  line-height: normal;
+
 }
 
 #scrollPane {
@@ -326,8 +327,8 @@
 }
 
 .sl-dialog-big {
-  width: 700px;
-  height: 600px;
+  width: 900px;
+  height: 80vh;
   background: white;
 }
 

@@ -1,0 +1,27 @@
+<span *ngIf="status?.hash">
+    <span class="file-attr"
+          title="File size = {{status.size}}">{{status.size | slSize}}</span>,
+    <span class="file-attr"
+          title="Last modification time">{{status.lastModification | date : 'yyyy-MM-dd HH:mm:ss'}}</span>
+</span>
+<span [ngSwitch]="status?.errorType">
+    <span *ngSwitchCase="'NoSuchFileException'" class="file-not-found">
+        file not found
+    </span>
+    <span *ngSwitchCase="'AccessDeniedException'" class="file-error" title="Access denied by OS">
+        access Denied
+    </span>
+    <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error" title="Access denied in application configuration">
+        access denied <span class="fas fa-wrench"></span>
+    </span>
+    <span *ngSwitchCase="'ConnectionProblem'" class="file-error">
+        {{status.errorMessage}}
+    </span>
+    <span *ngSwitchCase="'IOException'" class="file-error" [title]="status.errorMessage">
+        IO Error <span *ngIf="showErrorMessages">({{status.errorMessage}})</span>
+    </span>
+    <span *ngSwitchCase="'NoDateField'" class="file-error" [title]="status.errorMessage">
+        <span *ngIf="showErrorMessages">({{status.errorMessage}})</span>
+        <span *ngIf="!showErrorMessages">No date field</span>
+    </span>
+</span>

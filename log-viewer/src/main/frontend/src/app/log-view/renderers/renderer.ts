@@ -10,11 +10,16 @@ export interface Highlight {
     e: HTMLElement;
 }
 
+export interface RenderContext {
+    compact: boolean;
+    textRenderer: Text2HtmlConverter;
+}
+
 export interface FieldRenderer {
     append(e: HTMLElement,
            s: string,
            record: Record,
-           textRenderer?: Text2HtmlConverter,
+           rendererCtx: RenderContext,
     ): void;
 }
 

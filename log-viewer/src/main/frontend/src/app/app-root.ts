@@ -1,8 +1,7 @@
-import {Component, OnInit, ViewContainerRef} from '@angular/core';
+import {Component} from '@angular/core';
 import {Title} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
 
-var providers: any = [Title];
+const providers: any = [Title];
 
 @Component({
     selector: 'app-root',
@@ -11,7 +10,7 @@ var providers: any = [Title];
         <router-outlet></router-outlet>`,
     providers: providers
 })
-export class AppRoot implements OnInit {
+export class AppRoot {
     showGlobNav: boolean;
 
     // notificationOptions = {
@@ -20,11 +19,4 @@ export class AppRoot implements OnInit {
     //     timeOut: 5000
     // };
 
-    constructor(viewContainer: ViewContainerRef,
-                private route: ActivatedRoute,
-                private router: Router) {
-    }
-
-    ngOnInit() {
-    }
 }

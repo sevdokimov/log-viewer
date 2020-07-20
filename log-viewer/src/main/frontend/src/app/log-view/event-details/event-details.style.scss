@@ -1,0 +1,23 @@
+@import "src/css/variables";
+
+.key {
+  font-weight: bold;
+}
+
+.prop-list > div {
+  padding-bottom: 5px;
+}
+
+.field {
+  padding-bottom: 10px;
+}
+
+.field-label {
+  display: inline-block;
+  min-width: 40px;
+  font-weight: bold;
+}
+
+.field-value {
+  @include log-text;
+}

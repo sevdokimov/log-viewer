@@ -20,7 +20,7 @@ import {RecordRendererService} from './record-renderer.service';
 import {ViewStateService} from './view-state.service';
 import {FavoritesService} from '../services/favorites.service';
 import {State} from './log-view-states';
-import {LogFile, RestStatus} from './log-file';
+import {LogFile} from './log-file';
 import {Position} from './position';
 import {
     BackendErrorEvent,
@@ -42,6 +42,7 @@ import {ToastrService} from 'ngx-toastr';
 import {HttpClient} from '@angular/common/http';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {Subscription} from 'rxjs';
+import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
 
 @Component({
     selector: 'sl-log-view',
@@ -70,6 +71,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     @ViewChild('filtersDd', {read: BsDropdownDirective, static: false})
     namedFilterDropDown: BsDropdownDirective;
 
+    @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent;
+
     logs: LogFile[] = [];
 
     backendError: string;
@@ -77,13 +80,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     state: State = State.STATE_INIT;
     stateVersion: number = 0;
-
-    size: number;
-    hashes: { [key: string]: string };
-    statuses: { [key: string]: RestStatus } = {};
-    filesNotFoundCount: number;
-    filesErrorCount: number;
-    filesValidCount: number;
 
     m: Record[] = [];
 
@@ -118,6 +114,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     anchor: number;
 
     filterErrorText: string;
+
+    recordWithDetails: Record;
 
     private backendEventHandlers = {
         backendError: (event: BackendErrorEvent) => this.fail(event.stacktrace),
@@ -240,7 +238,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
             this.effectiveFilters = this.loadEffectiveFilters();
 
-            this.filterPanelStateService.filterChanges.subscribe((state: FilterState) => this.filtersChanged());
+            this.filterPanelStateService.filterChanges.subscribe(() => this.filtersChanged());
 
             if (!event.initByPermalink) {
                 this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
@@ -430,26 +428,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         },
 
         logChanged: (event: EventsLogChanged) => {
-            let hasNewChanges = false;
-
-            for (const [logId, fileAttr] of Object.entries(event.changedLogs)) {
-                let status = this.statuses[logId];
-                if (status && status.errorType == null) {
-                    if (fileAttr == null) {
-                        hasNewChanges = true;
-                    } else if (status.lastModification < fileAttr.modifiedTime // note: modifiedTime doesn't contain milliseconds
-                        || status.lastModification === fileAttr.modifiedTime && status.size !== fileAttr.size) {
-                        hasNewChanges = true;
-                        status.lastModification = fileAttr.modifiedTime;
-                        status.size = fileAttr.size;
-                    }
-                }
-            }
-
+            let hasNewChanges = this.vs.logChanged(event);
+            
             if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges) {
                 this.requestNextRecords();
             }
-        }
+        },
     };
 
     constructor(
@@ -460,9 +444,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         private commService: CommunicationService,
         private viewConfig: ViewConfigService,
         private recRenderer: RecordRendererService,
-        private vs: ViewStateService,
+        public vs: ViewStateService,
         public fwService: FavoritesService,
         private toastr: ToastrService,
+        private contextMenuService: ContextMenuService,
         private filterPanelStateService: FilterPanelStateService,
     ) {
     }
@@ -493,7 +478,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     @HostListener('window:resize', ['$event'])
-    onResize(event: any) {
+    onResize() {
         if (this.state !== State.STATE_OPENED) { return; }
 
         this.tryGrow();
@@ -538,26 +523,61 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.vs.selectedLine = Position.recordStart(this.m[idx]);
     }
 
-    selectRecord(event: MouseEvent) {
+    private static getLineIndex(e: Element) {
+        let res = 0;
+
+        let s = e;
+        while (s.previousSibling) {
+            res++;
+            s = <Element>s.previousSibling;
+        }
+
+        return res;
+    }
+
+    contextMenu(event: MouseEvent) {
+        if (event.shiftKey && event.ctrlKey) {
+            return true; // Open default menu for debugging.
+        }
+
+        if (this.state !== State.STATE_OPENED || this.modalWindow != null) { return false; }
+
+        for (let e = <Element>event.target; e; e = e.parentElement) {
+            if (e.parentElement && e.parentElement.id === 'records') {
+                let index = LogViewComponent.getLineIndex(e);
+
+                this.setSelectedLine(index);
+
+                this.contextMenuService.show.next({
+                    contextMenu: this.eventContextMenu,
+                    event: event,
+                    item: this.m[index],
+                });
+
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    showEventDetails(record: Record) {
+        this.recordWithDetails = record;
+        this.modalWindow = 'event-details';
+    }
+
+    clickRecord(event: MouseEvent) {
         if (this.state !== State.STATE_OPENED || this.modalWindow != null) { return; }
 
         if (window.getSelection().toString().length > 0) { return; }
 
+        if (this.recRenderer.handleClick(event)) {
+            return;
+        }
+
         for (let e = <Element>event.target; e; e = e.parentElement) {
-            if (e.classList.contains('coll-expander')) {
-                $($(e).parents('.coll-wrapper')[0])
-                    .addClass('expanded')
-                    .removeClass('collapsed');
-                return;
-            }
-
-            if (e.classList.contains('coll-collapser')) {
-                $($(e).parents('.coll-wrapper')[0])
-                    .addClass('collapsed')
-                    .removeClass('expanded');
-                return;
-            }
-
             if (e.classList.contains('filtering-error')) {
                 this.modalWindow = 'filter-error';
                 this.filterErrorText = (<any>e).errorText;
@@ -565,14 +585,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
             }
 
             if (e.parentElement && e.parentElement.id === 'records') {
-                let index = 0;
-                let s = e;
-                while (s.previousSibling) {
-                    index++;
-                    s = <Element>s.previousSibling;
-                }
+                let index = LogViewComponent.getLineIndex(e);
 
                 this.setSelectedLine(index);
+
+                if ((<Element>event.target).classList.contains('rec-pointer')) {
+                    this.showEventDetails(this.m[index]);
+                }
+
                 break;
             }
         }
@@ -728,7 +748,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                             start: Position.recordStart(this.m[0]),
                             backward: true,
                             recordCount,
-                            hashes: this.hashes,
+                            hashes: this.vs.hashes,
                             stateVersion: this.stateVersion,
                         })
                     );
@@ -766,7 +786,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
             savedFiltersName: param.filterSetName,
             filterState: this.filterPanelStateService.stateStr,
             offset: Position.recordStart(this.m[firstRecordIdx]),
-            hashes: this.hashes,
+            hashes: this.vs.hashes,
             selectedLine: this.vs.selectedLine,
             filterPanelFilters: this.filterPanelStateService.getActiveFilters(),
             shiftView: shiftView
@@ -998,7 +1018,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                 backward: d < 0,
                 recordCount,
                 pattern: this.searchPattern,
-                hashes: this.hashes,
+                hashes: this.vs.hashes,
                 stateVersion: this.stateVersion,
                 requestId: req.id,
             })
@@ -1106,7 +1126,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                             start: Position.recordStart(this.m[0]),
                             backward: true,
                             recordCount: this.recordCountToLoad(),
-                            hashes: this.hashes,
+                            hashes: this.vs.hashes,
                             stateVersion: this.stateVersion,
                         })
                     );
@@ -1118,47 +1138,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     private handleStatuses(event: StatusHolderEvent): boolean {
         if (event.stateVersion !== this.stateVersion) { return false; }
 
-        let size = 0;
-        let hashes: { [key: string]: string } = {};
-        let st: { [key: string]: RestStatus } = {};
-        let filesNotFoundCount = 0;
-        let filesErrorCount = 0;
-        let filesValidCount = 0;
-
-        for (let logId of Object.keys(event.statuses)) {
-            let oldStatus = this.statuses[logId];
-            if (oldStatus && !oldStatus.hash) {
-                if (oldStatus.errorType === 'NoSuchFileException') { filesNotFoundCount++; } else { filesErrorCount++; }
-
-                st[logId] = oldStatus;
-
-                continue;
-            }
-
-            let status = event.statuses[logId];
-
-            if (status.hash) {
-                hashes[logId] = status.hash;
-                size += status.size;
-                filesValidCount++;
-            } else {
-                if (status.errorType === 'LogCrashedException') {
-                    this.cleanAndScrollToEdge();
-                    return false;
-                }
-
-                if (status.errorType === 'NoSuchFileException') { filesNotFoundCount++; } else { filesErrorCount++; }
-            }
-
-            st[logId] = status;
+        if (!this.vs.handleStatuses(event)) {
+            this.cleanAndScrollToEdge();
+            return false;
         }
-
-        this.size = size;
-        this.hashes = hashes;
-        this.statuses = st;
-        this.filesNotFoundCount = filesNotFoundCount;
-        this.filesErrorCount = filesErrorCount;
-        this.filesValidCount = filesValidCount;
 
         return true;
     }
@@ -1231,7 +1214,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                     topRecordCount,
                     bottomRecordCount: this.recordCountToLoad() - topRecordCount + 1,
                     stateVersion: this.stateVersion,
-                    hashes: this.hashes,
+                    hashes: this.vs.hashes,
                     filter: this.effectiveFilters,
                     start: Position.recordStart(this.m[mainRecordIdx]),
                 })
@@ -1342,7 +1325,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                     start: offset,
                     backward: false,
                     recordCount: recordsToLoad,
-                    hashes: this.hashes,
+                    hashes: this.vs.hashes,
                     stateVersion: this.stateVersion,
                 })
             );
@@ -1450,6 +1433,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.searchRegexError = null;
         if (s.length > 0 && this.searchRegex) {
             try {
+                // tslint:disable-next-line:no-unused-expression
                 new RegExp(s);
             } catch (e) {
                 this.searchRegexError = e.message;

@@ -1,4 +1,4 @@
-import {FieldRenderer, Text2HtmlConverter} from './renderer';
+import {FieldRenderer, RenderContext} from './renderer';
 import {SlUtils} from '@app/utils/utils';
 import {SlStyle} from './style';
 import {Record} from '@app/log-view/record';
@@ -13,14 +13,14 @@ export class TextFieldRenderer implements FieldRenderer {
         this.textType = cfg.textType || 'text';
     }
 
-    append(e: HTMLElement, s: string, record: Record, textRenderer: Text2HtmlConverter) {
+    append(e: HTMLElement, s: string, record: Record, rendererCtx: RenderContext) {
         if (this.style) {
             let span = document.createElement('SPAN');
             SlUtils.applyStyle(span, this.style);
-            textRenderer(span, this.textType, s);
+            rendererCtx.textRenderer(span, this.textType, s);
             e.appendChild(span);
         } else {
-            textRenderer(e, this.textType, s);
+            rendererCtx.textRenderer(e, this.textType, s);
         }
     }
 }

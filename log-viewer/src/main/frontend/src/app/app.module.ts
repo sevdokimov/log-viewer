@@ -21,6 +21,9 @@ import {HttpClientModule} from '@angular/common/http';
 import {TopFilterListComponent} from './log-view/top-filters/top-filter-list/top-filter-list.component';
 import {LevelListComponent} from './log-view/top-filters/level-list/level-list.component';
 import {ExceptionOnlyComponent} from '@app/log-view/top-filters/exception-only/exception-only.component';
+import {EventDetailsComponent} from '@app/log-view/event-details/event-details.component';
+import {FileStatusComponent} from '@app/log-view/file-status/file-status.component';
+import {ContextMenuModule} from 'ngx-contextmenu';
 
 export const appRoutes: Routes = [
     {
@@ -45,6 +48,9 @@ export const appRoutes: Routes = [
         ModalModule.forRoot(),
         FormsModule,
         ToastrModule.forRoot(),
+        ContextMenuModule.forRoot({
+            useBootstrap4: true,
+        }),
         //        ReactiveFormsModule,
 
         // TranslateModule.forRoot(),
@@ -64,6 +70,8 @@ export const appRoutes: Routes = [
         FilterPanelComponent,
         LogListPanelComponent,
         GroovyPredicateEditorComponent,
+        EventDetailsComponent,
+        FileStatusComponent,
 
         AceEditorDirective,
         SlDurationPipe,

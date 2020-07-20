@@ -6,6 +6,7 @@
 .log-table > tr:hover {
   background-color: #e8ffff;
 }
+
 .log-table > tr > td {
   padding: 2px 3px 2px 0;
   white-space: nowrap;
@@ -15,11 +16,6 @@
   padding-left: 5px;
 }
 
-.file-not-found {
-  color: #777;
-}
-
-.file-error,
 .connection-problem {
   color: #922;
 }
