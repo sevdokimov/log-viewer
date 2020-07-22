@@ -4,26 +4,25 @@ import {SlUtils} from '@app/utils/utils';
 
 const exceptionMessageClass = 'exception-message';
 
+const MAX_MESSAGE_LENGTH = 1024;
+
 export class JavaExceptionRenderer implements TextRenderer {
-    private static exceptionRegex: RegExp = new RegExp(
-        /((?:[a-zA-Z_$][a-zA-Z_$0-9]*\.)+[a-zA-Z_$][a-zA-Z_$0-9]*): ([^\n]*)\n\tat ((?:[a-zA-Z_$][a-zA-Z_$0-9]*\.)*)([a-zA-Z_$][a-zA-Z_$0-9]*)\.([a-zA-Z_$][a-zA-Z_$0-9]*|<\w+>)\(([a-zA-Z_$][a-zA-Z_$0-9]*\.[a-zA-Z]+(?::\d+)?|<\w+>|Native Method|Unknown Source)\)/
-    );
 
-    private static EX_I_PACKAGE = 1;
-    private static EX_I_CLASS = 2;
-    private static EX_I_METHOD = 3;
+    private rgxHeader: RegExp;
+    private rgxCausedBy: RegExp;
+    private rgxItem: RegExp;
+    private rgxItemSearch: RegExp;
+    private rgxEnd: RegExp = /\n\t\.\.\. (\d+) common frames omitted$/ymg;
 
-    private static EX_I_SUBMITTED_FROM = 4;
-    private static EX_I_SOURCE = 5;
-    private static EX_I_CAUSED_BY_CLASS = 6;
-    private static EX_I_CAUSED_BY_MSG = 7;
-    private static EX_I_FRAMES_COUNT = 8;
+    private static EX_I_CLASSLOADER = 1;
+    private static EX_I_MODULE = 2;
+    private static EX_I_PACKAGE = 3;
+    private static EX_I_CLASS = 4;
+    private static EX_I_METHOD = 5;
+    private static EX_I_SUBMITTED_FROM = 6;
+    private static EX_I_SOURCE = 7;
 
-    private static exceptionItemRegexp: RegExp = new RegExp(
-        /^\n(?:(?:\tat (?:((?:[a-zA-Z_$][a-zA-Z_$0-9]*\.)*)([a-zA-Z_$][a-zA-Z_$0-9]*)\.([a-zA-Z_$][a-zA-Z_$0-9]*|<\w+>)|(-+ submitted from -+)\.)\(([a-zA-Z_$][a-zA-Z_$0-9]*\.[a-zA-Z]+(?::\d+)?|<\w+>|Native Method|Unknown Source)\))|(?:Caused by: ((?:[a-zA-Z_$][a-zA-Z_$0-9]*\.)+[a-zA-Z_$][a-zA-Z_$0-9]*): ([^\n]*))|\t... (\d+) common frames omitted)/
-    );
-
-    private homePackages: string[];
+    private readonly homePackages: string[];
 
     constructor(args: {homePackages: string[]}) {
         this.homePackages = args.homePackages || [];
@@ -31,75 +30,114 @@ export class JavaExceptionRenderer implements TextRenderer {
         for (let i = 0; i < this.homePackages.length; i++) {
             if (!this.homePackages[i].endsWith('.')) { this.homePackages[i] += '.'; }
         }
+
+        let rgxIdent = '[a-zA-Z_$][a-zA-Z_$0-9]*';
+        let rgxHeader = `((?:${rgxIdent}\\.)+${rgxIdent})(?:: ([^\n]*))?`;
+
+        this.rgxHeader = new RegExp(`^${rgxHeader}$`, 'mg');
+        this.rgxCausedBy = new RegExp(`\nCaused by: ${rgxHeader}$`, 'ymg');
+
+        let rgxItem: string = '\n\tat ' +
+            '(?:' +
+            '([^/@\n]+/)??' +
+            '([^/@\n]+(?:@[^/\n]+)?/)?' +
+            `((?:${rgxIdent}\\.)+)?(${rgxIdent})\\.(${rgxIdent}|<\\w+>)` +
+            '|' +
+            '(-+ submitted from -+)\\.' +
+            ')' +
+            '\\(' +
+            '(' +
+            '[a-zA-Z_$][a-zA-Z_$0-9]*\\.[a-zA-Z]+(?::-?\\d{1,9})?|<\\w+>|Native Method|Unknown Source' +
+            ')' +
+            '\\)' +
+            '$';
+
+        this.rgxItem = new RegExp(rgxItem, 'ymg');
+        this.rgxItemSearch = new RegExp(rgxItem, 'mg');
     }
 
     tryRender(s: string, textRenderer: Text2HtmlConverter): Highlight[] {
-        let res = JavaExceptionRenderer.exceptionRegex.exec(s);
+        this.rgxHeader.lastIndex = 0;
 
-        if (res) {
-            let e = document.createElement('SPAN');
-            e.className = 'ex-wrapper';
+        let headerMatch = this.rgxHeader.exec(s);
+        if (!headerMatch) { return null; }
 
-            let img: HTMLImageElement = <HTMLImageElement>(
-                document.createElement('IMG')
-            );
-            img.src = 'assets/java-exception.png';
-            (<SlElement>(<any>img)).virtual = true;
-            e.appendChild(img);
+        while (true) { // find last match
+            let next = this.rgxHeader.exec(s);
+            if (!next) { break; }
+            headerMatch = next;
+        }
 
-            let exClass = document.createElement('SPAN');
-            exClass.className = 'exception-class';
-            exClass.innerText = res[1];
+        let e = document.createElement('SPAN');
+        e.className = 'ex-wrapper';
 
-            e.appendChild(exClass);
+        let img: HTMLImageElement = <HTMLImageElement>(document.createElement('IMG'));
+        img.src = 'assets/java-exception.png';
+        (<SlElement>(<any>img)).virtual = true;
+        e.appendChild(img);
 
+        let exClass = document.createElement('SPAN');
+        exClass.className = 'exception-class';
+        exClass.innerText = headerMatch[1];
+
+        e.appendChild(exClass);
+
+        let headerEnd = headerMatch.index + headerMatch[0].length;
+
+        this.rgxItemSearch.lastIndex = headerEnd;
+        let firstItem = this.rgxItemSearch.exec(s);
+        if (!firstItem) { return null; }
+        if (firstItem.index - headerEnd > MAX_MESSAGE_LENGTH) { return null; }
+
+        if (headerMatch[2] != null) {
             e.appendChild(document.createTextNode(': '));
 
             let exMessage = document.createElement('SPAN');
             exMessage.className = exceptionMessageClass;
-            textRenderer(exMessage, 'text', res[2]);
-            
+            textRenderer(exMessage, 'text/exception-message', headerMatch[2] + s.substring(headerEnd, firstItem.index));
             e.appendChild(exMessage);
+        }
 
-            let traceItems = [[null, res[3], res[4], res[5], null, res[6]]];
+        let traceItems = [firstItem];
 
-            let idx = res.index + res[0].length;
+        let idx = this.rgxItemSearch.lastIndex;
 
-            while (true) {
-                let itemRes = JavaExceptionRenderer.exceptionItemRegexp.exec(
-                    s.substring(idx)
-                );
-
+        while (idx < s.length) {
+            this.rgxItem.lastIndex = idx;
+            let itemRes = this.rgxItem.exec(s);
+            if (itemRes) {
+                traceItems.push(itemRes);
+            } else {
+                this.rgxCausedBy.lastIndex = idx;
+                itemRes = this.rgxCausedBy.exec(s);
                 if (itemRes) {
-                    if (itemRes[JavaExceptionRenderer.EX_I_SOURCE]) {
-                        traceItems.push(itemRes);
-                    } else if (itemRes[JavaExceptionRenderer.EX_I_CAUSED_BY_CLASS]) {
-                        this.appendStacktraceItems(e, traceItems, true);
-                        traceItems.length = 0;
+                    this.appendStacktraceItems(e, traceItems, true);
+                    traceItems.length = 0;
 
-                        e.appendChild(document.createTextNode('\nCaused by: '));
+                    e.appendChild(document.createTextNode('\nCaused by: '));
 
-                        let exCauseClass = document.createElement('SPAN');
-                        exCauseClass.className = 'exception-class';
-                        exCauseClass.innerText =
-                            itemRes[JavaExceptionRenderer.EX_I_CAUSED_BY_CLASS];
+                    let exCauseClass = document.createElement('SPAN');
+                    exCauseClass.className = 'exception-class';
+                    exCauseClass.innerText = itemRes[1];
 
-                        e.appendChild(exCauseClass);
+                    e.appendChild(exCauseClass);
 
+                    let message = itemRes[2];
+                    if (message != null) {
                         e.appendChild(document.createTextNode(': '));
 
                         let exMessage = document.createElement('SPAN');
                         exMessage.className = exceptionMessageClass;
-                        textRenderer(exMessage, 'text', itemRes[JavaExceptionRenderer.EX_I_CAUSED_BY_MSG]);
-
+                        textRenderer(exMessage, 'text', message);
                         e.appendChild(exMessage);
-                    } else {
+                    }
+                } else {
+                    this.rgxEnd.lastIndex = idx;
+                    itemRes = this.rgxEnd.exec(s);
+                    if (itemRes) {
                         // text like "... 83 common frames omitted"
                         this.appendStacktraceItems(e, traceItems, false);
                         traceItems.length = 0;
-
-                        let val = itemRes[0];
-                        SlUtils.assert(val.startsWith('\n'));
 
                         e.appendChild(document.createTextNode('\n'));
 
@@ -108,32 +146,28 @@ export class JavaExceptionRenderer implements TextRenderer {
                         dots.innerText = itemRes[0].substr(1);
 
                         e.appendChild(dots);
+                    } else {
+                        break;
                     }
-
-                    idx += itemRes[0].length;
-                } else {
-                    break;
                 }
             }
 
-            if (
-                idx < s.length &&
-                !(idx === s.length - 1 && s[idx] === '\n') // See ExceptionRendererTest.exceptionWithLineEnd()
-            ) {
-                return null;
-            }
-
-            this.appendStacktraceItems(e, traceItems, true);
-
-            return [{start: res.index, end: idx, e}];
+            idx += itemRes[0].length;
         }
 
-        return null;
+        if (
+            idx < s.length &&
+            !(idx === s.length - 1 && s[idx] === '\n') // See ExceptionRendererTest.exceptionWithLineEnd()
+        ) {
+            return null;
+        }
+
+        this.appendStacktraceItems(e, traceItems, true);
+
+        return [{start: headerMatch.index, end: idx, e}];
     }
 
-    private appendStacktraceItems(e: HTMLElement,
-                                  m: string[][],
-                                  bigExpanderAtEnd: boolean) {
+    private appendStacktraceItems(e: HTMLElement, m: string[][], bigExpanderAtEnd: boolean) {
         if (m.length === 0) { return; }
 
         let nonHomeLines: string[][] = [];
@@ -263,21 +297,29 @@ export class JavaExceptionRenderer implements TextRenderer {
         let methodName;
 
         if (m[JavaExceptionRenderer.EX_I_SUBMITTED_FROM] != null) {
-            line.appendChild(
-                document.createTextNode(m[JavaExceptionRenderer.EX_I_SUBMITTED_FROM])
-            );
+            line.appendChild(document.createTextNode(m[JavaExceptionRenderer.EX_I_SUBMITTED_FROM]));
             methodName = '';
         } else {
+            if (m[JavaExceptionRenderer.EX_I_CLASSLOADER]) {
+                let classLoaderSpan = document.createElement('SPAN');
+                classLoaderSpan.innerText = m[JavaExceptionRenderer.EX_I_CLASSLOADER];
+                classLoaderSpan.classList.add('ex-classloader');
+                line.appendChild(classLoaderSpan);
+            }
+            if (m[JavaExceptionRenderer.EX_I_MODULE]) {
+                let moduleSpan = document.createElement('SPAN');
+                moduleSpan.innerText = m[JavaExceptionRenderer.EX_I_MODULE];
+                moduleSpan.classList.add('ex-module');
+                line.appendChild(moduleSpan);
+            }
+
             let packageName = m[JavaExceptionRenderer.EX_I_PACKAGE];
 
             if (packageName) {
                 SlUtils.assert(packageName.endsWith('.'));
 
                 let packageSpan = document.createElement('SPAN');
-                packageSpan.innerText = packageName.substring(
-                    0,
-                    packageName.length - 1
-                );
+                packageSpan.innerText = packageName.substring(0, packageName.length - 1);
                 packageSpan.classList.add('ex-stacktrace-package');
                 if (this.isHomePackage(packageName)) {
                     packageSpan.classList.add('ex-stacktrace-package-home');
@@ -329,22 +371,5 @@ export class JavaExceptionRenderer implements TextRenderer {
         }
 
         return false;
-    }
-
-    private static stackTraceItemLength(m: string[][], idx: number): number {
-        if (idx < 0 || idx >= m.length) { return 0; }
-
-        let item = m[idx];
-
-        return (
-            4 /* \tat */ +
-            (item[1] ? item[1].length : 0) /*package*/ +
-            item[2].length /* className */ +
-            1 +
-            item[3].length +
-            1 +
-            item[4].length +
-            1
-        );
     }
 }
