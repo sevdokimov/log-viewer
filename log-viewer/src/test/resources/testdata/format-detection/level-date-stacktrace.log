@@ -1,0 +1,23 @@
+TRACE 2020-01-01 18:11:00.000 mmm
+INFO 2020-01-01 18:11:00.000 mmm
+DEBUG 2020-01-01 18:11:00.000 mmm
+java.lang.NullPointerException
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)
+at com.logViewer.Aaa.foo(Aaa.java:45)

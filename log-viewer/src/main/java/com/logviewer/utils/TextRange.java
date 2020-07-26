@@ -18,5 +18,10 @@ public class TextRange {
     public int getEnd() {
         return end;
     }
+
+    @Override
+    public String toString() {
+        return "[" + start + ", " + end + ')';
+    }
 }
 

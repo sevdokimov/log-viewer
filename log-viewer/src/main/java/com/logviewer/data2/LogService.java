@@ -6,6 +6,7 @@ import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.data2.net.NotConnectedLogView;
 import com.logviewer.data2.net.RemoteLog;
 import com.logviewer.data2.net.RemoteNodeService;
+import com.logviewer.formats.LvDefaultFormatDetector;
 import com.logviewer.formats.SimpleLogFormat;
 import com.logviewer.utils.*;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class LogService implements InitializingBean, DisposableBean {
                 return formatName;
         }
 
-        return null;
+        return LvDefaultFormatDetector.detectFormat(path);
     }
 
     @Nonnull

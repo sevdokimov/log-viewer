@@ -1,6 +1,10 @@
 package com.logviewer.formats.utils;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Date in ISO8601 format. log4J_1 and log2J_2  format ISO8601 in different way
@@ -8,14 +12,26 @@ import java.util.Calendar;
  * Log4j_2 :  %d{ISO8601} = 2011-10-13T18:33:45,000
  *
  * This class support both of those formats.
+ *
+ * LvLayoutLog4jISO8601Date works much faster than {@link java.text.SimpleDateFormat}
  */
 public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
-    private Calendar calendar;
+    private static final Pattern SUPPORTED_PATTERN = Pattern.compile("yyyy-MM-dd(?:'T'|[_T ])HH:mm:ss([,.]SSS)?");
+
+    private final boolean hasMilliseconds;
+
+    private transient Calendar calendar;
+
+    public LvLayoutLog4jISO8601Date(boolean hasMilliseconds) {
+        this.hasMilliseconds = hasMilliseconds;
+    }
 
     @Override
     public int parse(String s, int offset, int end) {
-        if (end - offset < "2011-10-13T18:33:45,000".length()) {
+        int expectedLength = hasMilliseconds ? 23 : 19;
+
+        if (end - offset < expectedLength) {
             return PARSE_FAILED;
         }
 
@@ -44,7 +60,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
         offset += 2;
 
         char a = s.charAt(offset++);
-        if (a != 'T' && a != ' ')
+        if (a != 'T' && a != ' ' && a != '_')
             return PARSE_FAILED;
 
         int hh = readInt(s, offset, offset + 2);
@@ -71,12 +87,20 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
         offset += 2;
 
-        if (s.charAt(offset++) != ',')
-            return PARSE_FAILED;
+        int sss;
+        if (hasMilliseconds) {
+            a = s.charAt(offset++);
+            if (a != ',' && a != '.')
+                return PARSE_FAILED;
 
-        int sss = readInt(s, offset, offset + 3);
-        if (sss < 0 || sss > 999)
-            return PARSE_FAILED;
+            sss = readInt(s, offset, offset + 3);
+            if (sss < 0 || sss > 999)
+                return PARSE_FAILED;
+
+            offset += 3;
+        } else {
+            sss = 0;
+        }
 
         if (calendar == null)
             calendar = Calendar.getInstance();
@@ -91,7 +115,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
         this.currentDate = calendar.getTimeInMillis();
 
-        return offset + 3;
+        return offset;
     }
 
     private static int readInt(String s, int offset, int end) {
@@ -114,8 +138,17 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
         return true;
     }
 
+    @Nullable
+    public static LvLayoutLog4jISO8601Date fromPattern(@Nonnull String pattern) {
+        Matcher matcher = LvLayoutLog4jISO8601Date.SUPPORTED_PATTERN.matcher(pattern);
+        if (matcher.matches())
+            return new LvLayoutLog4jISO8601Date(matcher.group(1) != null);
+
+        return null;
+    }
+
     @Override
     public LvLayoutNode clone() {
-        return new LvLayoutLog4jISO8601Date();
+        return new LvLayoutLog4jISO8601Date(hasMilliseconds);
     }
 }

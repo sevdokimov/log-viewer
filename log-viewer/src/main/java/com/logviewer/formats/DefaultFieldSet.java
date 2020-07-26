@@ -144,9 +144,10 @@ public class DefaultFieldSet {
                 return null;
 
             LvLayoutDateNode dateNode = (LvLayoutDateNode) layoutCopy[dateNodeIndex];
+            int dateOffset = fieldIndex[dateNodeIndex] * 2;
 
             return () -> {
-                int dateStart = fieldOffset[dateNodeIndex * 2];
+                int dateStart = fieldOffset[dateOffset];
                 if (dateStart < 0)
                     return -1;
 

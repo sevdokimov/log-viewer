@@ -7,9 +7,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.pattern.*;
-import org.apache.logging.log4j.core.util.datetime.FixedDateFormat;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +25,20 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
             "\\([^)]*\\)"
     );
 
+    private final boolean realLog4j;
+
     public Log4jLogFormat(@Nonnull String pattern) {
-        super(null, pattern);
+        this(null, pattern, true);
     }
 
     public Log4jLogFormat(@Nonnull Charset charset, @Nonnull String pattern) {
+        this(charset, pattern, true);
+    }
+
+    public Log4jLogFormat(@Nullable Charset charset, @Nonnull String pattern, boolean realLog4j) {
         super(charset, pattern);
+
+        this.realLog4j = realLog4j;
     }
 
     @Override
@@ -99,17 +107,15 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
         }
 
         if (converter instanceof LevelPatternConverter) {
-            return new LvLayoutFixedTextNode("level", FieldTypes.LEVEL_LOG4J,
+            return new LvLayoutFixedTextNode("level", (realLog4j ? FieldTypes.LEVEL_LOG4J : FieldTypes.LEVEL),
                     Stream.of(Level.values()).map(Level::name).toArray(String[]::new));
         }
 
         if (converter instanceof DatePatternConverter) {
             String pattern = ((DatePatternConverter) converter).getPattern();
 
-            if (FixedDateFormat.FixedFormat.ISO8601.getPattern().equals(pattern))
-                return new LvLayoutLog4jISO8601Date(); // to compatible log4J_1 and log4J_2
-
-            return new LvLayoutSimpleDateNode(pattern);
+            LvLayoutNode res = LvLayoutLog4jISO8601Date.fromPattern(pattern);
+            return res != null ? res : new LvLayoutSimpleDateNode(pattern);
         }
 
         if (converter instanceof ThreadNamePatternConverter) {

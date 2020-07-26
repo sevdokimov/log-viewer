@@ -13,7 +13,7 @@ public class LvLayoutLog4jISO8601DateTest {
 
     @Test
     public void minValue() throws ParseException {
-        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date();
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true);
         String date = "2000-01-01 00:00:00,000";
         assertEquals(date.length(), field.parse(date, 0, date.length()));
 
@@ -23,7 +23,7 @@ public class LvLayoutLog4jISO8601DateTest {
 
     @Test
     public void maxValue() throws ParseException {
-        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date();
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true);
         String date = "2030-12-31 23:59:59,999";
         assertEquals(date.length(), field.parse(date, 0, date.length()));
 
@@ -34,7 +34,7 @@ public class LvLayoutLog4jISO8601DateTest {
     @Test
     public void valueExceedLimit() {
         String s = "2030-12-31 23:59:59,999";
-        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date();
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true);
 
         assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("3000-12-31 23:59:59,999", 0, s.length()));
         assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("1000-12-31 23:59:59,999", 0, s.length()));
@@ -51,16 +51,34 @@ public class LvLayoutLog4jISO8601DateTest {
     }
 
     @Test
-    public void separatorT() {
+    public void differentSeparator() {
         String s = "2030-12-31 23:59:59,999";
-        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date();
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true);
 
         assertEquals(s.length(), field.parse("2000-12-31T23:59:59,999", 0, s.length()));
+        assertEquals(s.length(), field.parse("2000-12-31 23:59:59,999", 0, s.length()));
+        assertEquals(s.length(), field.parse("2000-12-31_23:59:59,999", 0, s.length()));
+        assertEquals(s.length(), field.parse("2000-12-31_23:59:59.999", 0, s.length()));
+    }
+
+    @Test
+    public void fromPattern() {
+        String s = "2030-12-31 23:59:59,999";
+        LvLayoutLog4jISO8601Date field = LvLayoutLog4jISO8601Date.fromPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        assert field != null;
+
+        assertEquals(s.length(), field.parse("2000-12-31T23:59:59,999", 0, s.length()));
+
+        s = "2030-12-31 23:59:59";
+        field = LvLayoutLog4jISO8601Date.fromPattern("yyyy-MM-dd HH:mm:ss");
+        assert field != null;
+
+        assertEquals(s.length(), field.parse("2000-12-31T23:59:59", 0, s.length()));
     }
 
     @Test
     public void offset() throws ParseException {
-        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date();
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true);
         String date = "___2000-01-01 00:00:00,000_";
         assertEquals(date.length() - 1, field.parse(date, 3, date.length()));
 

@@ -97,7 +97,8 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                             }
                         }
 
-                        return new LvLayoutSimpleDateNode(datePattern);
+                        LvLayoutNode res = LvLayoutLog4jISO8601Date.fromPattern(datePattern);  // Optimization, LvLayoutLog4jISO8601Date works much faster.
+                        return res != null ? res : new LvLayoutSimpleDateNode(datePattern);
                     }
 
                     case "c":
