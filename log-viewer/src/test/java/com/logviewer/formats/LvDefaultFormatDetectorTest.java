@@ -52,6 +52,13 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
     }
 
     @Test
+    public void testDateOnly() {
+        checkLine("2020-01-01 18:11:00.000 mmm", "%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n");
+        checkLine("[2020-01-01 18:11:00.000][zzz] mmm", "[%d{yyyy-MM-dd HH:mm:ss.SSS}]%m%n");
+        checkLine("2020-01-01 18:11:00.000+06: mmm", "%d{yyyy-MM-dd HH:mm:ss.SSSX}: %m%n");
+    }
+
+    @Test
     public void testLevelDate() {
         checkLine("WARN 2020-01-01 18:11:00.000 mmm", "%level %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n");
         checkLine("WARN 2020-01-01 18:11:00,000 mmm", "%level %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n");
@@ -104,6 +111,20 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
     public void testDateFormat() {
         checkLine("2020-01-01 18:11:00 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss} %level %m%n");
         checkLine("2020-01-01 18:11:00.000 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS} %level %m%n");
+
+        checkLine("2020-01-01 18:11:00.000+01 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000-06 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000-0600 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSXX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000-0630 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSXX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000+0630 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSXX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000+1200 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSSXX} %level %m%n");
+        checkLine("2020-01-01 18:11:00.000!1200 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+3 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+300 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+3000 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+0310 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+0310 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00.000+03000 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
 
         checkLine("20200101 181100 WARN ddddd", "%d{yyyyMMdd HHmmss} %level %m%n");
         checkLine("20200101181100 WARN ddddd", "%d{yyyyMMddHHmmss} %level %m%n");

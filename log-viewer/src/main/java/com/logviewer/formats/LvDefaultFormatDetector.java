@@ -23,7 +23,7 @@ public class LvDefaultFormatDetector {
 
     static final String UNKNOWN_FORMAT = "???";
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[12]\\d-(?:1[12]|0\\d)-(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)([,.]\\d\\d\\d)?\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[12]\\d-(?:1[12]|0\\d)-(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)([,.]\\d\\d\\d)?([-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
 
     private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[12]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])(?:[0-5]\\d)(?:[0-5]\\d)([,.]?\\d\\d\\d)?\\b");
 
@@ -143,7 +143,25 @@ public class LvDefaultFormatDetector {
 
         Matcher matcher = DATE_ISO8601.matcher(line); // 2020-05-29 18:50:12,333
         if (matcher.find()) {
-            dateField = matcher.group(1) == null ? "%d{yyyy-MM-dd HH:mm:ss}" : "%d{yyyy-MM-dd HH:mm:ss.SSS}";
+            StringBuilder sb = new StringBuilder();
+            sb.append("%d{yyyy-MM-dd HH:mm:ss");
+            if (matcher.group(1) != null)
+                sb.append(".SSS");
+
+            String timeZone = matcher.group(2);
+            if (timeZone != null) {
+                sb.append('X');
+
+                if (timeZone.length() == 5) {
+                    sb.append('X');
+                } else {
+                    assert timeZone.length() == 3;
+                }
+            }
+
+            sb.append('}');
+
+            dateField = sb.toString();
         } else {
             matcher = DATE_COMPACT.matcher(line); // 20200529 185012
             if (matcher.find()) {
@@ -223,39 +241,50 @@ public class LvDefaultFormatDetector {
         // expected format "%d %p" or "%d [%t] %p"
         matcher.region(datePos.getEnd(), line.length());
 
-        if (!matcher.find())
-            return UNKNOWN_FORMAT;
+        if (matcher.find()) {
+            TextRange levelPos = new TextRange(matcher.start(), matcher.end());
+            String level = "%level";
+            TextRange ra = expandRange(line, levelPos);
+            if (!ra.equals(levelPos)) {
+                level = '[' + level + ']';
+                levelPos = ra;
+            }
 
-        TextRange levelPos = new TextRange(matcher.start(), matcher.end());
-        String level = "%level";
-        TextRange ra = expandRange(line, levelPos);
-        if (!ra.equals(levelPos)) {
-            level = '[' + level + ']';
-            levelPos = ra;
+            String messageSeparator = getMessageSeparator(line, levelPos.getEnd());
+            if (messageSeparator == null)
+                return UNKNOWN_FORMAT;
+
+            String separator = getSeparator(line, datePos.getEnd(), levelPos.getStart());
+            if (separator != null) {
+                return dateField + separator + level + messageSeparator + "%m%n";
+            }
+
+            matcher = THREAD_ITEM.matcher(line);
+            matcher.region(datePos.getEnd(), levelPos.getStart());
+            if (!matcher.matches())
+                return UNKNOWN_FORMAT;
+
+            String separator1 = getSeparator(line, datePos.getEnd(), matcher.start(1));
+            if (separator1 == null)
+                return UNKNOWN_FORMAT;
+            String separator2 = getSeparator(line, matcher.end(1), levelPos.getStart());
+            if (separator2 == null)
+                return UNKNOWN_FORMAT;
+
+            return dateField + separator1 + "[%t]" + separator2 + level + messageSeparator + "%m%n";
         }
 
-        String messageSeparator = getMessageSeparator(line, levelPos.getEnd());
-        if (messageSeparator == null)
-            return UNKNOWN_FORMAT;
-
-        String separator = getSeparator(line, datePos.getEnd(), levelPos.getStart());
-        if (separator != null) {
-            return dateField + separator + level + messageSeparator + "%m%n";
+        // Expected format "%d %msg%n" or "%d: %msg%n"
+        String messageSeparator = getMessageSeparator(line, datePos.getEnd());
+        if (messageSeparator == null) {
+            if (line.startsWith(": ", datePos.getEnd())) {
+                messageSeparator = ": ";
+            } else {
+                return UNKNOWN_FORMAT;
+            }
         }
 
-        matcher = THREAD_ITEM.matcher(line);
-        matcher.region(datePos.getEnd(), levelPos.getStart());
-        if (!matcher.matches())
-            return UNKNOWN_FORMAT;
-
-        String separator1 = getSeparator(line, datePos.getEnd(), matcher.start(1));
-        if (separator1 == null)
-            return UNKNOWN_FORMAT;
-        String separator2 = getSeparator(line, matcher.end(1), levelPos.getStart());
-        if (separator2 == null)
-            return UNKNOWN_FORMAT;
-
-        return dateField + separator1 + "[%t]" + separator2 + level + messageSeparator + "%m%n";
+        return dateField + messageSeparator + "%m%n";
     }
 
     /**

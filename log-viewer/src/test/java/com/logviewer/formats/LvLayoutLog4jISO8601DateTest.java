@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,6 +30,49 @@ public class LvLayoutLog4jISO8601DateTest {
 
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
         assertEquals(field.getCurrentDate(), format.parse(date).getTime());
+    }
+
+    @Test
+    public void timzeZoneHH() throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSSX");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+0300"));
+
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true, 3);
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999!03", 0, "2000-12-31 23:59:59,999!03".length()));
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999!0300", 0, "2000-12-31 23:59:59,999!0300".length()));
+
+        String s = "2000-12-31 23:59:59,999+03";
+        int parse = field.parse(s, 0, s.length());
+        assertEquals(s.length(), parse);
+        assertEquals(df.parse(s).getTime(), field.getCurrentDate());
+
+        df.setTimeZone(TimeZone.getTimeZone("GMT-0800"));
+        s = "2000-12-31 23:59:59,999-08";
+        parse = field.parse(s, 0, s.length());
+        assertEquals(s.length(), parse);
+        assertEquals(df.parse(s).getTime(), field.getCurrentDate());
+    }
+
+    @Test
+    public void timzeZoneHHMM() throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSSXX");
+        df.setTimeZone(TimeZone.getTimeZone("GMT+0300"));
+
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true, 5);
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999+030", 0, "2000-12-31 23:59:59,999+030".length()));
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999+03", 0, "2000-12-31 23:59:59,999+03".length()));
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999!0300", 0, "2000-12-31 23:59:59,999!0300".length()));
+
+        String s = "2000-12-31 23:59:59,999+0300";
+        int parse = field.parse(s, 0, s.length());
+        assertEquals(s.length(), parse);
+        assertEquals(df.parse(s).getTime(), field.getCurrentDate());
+
+        df.setTimeZone(TimeZone.getTimeZone("GMT-0800"));
+        s = "2000-12-31 23:59:59,999-0800";
+        parse = field.parse(s, 0, s.length());
+        assertEquals(s.length(), parse);
+        assertEquals(df.parse(s).getTime(), field.getCurrentDate());
     }
 
     @Test
