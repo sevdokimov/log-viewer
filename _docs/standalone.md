@@ -4,7 +4,7 @@ Make sure the machine has installed Java 8 or later.
 
 ## Usage
 
-Run `log-viewer-0.1.0/logviewer.sh` 
+Run `log-viewer-0.1.1/logviewer.sh` 
 
 Web UI will be available at http://localhost:8111. There will be a file tree where you can select a log to view. 
 
@@ -14,7 +14,7 @@ Note: all log files must have full timestamp and log format must be specified in
 
 ## Configuration
 
-Configuration is located in `log-viewer-0.1.0/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
+Configuration is located in `log-viewer-0.1.1/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
 format. 
 
 #### List of accessible log files
