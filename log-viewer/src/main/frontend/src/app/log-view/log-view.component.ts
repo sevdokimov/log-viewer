@@ -265,7 +265,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
             let data = event.records;
 
             if (!data) {
-                this.toastr.info('Not found');
+                this.showNotFoundMessage(req.d);
                 return;
             }
 
@@ -959,6 +959,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
         event.preventDefault();
     }
 
+    private showNotFoundMessage(d: number) {
+        if (d > 0) {
+            this.toastr.info('Not found. Try find to another direction (press Shift+F3 to search back)');
+        } else {
+            this.toastr.info('Not found. Try find to another direction (press F3 to search forward)');
+        }
+    }
+
     findNext(d: number) {
         if (this.modalWindow || this.state !== State.STATE_OPENED) { return; }
 
@@ -986,14 +994,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
         if (d > 0) {
             if (!this.hasRecordAfter) {
-                this.toastr.info('Not found');
+                this.showNotFoundMessage(d);
                 return;
             }
 
             start = Position.recordEnd(this.m[this.m.length - 1]);
         } else {
             if (!this.hasRecordBefore) {
-                this.toastr.info('Not found');
+                this.showNotFoundMessage(d);
                 return;
             }
 
