@@ -83,7 +83,7 @@ public class LvDefaultFormatDetector {
 
         for (StringTokenizer st = new StringTokenizer(s, "\n"); st.hasMoreTokens(); ) {
             String line = st.nextToken();
-            if (line.trim().isEmpty() || line.startsWith("\tat"))
+            if (line.trim().isEmpty() || line.startsWith("\tat") || line.startsWith("Caused by: "))
                 continue;
 
             String format = detectFormatOfLine(line);
