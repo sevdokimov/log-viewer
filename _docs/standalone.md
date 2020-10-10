@@ -1,4 +1,4 @@
-## Installing
+## Installation
 Download LogViewer from [Github releases](https://github.com/sevdokimov/log-viewer/releases) and unpack it to any folder.<br>
 Make sure the machine has installed Java 8 or later.
 
@@ -9,8 +9,8 @@ Run `log-viewer-0.1.1/logviewer.sh`
 Web UI will be available at http://localhost:8111. There will be a file tree where you can select a log to view. 
 
 Also, you can open the log by the direct link _h<span>t</span>tp://localhost:8111/log?***log=$pathToLogFile***_. Several log files can be
-opened in one view, pass several "log" query parameters, for example: _h<span>tt</span>p://localhost:8111/log?log=$pathToLogFile1&log=***$pathToLogFile2***&log=***$pathToLogFile3***_<br> 
-Note: all log files must have full timestamp and log format must be specified in the configuration, otherwise LogViewer cannot merge it.
+opened in one view, pass several "log" query parameters, for example: _h<span>tt</span>p://localhost:8111/log?log=***$pathToLogFile1***&log=***$pathToLogFile2***&log=***$pathToLogFile3***_<br> 
+Note: all log files must have full timestamp, otherwise LogViewer cannot merge them.
 
 ## Configuration
 
@@ -19,7 +19,7 @@ format.
 
 #### List of accessible log files
 
-List of available log files are defined in `logs = [ ... ]` section of the configuration file. The default configuration
+A list of available log files are defined in `logs = [ ... ]` section of the configuration file. The default configuration
 gives access to all files with ".log" extension:
 ```hocon
 logs = [
@@ -29,7 +29,7 @@ logs = [
 ]
 ```
 
-you can replace the default configuration with more accurate configuration like
+you can replace the default configuration with a more accurate configuration like
 
 ```hocon
 logs = [
@@ -47,12 +47,15 @@ logs = [
 
 Each `{ path: "..." }` section opens access to log files by a pattern. The pattern supports wildcards "*" matches a sequence
 of any characters except "/", "**" matches a sequence of any characters include "/".<br>
-${HOME} will be replaced with environment variable "HOME", this is a feature of [HOCON](https://github.com/lightbend/config#uses-of-substitutions) file.
+${HOME} will be replaced with the environment variable "HOME", it is a feature of [HOCON](https://github.com/lightbend/config#uses-of-substitutions).
 
 #### Log format
 
-You have to specify a format of the log file to enable all features of LogViewer. A format can be specified beside the log path configuration
+LogViewer detects the format of log files automatically. If the format cannot be detected automatically or if you want specify
+the format more detailed, you can add `format` section beside `path` definition.
 
+In the following example all files with ".log" extension in `${HOME}"/my-app/logs` directory will be parsed as Log4J generated logs
+with pattern `%date{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n`  
 ```hocon
 logs = [
   {
@@ -66,7 +69,7 @@ logs = [
 ]
 ```
 
-`format` property contains an object that defines a log format. The object must contain `type` property, other properties
+`format` property contains an object that defines a log format. The object must contain `type` property. Other properties
 depend on format type. The configuration supports the following format types:
 
 ###### Log4J format
@@ -100,7 +103,7 @@ format = {
 ###### Regex format
 
 Log format can be defined with [regular expression](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html).
-The log parser applies the regex to each line in the log, if a line matches to regex, it is a log event,
+The log parser applies the regex to each line in the log. If a line matches regex, it is a log event,
 if not, the line will be appended to a log event above the line.
 
 ```hocon    
