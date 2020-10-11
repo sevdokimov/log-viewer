@@ -94,7 +94,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     searchInputState: SearchPattern;
 
     searchPattern: SearchPattern;
-    searchIgnoreCase: boolean;
+    searchMatchCase: boolean;
     searchRegex: boolean;
     searchRegexError: string;
 
@@ -315,7 +315,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
             this.searchHideUnmatched = event.hideUnmatched;
             if (event.searchPattern) {
                 $('#filterInput').val(event.searchPattern.s);
-                this.searchIgnoreCase = !event.searchPattern.matchCase;
+                this.searchMatchCase = event.searchPattern.matchCase;
                 this.searchRegex = event.searchPattern.regex;
             }
 
@@ -1089,7 +1089,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
 
     caseSensitiveClick() {
-        this.searchIgnoreCase = !this.searchIgnoreCase;
+        this.searchMatchCase = !this.searchMatchCase;
         this.searchFlagsChanged();
     }
 
@@ -1450,7 +1450,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
         let pattern: SearchPattern = null;
         if (s.length > 0 && this.searchRegexError == null) {
-            pattern = {s, matchCase: !this.searchIgnoreCase, regex: this.searchRegex};
+            pattern = {s, matchCase: this.searchMatchCase, regex: this.searchRegex};
         }
 
         if (!SearchUtils.equals(this.searchInputState, pattern)) {

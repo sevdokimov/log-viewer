@@ -2,10 +2,7 @@ package com.logviewer.tests.web;
 
 import com.google.common.base.Joiner;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 
 import java.util.Collections;
@@ -123,11 +120,13 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE, "ss");
         driver.findElementByClassName("search-result");
         filterInput.sendKeys("S");
-        notExist(By.className("search-result"));
+        driver.findElementByClassName("search-result");
 
         driver.findElementById("match-cases").click();
 
-        driver.findElementByClassName("search-result");
+        notExist(By.className("search-result"));
+
+        driver.findElementById("match-cases").click();
 
         filterInput.sendKeys("\\b");
         notExist(By.className("search-result"));
@@ -153,6 +152,11 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
 
         filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
         filterInput.sendKeys(" A]", Keys.chord(Keys.SHIFT, Keys.F3));
+
+        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+
+        driver.findElementById("match-cases").click();
+        filterInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.F3));
 
         notExist(By.className("search-result"));
 
@@ -235,5 +239,24 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         driver.findElementById("findPrevArrow");
         driver.findElementById("findNextArrow");
         notExist(By.id("applySearchFilter"));
+    }
+
+    @Test
+    public void searchFieldSize() throws InterruptedException {
+        openLog("search.log");
+
+        WebElement filterDiv = driver.findElementById("filterInput").findElement(By.xpath("./.."));
+
+        Dimension size = filterDiv.getSize();
+
+        driver.findElementById("match-cases").click();
+        Thread.sleep(10);
+
+        assertEquals(size, filterDiv.getSize());
+
+        driver.findElementById("match-regex").click();
+        Thread.sleep(10);
+
+        assertEquals(size, filterDiv.getSize());
     }
 }
