@@ -6,13 +6,15 @@ import {WebSocketConnection} from '@app/log-view/web-socket-connection';
 import {WebsocketEmulatorConnection} from '@app/log-view/websocket-emulator-connection';
 import {HttpClient} from '@angular/common/http';
 
+const EVENT_NAME_META_KEY = 'event_name';
+
 @Injectable()
 export class CommunicationService implements OnDestroy {
 
     private connection: ConnectionService;
     private disconnected: boolean;
 
-    private eventHandlers: { [key: string]: any };
+    private handler: BackendEventHandlerHolder;
 
     constructor(private http: HttpClient, private rendererFactory2: RendererFactory2) {
     }
@@ -22,29 +24,27 @@ export class CommunicationService implements OnDestroy {
             this.disconnected = true;
             this.connection.close();
 
-            if (this.eventHandlers) {
-                let disconnectListener = this.eventHandlers['disconnected'];
-                if (disconnectListener) {
-                    disconnectListener(disconnectMessage);
-                }
+            if (this.handler) {
+                this.handler.disconnected(disconnectMessage)
             }
         }
     }
 
     private onData(event: BackendEvent) {
-        if (!this.eventHandlers) {
+        if (!this.handler) {
             console.warn('Event come, but listener is not set: ' + event);
             return;
         }
 
-        let fun = this.eventHandlers[event.name];
-
-        if (!fun) {
-            console.error('Unknown Event type: ' + event);
-            return;
+        let handler = this.handler[event.name]
+        if (typeof handler === 'function') {
+            if (Reflect.getMetadata(EVENT_NAME_META_KEY, this.handler, event.name)) {
+                handler.apply(this.handler, [event])
+                return;
+            }
         }
 
-        fun.apply(null, [event]);
+        console.error('Unknown Event type: ' + event);
     }
 
     private onError(e: any) {
@@ -53,9 +53,9 @@ export class CommunicationService implements OnDestroy {
         this.close(e);
     }
 
-    startup(eventHandlers: { [key: string]: any }) {
+    startup(handler: BackendEventHandlerHolder) {
         SlUtils.assert(!this.disconnected);
-        SlUtils.assert(!this.connection && !this.eventHandlers);
+        SlUtils.assert(!this.connection && !this.handler);
 
         let webSocketPath = (<any>window).webSocketPath;
         if (webSocketPath) {
@@ -69,7 +69,7 @@ export class CommunicationService implements OnDestroy {
                 () => this.close());
         }
 
-        this.eventHandlers = eventHandlers;
+        this.handler = handler;
 
         this.connection.startup();
     }
@@ -87,4 +87,14 @@ export class CommunicationService implements OnDestroy {
 
 export class Command {
     constructor(private methodName: string, private args?: {[key: string]: any}) {}
+}
+
+export interface BackendEventHandlerHolder {
+    disconnected(disconnectMessage?: string): any;
+}
+
+export function BackendEventHandler(eventName?: string): any {
+    return (target: Function, propertyName: string, descriptor: PropertyDescriptor) => {
+        Reflect.defineMetadata(EVENT_NAME_META_KEY, true, target, eventName || propertyName);
+    }
 }

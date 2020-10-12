@@ -26,6 +26,6 @@ public class EventInitByPermalink extends DataHolderEvent {
 
     @Override
     public String getName() {
-        return "initByPermalink";
+        return "onInitByPermalink";
     }
 }

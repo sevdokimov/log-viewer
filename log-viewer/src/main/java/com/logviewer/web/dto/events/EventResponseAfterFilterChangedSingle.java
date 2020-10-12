@@ -13,6 +13,6 @@ public class EventResponseAfterFilterChangedSingle extends DataHolderEvent {
 
     @Override
     public String getName() {
-        return "responseAfterFilterChangedSingle";
+        return "onResponseAfterFilterChangedSingle";
     }
 }

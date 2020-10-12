@@ -16,6 +16,6 @@ public class EventScrollToEdgeResponse extends DataHolderEvent {
 
     @Override
     public String getName() {
-        return "scrollToEdgeResponse";
+        return "onScrollToEdgeResponse";
     }
 }

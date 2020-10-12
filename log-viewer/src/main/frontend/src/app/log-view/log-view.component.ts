@@ -9,7 +9,7 @@ import {
     ViewChild
 } from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {Command, CommunicationService} from './communication.service';
+import {BackendEventHandler, BackendEventHandlerHolder, Command, CommunicationService} from './communication.service';
 import {Record} from './record';
 import {ViewConfigService} from './view-config.service';
 import {SearchPattern, SearchUtils} from './search';
@@ -56,7 +56,7 @@ import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
         FilterPanelStateService,
     ],
 })
-export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, BackendEventHandlerHolder {
     private static lineHeight: number = 16;
 
     @ViewChild('logView', {static: true})
@@ -117,324 +117,320 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     recordWithDetails: Record;
 
-    private backendEventHandlers = {
-        backendError: (event: BackendErrorEvent) => this.fail(event.stacktrace),
+    @BackendEventHandler()
+    private onBackendError(event: BackendErrorEvent) {
+        this.fail(event.stacktrace)
+    }
 
-        disconnected: (disconnectMessage?: string) => {
-            if (this.state !== State.STATE_NO_LOGS) {
-                this.modalWindow = 'disconnected';
-                this.state = State.STATE_DISCONNECTED;
-                this.disconnectMessage = disconnectMessage || 'Disconnected';
-            }
-        },
+    disconnected(disconnectMessage?: string) {
+        if (this.state !== State.STATE_NO_LOGS) {
+            this.modalWindow = 'disconnected';
+            this.state = State.STATE_DISCONNECTED;
+            this.disconnectMessage = disconnectMessage || 'Disconnected';
+        }
+    }
 
-        scrollToEdgeResponse: (event: EventScrollToEdgeResponse) => {
-            if (!this.handleStatuses(event)) { return; }
+    @BackendEventHandler()
+    private onScrollToEdgeResponse(event: EventScrollToEdgeResponse) {
+        if (!this.handleStatuses(event)) {
+            return;
+        }
 
-            let m = event.data.records;
+        let m = event.data.records;
 
-            this.state = State.STATE_OPENED;
+        this.state = State.STATE_OPENED;
 
-            if (this.searchPattern) { SearchUtils.doSimpleSearch(m, this.searchPattern); }
+        if (this.searchPattern) {
+            SearchUtils.doSimpleSearch(m, this.searchPattern);
+        }
 
-            this.clearRecords();
-            this.addRecords(m);
+        this.clearRecords();
+        this.addRecords(m);
 
-            this.shiftView = 0;
+        this.shiftView = 0;
 
-            if (event.isScrollToBegin) {
-                this.hasRecordBefore = false;
-                this.hasRecordAfter = event.data.hasNextLine;
+        if (event.isScrollToBegin) {
+            this.hasRecordBefore = false;
+            this.hasRecordAfter = event.data.hasNextLine;
 
-                this.tryGrow();
-            } else {
-                this.hasRecordAfter = false;
-                this.hasRecordBefore = event.data.hasNextLine;
+            this.tryGrow();
+        } else {
+            this.hasRecordAfter = false;
+            this.hasRecordBefore = event.data.hasNextLine;
 
-                this.scrollEnd();
-            }
-        },
+            this.scrollEnd();
+        }
+    }
 
-        nextDataLoaded: (event: EventNextDataLoaded) => {
-            if (!this.handleStatuses(event)) { return; }
+    @BackendEventHandler()
+    private onNextDataLoaded(event: EventNextDataLoaded) {
+        if (!this.handleStatuses(event)) {
+            return;
+        }
 
-            let m = event.data.records;
+        let m = event.data.records;
 
-            if (this.searchPattern) { SearchUtils.doSimpleSearch(m, this.searchPattern); }
+        if (this.searchPattern) {
+            SearchUtils.doSimpleSearch(m, this.searchPattern);
+        }
 
-            if (event.backward) {
-                if (
-                    this.m.length > 0 &&
-                    !Record.containPosition(event.start, this.m[0])
-                ) {
-                    return;
-                }
-
-                this.hasRecordBefore = event.data.hasNextLine;
-
-                if (m.length > 0) {
-                    this.addRecords(m, 0);
-
-                    this.shiftView += this.headHeight(m.length);
-                }
-
-                this.onViewMovedTop();
-            } else {
-                if (this.m.length > 0 &&
-                    !Record.containPosition(event.start, this.m[this.m.length - 1])) {
-                    return;
-                }
-
-                this.hasRecordAfter = event.data.hasNextLine;
-
-                if (m.length > 0) {
-                    if (this.m.length > 0 &&
-                        Record.compareTo(this.m[this.m.length - 1], m[0]) === 0) {
-                        this.m.pop();
-                        let parentDiv = <HTMLDivElement>this.records.nativeElement;
-                        parentDiv.removeChild(parentDiv.childNodes[this.m.length]);
-                    }
-
-                    this.addRecords(m);
-                }
-
-                this.tryGrow();
-            }
-        },
-
-        setViewState: (event: EventSetViewState) => {
-            SlUtils.assert(this.state === State.STATE_INIT);
-
-            this.logs = event.logs;
-
-            let uiConfig: UiConfig = JSON.parse(event.uiConfig);
-
-            let error = UiConfigValidator.validateUiConfig(uiConfig);
-            if (error != null) {
-                this.fail(error);
+        if (event.backward) {
+            if (this.m.length > 0 && !Record.containPosition(event.start, this.m[0])) {
                 return;
             }
 
-            this.viewConfig.setRendererCfg(event.logs, uiConfig);
-            this.inFavorites = event.inFavorites;
-            this.fwService.editable = event.favEditable;
+            this.hasRecordBefore = event.data.hasNextLine;
 
-            if (this.logs.length === 0) {
-                this.state = State.STATE_NO_LOGS;
-                this.stateVersion++;
-                this.commService.close();
+            if (m.length > 0) {
+                this.addRecords(m, 0);
+
+                this.shiftView += this.headHeight(m.length);
+            }
+
+            this.onViewMovedTop();
+        } else {
+            if (this.m.length > 0 &&
+                !Record.containPosition(event.start, this.m[this.m.length - 1])) {
                 return;
             }
-
-            for (const [filterName, stateJson] of Object.entries(event.globalSavedFilters)) {
-                let filterState = LogViewComponent.parseFilterState(stateJson);
-                if (filterState) {
-                    this.savedFilterStates[filterName] = filterState;
-                }
-            }
-
-            let filterState = LogViewComponent.parseFilterState(event.filterState) || {};
-            this.filterPanelStateService.init(this.logs, filterState);
-
-            this.effectiveFilters = this.loadEffectiveFilters();
-
-            this.filterPanelStateService.filterChanges.subscribe(() => this.filtersChanged());
-
-            if (!event.initByPermalink) {
-                this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
-            }
-        },
-
-        searchResponse: (event: EventSearchResponse) => {
-            if (this.searchRequest == null || this.searchRequest.id !== event.requestId) {
-                return;
-            }
-
-            this.modalWindow = null;
-
-            let req = this.searchRequest;
-            this.searchRequest = null;
-
-            if (!this.handleStatuses(event)) { return; }
-
-            if (this.getMainRecord(req.d < 0) !== req.mainRecord
-                || !SearchUtils.equals(req.searchPattern, this.searchPattern)) {
-                return;
-            }
-
-            let data = event.records;
-
-            if (!data) {
-                this.showNotFoundMessage(req.d);
-                return;
-            }
-
-            SearchUtils.doSimpleSearch(data, this.searchPattern);
-
-            let nextOccurrenceIds = req.d > 0 ? data.length - 1 : 0;
-
-            SlUtils.assert(data[nextOccurrenceIds].searchRes.length > 0);
-
-            if (!event.hasSkippedLine) {
-                if (req.d < 0) {
-                    if (!Record.containPosition(req.start, this.m[0])) { return; }
-
-                    this.addRecords(data, 0);
-
-                    this.hasRecordBefore = true;
-                } else {
-                    if (!Record.containPosition(req.start, this.m[this.m.length - 1])) {
-                        return;
-                    }
-
-                    nextOccurrenceIds += this.m.length;
-                    this.addRecords(data);
-
-                    this.hasRecordAfter = true;
-                }
-            } else {
-                this.hasRecordAfter = true;
-                this.hasRecordBefore = true;
-
-                this.clearRecords();
-                this.addRecords(data);
-            }
-
-            this.shiftView = 0;
-
-            this.setSelectedLine(nextOccurrenceIds);
-
-            this.scrollToLine(nextOccurrenceIds);
-        },
-
-        initByPermalink: (event: EventInitByPermalink) => {
-            if (!this.handleStatuses(event)) { return; }
-
-            this.searchPattern = event.searchPattern;
-            this.searchInputState = event.searchPattern;
-            this.searchHideUnmatched = event.hideUnmatched;
-            if (event.searchPattern) {
-                $('#filterInput').val(event.searchPattern.s);
-                this.searchMatchCase = event.searchPattern.matchCase;
-                this.searchRegex = event.searchPattern.regex;
-            }
-
-            let m = event.data.records;
-
-            if (this.searchPattern) { SearchUtils.doSimpleSearch(m, this.searchPattern); }
-
-            this.vs.selectedLine = event.selectedLine;
-
-            SlUtils.assert(this.m.length === 0);
-            this.addRecords(m);
 
             this.hasRecordAfter = event.data.hasNextLine;
 
-            this.shiftView = event.shiftView;
+            if (m.length > 0) {
+                if (this.m.length > 0 &&
+                    Record.compareTo(this.m[this.m.length - 1], m[0]) === 0) {
+                    this.m.pop();
+                    let parentDiv = <HTMLDivElement>this.records.nativeElement;
+                    parentDiv.removeChild(parentDiv.childNodes[this.m.length]);
+                }
 
-            let p = this.createParams();
-            this.router.navigate([], {queryParams: p});
-
-            this.state = State.STATE_OPENED;
+                this.addRecords(m);
+            }
 
             this.tryGrow();
-        },
-        brokenLink: () => {
-            this.modalWindow = 'brokenLink';
-        },
+        }
+    }
 
-        responseAfterFilterChangedSingle: (
-            event: EventResponseAfterFilterChangedSingle
-        ) => {
-            if (
-                !this.handleStatuses(event) ||
-                this.state !== State.STATE_WAIT_FOR_NEW_FILTERS
-            ) {
-                return;
+    @BackendEventHandler()
+    private onSearchResponse(event: EventSearchResponse) {
+        if (this.searchRequest == null || this.searchRequest.id !== event.requestId) {
+            return;
+        }
+
+        this.modalWindow = null;
+
+        let req = this.searchRequest;
+        this.searchRequest = null;
+
+        if (!this.handleStatuses(event)) {
+            return;
+        }
+
+        if (this.getMainRecord(req.d < 0) !== req.mainRecord
+            || !SearchUtils.equals(req.searchPattern, this.searchPattern)) {
+            return;
+        }
+
+        let data = event.records;
+
+        if (!data) {
+            this.showNotFoundMessage(req.d);
+            return;
+        }
+
+        SearchUtils.doSimpleSearch(data, this.searchPattern);
+
+        let nextOccurrenceIds = req.d > 0 ? data.length - 1 : 0;
+
+        SlUtils.assert(data[nextOccurrenceIds].searchRes.length > 0);
+
+        if (!event.hasSkippedLine) {
+            if (req.d < 0) {
+                if (!Record.containPosition(req.start, this.m[0])) {
+                    return;
+                }
+
+                this.addRecords(data, 0);
+
+                this.hasRecordBefore = true;
+            } else {
+                if (!Record.containPosition(req.start, this.m[this.m.length - 1])) {
+                    return;
+                }
+
+                nextOccurrenceIds += this.m.length;
+                this.addRecords(data);
+
+                this.hasRecordAfter = true;
             }
+        } else {
+            this.hasRecordAfter = true;
+            this.hasRecordBefore = true;
 
-            let m = event.data.records;
+            this.clearRecords();
+            this.addRecords(data);
+        }
 
-            if (this.searchPattern) { SearchUtils.doSimpleSearch(m, this.searchPattern); }
+        this.shiftView = 0;
 
-            this.state = State.STATE_OPENED;
-            this.modalWindow = null;
+        this.setSelectedLine(nextOccurrenceIds);
 
-            this.hasRecordBefore = event.data.hasNextLine;
-            this.hasRecordAfter = false;
+        this.scrollToLine(nextOccurrenceIds);
+    }
 
-            this.recRenderer.replaceRange(
-                m,
-                this.m,
-                0,
-                this.m.length,
-                this.records.nativeElement
-            );
+    @BackendEventHandler()
+    private onInitByPermalink(event: EventInitByPermalink) {
+        if (!this.handleStatuses(event)) {
+            return;
+        }
 
-            this.shiftView = Math.max(
-                0,
-                this.getLogViewHeight() +
-                LogViewComponent.lineHeight -
-                this.getPageHeight()
-            );
+        this.searchPattern = event.searchPattern;
+        this.searchInputState = event.searchPattern;
+        this.searchHideUnmatched = event.hideUnmatched;
 
+        if (event.searchPattern) {
+            $('#filterInput').val(event.searchPattern.s);
+            this.searchMatchCase = event.searchPattern.matchCase;
+            this.searchRegex = event.searchPattern.regex;
+        }
+
+        let m = event.data.records;
+
+        if (this.searchPattern) {
+            SearchUtils.doSimpleSearch(m, this.searchPattern);
+        }
+
+        this.vs.selectedLine = event.selectedLine;
+
+        SlUtils.assert(this.m.length === 0);
+        this.addRecords(m);
+
+        this.hasRecordAfter = event.data.hasNextLine;
+
+        this.shiftView = event.shiftView;
+
+        let p = this.createParams();
+        this.router.navigate([], {queryParams: p});
+
+        this.state = State.STATE_OPENED;
+
+        this.tryGrow();
+    }
+
+    @BackendEventHandler()
+    private onBrokenLink() {
+        this.modalWindow = 'brokenLink';
+    }
+
+    @BackendEventHandler()
+    private onResponseAfterFilterChangedSingle(event: EventResponseAfterFilterChangedSingle) {
+        if (!this.handleStatuses(event) || this.state !== State.STATE_WAIT_FOR_NEW_FILTERS) {
+            return;
+        }
+
+        let m = event.data.records;
+
+        if (this.searchPattern) {
+            SearchUtils.doSimpleSearch(m, this.searchPattern);
+        }
+
+        this.state = State.STATE_OPENED;
+        this.modalWindow = null;
+
+        this.hasRecordBefore = event.data.hasNextLine;
+        this.hasRecordAfter = false;
+
+        this.recRenderer.replaceRange(m, this.m, 0, this.m.length, this.records.nativeElement);
+
+        this.shiftView = Math.max(0, this.getLogViewHeight() + LogViewComponent.lineHeight - this.getPageHeight());
+
+        this.requestNextRecords();
+    }
+
+    @BackendEventHandler()
+    private onResponseAfterFilterChanged(event: EventResponseAfterFilterChanged) {
+        if (!this.handleStatuses(event) || this.state !== State.STATE_WAIT_FOR_NEW_FILTERS) {
+            return;
+        }
+
+        let top = event.topData.records;
+        let bottom = event.bottomData.records;
+
+        if (this.searchPattern) {
+            SearchUtils.doSimpleSearch(top, this.searchPattern);
+            SearchUtils.doSimpleSearch(bottom, this.searchPattern);
+        }
+
+        this.state = State.STATE_OPENED;
+
+        this.modalWindow = null;
+
+        this.hasRecordBefore = event.topData.hasNextLine;
+        this.hasRecordAfter = event.bottomData.hasNextLine;
+
+        let anchorOffset = this.headHeight(this.anchor) - this.shiftView;
+
+        this.recRenderer.replaceRange(top, this.m, 0, this.anchor, this.records.nativeElement);
+        this.recRenderer.replaceRange(bottom, this.m, top.length, this.m.length, this.records.nativeElement);
+
+        this.shiftView = this.headHeight(top.length) - anchorOffset;
+
+        this.onViewMovedTop();
+        this.requestNextRecords();
+    }
+
+    @BackendEventHandler()
+    private onLogChanged(event: EventsLogChanged) {
+        let hasNewChanges = this.vs.logChanged(event);
+
+        if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges) {
             this.requestNextRecords();
-        },
+        }
+    }
 
-        responseAfterFilterChanged: (event: EventResponseAfterFilterChanged) => {
-            if (
-                !this.handleStatuses(event) ||
-                this.state !== State.STATE_WAIT_FOR_NEW_FILTERS
-            ) {
-                return;
+    @BackendEventHandler()
+    private onSetViewState(event: EventSetViewState) {
+        SlUtils.assert(this.state === State.STATE_INIT);
+
+        this.logs = event.logs;
+
+        let uiConfig: UiConfig = JSON.parse(event.uiConfig);
+
+        let error = UiConfigValidator.validateUiConfig(uiConfig);
+        if (error != null) {
+            this.fail(error);
+            return;
+        }
+
+        this.viewConfig.setRendererCfg(event.logs, uiConfig);
+        this.inFavorites = event.inFavorites;
+        this.fwService.editable = event.favEditable;
+
+        if (this.logs.length === 0) {
+            this.state = State.STATE_NO_LOGS;
+            this.stateVersion++;
+            this.commService.close();
+            return;
+        }
+
+        for (const [filterName, stateJson] of Object.entries(event.globalSavedFilters)) {
+            let filterState = LogViewComponent.parseFilterState(stateJson);
+            if (filterState) {
+                this.savedFilterStates[filterName] = filterState;
             }
+        }
 
-            let top = event.topData.records;
-            let bottom = event.bottomData.records;
+        let filterState = LogViewComponent.parseFilterState(event.filterState) || {};
+        this.filterPanelStateService.init(this.logs, filterState);
 
-            if (this.searchPattern) {
-                SearchUtils.doSimpleSearch(top, this.searchPattern);
-                SearchUtils.doSimpleSearch(bottom, this.searchPattern);
-            }
+        this.effectiveFilters = this.loadEffectiveFilters();
 
-            this.state = State.STATE_OPENED;
+        this.filterPanelStateService.filterChanges.subscribe(() => this.filtersChanged());
 
-            this.modalWindow = null;
-
-            this.hasRecordBefore = event.topData.hasNextLine;
-            this.hasRecordAfter = event.bottomData.hasNextLine;
-
-            let anchorOffset = this.headHeight(this.anchor) - this.shiftView;
-
-            this.recRenderer.replaceRange(
-                top,
-                this.m,
-                0,
-                this.anchor,
-                this.records.nativeElement
-            );
-            this.recRenderer.replaceRange(
-                bottom,
-                this.m,
-                top.length,
-                this.m.length,
-                this.records.nativeElement
-            );
-
-            this.shiftView = this.headHeight(top.length) - anchorOffset;
-
-            this.onViewMovedTop();
-            this.requestNextRecords();
-        },
-
-        logChanged: (event: EventsLogChanged) => {
-            let hasNewChanges = this.vs.logChanged(event);
-            
-            if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges) {
-                this.requestNextRecords();
-            }
-        },
-    };
+        if (!event.initByPermalink) {
+            this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
+        }
+    }
 
     constructor(
         private changeDetectorRef: ChangeDetectorRef,
@@ -469,7 +465,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
                 console.error('Filter panel state is not an object');
                 return null;
             }
-            
+
             return filterState;
         } catch (e) {
             console.error('Failed to parse filter panel state', e);
@@ -642,7 +638,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
     ngOnInit() {
         let params = this.route.snapshot;
 
-        this.commService.startup(this.backendEventHandlers);
+        this.commService.startup(this);
 
         this.selectedFilterStateName =
             params.queryParams.filterSetName || 'default';
@@ -718,7 +714,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     pageUp() {
         let offset = this.getPageHeight() - LogViewComponent.lineHeight;
-        
+
         this.doUp(offset);
     }
 

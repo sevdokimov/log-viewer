@@ -20,6 +20,6 @@ public class EventNextDataLoaded extends DataHolderEvent {
 
     @Override
     public String getName() {
-        return "nextDataLoaded";
+        return "onNextDataLoaded";
     }
 }

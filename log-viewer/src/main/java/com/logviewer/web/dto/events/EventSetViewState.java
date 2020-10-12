@@ -45,6 +45,6 @@ public class EventSetViewState extends BackendEvent {
 
     @Override
     public String getName() {
-        return "setViewState";
+        return "onSetViewState";
     }
 }

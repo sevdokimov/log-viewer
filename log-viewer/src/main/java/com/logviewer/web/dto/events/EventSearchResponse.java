@@ -23,6 +23,6 @@ public class EventSearchResponse extends StatusHolderEvent {
 
     @Override
     public String getName() {
-        return "searchResponse";
+        return "onSearchResponse";
     }
 }
