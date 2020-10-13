@@ -2,7 +2,6 @@ package com.logviewer.tests.web;
 
 import com.google.common.base.Throwables;
 import com.logviewer.LogViewerMain;
-import com.logviewer.StartupJettyCommand;
 import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.FavoriteLogService;
