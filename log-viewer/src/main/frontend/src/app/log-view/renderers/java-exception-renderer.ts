@@ -3,6 +3,7 @@ import {SlElement} from '@app/utils/sl-element';
 import {SlUtils} from '@app/utils/utils';
 
 const exceptionMessageClass = 'exception-message';
+const exceptionFileNameClass = 'ex-stacktrace-source';
 
 const MAX_MESSAGE_LENGTH = 1024;
 
@@ -21,6 +22,7 @@ export class JavaExceptionRenderer implements TextRenderer {
     private static EX_I_METHOD = 5;
     private static EX_I_SUBMITTED_FROM = 6;
     private static EX_I_SOURCE = 7;
+    private static EX_I_JARNAME = 8;
 
     private readonly homePackages: string[];
 
@@ -50,6 +52,7 @@ export class JavaExceptionRenderer implements TextRenderer {
             '[a-zA-Z_$][a-zA-Z_$0-9]*\\.[a-zA-Z]+(?::-?\\d{1,9})?|<\\w+>|Native Method|Unknown Source' +
             ')' +
             '\\)' +
+            '( ~?\\[[^\\[\\]\\s]+:[^\\[\\]\\s]+\\])?' + // EX_I_JARNAME
             '$';
 
         this.rgxItem = new RegExp(rgxItem, 'ymg');
@@ -350,7 +353,7 @@ export class JavaExceptionRenderer implements TextRenderer {
 
         let srcSpan = document.createElement('SPAN');
         srcSpan.innerText = m[JavaExceptionRenderer.EX_I_SOURCE];
-        srcSpan.className = 'ex-stacktrace-source';
+        srcSpan.className = exceptionFileNameClass;
 
         line.appendChild(srcSpan);
 
@@ -359,6 +362,14 @@ export class JavaExceptionRenderer implements TextRenderer {
         finalBracketSpan.className = 'ex-stacktrace-method';
 
         line.appendChild(finalBracketSpan);
+
+        if (m[JavaExceptionRenderer.EX_I_JARNAME]) {
+            let jarnameSpan = document.createElement('SPAN');
+            jarnameSpan.innerText = m[JavaExceptionRenderer.EX_I_JARNAME];
+            jarnameSpan.className = exceptionFileNameClass;
+
+            line.appendChild(jarnameSpan);
+        }
 
         e.appendChild(line);
     }

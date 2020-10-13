@@ -195,7 +195,7 @@ export class RecordRendererService {
                             }
 
                             let len = this.setStrLenAttribute(sp.e);
-                            SlUtils.assert(len === sp.end - sp.start);
+                            SlUtils.assert(len === sp.end - sp.start, "Source text length is not equals the rendered text length");
 
                             nextRanges.push(sp.e);
                             idx = sp.end;

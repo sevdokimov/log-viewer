@@ -1,5 +1,6 @@
 package com.logviewer.tests.web;
 
+import com.google.common.collect.Iterables;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
@@ -85,6 +86,15 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         super.noImplicitWait(() -> assertEquals(0, re3.findElements(By.className("exception-message")).size()));
         assertEquals(2, re3.findElements(By.cssSelector(".ex-wrapper > .ex-stacktrace-line")).size());
         assertEquals(6, re3.findElements(By.cssSelector(".ex-stacktrace-line")).size());
+    }
+
+    @Test
+    public void exceptionWithJarname() {
+        openLog("rendering/exceptions-with-jarname.log");
+
+        WebElement npe1 = Iterables.getOnlyElement(driver.findElementsByClassName("ex-wrapper"));
+        assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
+        assertEquals(8, npe1.findElements(By.className("ex-stacktrace-line")).size());
     }
 
 }
