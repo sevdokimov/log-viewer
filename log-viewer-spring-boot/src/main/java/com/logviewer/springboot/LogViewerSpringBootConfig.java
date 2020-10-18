@@ -29,7 +29,7 @@ public class LogViewerSpringBootConfig {
             if (!logServletPath.endsWith("/"))
                 logServletPath += "/";
 
-            logServletPath += "/*";
+            logServletPath += "*";
         }
 
         servlet.setUrlMappings(Collections.singletonList(logServletPath));
