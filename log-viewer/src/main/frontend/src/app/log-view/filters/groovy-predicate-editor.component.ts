@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges
 import {GroovyPredicate} from '../predicates';
 import {AceEditorDirective} from '@app/utils/ace-editor.directive';
 import {Filter} from '@app/log-view/filter-panel-state.service';
+import {ViewConfigService} from '@app/log-view/view-config.service';
 
 @Component({
     selector: 'sl-groovy-predicate-editor',
@@ -17,8 +18,7 @@ export class GroovyPredicateEditorComponent implements OnChanges, OnInit {
     @Output() saved = new EventEmitter<boolean>();
 
     scriptEditorOptions = {
-        maxLines: 10,
-        minLines: 1,
+        maxLines: 12,
         showPrintMargin: false,
         highlightActiveLine: false,
         highlightGutterLine: false,
@@ -29,6 +29,9 @@ export class GroovyPredicateEditorComponent implements OnChanges, OnInit {
         fontSize: 14,
     };
 
+    scriptEditorViewOptions = Object.assign({minLines: 1}, this.scriptEditorOptions);
+    scriptEditorEditOptions = Object.assign({minLines: 3}, this.scriptEditorOptions);
+
     editing: boolean;
 
     scriptBackup: string;
@@ -36,10 +39,25 @@ export class GroovyPredicateEditorComponent implements OnChanges, OnInit {
     @ViewChild(AceEditorDirective, {static: false})
     private aceEditor: AceEditorDirective;
 
+    fieldList: string[];
+
+    constructor(private viewConfig: ViewConfigService) {
+    }
+
     ngOnInit(): void {
         if (this.forceEditing) {
             this.startEditing();
         }
+
+        let res = {};
+
+        for (let l of Object.values(this.viewConfig.logById)) {
+            for (let field of l.fields) {
+                res[field.name] = true;
+            }
+        }
+
+        this.fieldList = Object.keys(res);
     }
 
     startEditing() {

@@ -2,13 +2,24 @@
     <div class="script-editor-container">
         <div class="script-editor"
              behAceEditor
-             [options]="scriptEditorOptions"
+             [options]="scriptEditorEditOptions"
              [text]="filter.predicate.script"
              (textChanged)="onTextChanged($event)"
              (keydown)="editorKeyDown($event)"
              [mode]="'groovy'"
         >
         </div>
+    </div>
+    <div class="script-info text-secondary">
+        Events match the condition will be <strong>excluded</strong>. Use "<span class="field-in-info">_</span>" variable to access entire event text.
+        Each log field can be accessible by it's name, the log events have following fields:
+        <span *ngIf="fieldList.length === 0" class="noItems">no fields</span>
+        <span>
+          <span *ngFor="let field of fieldList" class="field-with-comma">
+              <span class="comma">, </span>
+              <span class="field-in-info">{{field}}</span>
+          </span>
+        </span>
     </div>
     <span class="fa fa-check tool-button" style="color: green;" title="Save (Ctrl+Enter)" (click)="stopEditing()"></span>
     &nbsp;
@@ -27,7 +38,7 @@
         <div class="script-editor"
              *ngIf="filter.predicate.script?.trim()?.length > 0"
              behAceEditor
-             [options]="scriptEditorOptions"
+             [options]="scriptEditorViewOptions"
              [text]="filter.predicate.script"
              (textChanged)="onTextChanged($event)"
              (keydown)="editorKeyDown($event)"

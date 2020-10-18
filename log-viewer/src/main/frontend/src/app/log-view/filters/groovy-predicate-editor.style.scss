@@ -22,3 +22,15 @@
   padding: 2px 0 2px 0;
   margin-bottom: 3px;
 }
+
+.script-info {
+  font-size: 11px;
+}
+
+.field-in-info {
+  font-weight: bold;
+}
+
+.field-with-comma:first-child > .comma {
+  display: none;
+}
