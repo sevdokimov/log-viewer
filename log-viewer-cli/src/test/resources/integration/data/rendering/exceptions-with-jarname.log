@@ -1,0 +1,10 @@
+2017-09-25_12:38:52.686 [http-bio-8088-exec-5] ERROR c.b.u.r.h.DashboardExceptionHandler - Capturing exception with timestamp 1506343132686
+java.lang.NullPointerException
+	at com.xyz.Wombat(Wombat.java:57) ~[wombat-1.3.jar:1.3]
+	at com.xyz.Wombat(Wombat.java:76) ~[wombat-1.3.jar:1.3]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.5.0_06]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25) ~[na:1.5.0_06]
+	at java.lang.reflect.Method.invoke(Method.java:585) ~[na:1.5.0_06]
+	at org.junit.internal.runners.TestMethod.invoke(TestMethod.java:59) [junit-4.4.jar:na]
+	at org.junit.internal.runners.MethodRoadie.runTestMethod(MethodRoadie.java:98) [junit-4.4.jar:na]

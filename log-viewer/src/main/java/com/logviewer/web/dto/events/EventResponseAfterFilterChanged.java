@@ -19,6 +19,6 @@ public class EventResponseAfterFilterChanged extends StatusHolderEvent {
 
     @Override
     public String getName() {
-        return "responseAfterFilterChanged";
+        return "onResponseAfterFilterChanged";
     }
 }

@@ -14,6 +14,6 @@ public class EventLogChanged extends BackendEvent {
 
     @Override
     public String getName() {
-        return "logChanged";
+        return "onLogChanged";
     }
 }

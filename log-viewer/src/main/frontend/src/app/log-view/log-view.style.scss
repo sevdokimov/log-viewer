@@ -373,6 +373,21 @@
 
   .search-option-selected {
     color: #000;
-    border-bottom: 3px solid #000;
+    position: relative;
+  }
+
+  .search-option-highlighter {
+    position: absolute;
+    bottom: -1px;
+    height: 3px;
+    left: 0;
+    right: 0;
+    background: black;
+
+    visibility: hidden;
+  }
+
+  .search-option-selected .search-option-highlighter {
+    visibility: visible;
   }
 }

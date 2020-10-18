@@ -10,6 +10,6 @@ public class BackendErrorEvent extends BackendEvent {
 
     @Override
     public String getName() {
-        return "backendError";
+        return "onBackendError";
     }
 }

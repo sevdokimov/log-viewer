@@ -27,7 +27,7 @@ import java.net.URL;
 
 public class LogViewerMain {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StartupJettyCommand.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LogViewerMain.class);
 
     @Value("${log-viewer.server.port:8111}")
     private int port;

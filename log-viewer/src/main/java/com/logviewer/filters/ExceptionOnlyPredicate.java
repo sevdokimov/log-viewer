@@ -20,7 +20,7 @@ public class ExceptionOnlyPredicate implements RecordPredicate {
 
     @Override
     public boolean test(Record record, LogFilterContext ctx) {
-        if (!record.getMessage().contains("\tat"))
+        if (!record.getMessage().contains("\tat "))
             return false;
 
         return EXCEPTION_PATTERN.matcher(record.getMessage()).find();

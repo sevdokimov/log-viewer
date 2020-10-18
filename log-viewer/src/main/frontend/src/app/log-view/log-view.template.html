@@ -12,10 +12,12 @@
 
             <div class="input-group-append">
                 <span id="match-cases"
-                      class="input-group-text search-option" title="Case insensitive search mode"
+                      class="input-group-text search-option" title="Match Case"
                       (click)="caseSensitiveClick()"
-                      [class.search-option-selected]="searchIgnoreCase">
+                      [class.search-option-selected]="searchMatchCase">
                     <i class="fab fa-behance"></i>
+
+                    <div class="search-option-highlighter"></div>
                 </span>
             </div>
             <div class="input-group-append">
@@ -24,6 +26,8 @@
                       (click)="regexModeClick()"
                       [class.search-option-selected]="searchRegex">
                     <i class="far fa-registered"></i>
+
+                    <div class="search-option-highlighter"></div>
                 </span>
             </div>
         </div>
