@@ -35,11 +35,11 @@
     <i class="fas fa-ad"></i>
     <span class="prev-next-panel">
         <img *ngIf="!searchHideUnmatched"
-             id="findPrevArrow" src="img/previousOccurence.png" title="Previous Occurrence (Shift+F3)"
+             id="findPrevArrow" src="img/previousOccurrence.png" title="Previous Occurrence (Shift+F3)"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(-1)">
         <img *ngIf="!searchHideUnmatched"
-             id="findNextArrow" src="img/nextOccurence.png" title="Next Occurrence (F3)"
+             id="findNextArrow" src="img/nextOccurrence.png" title="Next Occurrence (F3)"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(1)">
 
@@ -48,7 +48,7 @@
                  class="toolIcon" [class.tooliconDisabled]="!appliedFilterOutdated()"
                  (click)="applySearchFilter()">
             
-            <img src="img/nextOccurence.png" class="toolIcon" style="visibility: hidden;">
+            <img src="img/nextOccurrence.png" class="toolIcon" style="visibility: hidden;">
         </span>
     </span>
 
