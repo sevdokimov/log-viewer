@@ -5,6 +5,7 @@ import {ConnectionService} from '@app/log-view/connection.service';
 import {WebSocketConnection} from '@app/log-view/web-socket-connection';
 import {WebsocketEmulatorConnection} from '@app/log-view/websocket-emulator-connection';
 import {HttpClient} from '@angular/common/http';
+import 'reflect-metadata';
 
 const EVENT_NAME_META_KEY = 'event_name';
 
@@ -96,5 +97,5 @@ export interface BackendEventHandlerHolder {
 export function BackendEventHandler(eventName?: string): any {
     return (target: Function, propertyName: string, descriptor: PropertyDescriptor) => {
         Reflect.defineMetadata(EVENT_NAME_META_KEY, true, target, eventName || propertyName);
-    }
+    };
 }
