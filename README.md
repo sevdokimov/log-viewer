@@ -12,7 +12,7 @@ machines, all machines must have run LogViewer.
 1. Collapsing secondary information like unmeaning parts of exception stacktraces, full name of logger.
 1. A permanent link to a log position. A user can copy a link to the current position and send it to another user. 
 
-[Demo video](https://www.youtube.com/watch?v=1ukLMIqN0i0)
+[Demo video](https://www.youtube.com/watch?v=zY8b9ACenQo)
 
 ### Usage
 
