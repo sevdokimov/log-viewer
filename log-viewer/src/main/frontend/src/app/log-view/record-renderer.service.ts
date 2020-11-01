@@ -523,8 +523,6 @@ export class RecordRendererService {
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 if ((<SlElement>node).virtual) { continue; }
 
-                if ((<SlElement>node).highlightNode) { continue; }
-
                 let nodeLen = (<SlElement>node).strLen;
 
                 let nodeE = <HTMLElement>node;
