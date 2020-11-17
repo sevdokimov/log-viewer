@@ -21,7 +21,7 @@ public class RestLog {
         node = log.getHostname();
         path = log.getPath().getFile();
         connected = log.isConnected();
-        url = log.getPath().getNode() == null ? log.getPath().getFile() : log.getPath().getNode().toString() + ',' + log.getPath().getFile();
+        url = log.getPath().getNode() == null ? log.getPath().getFile() : log.getPath().getFile() + '@' + log.getPath().getNode().toString();
         fields = Stream.of(log.getFormat().getFields()).map(RestField::new).collect(Collectors.toList());
     }
 
