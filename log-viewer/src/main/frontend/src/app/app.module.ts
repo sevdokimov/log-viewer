@@ -11,7 +11,6 @@ import {SlDurationPipe} from './utils/sl-duration.pipe';
 import {SlSizePipe} from './utils/sl-size.pipe';
 import {GroovyPredicateEditorComponent} from './log-view/filters/groovy-predicate-editor.component';
 import {AceEditorDirective} from './utils/ace-editor.directive';
-import {FsTreeItemComponent} from './log-navigator/fs-tree-item.component';
 import {FavoritesService} from './services/favorites.service';
 import {LogListPanelComponent} from './log-view/log-list-panel.component';
 import {BsDropdownModule, ModalModule} from 'ngx-bootstrap';
@@ -65,7 +64,6 @@ export const appRoutes: Routes = [
         GlobalNavigation,
         // SimpleNotificationsComponent,
         LogNavigatorComponent,
-        FsTreeItemComponent,
         LogViewComponent,
         FilterPanelComponent,
         LogListPanelComponent,

@@ -1,17 +1,17 @@
-<div class="container" style="padding-top: 10px;">
-    <div *ngIf="loading.loading">
+<div #rootElement class="container main-pane" (keydown)="fakeInputPressed($event)" (keypress)="fakeKeyPressed($event)" tabindex="-1" autofocus>
+    <div *ngIf="initialLoading.loading">
         <img src="assets/progress.gif"> Loading log list...
     </div>
 
-    <div *ngIf="loading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{loading.errorMsg}}</div>
+    <div *ngIf="initialLoading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{initialLoading.errorMsg}}</div>
 
-    <div *ngIf="state">
+    <div *ngIf="init">
         <h4>Favorites</h4>
-        <div *ngIf="state.favorites.length === 0" id="no-favorites" class="noItems">
+        <div *ngIf="favorites.length === 0" id="no-favorites" class="noItems">
             No logs in favorites
         </div>
 
-        <div *ngFor="let l of state.favorites" class="favorite-item" [class.not-exist]="l.size == null">
+        <div *ngFor="let l of favorites" class="favorite-item" [class.not-exist]="l.size == null">
             <a [routerLink]="['/log']" [queryParams]="{log: l.path}">{{l.path}}</a>
             <span class="log-size">
                 <span title="File size">{{l.size | slSize}}</span>,
@@ -21,26 +21,58 @@
                 file not found
             </span>
 
-            <span *ngIf="state.favoritesEditable" class="fv-actions-block">
+            <span *ngIf="fwService.editable" class="fv-actions-block">
                 <span class="fas fa-times" title="Remove from favorites" (click)="removeFromFavorites(l.path)"></span>
             </span>
         </div>
 
         <hr>
 
-        <form (submit)="openByPath()">
-            <div class="input-group">
-                <input type="text" name="pathToOpen" class="form-control" aria-describedby="basic-addon2" autofocus
-                       [(ngModel)]="pathToOpen" placeholder="Path to log file">
-                <span class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" [disabled]="!pathToOpen || !pathToOpen.trim()"
-                            (click)="openByPath()">Open</button>
+        <div *ngIf="showFileTree" class="dir-content-panel">
+            <div class="current-path">
+                <span *ngIf="currentDirItems.length === 0" class="path-item">&nbsp;</span>
+
+                <span *ngFor="let path of currentDirItems; let idx = index" class="path-item">
+                    <a href="#" (click)="selectDir(constructPathFromPrefix(idx))">{{path}}</a>
+                    <span class="path-separator">
+                        <span *ngIf="path !== '/'">/</span>
+                    </span>
                 </span>
             </div>
-        </form>
+            <!--            <div class="filter-panel">-->
+            <!--                <input type="text" name="typedText" aria-describedby="basic-addon2" autofocus-->
+            <!--                       [(ngModel)]="typedText" placeholder="filter">-->
+            <!--            </div>-->
 
-        <div *ngIf="state?.treeRoot" id="file-tree" style="padding-top: 10px; display: inline-block; min-width: 300px;">
-            <sl-fs-tree-item *ngFor="let fi of state.treeRoot.items" [deep]="0" [item]="fi"></sl-fs-tree-item>
+            <div class="search-pane">
+                <span class="tool-button" [class.tool-button-pressed]="filterOpened"
+                      title="Search" (click)="toggleSearch()"><i class="fas fa-search"></i></span>
+                &nbsp;
+                <input #searchField type="text" name="typedText" aria-describedby="basic-addon2"
+                       class="filter-input"
+                       [style.visibility]="filterOpened ? 'visible' : 'hidden'"
+                       [(ngModel)]="typedText" (ngModelChange)="filterChanged()">
+            </div>
+
+            <img *ngIf="dirContentLoading.loading" src="assets/progress.gif">
+
+            <div *ngIf="dirContentLoading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{dirContentLoading.errorMsg}}</div>
+
+            <table *ngIf="dirContent" class="file-list">
+                <tr *ngFor="let fi of visibleDirItems" [class.selected]="selectedPath === fi.item.path"
+                    class="file-list-item"
+                    (click)="select($event, fi.item.path)" (dblclick)="dblClick(fi.item, $event)">
+                    <td><img [src]="fi.item.icon" height="16" width="16"></td>
+
+                    <td class="name" [innerHTML]="fi.nameHtml"></td>
+                </tr>
+            </table>
+
+            <div *ngIf="dirContent && dirContent.length === 0" class="noItems">&lt;the folder is empty&gt;</div>
+
+            <div *ngIf="dirContent && dirContent.length > 0 && visibleDirItems.length === 0" class="noItems">
+                &lt;no file matches the filter&gt;
+            </div>
         </div>
     </div>
 </div>

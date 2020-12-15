@@ -4,8 +4,8 @@ import com.logviewer.api.*;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.impl.InmemoryFavoritesService;
-import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.mocks.*;
+import com.logviewer.services.LvFileAccessManagerImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -52,7 +52,7 @@ public class LvTestConfig {
     }
 
     @Bean
-    public LvFileAccessManager lvFileAccessManager() {
-        return new LvFileAccessManagerImpl();
+    public LvFileAccessManager logManager() {
+        return new LvFileAccessManagerImpl(null);
     }
 }

@@ -137,4 +137,62 @@ export class SlUtils {
 
         return Object.keys(set);
     }
+
+    static normalizePath(path: string): string {
+        path = path.replace(/\\\\/g, '/').replace(/\/{2,}/g, '/');
+
+        if (path.length > 1 && path.endsWith('/')) {
+            path = path.substr(0, path.length - 1);
+        }
+
+        return path;
+    }
+
+    static isChild(parent: string, child: string): boolean {
+        parent = SlUtils.normalizePath(parent);
+        child = SlUtils.normalizePath(child);
+
+        if (!child.startsWith(parent)) {
+            return false;
+        }
+
+        if (child.length === parent.length) {
+            return true;
+        }
+
+        return child.charAt(parent.length) === '/';
+    }
+
+    static escapeHtml(s: string): string {
+        return s.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
+    }
+
+    static binarySearch<T>(m: T[], key: T): number {
+        let low = 0;
+        let high = m.length - 1;
+
+        while (low <= high) {
+            let mid = Math.floor((low + high) / 2);
+            let midVal = m[mid];
+
+            if (midVal < key) {
+                low = mid + 1;
+            } else if (midVal > key) {
+                high = mid - 1;
+            } else {
+                return mid; // key found
+            }
+        }
+        return -(low + 1);  // key not found
+    }
+
+    static extractName(path: string): string {
+        path = SlUtils.normalizePath(path);
+        let idx = path.lastIndexOf('/');
+        if (idx < 0) {
+            return path;
+        }
+
+        return path.substring(idx + 1);
+    }
 }

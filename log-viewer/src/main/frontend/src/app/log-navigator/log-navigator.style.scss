@@ -1,0 +1,98 @@
+.log-size {
+  font-size: 12px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.main-pane {
+  padding-top: 10px;
+  outline: none;
+}
+
+.file-non-exist {
+  font-size: 12px;
+  color: red;
+  display: none;
+}
+
+.not-exist .log-size {
+  display: none;
+}
+
+.not-exist .file-non-exist {
+  display: inline;
+}
+
+.fv-actions-block {
+  display: inline-block;
+  padding-left: 10px;
+  visibility: hidden;
+}
+
+.favorite-item:hover .fv-actions-block {
+  visibility: visible;
+}
+
+.fv-actions-block .fa-times {
+  color: #b00;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.current-path {
+  font-size: 1.2rem;
+
+  margin-bottom: 2px;
+}
+
+.path-separator {
+  display: inline-block;
+  padding: 0 5px;
+}
+
+.path-item:last-child .path-separator {
+  display: none;
+}
+
+.file-list {
+  width: 100%;
+}
+
+.file-list .name {
+  width: 99%;
+}
+
+.file-list-item.selected {
+  background: #3f7ad7 !important;
+  color: white !important;
+}
+
+.search-pane {
+  display: flex;
+  flex-direction: row;
+
+  margin-bottom: 6px;
+}
+
+.search-pane > .tool-button {
+  padding: 2px 4px;
+}
+
+.filter-input {
+  font-size: 13px;
+  flex: 1;
+  outline: none;
+}
+
+.fake-input {
+  position: absolute;
+  left: -1000px;
+  width: 10px;
+}
+
+::ng-deep {
+  .occurrence {
+    background: #ee0;
+    color: black;
+  }
+}

@@ -1,13 +1,19 @@
 package com.logviewer;
 
 import com.logviewer.api.LvFilterPanelStateProvider;
+import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.api.LvPathResolver;
 import com.logviewer.api.LvUiConfigurer;
 import com.logviewer.config.LvConfigBase;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.FileFavoriteLogService;
+import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.impl.LvHoconFilterPanelStateProvider;
+import com.logviewer.impl.LvPatternFormatRecognizer;
+import com.logviewer.services.LvFileAccessManagerImpl;
+import com.logviewer.services.PathPattern;
+import com.logviewer.utils.Pair;
 import com.typesafe.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Import({LvConfigBase.class})
 @Configuration
@@ -24,9 +31,17 @@ public class LvStandaloneConfig {
     public static final String LOG_PATHS = "log-paths";
 
     @Bean
-    public LogManager logManager() {
-        List<LogDescriptor> descriptors = LogManager.fromHocon(TypesafePropertySourceFactory.getHoconConfig());
-        return new LogManager(descriptors);
+    public LvFileAccessManagerImpl logManager() {
+        Config config = TypesafePropertySourceFactory.getHoconConfig();
+        List<Pair<PathPattern, LogFormat>> pairs = LvPatternFormatRecognizer.fromHocon(config);
+        return new LvFileAccessManagerImpl(pairs.stream().map(Pair::getFirst).collect(Collectors.toList()));
+    }
+
+    @Bean
+    public LvFormatRecognizer logFormatRecognizer() {
+        Config config = TypesafePropertySourceFactory.getHoconConfig();
+        List<Pair<PathPattern, LogFormat>> pairs = LvPatternFormatRecognizer.fromHocon(config);
+        return new LvPatternFormatRecognizer(pairs);
     }
 
     @Bean

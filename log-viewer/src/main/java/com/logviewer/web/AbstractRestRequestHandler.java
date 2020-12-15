@@ -189,7 +189,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
                 log.error("Failed to process request " + req.toString(), t);
 
-                resp.sendError(505, "Internal error: " + t.toString());
+                resp.sendError(500, "Internal error: " + t.toString());
             }
         } finally {
             request.remove();

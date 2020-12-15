@@ -1,19 +1,23 @@
 package com.logviewer.config;
 
-import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.impl.InmemoryFavoritesService;
-import com.logviewer.impl.LvFileAccessManagerImpl;
+import com.logviewer.impl.LvPatternFormatRecognizer;
 import com.logviewer.logLibs.LoggerLibSupport;
+import com.logviewer.services.LvFileAccessManagerImpl;
+import com.logviewer.services.PathPattern;
+import com.logviewer.utils.Pair;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
 public class LogViewerAutoConfig {
@@ -40,19 +44,19 @@ public class LogViewerAutoConfig {
     }
 
     @Bean
-    public LvFileAccessManager lvFileAccessManager() {
-        return new LvFileAccessManagerImpl(getLogFormats().keySet());
+    public LvFileAccessManagerImpl lvLogManager() {
+        LvFileAccessManagerImpl res = new LvFileAccessManagerImpl(null);
+        res.setVisibleFiles(new ArrayList<>(getLogFormats().keySet()));
+        return res;
     }
 
     @Bean
-    public LvFormatRecognizer lvFormatRecognizer() {
-        return new LvFormatRecognizer() {
-            @Nullable
-            @Override
-            public LogFormat getFormat(Path canonicalPath) {
-                return getLogFormats().get(canonicalPath);
-            }
-        };
+    public LvFormatRecognizer logFormatRecognizer() {
+        List<Pair<PathPattern, LogFormat>> pairs = getLogFormats().entrySet().stream()
+                .map(e -> Pair.of(PathPattern.file(e.getKey()), e.getValue()))
+                .collect(Collectors.toList());
+
+        return new LvPatternFormatRecognizer(pairs);
     }
 
     @Bean

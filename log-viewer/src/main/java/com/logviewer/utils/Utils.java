@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
+    private static final Pattern SLASHES = Pattern.compile("/{2,}");
+
     private static final Pattern NUMBER = Pattern.compile("\\d+");
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -232,5 +234,10 @@ public class Utils {
         } catch (ExecutionException e) {
             throw Throwables.propagate(e.getCause());
         }
+    }
+
+    public static String normalizePath(String path) {
+        path = path.replace('\\', '/');
+        return SLASHES.matcher(path).replaceAll("/");
     }
 }

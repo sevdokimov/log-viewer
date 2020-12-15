@@ -4,40 +4,21 @@ import com.logviewer.api.LvFileNavigationManager;
 import com.logviewer.data2.DirectoryNotVisibleException;
 import com.logviewer.data2.LogService;
 import com.logviewer.data2.Snapshot;
-import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.impl.LvFileNavigationManagerImpl;
+import com.logviewer.services.LvFileAccessManagerImpl;
+import com.logviewer.services.PathPattern;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 @SuppressWarnings("Convert2MethodRef")
 public class FileManagerTest extends AbstractLogTest {
-
-    @Test
-    public void testDefaultDirectory() {
-        LvFileNavigationManagerImpl manager = getCommonContext().getBean(LvFileNavigationManagerImpl.class);
-
-        assertEquals(Paths.get(System.getProperty("user.home")), manager.getDefaultDirectory());
-
-        manager.setDefaultDirectory(null);
-
-        assertNull(manager.getDefaultDirectory());
-
-        Path defDir = Paths.get(System.getProperty("user.home"), "logs");
-
-        manager.setDefaultDirectory(defDir);
-
-        assertEquals(defDir, manager.getDefaultDirectory());
-    }
 
     @Test
     public void testList() throws IOException {
@@ -69,7 +50,7 @@ public class FileManagerTest extends AbstractLogTest {
 
         LvFileAccessManagerImpl accessManager = getCommonContext().getBean(LvFileAccessManagerImpl.class);
 
-        accessManager.setAllowedPaths(Collections.singletonList(subdir2));
+        accessManager.setPaths(Collections.singletonList(PathPattern.directory(subdir2)));
 
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir), f -> f.getPath(), subdir2);
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir.getParent()), f -> f.getPath(), tmpDir);
@@ -84,7 +65,8 @@ public class FileManagerTest extends AbstractLogTest {
             assertNull(snapshot.getError());
         }
 
-        accessManager.setAllowedPaths(Collections.singletonMap(subdir1, Pattern.compile("a.*")));
+        PathPattern d = new PathPattern(subdir1, p -> p.toString().matches("a.*"), dir -> false);
+        accessManager.setPaths(Collections.singletonList(d));
 
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir), f -> f.getPath(), subdir1);
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir.getParent()), f -> f.getPath(), tmpDir);

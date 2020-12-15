@@ -1,7 +1,9 @@
 package com.logviewer.api;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.List;
 
 public interface LvFileAccessManager {
     /**
@@ -11,4 +13,8 @@ public interface LvFileAccessManager {
     @Nullable
     String checkAccess(Path path);
 
+    boolean isDirectoryVisible(Path dir);
+
+    @Nonnull
+    List<Path> getRoots();
 }

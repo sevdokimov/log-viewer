@@ -8,7 +8,7 @@ import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.data2.LogService;
 import com.logviewer.impl.InmemoryFavoritesService;
-import com.logviewer.impl.LvFileAccessManagerImpl;
+import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.TestListener;
 import com.logviewer.utils.Utils;

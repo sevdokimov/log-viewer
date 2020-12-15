@@ -251,21 +251,32 @@ public class RegexUtils {
     public static Pattern filePattern(@Nonnull String filePattern) {
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0, len = filePattern.length(); i < len; i++) {
+        filePattern = Utils.normalizePath(filePattern).replaceAll("\\*{3,}", "**");
+
+        int i = 0;
+
+        if (filePattern.startsWith("**/")) {
+            sb.append("(?:.*[/\\\\]+)?");
+            i = 3;
+        }
+
+        for (int len = filePattern.length(); i < len; i++) {
             char a = filePattern.charAt(i);
 
             if (a == '*') {
-                if (filePattern.startsWith("**/", i) || filePattern.startsWith("**\\", i)) {
-                    sb.append(".*[/\\\\]?");
-                    i += 2;
-                } else if (filePattern.startsWith("**", i)) {
+                if (filePattern.startsWith("**", i)) {
                     sb.append(".*");
                     i++;
                 } else {
                     sb.append("[^/\\\\]*");
                 }
-            } else if (a == '\\' || a == '/') {
-                sb.append("[\\\\/]");
+            } else if (a == '/') {
+                sb.append("[/\\\\]+");
+
+                if (filePattern.startsWith("/**/", i)) {
+                    sb.append("(?:.+[/\\\\]+)*");
+                    i += 3;
+                }
             } else if (ESCAPED_CHARACTERS.indexOf(a) > 0) {
                 sb.append('\\').append(a);
             } else {

@@ -25,7 +25,7 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
 
     private static final String DIR_ICON = "assets/dir.png";
 
-    public static final String CFG_SHOW_FILE_TREE = "log-viewer.show-file-tree";
+    public static final String CFG_FS_NAVIGATION_ENABLED = "log-viewer.fs-navigation.enabled";
 
     @Autowired
     private FavoriteLogService favoriteLogService;
@@ -41,76 +41,36 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         res.favoritesEditable = favoriteLogService.isEditable();
         res.favorites = getRestFavorites(favoriteLogService.getFavorites());
 
-        if (environment.getProperty(CFG_SHOW_FILE_TREE, Boolean.class, true))
-            res.treeRoot = loadTreeRoot();
+        res.showFileTree = isFileTreeAllowed();
+        if (res.showFileTree) {
+            Path initPath = fileManager.getDefaultDirectory();
+            res.initPath = initPath == null ? null : initPath.toString();
+            res.initDirContent = getDirContent(initPath);
+        }
 
         return res;
     }
 
-    private DirItem loadTreeRoot() {
-        List<DirItem> items = new ArrayList<>();
-
-        DirItem userRoot = createTreeForDirectory(fileManager.getDefaultDirectory());
-
-        List<LvFileNavigationManager.LvFsItem> roots = fileManager.getChildren(null);
-        if (roots == null) {
-            items.add(userRoot);
-        } else {
-            for (LvFileNavigationManager.LvFsItem root : roots) {
-                if (root.getPath().toString().equals(userRoot.path)) {
-                    items.add(userRoot);
-                }
-                else {
-                    items.add(new DirItem(root.getPath(), DIR_ICON, null));
-                }
-            }
-        }
-
-        return new DirItem(Paths.get(""), "", items);
+    private boolean isFileTreeAllowed() {
+        return environment.getProperty(CFG_FS_NAVIGATION_ENABLED, Boolean.class, true);
     }
 
-    private DirItem createTreeForDirectory(Path dir) {
-        List<Path> path = new ArrayList<>();
+    private List<FsItem> getDirContent(@Nullable Path dir) {
+        if (!isFileTreeAllowed())
+            throw new RestException(403, "File system navigation is disabled");
 
-        for (Path f = dir; f != null; f = f.getParent()) {
-            path.add(f);
-        }
+        List<LvFileNavigationManager.LvFsItem> items = fileManager.getChildren(dir);
+        if (items == null)
+            return null;
 
-        Collections.reverse(path);
-
-        DirItem root = new DirItem(path.get(0), DIR_ICON, null);
-
-        DirItem f = root;
-
-        int i = 0;
-        do {
-            List<LvFileNavigationManager.LvFsItem> files = fileManager.getChildren(path.get(i));
-            if (files != null) {
-                f.items = createFileItems(files);
-            }
-
-            if (++i >= path.size())
-                break;
-
-            String dirName = path.get(i).getFileName().toString();
-
-            if (f.items == null) {
-                DirItem dirItem = new DirItem(path.get(i), DIR_ICON, null);
-                f.items = Collections.singletonList(dirItem);
-                f = dirItem;
-            } else {
-                f = (DirItem) ((List<FsItem>)f.items).stream().filter(item -> item.name.equals(dirName)).findFirst().orElse(null);
-            }
-        }  while (f != null);
-
-        return root;
+        return createFileItems(items);
     }
 
     private List<FsItem> createFileItems(List<LvFileNavigationManager.LvFsItem> files) {
         List<FsItem> res = new ArrayList<>(files.size());
         for (LvFileNavigationManager.LvFsItem file : files) {
             if (file.isDirectory()) {
-                res.add(new DirItem(file.getPath(), DIR_ICON, null));
+                res.add(new DirItem(file.getPath(), DIR_ICON));
             } else {
                 res.add(new FileItem(file.getPath(), file.getType(), file.getSize(), file.getModificationTime()));
             }
@@ -179,7 +139,11 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
 
         private boolean favoritesEditable;
 
-        private DirItem treeRoot;
+        private boolean showFileTree;
+
+        private String initPath;
+
+        private List<FsItem> initDirContent;
     }
 
     public static class RestFileState {
@@ -220,11 +184,10 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
     }
 
     private static class DirItem extends FsItem {
-        private List<?> items;
+        private List<?> singleItem;
 
-        public DirItem(Path path, String icon, List<?> items) {
+        public DirItem(Path path, String icon) {
             super(path, icon, true);
-            this.items = items;
         }
     }
 

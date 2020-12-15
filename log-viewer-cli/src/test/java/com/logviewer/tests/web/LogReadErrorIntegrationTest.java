@@ -1,8 +1,8 @@
 package com.logviewer.tests.web;
 
 import com.logviewer.TestUtils;
-import com.logviewer.impl.LvFileAccessManagerImpl;
 import com.logviewer.mocks.TestFormatRecognizer;
+import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.utils.Utils;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -114,7 +114,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
     @Test
     public void noDateFieldInRestrictedFiles() {
-        ctx.getBean(LvFileAccessManagerImpl.class).setAllowedPaths(Collections.emptyList());
+        ctx.getBean(LvFileAccessManagerImpl.class).setPaths(Collections.emptyList());
 
         String path1 = getDataFilePath("1-7.log");
         String path2 = getDataFilePath("1-100.log");
