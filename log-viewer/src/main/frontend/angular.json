@@ -10,7 +10,7 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss"
+          "style": "scss"
         }
       },
       "architect": {
@@ -29,7 +29,9 @@
             "styles": [
               "src/css/main.scss"
             ],
-            "customWebpackConfig": {"path": "./custom-webpack.config.js"},
+            "customWebpackConfig": {
+              "path": "./custom-webpack.config.js"
+            },
             "scripts": []
           },
           "configurations": {
@@ -129,5 +131,8 @@
       }
     }
   },
-  "defaultProject": "log-viewer"
+  "defaultProject": "log-viewer",
+  "cli": {
+    "analytics": "7c6438ec-8a83-4232-ac7d-563678851c86"
+  }
 }

@@ -12,7 +12,7 @@ import {SlUtils} from '@app/utils/utils';
 })
 export class LogNavigatorComponent implements OnInit {
 
-    @ViewChild('searchField', {static: false})
+    @ViewChild('searchField')
     searchField: ElementRef;
     @ViewChild('rootElement', {static: true})
     rootElement: ElementRef;

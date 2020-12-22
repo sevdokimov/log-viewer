@@ -36,7 +36,7 @@ export class GroovyPredicateEditorComponent implements OnChanges, OnInit {
 
     scriptBackup: string;
 
-    @ViewChild(AceEditorDirective, {static: false})
+    @ViewChild(AceEditorDirective)
     private aceEditor: AceEditorDirective;
 
     fieldList: string[];

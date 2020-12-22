@@ -68,7 +68,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     @ViewChild('loadingProgressTop', {static: true})
     loadingProgressTop: ElementRef;
 
-    @ViewChild('filtersDd', {read: BsDropdownDirective, static: false})
+    @ViewChild('filtersDd', { read: BsDropdownDirective })
     namedFilterDropDown: BsDropdownDirective;
 
     @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent;
@@ -1178,7 +1178,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     @BackendEventHandler()
     private onBackendError(event: BackendErrorEvent) {
-        this.fail(event.stacktrace)
+        this.fail(event.stacktrace);
     }
 
     disconnected(disconnectMessage?: string) {

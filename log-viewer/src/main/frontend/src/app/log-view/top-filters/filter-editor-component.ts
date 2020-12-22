@@ -1,7 +1,8 @@
 import {Subscription} from 'rxjs';
-import {OnDestroy, OnInit} from '@angular/core';
+import {Injectable, OnDestroy, OnInit} from '@angular/core';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 
+@Injectable()
 export abstract class FilterEditorComponent implements OnInit, OnDestroy {
 
     private filterStateSbscr: Subscription;
