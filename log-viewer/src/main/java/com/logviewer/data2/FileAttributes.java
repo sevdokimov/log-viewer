@@ -1,6 +1,7 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nullable;
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;

@@ -1,7 +1,7 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class FieldTypes {
 
@@ -24,7 +24,7 @@ public class FieldTypes {
      */
     public static final String RELATIVE_TIMESTAMP = "relativeTimestamp";
 
-    public static boolean is(@Nullable String fieldType, @Nonnull String expectedType) {
+    public static boolean is(@Nullable String fieldType, @NonNull String expectedType) {
         if (fieldType == null || !fieldType.startsWith(expectedType))
             return false;
 

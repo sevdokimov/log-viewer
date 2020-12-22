@@ -1,8 +1,8 @@
 package com.logviewer.api;
 
 import com.logviewer.data2.LogFormat;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 
 public interface LvFormatRecognizer {

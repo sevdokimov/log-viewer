@@ -1,10 +1,11 @@
 package com.logviewer.data2.config;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.nio.file.Path;
 
 public interface ConfigDirHolder {
     Path getConfigDir();
 
-    String getProperty(@Nonnull String name);
+    String getProperty(@NonNull String name);
 }

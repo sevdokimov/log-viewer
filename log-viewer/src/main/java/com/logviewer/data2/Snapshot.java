@@ -1,7 +1,8 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.io.IOException;
 import java.util.function.Predicate;
 
@@ -27,7 +28,7 @@ public interface Snapshot extends AutoCloseable {
 
     Log getLog();
 
-    boolean isValidHash(@Nonnull String hash) throws LogCrashedException;
+    boolean isValidHash(@NonNull String hash) throws LogCrashedException;
 
     String getHash();
 

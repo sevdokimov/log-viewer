@@ -1,9 +1,8 @@
 package com.logviewer.formats.utils;
 
 import com.logviewer.data2.FieldTypes;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
 
@@ -11,7 +10,7 @@ public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
 
     private final int minSize;
 
-    public LvLayoutStretchNode(@Nonnull String fieldName, @Nullable String fieldType, boolean removeSpacesBefore, int minSize) {
+    public LvLayoutStretchNode(@NonNull String fieldName, @Nullable String fieldType, boolean removeSpacesBefore, int minSize) {
         super(fieldName, fieldType);
         this.removeSpacesBefore = removeSpacesBefore;
         this.minSize = minSize;

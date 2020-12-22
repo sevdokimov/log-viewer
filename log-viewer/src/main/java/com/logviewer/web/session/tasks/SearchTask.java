@@ -1,6 +1,5 @@
 package com.logviewer.web.session.tasks;
 
-import com.google.common.collect.Iterables;
 import com.logviewer.data2.LogView;
 import com.logviewer.data2.Position;
 import com.logviewer.data2.Record;
@@ -8,9 +7,9 @@ import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
 import com.logviewer.web.session.*;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -32,8 +31,8 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
     private boolean finished;
 
     public SearchTask(SessionAdapter sender, LogView[] logs, Position start, int recordCount, boolean backward,
-                      @Nonnull SearchPattern pattern,
-                      @Nonnull Map<String, String> hashes, @Nullable RecordPredicate filter) {
+                      @NonNull SearchPattern pattern,
+                      @NonNull Map<String, String> hashes, @Nullable RecordPredicate filter) {
         super(sender, logs);
 
         this.start = start;
@@ -70,7 +69,8 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
                                 if (searchResult.isFound()) {
                                     for (Map.Entry<LogView, LogProcess> entry : searchers.entrySet()) {
                                         if (entry.getKey() != log) {
-                                            long time = Iterables.getLast(searchResult.getData()).getFirst().getTime();
+                                            Pair<Record, Throwable> pair = searchResult.getData().get(searchResult.getData().size() - 1);
+                                            long time = pair.getFirst().getTime();
                                             entry.getValue().setTimeLimit(LogProcess.makeTimeLimitNonStrict(backward, time));
                                         }
                                     }

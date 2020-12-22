@@ -1,7 +1,7 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class DefaultFieldDesciptor implements LogFormat.FieldDescriptor, Cloneable {
 
@@ -9,12 +9,12 @@ public class DefaultFieldDesciptor implements LogFormat.FieldDescriptor, Cloneab
 
     private final String type;
 
-    public DefaultFieldDesciptor(@Nonnull String name, @Nullable String type) {
+    public DefaultFieldDesciptor(@NonNull String name, @Nullable String type) {
         this.name = name;
         this.type = type;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String name() {
         return name;

@@ -7,8 +7,8 @@ import com.logviewer.data2.Record;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.web.dto.RestRecord;
 import org.junit.Assert;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -127,11 +127,11 @@ public class TestUtils {
         return new Date(115, 0, 1, 10, mm, ss).getTime();
     }
 
-    public static <T> void assertEqualsUnorder(@Nonnull  Collection<T> c, T ... objects) {
+    public static <T> void assertEqualsUnorder(@NonNull  Collection<T> c, T ... objects) {
         Assert.assertEquals(new HashSet<>(Arrays.asList(objects)), new HashSet<>(c));
     }
 
-    public static <T, R> void assertEqualsUnorder(@Nonnull Collection<T> c, @Nonnull Function<T, R> transformer, R ... objects) {
+    public static <T, R> void assertEqualsUnorder(@NonNull Collection<T> c, @NonNull Function<T, R> transformer, R ... objects) {
         Assert.assertEquals(new HashSet<>(Arrays.asList(objects)), c.stream().map(transformer).collect(Collectors.toSet()));
     }
 

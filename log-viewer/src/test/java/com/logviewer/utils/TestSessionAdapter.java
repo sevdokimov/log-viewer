@@ -11,8 +11,8 @@ import com.logviewer.web.dto.events.StatusHolderEvent;
 import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.SessionAdapter;
 import org.junit.Assert;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -32,7 +32,7 @@ public class TestSessionAdapter implements SessionAdapter {
     private BlockingDeque<BackendEvent> events = new LinkedBlockingDeque<>();
 
     @Override
-    public void send(@Nonnull BackendEvent event) {
+    public void send(@NonNull BackendEvent event) {
         events.add(event);
     }
 

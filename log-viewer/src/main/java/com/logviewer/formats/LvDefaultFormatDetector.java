@@ -3,9 +3,9 @@ package com.logviewer.formats;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.utils.TextRange;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -35,7 +35,7 @@ public class LvDefaultFormatDetector {
 
     private static final Pattern THREAD_ITEM = Pattern.compile(" *(\\[[^\\[\\]\n]+]) *");
 
-    private static int readBuffer(@Nonnull Path path, byte[] data) {
+    private static int readBuffer(@NonNull Path path, byte[] data) {
         int length = 0;
 
         try (FileInputStream in = new FileInputStream(path.toFile())) {
@@ -66,7 +66,7 @@ public class LvDefaultFormatDetector {
         return 0;
     }
 
-    public static LogFormat detectFormat(@Nonnull Path path) {
+    public static LogFormat detectFormat(@NonNull Path path) {
         byte[] data = new byte[WINDOW_SIZE];
         int length = readBuffer(path, data);
         if (length <= 0)

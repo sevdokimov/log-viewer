@@ -2,9 +2,9 @@ package com.logviewer.data2.net.server;
 
 import com.logviewer.data2.LogService;
 import com.logviewer.data2.net.server.api.RemoteTaskContext;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -44,7 +44,7 @@ public class RemoteTaskContextImpl<CALL_BACK> implements RemoteTaskContext<CALL_
     }
 
     @Override
-    public void sendErrorAndCloseChannel(@Nonnull Throwable t) {
+    public void sendErrorAndCloseChannel(@NonNull Throwable t) {
         assert !closed;
         closed = true;
 

@@ -1,17 +1,17 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class LvLayoutNumberNode extends LvLayoutCustomTypeNode {
 
     private final boolean canBeNegative;
 
-    public LvLayoutNumberNode(@Nonnull String fieldName, @Nullable String fieldType) {
+    public LvLayoutNumberNode(@NonNull String fieldName, @Nullable String fieldType) {
         this(fieldName, fieldType, false);
     }
 
-    public LvLayoutNumberNode(@Nonnull String fieldName, @Nullable String fieldType, boolean canBeNegative) {
+    public LvLayoutNumberNode(@NonNull String fieldName, @Nullable String fieldType, boolean canBeNegative) {
         super(fieldName, fieldType);
         this.canBeNegative = canBeNegative;
     }

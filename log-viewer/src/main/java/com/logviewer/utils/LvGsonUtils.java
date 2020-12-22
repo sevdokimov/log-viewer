@@ -11,8 +11,8 @@ import com.logviewer.filters.*;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.formats.SimpleLogFormat;
 import com.logviewer.logLibs.LoggerLibSupport;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -68,7 +68,7 @@ public class LvGsonUtils {
 
     }
 
-    public static <T> T copy(@Nonnull T object) {
+    public static <T> T copy(@NonNull T object) {
         String str = GSON.toJson(object);
         return (T)GSON.fromJson(str, object.getClass());
     }

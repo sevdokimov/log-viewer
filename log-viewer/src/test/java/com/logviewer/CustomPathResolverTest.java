@@ -11,9 +11,9 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,7 +58,7 @@ public class CustomPathResolverTest extends LogSessionTestBase {
             return new LvPathResolver() {
                 @Nullable
                 @Override
-                public Collection<LogPath> resolvePath(@Nonnull String pathFromHttpParameter) {
+                public Collection<LogPath> resolvePath(@NonNull String pathFromHttpParameter) {
                     if (pathFromHttpParameter.equals("abc")) {
                         return Arrays.asList(new LogPath(null, tempDir.resolve("a.txt").toString()),
                                 new LogPath(null, tempDir.resolve("b.txt").toString()));

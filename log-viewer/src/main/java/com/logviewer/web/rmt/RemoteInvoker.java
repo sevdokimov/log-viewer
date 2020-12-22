@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import com.logviewer.utils.LvGsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -22,7 +22,7 @@ public class RemoteInvoker {
 
     private static final Map<Class, Map<String, MethodDescriptor>> classCache = new ConcurrentHashMap<>();
 
-    private static Map<String, MethodDescriptor> getMethods(@Nonnull Class handlerClass) {
+    private static Map<String, MethodDescriptor> getMethods(@NonNull Class handlerClass) {
         return classCache.computeIfAbsent(handlerClass, cls -> {
             Map<String, MethodDescriptor> methods = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class RemoteInvoker {
         });
     }
 
-    public static Object call(@Nonnull Object handler, @Nonnull MethodCall call) throws Throwable {
+    public static Object call(@NonNull Object handler, @NonNull MethodCall call) throws Throwable {
         if (LOG.isDebugEnabled())
             LOG.debug("Incoming message: " + call);
 

@@ -1,11 +1,10 @@
 package com.logviewer.web.session;
 
 import com.logviewer.web.dto.events.BackendEvent;
-
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
 
 public interface SessionAdapter {
 
-    void send(@Nonnull BackendEvent event);
+    void send(@NonNull BackendEvent event);
 
 }

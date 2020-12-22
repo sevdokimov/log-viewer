@@ -4,8 +4,8 @@ import com.logviewer.api.LvFilterPanelStateProvider;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
 import com.typesafe.config.ConfigValue;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,11 +18,11 @@ public class LvHoconFilterPanelStateProvider implements LvFilterPanelStateProvid
 
     private volatile Map<String, String> filters;
 
-    public LvHoconFilterPanelStateProvider(@Nonnull Config lvHoconConfig) {
+    public LvHoconFilterPanelStateProvider(@NonNull Config lvHoconConfig) {
         this.lvHoconConfig = lvHoconConfig;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Map<String, String> getFilterSets() {
         Map<String, String> res = this.filters;

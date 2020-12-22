@@ -7,9 +7,9 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigValue;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,7 +17,7 @@ public class HoconPathResolver implements LvPathResolver {
 
     private final Map<String, List<LogPath>> paths;
 
-    public HoconPathResolver(@Nonnull ConfigObject configObj) {
+    public HoconPathResolver(@NonNull ConfigObject configObj) {
         Map<String, List<LogPath>> paths = new HashMap<>();
 
         Config cfg = configObj.toConfig();
@@ -72,7 +72,7 @@ public class HoconPathResolver implements LvPathResolver {
 
     @Nullable
     @Override
-    public Collection<LogPath> resolvePath(@Nonnull String pathFromHttpParameter) {
+    public Collection<LogPath> resolvePath(@NonNull String pathFromHttpParameter) {
         return paths.get(pathFromHttpParameter);
     }
 }

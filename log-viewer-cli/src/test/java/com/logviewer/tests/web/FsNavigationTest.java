@@ -8,8 +8,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -135,7 +135,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
         assertEquals(ALL_ROOT_FILES, fileNames());
     }
 
-    private void clickNavigation(@Nonnull String pathPart) {
+    private void clickNavigation(@NonNull String pathPart) {
         List<WebElement> navigationRoots = driver.findElementsByXPath("//div[@class='current-path']/span[@class='path-item']/a[text()='" + pathPart + "']");
         navigationRoots.get(navigationRoots.size() - 1).click();
     }

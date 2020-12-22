@@ -1,9 +1,8 @@
 package com.logviewer.data2.net.server.msg;
 
 import com.logviewer.data2.net.server.Message;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class MessageTaskCallbackCall implements Message {
 
@@ -15,7 +14,7 @@ public class MessageTaskCallbackCall implements Message {
 
     private final boolean taskStopped;
 
-    public MessageTaskCallbackCall(long taskId, @Nonnull Throwable error) {
+    public MessageTaskCallbackCall(long taskId, @NonNull Throwable error) {
         this.taskId = taskId;
         this.error = error;
         taskStopped = true;

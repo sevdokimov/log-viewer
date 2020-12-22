@@ -1,6 +1,7 @@
 package com.logviewer.files;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -78,8 +79,8 @@ public class FileTypes {
         }
     }
 
-    @Nonnull
-    public static FileType detectType(@Nonnull String path) {
+    @NonNull
+    public static FileType detectType(@NonNull String path) {
         for (FileType type : ALL_TYPES) {
             if (type.getPattern().matcher(path).matches())
                 return type;

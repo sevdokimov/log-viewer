@@ -4,9 +4,8 @@ import com.logviewer.api.LvFilterStorage;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.utils.PersistentMap;
 import org.springframework.beans.factory.InitializingBean;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class FileSystemFilterStorage implements LvFilterStorage, InitializingBean {
 
@@ -28,12 +27,12 @@ public class FileSystemFilterStorage implements LvFilterStorage, InitializingBea
 
     @Nullable
     @Override
-    public String loadFilterStateByHash(@Nonnull String hash) {
+    public String loadFilterStateByHash(@NonNull String hash) {
         return persistentMap.get(hash);
     }
 
     @Override
-    public void saveFilterSet(@Nonnull String hash, @Nonnull String filters) {
+    public void saveFilterSet(@NonNull String hash, @NonNull String filters) {
         persistentMap.put(hash, filters);
     }
 }

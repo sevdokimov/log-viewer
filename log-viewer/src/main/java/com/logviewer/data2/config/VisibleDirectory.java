@@ -1,10 +1,10 @@
 package com.logviewer.data2.config;
 
-import com.google.common.base.Strings;
 import com.logviewer.utils.Utils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.regex.Pattern;
 
 public class VisibleDirectory {
@@ -15,13 +15,13 @@ public class VisibleDirectory {
 
     private transient volatile Pattern pattern;
 
-    public VisibleDirectory(@Nonnull String directory) {
+    public VisibleDirectory(@NonNull String directory) {
         this(directory, null);
     }
 
-    public VisibleDirectory(@Nonnull String directory, @Nullable String fileRegex) {
+    public VisibleDirectory(@NonNull String directory, @Nullable String fileRegex) {
         this.directory = directory;
-        this.fileRegex = Strings.emptyToNull(fileRegex);
+        this.fileRegex = StringUtils.isEmpty(fileRegex) ? null : fileRegex;
     }
 
     public String getDirectory() {
@@ -32,7 +32,7 @@ public class VisibleDirectory {
         return fileRegex;
     }
 
-    public boolean match(@Nonnull String path) {
+    public boolean match(@NonNull String path) {
         if (!Utils.isSubdirectory(directory, path))
             return false;
 

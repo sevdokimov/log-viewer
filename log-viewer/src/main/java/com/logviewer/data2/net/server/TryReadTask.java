@@ -5,8 +5,8 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.net.server.api.RemoteTask;
 import com.logviewer.data2.net.server.api.RemoteTaskContext;
 import com.logviewer.utils.LvGsonUtils;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 
 public class TryReadTask implements RemoteTask<Void> {
@@ -14,13 +14,13 @@ public class TryReadTask implements RemoteTask<Void> {
     private final String file;
     private final String format;
 
-    public TryReadTask(@Nonnull String file, String format) {
+    public TryReadTask(@NonNull String file, String format) {
         this.file = file;
         this.format = format;
     }
 
     @Override
-    public void start(@Nonnull RemoteTaskContext<Void> ctx) {
+    public void start(@NonNull RemoteTaskContext<Void> ctx) {
         Log log = ctx.getLogService().openLog(file, LvGsonUtils.GSON.fromJson(format, LogFormat.class));
 
         CompletableFuture<Throwable> future = log.tryRead();

@@ -1,13 +1,11 @@
 package com.logviewer.filters;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Primitives;
 import com.logviewer.utils.Pair;
 import groovy.lang.Script;
 import org.codehaus.groovy.runtime.ScriptBytecodeAdapter;
 import org.kohsuke.groovy.sandbox.GroovyValueFilter;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,30 +18,47 @@ class GroovyPredicateSandbox extends GroovyValueFilter {
     private static final Map<Class, Pair<Boolean, Set<String>>> GREEN_CLASSES;
 
     static {
-        ImmutableMap.Builder<Class, Pair<Boolean, Set<String>>> builder = ImmutableMap.<Class, Pair<Boolean, Set<String>>>builder()
-                .put(String.class, Pair.of(true, Collections.singleton("execute")))
-                .put(Pattern.class, Pair.of(true, Collections.emptySet()))
-                .put(Matcher.class, Pair.of(true, Collections.emptySet()))
+        Map<Class, Pair<Boolean, Set<String>>> greenClasses = new HashMap<>();
 
-                .put(GroovyPredicateScriptBase.class, Pair.of(true, new HashSet<>(Arrays.asList("evaluate", "run"))))
+        Pair<Boolean, Set<String>> allowAll = Pair.of(true, Collections.emptySet());
 
-                .put(ArrayList.class, Pair.of(true, Collections.emptySet()))
-                .put(HashSet.class, Pair.of(true, Collections.emptySet()))
-                .put(HashMap.class, Pair.of(true, Collections.emptySet()))
-                .put(LinkedHashMap.class, Pair.of(true, Collections.emptySet()))
-                .put(LinkedHashSet.class, Pair.of(true, Collections.emptySet()))
+        greenClasses.put(String.class, Pair.of(true, Collections.singleton("execute")));
+        greenClasses.put(Pattern.class, allowAll);
+        greenClasses.put(Matcher.class, allowAll);
 
-                .put(ScriptBytecodeAdapter.class, Pair.of(false, new HashSet<>(Arrays.asList(
-                        "castToType", "createTuple", "createList", "createMap", "compareIdentical", "compareNotIdentical",
-                        "regexPattern", "findRegex", "matchRegex")))
-                );
+        greenClasses.put(GroovyPredicateScriptBase.class, Pair.of(true, new HashSet<>(Arrays.asList("evaluate", "run"))));
 
-        for (Class<?> primitive : Primitives.allPrimitiveTypes()) {
-            builder.put(primitive, Pair.of(true, Collections.emptySet()));
-            builder.put(Primitives.wrap(primitive), Pair.of(true, Collections.emptySet()));
-        }
+        greenClasses.put(ArrayList.class, allowAll);
+        greenClasses.put(HashSet.class, allowAll);
+        greenClasses.put(HashMap.class, allowAll);
+        greenClasses.put(LinkedHashMap.class, allowAll);
+        greenClasses.put(LinkedHashSet.class, allowAll);
 
-        GREEN_CLASSES = builder.build();
+        greenClasses.put(ScriptBytecodeAdapter.class, Pair.of(false, new HashSet<>(Arrays.asList(
+                "castToType", "createTuple", "createList", "createMap", "compareIdentical", "compareNotIdentical",
+                "regexPattern", "findRegex", "matchRegex")))
+        );
+
+        greenClasses.put(Byte.TYPE, allowAll);
+        greenClasses.put(Byte.class, allowAll);
+        greenClasses.put(Short.TYPE, allowAll);
+        greenClasses.put(Short.class, allowAll);
+        greenClasses.put(Integer.TYPE, allowAll);
+        greenClasses.put(Integer.class, allowAll);
+        greenClasses.put(Float.TYPE, allowAll);
+        greenClasses.put(Float.class, allowAll);
+        greenClasses.put(Double.TYPE, allowAll);
+        greenClasses.put(Double.class, allowAll);
+        greenClasses.put(Long.TYPE, allowAll);
+        greenClasses.put(Long.class, allowAll);
+        greenClasses.put(Boolean.TYPE, allowAll);
+        greenClasses.put(Boolean.class, allowAll);
+        greenClasses.put(Character.TYPE, allowAll);
+        greenClasses.put(Character.class, allowAll);
+        greenClasses.put(Void.TYPE, allowAll);
+        greenClasses.put(Void.class, allowAll);
+
+        GREEN_CLASSES = greenClasses;
     }
 
     private final Class<? extends Script> scriptClass;

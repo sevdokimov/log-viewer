@@ -1,9 +1,9 @@
 package com.logviewer.services;
 
 import com.logviewer.api.LvFileAccessManager;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
         }
     }
 
-    public void setVisibleFiles(@Nonnull List<Path> files) {
+    public void setVisibleFiles(@NonNull List<Path> files) {
         setPaths(files.stream().map(PathPattern::file).collect(Collectors.toList()));
     }
 
@@ -106,7 +106,7 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
         return false;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public List<Path> getRoots() {
         return roots;

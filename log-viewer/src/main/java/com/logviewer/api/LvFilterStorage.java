@@ -1,13 +1,13 @@
 package com.logviewer.api;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public interface LvFilterStorage {
 
     @Nullable
-    String loadFilterStateByHash(@Nonnull String hash);
+    String loadFilterStateByHash(@NonNull String hash);
 
-    void saveFilterSet(@Nonnull String hash, @Nonnull String filters);
+    void saveFilterSet(@NonNull String hash, @NonNull String filters);
 
 }

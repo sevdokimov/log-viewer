@@ -1,7 +1,8 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,11 +12,11 @@ public class LvLayoutRegexNode extends LvLayoutCustomTypeNode implements LvLayou
 
     private Matcher matcher;
 
-    public LvLayoutRegexNode(@Nonnull String fieldName, @Nullable String fieldType, String pattern) {
+    public LvLayoutRegexNode(@NonNull String fieldName, @Nullable String fieldType, String pattern) {
         this(fieldName, fieldType, Pattern.compile(pattern));
     }
 
-    public LvLayoutRegexNode(@Nonnull String fieldName, @Nullable String fieldType, Pattern pattern) {
+    public LvLayoutRegexNode(@NonNull String fieldName, @Nullable String fieldType, Pattern pattern) {
         super(fieldName, fieldType);
         
         this.pattern = pattern;

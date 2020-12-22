@@ -3,9 +3,9 @@ package com.logviewer.web.session;
 import com.logviewer.data2.*;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -35,7 +35,7 @@ public class LocalFileRecordLoader implements LogProcess {
 
     private volatile Future<?> future;
 
-    public LocalFileRecordLoader(Supplier<Snapshot> snapshotFactory, @Nonnull ExecutorService executor,
+    public LocalFileRecordLoader(Supplier<Snapshot> snapshotFactory, @NonNull ExecutorService executor,
                                  LogDataListener listener,
                                  @Nullable Position start, RecordPredicate filter, boolean backward,
                                  int recordCountLimit, long sizeLimit, @Nullable String hash) {

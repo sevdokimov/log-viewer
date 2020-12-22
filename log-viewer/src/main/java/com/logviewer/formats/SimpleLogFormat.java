@@ -4,8 +4,8 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.Record;
 import com.logviewer.utils.Utils;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 
 public class SimpleLogFormat implements LogFormat {

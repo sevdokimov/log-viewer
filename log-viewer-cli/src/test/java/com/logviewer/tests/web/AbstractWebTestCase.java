@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -136,7 +136,7 @@ public abstract class AbstractWebTestCase {
         ctx.getBeansOfType(TestListener.class).values().forEach(TestListener::beforeTest);
     }
 
-    protected void notExist(@Nonnull By by) {
+    protected void notExist(@NonNull By by) {
         noImplicitWait(() -> {
             assert driver.findElements(by).isEmpty();
         });
@@ -195,7 +195,7 @@ public abstract class AbstractWebTestCase {
         openUrl(path, map);
     }
 
-    protected static void openUrl(String path, @Nonnull Map<String, List<String>> params) {
+    protected static void openUrl(String path, @NonNull Map<String, List<String>> params) {
         StringBuilder sb = new StringBuilder();
         sb.append("http://localhost:").append(TEST_PORT).append("/");
 

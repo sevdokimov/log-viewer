@@ -9,8 +9,8 @@ import org.junit.After;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -171,7 +171,7 @@ public abstract class AbstractLogTest {
         return res;
     }
 
-    protected ApplicationContext findContext(@Nonnull LogService logService) {
+    protected ApplicationContext findContext(@NonNull LogService logService) {
         for (ConfigurableApplicationContext context : contexts) {
             if (context.getBean(LogService.class) == logService)
                 return context;
@@ -184,7 +184,7 @@ public abstract class AbstractLogTest {
         doRemoteTest(LvTestConfig.class, test);
     }
 
-    protected void doRemoteTest(@Nonnull Class<?> cfg, @Nonnull RemoteTest test) throws Exception {
+    protected void doRemoteTest(@NonNull Class<?> cfg, @NonNull RemoteTest test) throws Exception {
         LogService local = createLogServiceWithContext(cfg);
         LogService remote = createLogServiceWithContext(cfg, LogViewerServerConfig.class);
 
@@ -206,7 +206,7 @@ public abstract class AbstractLogTest {
         return record.getFieldText(fieldIdx);
     }
 
-    protected Record read(@Nonnull LogFormat logFormat, @Nonnull String s) {
+    protected Record read(@NonNull LogFormat logFormat, @NonNull String s) {
         LogReader reader = logFormat.createReader();
         boolean isSuccess = reader.parseRecord(new BufferedFile.Line(s));
         assert isSuccess : "Failed to parse: " + s;

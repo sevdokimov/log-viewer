@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -175,7 +175,7 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         }
 
         @Override
-        public int compareTo(@Nonnull LogNavigatorController.FsItem o) {
+        public int compareTo(@NonNull LogNavigatorController.FsItem o) {
             if (isDirectory != o.isDirectory)
                 return isDirectory ? -1 : 1;
 

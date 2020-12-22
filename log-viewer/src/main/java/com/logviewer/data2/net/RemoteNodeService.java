@@ -1,6 +1,5 @@
 package com.logviewer.data2.net;
 
-import com.google.common.base.Throwables;
 import com.logviewer.data2.net.server.LogViewerBackdoorServer;
 import com.logviewer.data2.net.server.api.RemoteTask;
 import com.logviewer.data2.net.server.api.RemoteTaskController;
@@ -10,8 +9,8 @@ import com.logviewer.utils.Wrappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -31,7 +30,7 @@ public class RemoteNodeService implements DisposableBean {
 
     private boolean closed;
 
-    public synchronized CompletableFuture<OutcomeConnection> getNodeConnection(@Nonnull Node node) {
+    public synchronized CompletableFuture<OutcomeConnection> getNodeConnection(@NonNull Node node) {
         if (closed)
             throw new IllegalStateException("Server is closed");
 
@@ -48,7 +47,7 @@ public class RemoteNodeService implements DisposableBean {
                 } catch (InterruptedException e) {
                     throw new RuntimeInterruptedException(e);
                 } catch (ExecutionException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw Utils.propagate(e.getCause());
                 }
 
                 if (res.isOpen())
@@ -107,17 +106,17 @@ public class RemoteNodeService implements DisposableBean {
         }
     }
 
-    public <E, T extends RemoteTask<E>> RemoteTaskController<T> startTask(@Nonnull Node node,
-                                                                                       @Nonnull T task,
-                                                                                       @Nonnull BiConsumer<E, Throwable> callback) {
+    public <E, T extends RemoteTask<E>> RemoteTaskController<T> startTask(@NonNull Node node,
+                                                                                       @NonNull T task,
+                                                                                       @NonNull BiConsumer<E, Throwable> callback) {
         RemoteTaskControllerImpl<E, T> controller = new RemoteTaskControllerImpl<>(node, task, callback);
         controller.start();
         return controller;
     }
 
-    public <E, T extends RemoteTask<E>> RemoteTaskController<T> createTask(@Nonnull Node node,
-                                                                           @Nonnull T task,
-                                                                           @Nonnull BiConsumer<E, Throwable> callback) {
+    public <E, T extends RemoteTask<E>> RemoteTaskController<T> createTask(@NonNull Node node,
+                                                                           @NonNull T task,
+                                                                           @NonNull BiConsumer<E, Throwable> callback) {
         return new RemoteTaskControllerImpl<>(node, task, callback);
     }
 
@@ -159,7 +158,7 @@ public class RemoteNodeService implements DisposableBean {
 
         private boolean canceled;
 
-        RemoteTaskControllerImpl(@Nonnull Node node, @Nonnull T task, @Nonnull BiConsumer<E, Throwable> callback) {
+        RemoteTaskControllerImpl(@NonNull Node node, @NonNull T task, @NonNull BiConsumer<E, Throwable> callback) {
             this.node = node;
             this.task = task;
             this.callback = callback;

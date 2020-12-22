@@ -1,8 +1,8 @@
 package com.logviewer.data2;
 
 import com.logviewer.utils.Pair;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -19,7 +19,7 @@ public class RecordList extends ArrayList<Pair<Record, Throwable>> implements Ex
 
     }
 
-    public RecordList(@Nonnull Pair<Record, Throwable> restRecord) {
+    public RecordList(@NonNull Pair<Record, Throwable> restRecord) {
         add(restRecord);
     }
 

@@ -2,8 +2,8 @@ package com.logviewer.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -175,7 +175,7 @@ public class RegexUtilsTest {
                 "l.txt", "ssssss/t.txt", "sss");
     }
 
-    private void doFilePatternTest(@Nonnull String pattern, String[] matches, String ... notMatches) {
+    private void doFilePatternTest(@NonNull String pattern, String[] matches, String ... notMatches) {
         Pattern p1 = RegexUtils.filePattern(pattern);
         Pattern p2 = RegexUtils.filePattern(pattern.replace('/', '\\'));
 

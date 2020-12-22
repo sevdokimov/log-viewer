@@ -1,8 +1,7 @@
 package com.logviewer.filters;
 
-import com.google.common.base.Throwables;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
 import groovy.lang.Binding;
@@ -11,10 +10,9 @@ import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.kohsuke.groovy.sandbox.SandboxTransformer;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -23,7 +21,7 @@ public class GroovyPredicate implements RecordPredicate {
 
     private final String script;
 
-    private static final Cache<String, Object> scriptCache = CacheBuilder.newBuilder().maximumSize(500).build();
+    private static final Cache<String, Object> scriptCache = Caffeine.newBuilder().maximumSize(500).build();
 
     private transient GroovyPredicateSandbox sandbox;
     private transient CompilationFailedException compilationError;
@@ -33,39 +31,35 @@ public class GroovyPredicate implements RecordPredicate {
     /**
      * @param script
      */
-    public GroovyPredicate(@Nonnull String script) {
+    public GroovyPredicate(@NonNull String script) {
         this.script = script;
     }
 
     public GroovyPredicateSandbox getSandbox() {
         if (!initialized) {
-            try {
-                Object o = scriptCache.get(script, () -> {
-                    CompilerConfiguration cfg = new CompilerConfiguration();
-                    cfg.setScriptBaseClass(GroovyPredicateScriptBase.class.getName());
-                    cfg.addCompilationCustomizers(new SandboxTransformer());
+            Object o = scriptCache.get(script, key -> {
+                CompilerConfiguration cfg = new CompilerConfiguration();
+                cfg.setScriptBaseClass(GroovyPredicateScriptBase.class.getName());
+                cfg.addCompilationCustomizers(new SandboxTransformer());
 
-                    GroovyClassLoader cl = new GroovyClassLoader(getClass().getClassLoader(), cfg);
+                GroovyClassLoader cl = new GroovyClassLoader(getClass().getClassLoader(), cfg);
 
-                    try {
-                        Class scriptClass = cl.parseClass(this.script, "GroovyFilterClass");
-                        return new GroovyPredicateSandbox(scriptClass);
-                    } catch (CompilationFailedException e) {
-                        return e;
-                    }
-                });
-
-                if (o instanceof GroovyPredicateSandbox) {
-                    sandbox = (GroovyPredicateSandbox) o;
+                try {
+                    Class scriptClass = cl.parseClass(this.script, "GroovyFilterClass");
+                    return new GroovyPredicateSandbox(scriptClass);
+                } catch (CompilationFailedException e) {
+                    return e;
                 }
-                else {
-                    compilationError = (CompilationFailedException) o;
-                }
+            });
 
-                initialized = true;
-            } catch (ExecutionException e) {
-                throw Throwables.propagate(e.getCause());
+            if (o instanceof GroovyPredicateSandbox) {
+                sandbox = (GroovyPredicateSandbox) o;
             }
+            else {
+                compilationError = (CompilationFailedException) o;
+            }
+
+            initialized = true;
         }
 
         return sandbox;

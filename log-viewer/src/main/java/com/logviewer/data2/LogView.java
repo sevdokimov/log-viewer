@@ -6,9 +6,9 @@ import com.logviewer.web.session.LogDataListener;
 import com.logviewer.web.session.LogProcess;
 import com.logviewer.web.session.SearchResult;
 import com.logviewer.web.session.tasks.SearchPattern;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -26,7 +26,7 @@ public interface LogView {
 
     LogProcess loadRecords(RecordPredicate filter, int recordCount,
                            @Nullable Position start, boolean backward, @Nullable String hash, long sizeLimit,
-                           @Nonnull LogDataListener loadListener);
+                           @NonNull LogDataListener loadListener);
 
     LogProcess createRecordSearcher(Position start, boolean backward, RecordPredicate recordPredicate,
                                         String hash, int recordCount, SearchPattern searchPattern,

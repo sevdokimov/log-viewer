@@ -1,7 +1,8 @@
 package com.logviewer.api;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.nio.file.Path;
 import java.util.List;
 
@@ -15,6 +16,6 @@ public interface LvFileAccessManager {
 
     boolean isDirectoryVisible(Path dir);
 
-    @Nonnull
+    @NonNull
     List<Path> getRoots();
 }

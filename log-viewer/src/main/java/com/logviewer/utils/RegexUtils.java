@@ -1,6 +1,7 @@
 package com.logviewer.utils;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -248,7 +249,7 @@ public class RegexUtils {
         }
     }
 
-    public static Pattern filePattern(@Nonnull String filePattern) {
+    public static Pattern filePattern(@NonNull String filePattern) {
         StringBuilder sb = new StringBuilder();
 
         filePattern = Utils.normalizePath(filePattern).replaceAll("\\*{3,}", "**");

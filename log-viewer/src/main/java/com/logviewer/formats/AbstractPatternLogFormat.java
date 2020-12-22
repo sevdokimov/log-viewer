@@ -4,9 +4,9 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.formats.utils.LvLayoutNode;
 import com.logviewer.formats.utils.LvLayoutStretchNode;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     private transient volatile DefaultFieldSet fieldSet;
 
-    public AbstractPatternLogFormat(@Nullable Charset charset, @Nonnull String pattern) {
+    public AbstractPatternLogFormat(@Nullable Charset charset, @NonNull String pattern) {
         this.charset = charset;
         this.pattern = pattern;
     }
@@ -77,7 +77,7 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
         return res;
     }
 
-    protected abstract LvLayoutNode[] parseLayout(@Nonnull String pattern) throws IllegalArgumentException;
+    protected abstract LvLayoutNode[] parseLayout(@NonNull String pattern) throws IllegalArgumentException;
 
     protected static void mergeMessageFields(List<LvLayoutNode> nodes) {
         for (int i = 0; i + 1 < nodes.size(); ) {

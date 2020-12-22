@@ -2,8 +2,8 @@ package com.logviewer.utils;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigException;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Predicate;

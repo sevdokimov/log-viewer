@@ -3,8 +3,8 @@ package com.logviewer.impl;
 import com.logviewer.api.LvFileNavigationManager;
 import com.logviewer.files.FileType;
 import com.logviewer.files.FileTypes;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

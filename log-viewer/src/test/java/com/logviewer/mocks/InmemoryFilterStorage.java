@@ -2,9 +2,9 @@ package com.logviewer.mocks;
 
 import com.logviewer.api.LvFilterStorage;
 import com.logviewer.utils.TestListener;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,12 +14,12 @@ public class InmemoryFilterStorage implements LvFilterStorage, TestListener {
 
     @Nullable
     @Override
-    public String loadFilterStateByHash(@Nonnull String hash) {
+    public String loadFilterStateByHash(@NonNull String hash) {
         return map.get(hash);
     }
 
     @Override
-    public void saveFilterSet(@Nonnull String hash, @Nonnull String filters) {
+    public void saveFilterSet(@NonNull String hash, @NonNull String filters) {
         map.put(hash, filters);
     }
 

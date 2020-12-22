@@ -7,8 +7,8 @@ import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
 import com.logviewer.web.session.*;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;

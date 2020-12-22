@@ -5,19 +5,16 @@ import ch.qos.logback.core.pattern.parser.Node;
 import ch.qos.logback.core.pattern.parser.Parser;
 import ch.qos.logback.core.pattern.parser.SimpleKeywordNode;
 import ch.qos.logback.core.spi.ScanException;
-import com.google.common.collect.ImmutableSet;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
 import org.slf4j.event.Level;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
@@ -26,21 +23,19 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     private static final int NODE_SIMPLE_KEYWORD = 1; // Node.COMPOSITE_KEYWORD
     private static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
 
-    private static final Set<String> TEXT_FILEDS = ImmutableSet.of(
-            "ex", "exception", "throwable",
-            "xEx", "xException", "xThrowable",
-            "X", "mdc", "m", "msg", "message");
+    private static final Set<String> TEXT_FILEDS = new HashSet<>(Arrays.asList("ex", "exception", "throwable",
+            "xEx", "xException", "xThrowable", "X", "mdc", "m", "msg", "message"));
 
-    public LogbackLogFormat(@Nonnull String pattern) {
+    public LogbackLogFormat(@NonNull String pattern) {
         super(null, pattern);
     }
 
-    public LogbackLogFormat(@Nullable Charset charset, @Nonnull String pattern) {
+    public LogbackLogFormat(@Nullable Charset charset, @NonNull String pattern) {
         super(charset, pattern);
     }
 
     @Override
-    protected LvLayoutNode[] parseLayout(@Nonnull String pattern) throws IllegalArgumentException {
+    protected LvLayoutNode[] parseLayout(@NonNull String pattern) throws IllegalArgumentException {
         Node t;
         try {
             Parser parser = new Parser(pattern);

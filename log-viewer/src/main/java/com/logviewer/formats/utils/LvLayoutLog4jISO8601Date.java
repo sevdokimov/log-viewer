@@ -1,7 +1,8 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -194,7 +195,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
     }
 
     @Nullable
-    public static LvLayoutLog4jISO8601Date fromPattern(@Nonnull String pattern) {
+    public static LvLayoutLog4jISO8601Date fromPattern(@NonNull String pattern) {
         Matcher matcher = LvLayoutLog4jISO8601Date.SUPPORTED_PATTERN.matcher(pattern);
         if (!matcher.matches())
             return null;

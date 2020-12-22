@@ -17,8 +17,8 @@ import com.logviewer.web.session.Status;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -39,8 +39,8 @@ public class RemoteLog implements LogView {
     private final RemoteNodeService remoteNodeService;
     private final RemoteLogChangeListenerService remoteLogChangeListenerService;
 
-    public RemoteLog(@Nonnull LogPath path, @Nonnull LogFormat format, @Nonnull String logId, @Nonnull String hostname,
-                     @Nonnull RemoteNodeService remoteNodeService, RemoteLogChangeListenerService remoteLogChangeListenerService) {
+    public RemoteLog(@NonNull LogPath path, @NonNull LogFormat format, @NonNull String logId, @NonNull String hostname,
+                     @NonNull RemoteNodeService remoteNodeService, RemoteLogChangeListenerService remoteLogChangeListenerService) {
         this.path = path;
         node = path.getNode();
         assert node != null;
@@ -80,7 +80,7 @@ public class RemoteLog implements LogView {
     }
 
     @Override
-    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @Nonnull LogDataListener listener) {
+    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
         return new RemoteLogProcess<>(new RecordLoaderRemoteTask(path.getFile(), serializedFormat, start, backward, hash,
                 LvGsonUtils.GSON.toJson(filter, RecordPredicate.class), recordCount, sizeLimit), (o, error) -> {
             if (error != null) {

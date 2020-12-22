@@ -3,9 +3,9 @@ package com.logviewer.impl;
 import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFileNavigationManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +22,7 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
     @Value("${log-viewer.default-directory:}")
     private String defaultDirectory;
 
-    public LvFileNavigationManagerImpl(@Nonnull LvFileAccessManager fileAccessManager) {
+    public LvFileNavigationManagerImpl(@NonNull LvFileAccessManager fileAccessManager) {
         this.fileAccessManager = fileAccessManager;
     }
 

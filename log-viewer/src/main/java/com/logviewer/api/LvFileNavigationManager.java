@@ -1,8 +1,8 @@
 package com.logviewer.api;
 
 import com.logviewer.files.FileType;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 

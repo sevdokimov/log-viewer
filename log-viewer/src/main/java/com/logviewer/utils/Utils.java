@@ -1,17 +1,16 @@
 package com.logviewer.utils;
 
-import com.google.common.base.Throwables;
-import com.google.common.hash.Hashing;
 import com.google.gson.JsonParser;
 import com.logviewer.data2.LogFormat;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StreamUtils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -22,7 +21,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
@@ -76,7 +79,7 @@ public class Utils {
     
     public static void deleteContent(final Path path) throws IOException {
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-            @Nonnull
+            @NonNull
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
@@ -84,7 +87,7 @@ public class Utils {
                 return FileVisitResult.CONTINUE;
             }
 
-            @Nonnull
+            @NonNull
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 if (!dir.equals(path))
@@ -149,6 +152,12 @@ public class Utils {
         return new String(buffer.array(), buffer.position(), buffer.limit() - buffer.position(), charsets);
     }
 
+    public static String toString(URL url, Charset charsets) throws IOException {
+        try (InputStream inputStream = url.openStream()) {
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        }
+    }
+
     public static boolean isSubdirectory(String directory, String child) {
         if (directory.equals(child))
             return true;
@@ -160,7 +169,7 @@ public class Utils {
         return child.startsWith(directory);
     }
 
-    public static int compareFileNames(@Nonnull String f1, @Nonnull String f2) {
+    public static int compareFileNames(@NonNull String f1, @NonNull String f2) {
         Matcher matcher1 = NUMBER.matcher(f1);
         Matcher matcher2 = NUMBER.matcher(f2);
 
@@ -223,7 +232,13 @@ public class Utils {
     }
 
     public static String getFormatHash(LogFormat format) {
-        return Hashing.md5().hashUnencodedChars(LvGsonUtils.GSON.toJson(format)).toString();
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            Utils.putUnencodedChars(digest, LvGsonUtils.GSON.toJson(format));
+            return DatatypeConverter.printHexBinary(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static <T> T safeGet(Future<T> future) {
@@ -232,12 +247,57 @@ public class Utils {
         } catch (InterruptedException e) {
             throw new RuntimeInterruptedException(e);
         } catch (ExecutionException e) {
-            throw Throwables.propagate(e.getCause());
+            throw propagate(e.getCause());
         }
     }
 
     public static String normalizePath(String path) {
         path = path.replace('\\', '/');
         return SLASHES.matcher(path).replaceAll("/");
+    }
+
+    public static RuntimeException propagate(@NonNull Throwable t) {
+        if (t instanceof RuntimeException)
+            throw (RuntimeException) t;
+        if (t instanceof Error)
+            throw (Error) t;
+
+        throw new RuntimeException(t);
+    }
+
+    public static void putUnencodedChars(MessageDigest digest, String s) {
+        for (int i = 0, len = s.length(); i < len; i++) {
+            putUnencodedChars(digest, s.charAt(i));
+        }
+    }
+
+    public static void putUnencodedChars(MessageDigest digest, char c) {
+        digest.update((byte) c);
+        digest.update((byte) (c >>> 8));
+    }
+
+    public static void putInt(MessageDigest digest, int x) {
+        ByteBuffer buff = ByteBuffer.allocate(4);
+        buff.putInt(x);
+        digest.update(buff.array());
+    }
+
+    public static <K, V> Map<K, V> newMap(Object ... keysAndValues) {
+        assert (keysAndValues.length & 1) == 0;
+
+        Map res = new LinkedHashMap<>();
+
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            res.put(keysAndValues[i], keysAndValues[i + 1]);
+        }
+
+        return res;
+    }
+
+    @NonNull
+    public static String getStackTraceAsString(@NonNull Throwable throwable) {
+        StringWriter stringWriter = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
     }
 }

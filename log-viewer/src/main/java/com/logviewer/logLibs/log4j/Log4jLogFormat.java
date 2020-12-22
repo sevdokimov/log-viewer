@@ -7,9 +7,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.pattern.*;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,22 +27,22 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
 
     private final boolean realLog4j;
 
-    public Log4jLogFormat(@Nonnull String pattern) {
+    public Log4jLogFormat(@NonNull String pattern) {
         this(null, pattern, true);
     }
 
-    public Log4jLogFormat(@Nonnull Charset charset, @Nonnull String pattern) {
+    public Log4jLogFormat(@NonNull Charset charset, @NonNull String pattern) {
         this(charset, pattern, true);
     }
 
-    public Log4jLogFormat(@Nullable Charset charset, @Nonnull String pattern, boolean realLog4j) {
+    public Log4jLogFormat(@Nullable Charset charset, @NonNull String pattern, boolean realLog4j) {
         super(charset, pattern);
 
         this.realLog4j = realLog4j;
     }
 
     @Override
-    protected LvLayoutNode[] parseLayout(@Nonnull String pattern) throws IllegalArgumentException {
+    protected LvLayoutNode[] parseLayout(@NonNull String pattern) throws IllegalArgumentException {
         PatternParser parser = new PatternParser(PatternLayout.KEY);
         List<PatternFormatter> list = new ArrayList<>(parser.parse(pattern));
 

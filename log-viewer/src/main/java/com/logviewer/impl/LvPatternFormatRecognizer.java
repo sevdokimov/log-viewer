@@ -8,8 +8,8 @@ import com.logviewer.utils.Pair;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import com.typesafe.config.ConfigRenderOptions;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;

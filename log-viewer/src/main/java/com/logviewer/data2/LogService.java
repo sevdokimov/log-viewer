@@ -1,6 +1,5 @@
 package com.logviewer.data2;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.data2.net.NotConnectedLogView;
@@ -14,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.LinkOption;
@@ -25,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogService implements InitializingBean, DisposableBean {
 
@@ -51,13 +51,16 @@ public class LogService implements InitializingBean, DisposableBean {
 
     @Override
     public void afterPropertiesSet() {
+        AtomicInteger counter = new AtomicInteger();
+
         ThreadPoolExecutor executor = new ThreadPoolExecutor(8, 8,
                 20L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
-                new ThreadFactoryBuilder()
-                        .setNameFormat("log-service-%d")
-                        .setUncaughtExceptionHandler((t, e) -> LOG.error("Unhandled error", e))
-                        .build());
+                run -> {
+                    Thread res = new Thread(run, "log-service-" + counter.incrementAndGet());
+                    res.setUncaughtExceptionHandler((t, e) -> LOG.error("Unhandled error", e));
+                    return res;
+                });
         executor.allowCoreThreadTimeOut(true);
         this.executor = executor;
     }
@@ -79,7 +82,7 @@ public class LogService implements InitializingBean, DisposableBean {
     }
 
     @Nullable
-    public LogFormat getFormatByPath(@Nonnull Path path) {
+    public LogFormat getFormatByPath(@NonNull Path path) {
         try {
             path = path.toRealPath(LinkOption.NOFOLLOW_LINKS);
         } catch (NoSuchFileException ignored) {
@@ -98,8 +101,8 @@ public class LogService implements InitializingBean, DisposableBean {
         return LvDefaultFormatDetector.detectFormat(path);
     }
 
-    @Nonnull
-    public CompletableFuture<Map<String, LogView>> openLogs(@Nonnull Collection<LogPath> paths) {
+    @NonNull
+    public CompletableFuture<Map<String, LogView>> openLogs(@NonNull Collection<LogPath> paths) {
         Map<String, LogView> res = new LinkedHashMap<>();
         List<CompletableFuture<LogView>> remoteLogs = new ArrayList<>();
 
@@ -126,8 +129,8 @@ public class LogService implements InitializingBean, DisposableBean {
         });
     }
 
-    @Nonnull
-    public CompletableFuture<LogView> openRemoteLog(@Nonnull LogPath path) {
+    @NonNull
+    public CompletableFuture<LogView> openRemoteLog(@NonNull LogPath path) {
         assert path.getNode() != null;
 
         CompletableFuture<LogView> res = new CompletableFuture<>();
@@ -162,8 +165,8 @@ public class LogService implements InitializingBean, DisposableBean {
         return res;
     }
 
-    @Nonnull
-    public Log openLog(@Nonnull String pathStr) {
+    @NonNull
+    public Log openLog(@NonNull String pathStr) {
         Path path = normalizePath(Paths.get(pathStr));
 
         LogFormat format = getFormatByPath(path);
@@ -171,13 +174,13 @@ public class LogService implements InitializingBean, DisposableBean {
         return openLog0(path, format);
     }
 
-    @Nonnull
-    public Log openLog(@Nonnull String path, @Nullable LogFormat format) {
+    @NonNull
+    public Log openLog(@NonNull String path, @Nullable LogFormat format) {
         return openLog(Paths.get(path), format);
     }
 
-    @Nonnull
-    public Log openLog(@Nonnull Path path, @Nullable LogFormat format) {
+    @NonNull
+    public Log openLog(@NonNull Path path, @Nullable LogFormat format) {
         return openLog0(normalizePath(path), format);
     }
 
@@ -193,8 +196,8 @@ public class LogService implements InitializingBean, DisposableBean {
         return path;
     }
 
-    @Nonnull
-    private Log openLog0(@Nonnull Path path, @Nullable LogFormat format) {
+    @NonNull
+    private Log openLog0(@NonNull Path path, @Nullable LogFormat format) {
         LogFormat finalFormat = format == null ? DEFAULT_FORMAT : LvGsonUtils.copy(format);
 
         return logs.computeIfAbsent(Pair.of(path, Utils.getFormatHash(finalFormat)), p -> {

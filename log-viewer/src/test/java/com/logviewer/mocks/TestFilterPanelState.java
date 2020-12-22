@@ -4,8 +4,8 @@ import com.logviewer.api.LvFilterPanelStateProvider;
 import com.logviewer.domain.FilterPanelState;
 import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.TestListener;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,20 +13,20 @@ public class TestFilterPanelState implements LvFilterPanelStateProvider, TestLis
 
     private final Map<String, String> map = new HashMap<>();
 
-    @Nonnull
+    @NonNull
     @Override
     public Map<String, String> getFilterSets() {
         return map;
     }
 
-    public TestFilterPanelState addFilterSet(@Nonnull String name,
-                                             @Nonnull String filters) {
+    public TestFilterPanelState addFilterSet(@NonNull String name,
+                                             @NonNull String filters) {
         map.put(name, filters);
         return this;
     }
 
-    public TestFilterPanelState addFilterSet(@Nonnull String name,
-                                             @Nonnull FilterPanelState state) {
+    public TestFilterPanelState addFilterSet(@NonNull String name,
+                                             @NonNull FilterPanelState state) {
         addFilterSet(name, LvGsonUtils.GSON.toJson(state));
         return this;
     }

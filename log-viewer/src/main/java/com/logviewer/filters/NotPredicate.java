@@ -2,8 +2,7 @@ package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
-
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
 
 /**
  *
@@ -12,7 +11,7 @@ public class NotPredicate implements RecordPredicate {
 
     private RecordPredicate delegate;
 
-    public NotPredicate(@Nonnull RecordPredicate delegate) {
+    public NotPredicate(@NonNull RecordPredicate delegate) {
         this.delegate = delegate;
     }
 
@@ -20,7 +19,7 @@ public class NotPredicate implements RecordPredicate {
         return delegate;
     }
 
-    public void setDelegate(@Nonnull RecordPredicate delegate) {
+    public void setDelegate(@NonNull RecordPredicate delegate) {
         this.delegate = delegate;
     }
 

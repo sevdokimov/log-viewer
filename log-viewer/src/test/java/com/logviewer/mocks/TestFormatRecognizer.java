@@ -3,8 +3,8 @@ package com.logviewer.mocks;
 import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.utils.TestListener;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;

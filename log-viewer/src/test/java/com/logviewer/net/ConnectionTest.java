@@ -13,8 +13,8 @@ import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.Triple;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.concurrent.*;
@@ -228,7 +228,7 @@ public class ConnectionTest extends LogSessionTestBase {
     private static class BrokenTask implements RemoteTask<String> {
 
         @Override
-        public void start(@Nonnull RemoteTaskContext<String> ctx) {
+        public void start(@NonNull RemoteTaskContext<String> ctx) {
             throw new UnsupportedOperationException();
         }
 
@@ -247,7 +247,7 @@ public class ConnectionTest extends LogSessionTestBase {
         private Future<?> future;
 
         @Override
-        public void start(@Nonnull RemoteTaskContext<String> ctx) {
+        public void start(@NonNull RemoteTaskContext<String> ctx) {
             assert future == null;
 
             assert taskEvents == null;

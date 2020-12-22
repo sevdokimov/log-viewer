@@ -2,9 +2,9 @@ package com.logviewer.formats;
 
 import com.logviewer.data2.*;
 import com.logviewer.formats.utils.*;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,12 +89,12 @@ public class DefaultFieldSet {
         return fields;
     }
 
-    @Nonnull
+    @NonNull
     public Charset getEncoding() {
         return charset;
     }
 
-    @Nonnull
+    @NonNull
     public LogReader createReader() {
         return new LogReaderImpl();
     }
@@ -103,7 +103,7 @@ public class DefaultFieldSet {
         return dateNodeIndex >= 0;
     }
 
-    public static boolean canAppendTail(@Nonnull LvLayoutNode[] nodes) {
+    public static boolean canAppendTail(@NonNull LvLayoutNode[] nodes) {
         if (nodes.length == 0)
             return false;
 

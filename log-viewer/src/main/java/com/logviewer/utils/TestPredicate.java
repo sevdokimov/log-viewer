@@ -3,8 +3,8 @@ package com.logviewer.utils;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
 import com.logviewer.filters.RecordPredicate;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -62,7 +62,7 @@ public class TestPredicate implements RecordPredicate {
         }
     }
 
-    public static void waitForRecord(@Nonnull String record) throws InterruptedException {
+    public static void waitForRecord(@NonNull String record) throws InterruptedException {
         waitForRecord(r -> r.getMessage().equals(record));
     }
 

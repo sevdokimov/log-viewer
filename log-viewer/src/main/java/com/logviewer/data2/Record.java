@@ -1,6 +1,7 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -34,7 +35,7 @@ public class Record implements Comparable<Record>, Externalizable {
 
     }
 
-    public Record(@Nonnull String message, long time, long start, long end, boolean hasMore, @Nonnull int[] fieldPositions) {
+    public Record(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
         this.message = message;
         this.time = time;
 
@@ -148,8 +149,8 @@ public class Record implements Comparable<Record>, Externalizable {
         }
     }
 
-    @Nonnull
-    public static Record createUnparsedRecord(@Nonnull String message, long time, long start, long end, boolean hasMore, @Nonnull LogFormat logFormat) {
+    @NonNull
+    public static Record createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull LogFormat logFormat) {
         int[] fieldOffsets = new int[logFormat.getFields().length * 2];
         Arrays.fill(fieldOffsets, -1);
         return new Record(message, time, start, end, hasMore, fieldOffsets);

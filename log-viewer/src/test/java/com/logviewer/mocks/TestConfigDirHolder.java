@@ -4,8 +4,8 @@ import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.utils.Utils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,7 +48,7 @@ public class TestConfigDirHolder implements ConfigDirHolder, DisposableBean {
     }
 
     @Override
-    public String getProperty(@Nonnull String name) {
+    public String getProperty(@NonNull String name) {
         return environment.getProperty(name);
     }
 }

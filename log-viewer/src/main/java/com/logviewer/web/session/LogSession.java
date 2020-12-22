@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
@@ -75,7 +75,7 @@ public class LogSession {
         return logs;
     }
 
-    private void initFilters(@Nonnull String[] paths, @Nullable String filterStateName, @Nullable String filterState,
+    private void initFilters(@NonNull String[] paths, @Nullable String filterStateName, @Nullable String filterState,
                              boolean isInitByPermalink) {
         Set<LogPath> logPaths = parsePathParameter(paths);
 
@@ -125,7 +125,7 @@ public class LogSession {
     }
 
     @Remote
-    public synchronized void initPermalink(int recordCount, @Nonnull String linkHash) {
+    public synchronized void initPermalink(int recordCount, @NonNull String linkHash) {
         if (stateVersion != 0)
             throw new IllegalStateException(String.valueOf(stateVersion));
 
@@ -186,7 +186,7 @@ public class LogSession {
     }
 
     @Remote
-    public synchronized void init(@Nonnull String[] paths,
+    public synchronized void init(@NonNull String[] paths,
                                   @Nullable String savedFiltersName, @Nullable String filterStateHash) {
         if (stateVersion != 0)
             throw new IllegalStateException(String.valueOf(stateVersion));
@@ -339,7 +339,7 @@ public class LogSession {
 
     @Remote
     public synchronized void searchNext(Position start, boolean backward, int recordCount, SearchPattern pattern,
-                             @Nonnull Map<String, String> hashes, long stateVersion, long requestId) {
+                             @NonNull Map<String, String> hashes, long stateVersion, long requestId) {
         if (this.stateVersion > stateVersion)
             return;
 
@@ -409,7 +409,7 @@ public class LogSession {
             logChangeNotifier.close();
     }
 
-    private void handleTaskError(@Nonnull Throwable e) {
+    private void handleTaskError(@NonNull Throwable e) {
         assert Thread.holdsLock(this);
 
         if (!(e instanceof CancellationException)) {
@@ -474,7 +474,7 @@ public class LogSession {
         return res;
     }
 
-    public static LogSession fromContext(@Nonnull SessionAdapter sender, @Nonnull ApplicationContext ctx) {
+    public static LogSession fromContext(@NonNull SessionAdapter sender, @NonNull ApplicationContext ctx) {
         LogSession res = new LogSession(sender);
         ctx.getAutowireCapableBeanFactory().autowireBeanProperties(res, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
         return res;

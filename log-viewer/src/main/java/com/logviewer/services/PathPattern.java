@@ -2,9 +2,9 @@ package com.logviewer.services;
 
 import com.logviewer.utils.RegexUtils;
 import com.logviewer.utils.Utils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class PathPattern {
     private final Predicate<Path> fileFilter;
     private final Predicate<Path> dirFilter;
 
-    public PathPattern(@Nullable Path prefix, @Nonnull Predicate<Path> fileFilter, @Nonnull Predicate<Path> dirFilter) {
+    public PathPattern(@Nullable Path prefix, @NonNull Predicate<Path> fileFilter, @NonNull Predicate<Path> dirFilter) {
         this.prefix = prefix;
         this.fileFilter = fileFilter;
         this.dirFilter = dirFilter;
@@ -29,17 +29,17 @@ public class PathPattern {
         return prefix;
     }
 
-    @Nonnull
+    @NonNull
     public Predicate<Path> getFileFilter() {
         return fileFilter;
     }
 
-    @Nonnull
+    @NonNull
     public Predicate<Path> getDirFilter() {
         return dirFilter;
     }
 
-    public boolean matchFile(@Nonnull Path file) {
+    public boolean matchFile(@NonNull Path file) {
         if (prefix == null)
             return fileFilter.test(file);
 
@@ -54,7 +54,7 @@ public class PathPattern {
         return fileFilter.test(relative);
     }
 
-    public boolean matchDir(@Nonnull Path dir) {
+    public boolean matchDir(@NonNull Path dir) {
         if (prefix == null)
             return dirFilter.test(dir);
 
@@ -68,14 +68,14 @@ public class PathPattern {
         return dirFilter.test(relative);
     }
 
-    public static PathPattern directory(@Nonnull Path dir) {
+    public static PathPattern directory(@NonNull Path dir) {
         if (!dir.isAbsolute())
             throw new IllegalArgumentException("Path must be absolute: " + dir);
 
         return new PathPattern(dir, p -> true, p -> true);
     }
 
-    public static PathPattern file(@Nonnull Path file) {
+    public static PathPattern file(@NonNull Path file) {
         if (!file.isAbsolute())
             throw new IllegalArgumentException("Path must be absolute: " + file);
 
@@ -87,7 +87,7 @@ public class PathPattern {
         return new PathPattern(file.getParent(), f -> f.equals(fileName), dir -> false);
     }
 
-    public static PathPattern fromPattern(@Nonnull String pattern) {
+    public static PathPattern fromPattern(@NonNull String pattern) {
         pattern = Utils.normalizePath(pattern);
         if (pattern.endsWith("/"))
             pattern += "**";
@@ -147,7 +147,7 @@ public class PathPattern {
     }
 
     @Nullable
-    private static String extractFixedPrefix(@Nonnull String pattern) {
+    private static String extractFixedPrefix(@NonNull String pattern) {
         int firstStarIdx = pattern.indexOf('*');
         if (firstStarIdx < 0) {
             int slashIdx = pattern.lastIndexOf('/');

@@ -2,8 +2,8 @@ package com.logviewer.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +19,7 @@ public class LvTimer extends Timer {
         super("log-viewer-timer", true);
     }
 
-    public boolean scheduleTask(@Nonnull Object key, @Nonnull Runnable task, long delay) {
+    public boolean scheduleTask(@NonNull Object key, @NonNull Runnable task, long delay) {
         if (uniqueTaskMap.putIfAbsent(key, true) == null) {
             schedule(new TimerTask() {
                 @Override

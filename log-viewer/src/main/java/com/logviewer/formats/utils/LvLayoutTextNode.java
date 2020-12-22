@@ -1,6 +1,6 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
 
 public class LvLayoutTextNode implements LvLayoutNode, LvLayoutNodeSearchable, Cloneable {
 
@@ -10,7 +10,7 @@ public class LvLayoutTextNode implements LvLayoutNode, LvLayoutNodeSearchable, C
 
     private final int prefixSpaces;
 
-    public LvLayoutTextNode(@Nonnull String txt) {
+    public LvLayoutTextNode(@NonNull String txt) {
         assert txt.length() > 0;
 
         this.txt = txt;

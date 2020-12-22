@@ -7,8 +7,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -60,7 +60,7 @@ public class HoconPathResolverTest {
                 new LogPath(new Node("host-02", 9090), "/logs/yyy"));
     }
 
-    private void check(@Nonnull String hocon, LogPath ... paths) {
+    private void check(@NonNull String hocon, LogPath ... paths) {
         Config config = ConfigFactory.parseString(hocon);
 
         HoconPathResolver resolver = new HoconPathResolver(config.getObject("log-paths"));

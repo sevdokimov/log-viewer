@@ -1,9 +1,9 @@
 package com.logviewer.data2;
 
 import com.logviewer.data2.net.Node;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +20,7 @@ public class LogPath implements Serializable {
 
     private final String file;
 
-    public LogPath(@Nullable Node node, @Nonnull String file) {
+    public LogPath(@Nullable Node node, @NonNull String file) {
         this.node = node;
         this.file = file;
     }
@@ -30,7 +30,7 @@ public class LogPath implements Serializable {
         return node;
     }
 
-    @Nonnull
+    @NonNull
     public String getFile() {
         return file;
     }
@@ -53,7 +53,7 @@ public class LogPath implements Serializable {
         return result;
     }
 
-    public static List<LogPath> parsePathFromHttpParameter(@Nonnull String path) {
+    public static List<LogPath> parsePathFromHttpParameter(@NonNull String path) {
         path = path.trim();
 
         int pathStart = path.lastIndexOf('@');

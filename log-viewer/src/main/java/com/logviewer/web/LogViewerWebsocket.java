@@ -1,8 +1,8 @@
 package com.logviewer.web;
 
-import com.google.common.base.Throwables;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.utils.LvGsonUtils;
+import com.logviewer.utils.Utils;
 import com.logviewer.web.dto.events.BackendErrorEvent;
 import com.logviewer.web.rmt.MethodCall;
 import com.logviewer.web.rmt.RemoteInvoker;
@@ -11,8 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import javax.websocket.Endpoint;
 import javax.websocket.*;
 import java.lang.reflect.InvocationTargetException;
@@ -87,7 +87,7 @@ public class LogViewerWebsocket extends Endpoint {
 
         private final WebsocketSessionAdapter sessionAdapter;
 
-        LogWebSocketHandler(Session webSession, @Nonnull ApplicationContext applicationContext) {
+        LogWebSocketHandler(Session webSession, @NonNull ApplicationContext applicationContext) {
             sessionAdapter = new WebsocketSessionAdapter(webSession);
             session = LogSession.fromContext(sessionAdapter, applicationContext);
         }
@@ -110,7 +110,7 @@ public class LogViewerWebsocket extends Endpoint {
 
                 LOG.error("Remote method execution error", e);
 
-                sessionAdapter.send(new BackendErrorEvent(Throwables.getStackTraceAsString(e)));
+                sessionAdapter.send(new BackendErrorEvent(Utils.getStackTraceAsString(e)));
             }
         }
 

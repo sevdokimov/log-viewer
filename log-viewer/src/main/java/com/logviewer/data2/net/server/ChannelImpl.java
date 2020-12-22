@@ -1,8 +1,8 @@
 package com.logviewer.data2.net.server;
 
 import com.logviewer.data2.net.server.api.ChannelController;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.function.BiConsumer;
 
 public abstract class ChannelImpl implements Runnable {
@@ -15,7 +15,7 @@ public abstract class ChannelImpl implements Runnable {
         this.listener = listener;
     }
 
-    protected void sendMessage(@Nonnull Object o, boolean closeChannel) {
+    protected void sendMessage(@NonNull Object o, boolean closeChannel) {
         listener.accept(o, closeChannel);
     }
 

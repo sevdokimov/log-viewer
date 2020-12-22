@@ -1,21 +1,19 @@
 package com.logviewer.filters;
 
-import com.google.common.base.Throwables;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
 import com.logviewer.utils.Pair;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import javax.script.*;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -26,7 +24,7 @@ public class JsPredicate implements RecordPredicate {
 
     private final String script;
 
-    private static final Cache<String, Object> scriptCache = CacheBuilder.newBuilder().maximumSize(500).build();
+    private static final Cache<String, Object> scriptCache = Caffeine.newBuilder().maximumSize(500).build();
 
     private transient CompiledScript scriptInstance;
     private transient Throwable scriptError;
@@ -35,31 +33,27 @@ public class JsPredicate implements RecordPredicate {
 
     private volatile transient boolean initialized;
 
-    public JsPredicate(@Nonnull String script) {
+    public JsPredicate(@NonNull String script) {
         this.script = script;
     }
 
     public CompiledScript getScriptInstance() {
         if (!initialized) {
-            try {
-                Object o = scriptCache.get(script, () -> {
-                    NashornScriptEngine engine = (NashornScriptEngine)scriptEngineManager.getEngineByName("JavaScript");
+            Object o = scriptCache.get(script, key -> {
+                NashornScriptEngine engine = (NashornScriptEngine)scriptEngineManager.getEngineByName("JavaScript");
 
-                    try {
-                        return engine.compile(script);
-                    } catch (ScriptException e) {
-                        return e;
-                    }
-                });
+                try {
+                    return engine.compile(script);
+                } catch (ScriptException e) {
+                    return e;
+                }
+            });
 
-                if (o instanceof Throwable) {
-                    scriptError = (Throwable) o;
-                }
-                else {
-                    scriptInstance = (CompiledScript) o;
-                }
-            } catch (ExecutionException e) {
-                throw Throwables.propagate(e.getCause());
+            if (o instanceof Throwable) {
+                scriptError = (Throwable) o;
+            }
+            else {
+                scriptInstance = (CompiledScript) o;
             }
 
             initialized = true;

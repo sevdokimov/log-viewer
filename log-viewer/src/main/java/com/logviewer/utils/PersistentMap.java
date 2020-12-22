@@ -2,8 +2,8 @@ package com.logviewer.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -70,7 +70,7 @@ public class PersistentMap {
         }
     }
 
-    public synchronized String get(@Nonnull String key) {
+    public synchronized String get(@NonNull String key) {
         ensureInited();
 
         String value = map.remove(key);
@@ -81,7 +81,7 @@ public class PersistentMap {
         return value;
     }
 
-    public synchronized void put(@Nonnull String key, @Nonnull String value) {
+    public synchronized void put(@NonNull String key, @NonNull String value) {
         ensureInited();
 
         String oldValue = map.remove(key);

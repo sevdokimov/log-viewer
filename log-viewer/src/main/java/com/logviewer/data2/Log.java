@@ -1,7 +1,5 @@
 package com.logviewer.data2;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.hash.Hashing;
 import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.*;
@@ -9,8 +7,9 @@ import com.logviewer.web.session.*;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
+import javax.xml.bind.DatatypeConverter;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -21,22 +20,29 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.zip.CRC32;
 
 public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
 
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
-        return Hashing.md5().newHasher()
-                .putUnencodedChars(Utils.LOCAL_HOST_NAME)
-                .putByte((byte) '|')
-                .putUnencodedChars(path)
-                .hash().toString().substring(0, 16);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            Utils.putUnencodedChars(digest, Utils.LOCAL_HOST_NAME);
+            digest.update((byte) '|');
+            Utils.putUnencodedChars(digest, path);
+            return DatatypeConverter.printHexBinary(digest.digest()).substring(0, 16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     };
 
     public static Function<String, String> LOG_ID_GENERATOR = DEFAULT_ID_GENERATOR;
@@ -68,9 +74,9 @@ public class Log implements LogView {
 
     private LogIndex logIndex;
 
-    public Log(@Nonnull Path path, @Nonnull LogFormat format, @Nonnull ExecutorService executor,
-               @Nonnull LvTimer timer,
-               @Nonnull FileWatcherService fileWatcherService, @Nonnull LvFileAccessManager accessManager) {
+    public Log(@NonNull Path path, @NonNull LogFormat format, @NonNull ExecutorService executor,
+               @NonNull LvTimer timer,
+               @NonNull FileWatcherService fileWatcherService, @NonNull LvFileAccessManager accessManager) {
         file = path;
         this.format = LvGsonUtils.copy(format);
         this.executor = executor;
@@ -579,8 +585,11 @@ public class Log implements LogView {
                 getChannel().position(0);
                 Utils.readFully(channel, buf);
 
-                long hash = Hashing.goodFastHash(128).hashBytes(buf.array()).asLong();
-                long hashWithLength = (hash & 0xff00ffff_ffffffffL) | ((long)hashSize << (32 + 16) );
+                CRC32 crc = new CRC32();
+                crc.update(buf.array());
+
+                int hash = (int) crc.getValue();
+                long hashWithLength = (hash & 0xffff_ffffL) | ((long)hashSize << 32);
 
                 return Long.toHexString(hashWithLength);
             } catch (EOFException e) {
@@ -593,10 +602,10 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean isValidHash(@Nonnull String hash) {
+        public boolean isValidHash(@NonNull String hash) {
             long tLong = Long.parseUnsignedLong(hash, 16);
 
-            int hashSize = (int) ((tLong >>> (32 + 16)) & 0xff);
+            int hashSize = (int) ((tLong >>> 32) & 0xff);
 
             if (hashSize == hashSize(size) ) { // Compare size of block used to has calculation.
                 return hash.equals(this.hash);
@@ -634,7 +643,7 @@ public class Log implements LogView {
     @Override
     public LogProcess loadRecords(RecordPredicate filter, int recordCountLimit,
                                   Position start, boolean backward, String hash, long sizeLimit,
-                                  @Nonnull LogDataListener loadListener) {
+                                  @NonNull LogDataListener loadListener) {
         return new LocalFileRecordLoader(this::createSnapshot, executor, loadListener, start, filter, backward,
                 recordCountLimit, sizeLimit, hash);
     }
@@ -701,7 +710,9 @@ public class Log implements LogView {
         return file.toString();
     }
 
-    @VisibleForTesting
+    /**
+     * VisibleForTesting
+     */
     public static void setLogIdGenerator(Function<String, String> logIdGenerator) {
         LOG_ID_GENERATOR = logIdGenerator;
     }

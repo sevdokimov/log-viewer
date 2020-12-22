@@ -1,11 +1,12 @@
 package com.logviewer.api;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.util.Map;
 
 public interface LvFilterPanelStateProvider {
 
-    @Nonnull
+    @NonNull
     Map<String, String> getFilterSets();
 
 }

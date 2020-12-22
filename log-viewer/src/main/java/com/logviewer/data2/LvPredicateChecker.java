@@ -2,9 +2,8 @@ package com.logviewer.data2;
 
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class LvPredicateChecker implements LogFilterContext {
 
@@ -24,26 +23,26 @@ public class LvPredicateChecker implements LogFilterContext {
     }
 
     @Override
-    public int findFieldIndexByName(@Nonnull String fieldName) {
+    public int findFieldIndexByName(@NonNull String fieldName) {
         return logFormat.getFieldIndexByName(fieldName);
     }
 
     @Nullable
     @Override
-    public String getFieldValue(@Nonnull Record record, @Nonnull String fieldName) {
+    public String getFieldValue(@NonNull Record record, @NonNull String fieldName) {
         assert logId.equals(record.getLogId());
 
         int fieldIndex = findFieldIndexByName(fieldName);
         return fieldIndex < 0 ? null : record.getFieldText(fieldIndex);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public LogFormat.FieldDescriptor[] getFields() {
         return logFormat.getFields();
     }
 
-    public Pair<Record, Throwable> applyFilter(@Nonnull Record record, @Nullable RecordPredicate filter) {
+    public Pair<Record, Throwable> applyFilter(@NonNull Record record, @Nullable RecordPredicate filter) {
         try {
             if (filter != null && !filter.test(record, this))
                 return null;

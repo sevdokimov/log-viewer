@@ -10,8 +10,8 @@ import com.logviewer.web.session.LogProcess;
 import com.logviewer.web.session.SearchResult;
 import com.logviewer.web.session.Status;
 import com.logviewer.web.session.tasks.SearchPattern;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -29,7 +29,7 @@ public abstract class BrokenLog implements LogView {
     }
 
     @Override
-    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @Nonnull LogDataListener listener) {
+    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
         return new DummyLogProcess(() -> listener.onFinish(new Status(error), false));
     }
 

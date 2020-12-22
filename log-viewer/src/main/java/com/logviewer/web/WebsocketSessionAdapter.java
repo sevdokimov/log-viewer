@@ -7,8 +7,8 @@ import com.logviewer.web.dto.events.BackendEvent;
 import com.logviewer.web.session.SessionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import javax.websocket.Session;
 
 public class WebsocketSessionAdapter implements SessionAdapter {
@@ -22,11 +22,11 @@ public class WebsocketSessionAdapter implements SessionAdapter {
     }
 
     @Override
-    public void send(@Nonnull BackendEvent event) {
+    public void send(@NonNull BackendEvent event) {
         send(LvGsonUtils.GSON.toJson(event));
     }
 
-    private synchronized void send(@Nonnull String jsonObject) {
+    private synchronized void send(@NonNull String jsonObject) {
         if (Thread.currentThread().isInterrupted())
             throw new RuntimeInterruptedException();
 

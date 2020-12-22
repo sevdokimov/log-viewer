@@ -1,7 +1,8 @@
 package com.logviewer.data2.net;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 
 public class Node implements Serializable {
@@ -10,16 +11,16 @@ public class Node implements Serializable {
 
     private final Integer port;
 
-    public Node(@Nonnull String host) {
+    public Node(@NonNull String host) {
         this(host, null);
     }
 
-    public Node(@Nonnull String host, @Nullable Integer port) {
+    public Node(@NonNull String host, @Nullable Integer port) {
         this.host = host;
         this.port = port;
     }
 
-    @Nonnull
+    @NonNull
     public String getHost() {
         return host;
     }

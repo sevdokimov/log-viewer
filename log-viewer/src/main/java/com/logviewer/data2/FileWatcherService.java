@@ -7,8 +7,8 @@ import com.logviewer.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class FileWatcherService implements DisposableBean {
 
     private final Map<Path, Pair<WatchKey, List<WatcherDestroyer>>> listeners = new HashMap<>();
 
-    public Destroyer watchDirectory(@Nonnull Path path, @Nonnull Consumer<List<Path>> listener) throws IOException {
+    public Destroyer watchDirectory(@NonNull Path path, @NonNull Consumer<List<Path>> listener) throws IOException {
         Path dir = path.toAbsolutePath();
 
         if (Files.exists(dir) && !Files.isDirectory(dir)) {

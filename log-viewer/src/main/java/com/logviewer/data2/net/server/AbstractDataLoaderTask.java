@@ -3,8 +3,7 @@ package com.logviewer.data2.net.server;
 import com.logviewer.data2.net.server.api.RemoteTask;
 import com.logviewer.data2.net.server.api.RemoteTaskContext;
 import com.logviewer.web.session.LogProcess;
-
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
 
 public abstract class AbstractDataLoaderTask<T> implements RemoteTask<T> {
 
@@ -15,7 +14,7 @@ public abstract class AbstractDataLoaderTask<T> implements RemoteTask<T> {
     protected abstract LogProcess createLogProcessTask(RemoteTaskContext<T> ctx);
 
     @Override
-    public final void start(@Nonnull RemoteTaskContext<T> ctx) {
+    public final void start(@NonNull RemoteTaskContext<T> ctx) {
         assert logProcess == null;
         logProcess = createLogProcessTask(ctx);
 

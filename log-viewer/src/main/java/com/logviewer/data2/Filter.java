@@ -1,9 +1,8 @@
 package com.logviewer.data2;
 
 import com.logviewer.filters.RecordPredicate;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class Filter {
 
@@ -13,7 +12,7 @@ public class Filter {
 
     private RecordPredicate predicate;
 
-    public Filter(@Nullable String name, boolean enabled, @Nonnull RecordPredicate predicate) {
+    public Filter(@Nullable String name, boolean enabled, @NonNull RecordPredicate predicate) {
         this.name = name;
         this.enabled = enabled;
         this.predicate = predicate;
@@ -23,7 +22,7 @@ public class Filter {
         return name;
     }
 
-    @Nonnull
+    @NonNull
     public RecordPredicate getPredicate() {
         return predicate;
     }

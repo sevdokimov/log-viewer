@@ -12,9 +12,9 @@ import org.junit.Test;
 import org.openqa.selenium.WebElement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
@@ -63,7 +63,7 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
             return new LvPathResolver() {
                 @Nullable
                 @Override
-                public Collection<LogPath> resolvePath(@Nonnull String pathFromHttpParameter) {
+                public Collection<LogPath> resolvePath(@NonNull String pathFromHttpParameter) {
                     throw new RuntimeException("Problem!!!");
                 }
             };

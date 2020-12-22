@@ -3,9 +3,9 @@ package com.logviewer.formats;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import org.junit.Test;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -155,7 +155,7 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         return (Log4jLogFormat) LvDefaultFormatDetector.detectFormat(path);
     }
 
-    private void checkLine(@Nonnull String line, @Nullable String format) {
+    private void checkLine(@NonNull String line, @Nullable String format) {
         String detectedFormat = LvDefaultFormatDetector.detectFormatOfLine(line);
         assertEquals(format, detectedFormat);
 

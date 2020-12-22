@@ -1,16 +1,16 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public interface LogFilterContext {
     LogFormat getLogFormat();
 
-    int findFieldIndexByName(@Nonnull String fieldName);
+    int findFieldIndexByName(@NonNull String fieldName);
 
     @Nullable
-    String getFieldValue(@Nonnull Record record, @Nonnull String fieldName);
+    String getFieldValue(@NonNull Record record, @NonNull String fieldName);
 
-    @Nonnull
+    @NonNull
     LogFormat.FieldDescriptor[] getFields();
 }

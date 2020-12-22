@@ -1,11 +1,12 @@
 package com.logviewer.data2.net.server.api;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.io.Serializable;
 
 public interface RemoteTask<E> extends Serializable {
 
-    void start(@Nonnull RemoteTaskContext<E> ctx);
+    void start(@NonNull RemoteTaskContext<E> ctx);
 
     void cancel();
 

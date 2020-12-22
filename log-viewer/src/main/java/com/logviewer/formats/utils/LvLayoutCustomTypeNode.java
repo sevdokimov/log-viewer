@@ -1,7 +1,7 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public abstract class LvLayoutCustomTypeNode implements LvLayoutNode {
 
@@ -12,12 +12,12 @@ public abstract class LvLayoutCustomTypeNode implements LvLayoutNode {
      */
     private final String fieldType;
 
-    public LvLayoutCustomTypeNode(@Nonnull String fieldName, @Nullable String fieldType) {
+    public LvLayoutCustomTypeNode(@NonNull String fieldName, @Nullable String fieldType) {
         this.fieldName = fieldName;
         this.fieldType = fieldType;
     }
 
-    @Nonnull
+    @NonNull
     public String getFieldName() {
         return fieldName;
     }

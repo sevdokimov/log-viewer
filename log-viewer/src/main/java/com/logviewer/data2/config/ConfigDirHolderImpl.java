@@ -1,8 +1,8 @@
 package com.logviewer.data2.config;
 
 import org.springframework.core.env.Environment;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +41,7 @@ public class ConfigDirHolderImpl implements ConfigDirHolder {
     }
 
     @Override
-    public String getProperty(@Nonnull String name) {
+    public String getProperty(@NonNull String name) {
         return environment.getProperty(name);
     }
 }

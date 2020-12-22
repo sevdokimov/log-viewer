@@ -6,8 +6,8 @@ import com.logviewer.data2.net.server.api.RemoteTaskContext;
 import com.logviewer.utils.Destroyer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +27,7 @@ public class LogWatcherTask implements RemoteTask<FileAttributes> {
     }
 
     @Override
-    public void start(@Nonnull RemoteTaskContext<FileAttributes> ctx) {
+    public void start(@NonNull RemoteTaskContext<FileAttributes> ctx) {
         Path path = Paths.get(this.path);
         try {
             closeable = ctx.getLogService().getFileWatcherService().watchDirectory(path.getParent(), changedDirs -> {

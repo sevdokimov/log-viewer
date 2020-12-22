@@ -1,11 +1,11 @@
 package com.logviewer.web.dto;
 
-import com.google.common.base.Throwables;
 import com.logviewer.data2.Record;
 import com.logviewer.utils.Pair;
+import com.logviewer.utils.Utils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +26,15 @@ public class RestRecord {
 
     private final String filteringError;
 
-    public RestRecord(@Nonnull Record record) {
+    public RestRecord(@NonNull Record record) {
         this(record, null);
     }
 
-    public RestRecord(@Nonnull Pair<Record, Throwable> pair) {
-        this(pair.getFirst(), pair.getSecond() == null ? null : Throwables.getStackTraceAsString(pair.getSecond()));
+    public RestRecord(@NonNull Pair<Record, Throwable> pair) {
+        this(pair.getFirst(), pair.getSecond() == null ? null : Utils.getStackTraceAsString(pair.getSecond()));
     }
 
-    public RestRecord(@Nonnull Record record, @Nullable String filteringError) {
+    public RestRecord(@NonNull Record record, @Nullable String filteringError) {
         this.logId = record.getLogId();
 
         s = record.getMessage();

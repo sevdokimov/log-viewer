@@ -1,6 +1,7 @@
 package com.logviewer.utils;
 
-import javax.annotation.Nonnull;
+import org.springframework.lang.NonNull;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -19,7 +20,7 @@ public class LvDateUtils {
      * @return {@code true} if the date format can be used to sort log entries. For example "HH:mm:ss" format cannot
      * be used for sorting because it doesn't contain date.
      */
-    public static boolean isDateFormatFull(@Nonnull DateFormat dateFormat) {
+    public static boolean isDateFormatFull(@NonNull DateFormat dateFormat) {
         Calendar c = Calendar.getInstance(dateFormat.getTimeZone());
         c.set(2020, Calendar.FEBRUARY, 25, 1, 1, 4);
         c.setTimeInMillis(333);
@@ -45,7 +46,7 @@ public class LvDateUtils {
         return true;
     }
 
-    private static boolean isFieldPresent(@Nonnull DateFormat dateFormat, Calendar c, int field, int incrementCount) {
+    private static boolean isFieldPresent(@NonNull DateFormat dateFormat, Calendar c, int field, int incrementCount) {
         try {
             Date initDate = dateFormat.parse(dateFormat.format(c.getTime()));
 

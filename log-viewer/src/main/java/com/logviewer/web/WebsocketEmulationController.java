@@ -1,8 +1,8 @@
 package com.logviewer.web;
 
-import com.google.common.base.Throwables;
 import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.LvTimer;
+import com.logviewer.utils.Utils;
 import com.logviewer.web.dto.events.BackendErrorEvent;
 import com.logviewer.web.dto.events.BackendEvent;
 import com.logviewer.web.rmt.MethodCall;
@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -135,7 +135,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
         private final String userName;
 
-        public ConnectionSession(@Nonnull String sessionId, @Nonnull String userName) {
+        public ConnectionSession(@NonNull String sessionId, @NonNull String userName) {
             this.sessionId = sessionId;
             this.userName = userName;
 
@@ -235,7 +235,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
                     LOG.error("Remote method execution error", e);
 
-                    sendEvent(new BackendErrorEvent(Throwables.getStackTraceAsString(e)));
+                    sendEvent(new BackendErrorEvent(Utils.getStackTraceAsString(e)));
                     break;
                 }
 
@@ -246,7 +246,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
         }
 
-        private void close(@Nonnull String reason) {
+        private void close(@NonNull String reason) {
             assert !Thread.holdsLock(toBackendQueue);
             assert !Thread.holdsLock(toUiQueue);
 

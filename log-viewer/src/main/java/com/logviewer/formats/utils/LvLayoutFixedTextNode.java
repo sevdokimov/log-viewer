@@ -1,13 +1,13 @@
 package com.logviewer.formats.utils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 public class LvLayoutFixedTextNode extends LvLayoutCustomTypeNode implements LvLayoutNode {
 
     private final String[] values;
 
-    public LvLayoutFixedTextNode(@Nonnull String fieldName, @Nullable String fieldType, String ... values) {
+    public LvLayoutFixedTextNode(@NonNull String fieldName, @Nullable String fieldType, String ... values) {
         super(fieldName, fieldType);
         this.values = values;
     }

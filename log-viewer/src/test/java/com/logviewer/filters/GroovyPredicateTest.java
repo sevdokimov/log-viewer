@@ -6,8 +6,8 @@ import com.logviewer.data2.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class GroovyPredicateTest extends AbstractLogTest {
         checkError("'ls'.setMetaClass(null)");
     }
 
-    private void check(@Nonnull String script, boolean matches) {
+    private void check(@NonNull String script, boolean matches) {
         GroovyPredicate groovyPredicate = new GroovyPredicate(script);
 
         boolean res = groovyPredicate.test(record, ctx);
@@ -70,7 +70,7 @@ public class GroovyPredicateTest extends AbstractLogTest {
         Assert.assertEquals(script, matches, res);
     }
 
-    private void checkError(@Nonnull String script) {
+    private void checkError(@NonNull String script) {
         GroovyPredicate groovyPredicate = new GroovyPredicate(script);
 
         TestUtils.assertError(SecurityException.class, () -> groovyPredicate.test(record, ctx));

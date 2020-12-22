@@ -5,9 +5,9 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.Record;
 import com.logviewer.utils.Utils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -32,13 +32,13 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     private transient volatile Pattern pattern;
 
-    public RegexLogFormat(@Nonnull Charset charset, @Nonnull String regex,
+    public RegexLogFormat(@NonNull Charset charset, @NonNull String regex,
                           boolean dontAppendUnmatchedTextToLastField,
                           RegexField... fields) {
         this(charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
     }
 
-    public RegexLogFormat(@Nullable Charset charset, @Nonnull String regex,
+    public RegexLogFormat(@Nullable Charset charset, @NonNull String regex,
                           boolean dontAppendUnmatchedTextToLastField,
                           @Nullable String datePattern, @Nullable String dateField,
                           RegexField... fields) {
@@ -292,25 +292,25 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
         private final Integer groupIndex;
 
-        public RegexField(@Nonnull String name) {
+        public RegexField(@NonNull String name) {
             this(name, null, null);
         }
 
-        public RegexField(@Nonnull String name, Integer groupIndex) {
+        public RegexField(@NonNull String name, Integer groupIndex) {
             this(name, groupIndex, null);
         }
 
-        public RegexField(@Nonnull String name, Integer groupIndex, @Nullable String type) {
+        public RegexField(@NonNull String name, Integer groupIndex, @Nullable String type) {
             super(name, type);
             this.groupIndex = groupIndex;
         }
     }
 
-    public static RegexField field(@Nonnull String name, @Nullable String type) {
+    public static RegexField field(@NonNull String name, @Nullable String type) {
         return field(name, type, null);
     }
 
-    public static RegexField field(@Nonnull String name, @Nullable String type, @Nullable Integer groupIndex) {
+    public static RegexField field(@NonNull String name, @Nullable String type, @Nullable Integer groupIndex) {
         return new RegexField(name, groupIndex, type);
     }
 }

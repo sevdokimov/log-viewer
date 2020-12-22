@@ -1,7 +1,8 @@
 package com.logviewer.data2;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 
@@ -14,7 +15,7 @@ public interface LogFormat {
 
     FieldDescriptor[] getFields();
 
-    default int getFieldIndexByName(@Nonnull String fieldName) {
+    default int getFieldIndexByName(@NonNull String fieldName) {
         FieldDescriptor[] fields = getFields();
         for (int i = 0; i < fields.length; i++) {
             if (fields[i].name().equals(fieldName))
@@ -36,7 +37,7 @@ public interface LogFormat {
     interface FieldDescriptor {
         FieldDescriptor[] EMPTY_ARRAY = new FieldDescriptor[0];
 
-        @Nonnull
+        @NonNull
         String name();
         @Nullable
         String type();

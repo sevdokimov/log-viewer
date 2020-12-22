@@ -1,14 +1,13 @@
 package com.logviewer.web;
 
-import com.google.common.base.Throwables;
-import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
+import org.springframework.util.StreamUtils;
 
-import javax.annotation.Nonnull;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +64,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
         process(req, resp, methodType);
     }
 
-    @Nonnull
+    @NonNull
     protected HttpServletRequest getRequest() {
         return request.get();
     }
@@ -122,7 +121,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
                         Class<?> paramType = method.getParameterTypes()[0];
                         if (paramType == String.class) {
-                            arg = new String(ByteStreams.toByteArray(req.getInputStream()), StandardCharsets.UTF_8);
+                            arg = StreamUtils.copyToString(req.getInputStream(), StandardCharsets.UTF_8);
                         }
                         else {
                             arg = LvGsonUtils.GSON.fromJson(new InputStreamReader(req.getInputStream(), StandardCharsets.UTF_8), paramType);
@@ -165,7 +164,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
                     throw targetException;
                 } catch (IllegalAccessException e) {
-                    throw Throwables.propagate(e);
+                    throw Utils.propagate(e);
                 }
 
                 if (res instanceof AsyncContext)

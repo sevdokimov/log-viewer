@@ -1,8 +1,8 @@
 package com.logviewer.web.dto;
 
-import com.google.common.base.Throwables;
 import com.logviewer.data2.DirectoryNotVisibleException;
 import com.logviewer.data2.LogCrashedException;
+import com.logviewer.utils.Utils;
 import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.Status;
 import org.slf4j.Logger;
@@ -67,7 +67,7 @@ public class RestStatus {
             if (errorMessage == null)
                 errorMessage = error.getMessage();
 
-            this.error = Throwables.getStackTraceAsString(error);
+            this.error = Utils.getStackTraceAsString(error);
         }
     }
 

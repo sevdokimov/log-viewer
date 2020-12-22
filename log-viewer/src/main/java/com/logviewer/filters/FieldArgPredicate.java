@@ -2,8 +2,8 @@ package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
+import org.springframework.lang.NonNull;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -17,22 +17,22 @@ public class FieldArgPredicate implements RecordPredicate {
 
     private Operator operator = Operator.EQUALS;
 
-    public FieldArgPredicate(@Nonnull String fieldName, String value) {
+    public FieldArgPredicate(@NonNull String fieldName, String value) {
         this(fieldName, value, Operator.EQUALS);
     }
 
-    public FieldArgPredicate(@Nonnull String fieldName, String value, @Nonnull Operator operator) {
+    public FieldArgPredicate(@NonNull String fieldName, String value, @NonNull Operator operator) {
         this.fieldName = fieldName;
         this.value = value;
         this.operator = operator;
     }
 
-    @Nonnull
+    @NonNull
     public String getFieldName() {
         return fieldName;
     }
 
-    public void setFieldName(@Nonnull String fieldName) {
+    public void setFieldName(@NonNull String fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -44,12 +44,12 @@ public class FieldArgPredicate implements RecordPredicate {
         this.value = value;
     }
 
-    @Nonnull
+    @NonNull
     public Operator getOperator() {
         return operator;
     }
 
-    public void setOperator(@Nonnull Operator operator) {
+    public void setOperator(@NonNull Operator operator) {
         this.operator = operator;
     }
 

@@ -1,14 +1,12 @@
 package com.logviewer.web;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Resources;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.utils.Utils;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
+import org.springframework.util.StreamUtils;
 
-import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +32,7 @@ public class LogViewerServlet extends HttpServlet {
             Pattern.compile("(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{20})?\\.(?:css|js|js\\.map|css\\.map)"),
     };
 
-    private static final Map<String, String> MIME_TYPES_MAP = ImmutableMap.of("css", "text/css", "js", "application/javascript");
+    private static final Map<String, String> MIME_TYPES_MAP = Utils.newMap("css", "text/css", "js", "application/javascript");
 
     private volatile byte[] indexHtml;
 
@@ -46,7 +44,7 @@ public class LogViewerServlet extends HttpServlet {
     public void init() {
         ApplicationContext logContext = getSpringContext();
 
-        restHandlers = ImmutableMap.of(
+        restHandlers = Utils.newMap(
                 "navigator", injectDeps(logContext, new LogNavigatorController()),
                 "ws-emulator", injectDeps(logContext, new WebsocketEmulationController()),
                 "log-view", injectDeps(logContext, new LogViewController())
@@ -175,7 +173,7 @@ public class LogViewerServlet extends HttpServlet {
 
                         if (res.length < 5 * 1024) {
                             try (InputStream inputStream = urlConnection.getInputStream()) {
-                                res.data = ByteStreams.toByteArray(inputStream);
+                                res.data = StreamUtils.copyToByteArray(inputStream);
                             }
                         }
                     }
@@ -242,7 +240,7 @@ public class LogViewerServlet extends HttpServlet {
                         GZIPOutputStream gzip = new GZIPOutputStream(resp.getOutputStream());
 
                         try (InputStream inputStream = urlConnection.getInputStream()) {
-                            ByteStreams.copy(inputStream, gzip);
+                            StreamUtils.copy(inputStream, gzip);
                         }
 
                         gzip.finish();
@@ -253,7 +251,7 @@ public class LogViewerServlet extends HttpServlet {
             }
 
             try (InputStream inputStream = urlConnection.getInputStream()) {
-                ByteStreams.copy(inputStream, resp.getOutputStream());
+                StreamUtils.copy(inputStream, resp.getOutputStream());
             }
         }
     }
@@ -277,7 +275,7 @@ public class LogViewerServlet extends HttpServlet {
                 return;
             }
 
-            String htmlText = Resources.toString(indexHtmlUrl, StandardCharsets.UTF_8);
+            String htmlText = Utils.toString(indexHtmlUrl, StandardCharsets.UTF_8);
 
             htmlText = htmlText.replace("$PATH", req.getContextPath() + req.getServletPath() + '/');
             htmlText = htmlText.replace("$WEB_SOCKET_PATH", getWebSocketPath());
@@ -293,7 +291,7 @@ public class LogViewerServlet extends HttpServlet {
         resp.getOutputStream().write(htmlTextBytes);
     }
 
-    @Nonnull
+    @NonNull
     private String getWebSocketPath() {
         String webSocketPath = getServletConfig().getInitParameter("web-socket-path");
 

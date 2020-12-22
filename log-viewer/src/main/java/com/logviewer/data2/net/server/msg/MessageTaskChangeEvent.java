@@ -2,8 +2,8 @@ package com.logviewer.data2.net.server.msg;
 
 import com.logviewer.data2.net.server.Message;
 import com.logviewer.data2.net.server.api.RemoteTask;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class MessageTaskChangeEvent implements Message {
