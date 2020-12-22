@@ -62,7 +62,6 @@
     white-space: nowrap;
     padding-right: 2px;
     flex-shrink: 0;
-    cursor: pointer;
   }
 
   .record.labeled .rec-text {
@@ -138,7 +137,7 @@
   border: 1px solid #eee;
 }
 
-#searchBar {
+.search-bar {
   background: $top-panel-background;
   padding: 2px 3px 4px 4px;
   border-bottom: 1px solid black;
@@ -230,17 +229,6 @@
   color: #999;
 }
 
-#rightPanel {
-  position: absolute;
-
-  top: 26px;
-  bottom: 0;
-
-  right: 0;
-
-  width: 26px;
-}
-
 #heightLimiter {
   max-height: 1px;
   height: 1px;
@@ -251,44 +239,25 @@
 
 }
 
-#scrollPane {
-  position: absolute;
-  top: 2px;
-  bottom: 28px; /* 26 + 2 */
-  right: 3px;
-
-  width: 14px;
-
-  border-top: 2px solid black;
-  border-bottom: 2px solid black;
-  border-right: 2px solid black;
-
-  overflow: visible;
-
-  cursor: pointer;
-}
-
-#downIcon {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-}
-
 #menu-icon {
   cursor: pointer;
 }
 
-#scrollPoint {
-  position: relative;
+.right-top-panel {
+  float: right;
+  display: flex;
 
-  /*cursor: pointer;*/
+  padding: 0 3px;
 
-  left: -2px;
+  #filters-dd {
+    padding-right: 10px;
+  }
 
-  top: -11px;
-  /*height: 5px;*/
-  /*width: 100%;*/
+  .file-list-block {
+    padding-right: 10px;
+  }
 }
+
 
 #loading-progress-bottom,
 #loading-progress-top {

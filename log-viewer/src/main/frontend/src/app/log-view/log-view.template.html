@@ -1,4 +1,41 @@
-<div id="searchBar">
+<div class="search-bar">
+
+    <div class="right-top-panel">
+        <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown file-list-block">
+            <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
+                <span id="successFileCount" title="Successfully opened files"
+                      [class.has-problems-files]="vs.filesValidCount < logs.length">{{vs.filesValidCount}}</span>
+                /
+                <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
+                logs
+                <i class="fas fa-caret-down"></i>
+            </span>
+            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
+                <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses"></sl-log-list-panel>
+            </div>
+        </div>
+
+        <div #filtersDd id="filters-dd" dropdown [autoClose]="false"
+             class="dropdown top-panel-dropdown">
+            <span data-toggle="dropdown" dropdownToggle>Filters <i class="fas fa-caret-down"></i></span>
+            <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
+                <sl-filter-panel (apply)="namedFilterDropDown.hide()"></sl-filter-panel>
+            </div>
+        </div>
+
+        <div class="dropdown" dropdown>
+            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu">
+            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
+                <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
+                <a href="#" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to current position</a>
+                <a href="javascript:void(0)" *ngIf="fwService.editable && logs.length === 1" class="dropdown-item"
+                   (click)="addToFavorites()">
+                    <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
+                    {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
+                </a>
+            </div>
+        </div>
+    </div>
 
     <div class="search-field">
         <div class="input-group">
@@ -32,7 +69,7 @@
             </div>
         </div>
     </div>
-    <i class="fas fa-ad"></i>
+
     <span class="prev-next-panel">
         <img *ngIf="!searchHideUnmatched"
              id="findPrevArrow" src="img/previousOccurrence.png" title="Previous Occurrence (Shift+F3)"
@@ -56,44 +93,6 @@
            [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()"> <label for="hide-unmatched" class="non-bold-label">Hide unmatched</label>
 
     <lv-top-filter></lv-top-filter>
-
-    <div style="padding: 0 3px 0 15px; float: right; display: inline-block;">
-        <div class="dropdown" dropdown>
-            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu">
-            <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
-                <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
-                <a href="#" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to current position</a>
-                <a href="javascript:void(0)" *ngIf="fwService.editable && logs.length === 1" class="dropdown-item"
-                   (click)="addToFavorites()">
-                    <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
-                    {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div #filtersDd id="filters-dd" dropdown [autoClose]="false"
-         style="float: right;"
-         class="dropdown top-panel-dropdown">
-        <span data-toggle="dropdown" dropdownToggle>Filters <i class="fas fa-caret-down"></i></span>
-        <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
-            <sl-filter-panel (apply)="namedFilterDropDown.hide()"></sl-filter-panel>
-        </div>
-    </div>
-
-    <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown" style="padding-right: 15px; float: right;">
-            <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
-                <span id="successFileCount" title="Successfully opened files"
-                      [class.has-problems-files]="vs.filesValidCount < logs.length">{{vs.filesValidCount}}</span>
-                /
-                <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
-                logs
-                <i class="fas fa-caret-down"></i>
-            </span>
-        <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-            <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses"></sl-log-list-panel>
-        </div>
-    </div>
 </div>
 
 <div #logPane id="logPane" (wheel)="wheelRoll($event)" [class.state-opened]="state === 0">
