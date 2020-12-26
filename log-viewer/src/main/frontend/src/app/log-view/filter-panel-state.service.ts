@@ -7,6 +7,7 @@ import {LevelFilterDescription} from '@app/log-view/top-filters/level-list/Level
 import * as equal from 'fast-deep-equal';
 import {ExceptionOnlyFilterFactory} from '@app/log-view/top-filters/exception-only/exception-only-filter-factory';
 import {DateIntervalFilterFactory} from '@app/log-view/top-filters/date-interval/date-interval-filter-factory';
+import {Record} from '@app/log-view/record';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -28,6 +29,8 @@ export class FilterPanelStateService {
     filterChanges = new EventEmitter<FilterState>();
 
     private updating: boolean;
+
+    currentRecords: Record[];
 
     constructor(private http: HttpClient) {
     }

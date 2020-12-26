@@ -81,7 +81,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     state: State = State.STATE_INIT;
     stateVersion: number = 0;
 
-    m: Record[] = [];
+    readonly m: Record[] = [];
 
     hasRecordBefore: boolean = true;
     hasRecordAfter: boolean = true;
@@ -133,6 +133,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         private contextMenuService: ContextMenuService,
         private filterPanelStateService: FilterPanelStateService,
     ) {
+        this.filterPanelStateService.currentRecords = this.m;
     }
 
     private fail(error: string) {

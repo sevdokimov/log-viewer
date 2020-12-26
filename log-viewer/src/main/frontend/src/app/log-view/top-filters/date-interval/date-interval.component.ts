@@ -41,6 +41,10 @@ export class LvDateIntervalComponent extends FilterEditorComponent {
     dropdownShown: boolean;
     dropdownRight: boolean;
 
+    defaultDate: Moment;
+
+    readonly defaultTime = [0, 0 , 0];
+
     constructor(filterPanelStateService: FilterPanelStateService) {
         super(filterPanelStateService);
     }
@@ -102,6 +106,21 @@ export class LvDateIntervalComponent extends FilterEditorComponent {
 
             let rect = this.dateDropDownElement.nativeElement.getBoundingClientRect();
             this.dropdownRight = rect.x + rect.width > 440;
+        }
+
+        this.calculateDefaultDate();
+    }
+
+    private calculateDefaultDate() {
+        this.defaultDate = null;
+
+        if (this.filterPanelStateService.currentRecords) {
+            for (let record of this.filterPanelStateService.currentRecords) {
+                if (record.time) {
+                    this.defaultDate = moment(record.time);
+                    break;
+                }
+            }
         }
     }
 

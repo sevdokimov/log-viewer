@@ -27,7 +27,8 @@
                                        matInput [ngxMatDatetimePicker]="pickerStartDate" autocomplete="off">
 
                                 <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
-                                <ngx-mat-datetime-picker  #pickerStartDate [showSeconds]="true">
+                                <ngx-mat-datetime-picker  #pickerStartDate [showSeconds]="true"
+                                                          [defaultTime]="defaultTime" [startAt]="defaultDate">
                                 </ngx-mat-datetime-picker>
 
                                 <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearStartDate()">close</mat-icon>
@@ -39,7 +40,8 @@
                                        matInput [ngxMatDatetimePicker]="pickerEndDate" autocomplete="off">
 
                                 <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
-                                <ngx-mat-datetime-picker #pickerEndDate [showSeconds]="true">
+                                <ngx-mat-datetime-picker #pickerEndDate [showSeconds]="true"
+                                                         [defaultTime]="defaultTime" [startAt]="defaultDate">
                                 </ngx-mat-datetime-picker>
 
                                 <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearEndDate()">close</mat-icon>
