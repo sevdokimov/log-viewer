@@ -38,3 +38,14 @@
   cursor: pointer;
   vertical-align: text-bottom;
 }
+
+.time-range-error {
+  padding-bottom: 5px;
+  color: #a00;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}

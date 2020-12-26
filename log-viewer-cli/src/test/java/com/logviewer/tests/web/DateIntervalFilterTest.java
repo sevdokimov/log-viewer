@@ -217,4 +217,30 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
         assert getRecord().size() == 3;
         assertThat(dateFilterHeader(), is("2012-01-01 00:41 - 2012-01-01 00:43"));
     }
+
+    @Test
+    public void startMoreThanEnd() {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
+
+        openLog("search.log");
+
+        driver.findElementByTagName("lv-date-interval").click();
+        timeSelectPanel().findElement(By.name("startDate")).sendKeys("2012-05-05 00:39");
+        timeSelectPanel().findElement(By.name("endDate")).sendKeys("2012-01-01 00:39");
+
+        driver.findElementByClassName("time-range-error");
+
+        timeSelectPanel().findElement(By.name("startDate")).sendKeys(Keys.ENTER);
+
+        driver.findElementByClassName("time-range-error");
+
+        timeSelectPanel().findElement(By.name("apply-button")).click();
+
+        driver.findElementByClassName("time-range-error");
+
+        timeSelectPanel().findElement(By.className("clear-icon")).click();
+
+        notExist(By.className("time-range-error"));
+    }
+
 }

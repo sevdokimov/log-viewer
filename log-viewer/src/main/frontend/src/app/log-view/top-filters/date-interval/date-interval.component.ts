@@ -77,6 +77,10 @@ export class LvDateIntervalComponent extends FilterEditorComponent {
     }
 
     onApply() {
+        if (this.startDate && this.endDate && (this.startDate > this.endDate)) {
+            return false;
+        }
+
         this.filterPanelStateService.updateFilterState(state => {
             state.startDate = this.startDate ? this.startDate.toDate().getTime() : null;
             state.endDate = this.endDate ? this.endDate.toDate().getTime() : null;

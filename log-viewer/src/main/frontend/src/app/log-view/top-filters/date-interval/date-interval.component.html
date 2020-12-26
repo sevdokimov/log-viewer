@@ -48,8 +48,13 @@
                     </tr>
                 </table>
 
+                <div *ngIf="startDate && endDate && (endDate < startDate)" class="time-range-error">
+                    <mat-icon>error_outline</mat-icon> Error: end-date < start-date
+                </div>
+
                 <div class="action-panel">
-                    <button mat-button mat-stroked-button title="Apply filter" (click)="onApply()" name="apply-button">
+                    <button mat-button mat-stroked-button title="Apply filter" (click)="onApply()"
+                            name="apply-button" [disabled]="startDate && endDate && (endDate < startDate)">
                         <span class="mat-button-wrapper"><mat-icon>done</mat-icon></span>
                     </button>
 
