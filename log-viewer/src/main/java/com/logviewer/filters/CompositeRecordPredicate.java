@@ -2,11 +2,9 @@ package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.Record;
+import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -35,6 +33,10 @@ public class CompositeRecordPredicate implements RecordPredicate {
         predicates.add(recordPredicate);
     }
 
+    public boolean isAnd() {
+        return isAnd;
+    }
+
     public List<RecordPredicate> getPredicates() {
         return Collections.unmodifiableList(predicates);
     }
@@ -57,5 +59,23 @@ public class CompositeRecordPredicate implements RecordPredicate {
 
             return false;
         }
+    }
+
+    @Nullable
+    public static RecordPredicate and(@Nullable RecordPredicate ... filters) {
+        if (filters == null || filters.length == 0)
+            return null;
+
+        return and(Arrays.asList(filters));
+    }
+
+    public static RecordPredicate and(@Nullable Collection<RecordPredicate> filters) {
+        if (filters == null || filters.isEmpty())
+            return null;
+
+        if (filters.size() == 1)
+            return filters.iterator().next();
+        
+        return new CompositeRecordPredicate(true, filters);
     }
 }

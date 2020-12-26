@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Record implements Comparable<Record>, Externalizable {
 
@@ -154,5 +155,18 @@ public class Record implements Comparable<Record>, Externalizable {
         int[] fieldOffsets = new int[logFormat.getFields().length * 2];
         Arrays.fill(fieldOffsets, -1);
         return new Record(message, time, start, end, hasMore, fieldOffsets);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Record record = (Record) o;
+        return time == record.time && start == record.start && end == record.end && hasMore == record.hasMore && logId.equals(record.logId) && message.equals(record.message) && Arrays.equals(fieldPositions, record.fieldPositions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message);
     }
 }

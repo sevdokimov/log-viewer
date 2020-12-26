@@ -34,9 +34,9 @@ public abstract class BrokenLog implements LogView {
     }
 
     @Override
-    public LogProcess createRecordSearcher(Position start, boolean backward, RecordPredicate recordPredicate,
-                                               String hash, int recordCount, SearchPattern searchPattern,
-                                               Consumer<SearchResult> listener) {
+    public LogProcess createRecordSearcher(@NonNull Position start, boolean backward, RecordPredicate recordPredicate,
+                                           @NonNull String hash, int recordCount, @NonNull SearchPattern searchPattern,
+                                           @NonNull Consumer<SearchResult> listener) {
         return new DummyLogProcess(() -> listener.accept(new SearchResult(error)));
     }
 

@@ -39,6 +39,9 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -306,8 +309,9 @@ public abstract class AbstractWebTestCase {
         driver.executeScript("arguments[0].click()", driver.findElementByXPath("//sl-filter-panel/form/button[@type='submit']"));
     }
 
-    protected WebElement recordByText(String text) {
-        return driver.findElement(By.xpath("//div[@id='records']/div[@class='record']/div[@class='rec-text'][text()='" + text + "']/.."));
+    protected WebElement recordByText(@NonNull String text) {
+        text = text.replaceAll("\\s+", " ");
+        return driver.findElement(By.xpath("//div[@id='records']/div[@class='record'][normalize-space(.)='" + text + "']"));
     }
 
     protected WebElement lastRecord() {
@@ -351,6 +355,10 @@ public abstract class AbstractWebTestCase {
         return record.getLocation().y - logPanePosition;
     }
 
+    protected List<WebElement> getRecord() {
+        return driver.findElementsByCssSelector("#records > .record");
+    }
+
     protected String getVisibleRecords() {
         WebElement logPane = driver.findElementById("logPane");
         int logPaneInternalHeight = logPane.getSize().height
@@ -385,4 +393,21 @@ public abstract class AbstractWebTestCase {
         });
     }
 
+    private static DateFormat[] FORMATS = new DateFormat[]{
+            new SimpleDateFormat("yyyyMMdd HH:mm:ss.SSS"),
+            new SimpleDateFormat("yyyyMMdd HH:mm:ss"),
+            new SimpleDateFormat("yyyyMMdd HH:mm"),
+    };
+
+    public static long date(@NonNull String date) {
+        for (DateFormat format : FORMATS) {
+            try {
+                return format.parse(date).getTime();
+            } catch (ParseException ignored) {
+
+            }
+        }
+
+        throw new IllegalArgumentException("Invalid date format: " + date);
+    }
 }

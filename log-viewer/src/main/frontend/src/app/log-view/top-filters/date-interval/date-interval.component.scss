@@ -1,0 +1,40 @@
+@import "src/css/variables";
+
+:host {
+  display: inline-block;
+  position: relative;
+}
+
+.time-select-panel {
+  padding: 5px;
+}
+
+.time-select-table > tr > td:first-child {
+  padding-right: 10px;
+}
+
+.action-panel {
+  display: flex;
+}
+
+.action-panel > * {
+  margin-right: 15px;
+}
+
+.predefined-intervals-panel {
+  padding-bottom: 5px;
+
+  button {
+    line-height: 25px;
+
+    margin-right: 10px;
+  }
+}
+
+.clear-icon {
+  font-size: 16px;
+  height: 16px;
+  color: #800;
+  cursor: pointer;
+  vertical-align: text-bottom;
+}

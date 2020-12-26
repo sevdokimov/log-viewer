@@ -3,12 +3,14 @@ package com.logviewer.web.session;
 import com.logviewer.data2.*;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
+import com.logviewer.utils.PredicateUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -22,6 +24,7 @@ public class LocalFileRecordLoader implements LogProcess {
     private final Position start;
 
     private final RecordPredicate filter;
+    private final Long timeLimitFomFilter;
     private final int recordCountLimit;
     private final boolean backward;
 
@@ -48,6 +51,8 @@ public class LocalFileRecordLoader implements LogProcess {
         this.backward = backward;
         this.sizeLimit = sizeLimit;
         this.hash = hash;
+
+        timeLimitFomFilter = PredicateUtils.extractTimeLimit(filter, !backward);
     }
 
     @Override
@@ -66,14 +71,23 @@ public class LocalFileRecordLoader implements LogProcess {
                     if (hash != null && !snapshot.isValidHash(hash))
                         throw new LogCrashedException();
 
-                    Predicate<Record> predicate = new MyRecordPredicate(snapshot);
+                    MyRecordPredicate predicate = new MyRecordPredicate(snapshot);
+
+                    boolean hasMoreLine;
 
                     if (start == null) {
-                        processedAllLined = snapshot.processRecordsBack(snapshot.getSize(), false, new MyRecordPredicate(snapshot));
+                        assert backward;
+                        Long startTime = PredicateUtils.extractTimeLimit(filter, true);
+                        if (startTime != null) {
+                            hasMoreLine = snapshot.processFromTimeBack(startTime, predicate);
+                        } else {
+                            hasMoreLine = snapshot.processRecordsBack(snapshot.getSize(), false, predicate);
+                        }
                     } else {
-                        processedAllLined = searchFromPosition(snapshot, predicate);
+                        hasMoreLine = searchFromPosition(snapshot, predicate);
                     }
 
+                    processedAllLined = hasMoreLine || predicate.stoppedByFilterTimeLimit;
                     status = new Status(snapshot);
                 } catch (Throwable e) {
                     processedAllLined = false;
@@ -121,12 +135,50 @@ public class LocalFileRecordLoader implements LogProcess {
     }
 
     private boolean searchFromPosition(Snapshot snapshot, Predicate<Record> predicate) throws IOException, LogCrashedException {
+        Long startTimeFromFilters = PredicateUtils.extractTimeLimit(filter, backward);
+
         int idCmp = start.getLogId().compareTo(snapshot.getLog().getId());
         if (idCmp == 0) {
-            if (backward)
-                return snapshot.processRecordsBack(start.getLocalPosition(), true, predicate);
-            else
-                return snapshot.processRecords(start.getLocalPosition(), true, predicate);
+            AtomicBoolean wrongDateFlag = new AtomicBoolean();
+            AtomicBoolean firstRecordProcessedFlag = new AtomicBoolean();
+
+            boolean res;
+
+            if (backward) {
+                res = snapshot.processRecordsBack(start.getLocalPosition(), true, rec -> {
+                    if (startTimeFromFilters != null && rec.hasTime() && !firstRecordProcessedFlag.get()) {
+                        if (rec.getTime() > startTimeFromFilters) {
+                            wrongDateFlag.set(true);
+                            return false;
+                        }
+                    }
+                    firstRecordProcessedFlag.set(true);
+
+                    return predicate.test(rec);
+                });
+
+                if (wrongDateFlag.get())
+                    return snapshot.processFromTimeBack(startTimeFromFilters, predicate);
+            }
+            else {
+                res = snapshot.processRecords(start.getLocalPosition(), true, rec -> {
+                    if (startTimeFromFilters != null && rec.hasTime() && !firstRecordProcessedFlag.get()) {
+                        if (rec.getTime() < startTimeFromFilters) {
+                            wrongDateFlag.set(true);
+                            return false;
+                        }
+                    }
+
+                    firstRecordProcessedFlag.set(true);
+
+                    return predicate.test(rec);
+                });
+
+                if (wrongDateFlag.get())
+                    return snapshot.processFromTime(startTimeFromFilters, predicate);
+            }
+
+            return res;
         }
 
         if (backward) {
@@ -136,6 +188,9 @@ public class LocalFileRecordLoader implements LogProcess {
             else
                 startTime = start.getTime();
 
+            if (startTimeFromFilters != null && startTime > startTimeFromFilters)
+                startTime = startTimeFromFilters;
+
             return snapshot.processFromTimeBack(startTime, predicate);
         }
         else {
@@ -144,6 +199,9 @@ public class LocalFileRecordLoader implements LogProcess {
                 startTime = start.getTime();
             else
                 startTime = start.getTime() + 1;
+
+            if (startTimeFromFilters != null && startTime < startTimeFromFilters)
+                startTime = startTimeFromFilters;
 
             return snapshot.processFromTime(startTime, predicate);
         }
@@ -155,12 +213,21 @@ public class LocalFileRecordLoader implements LogProcess {
         private long readSize;
         private int recordCount;
 
+        private boolean stoppedByFilterTimeLimit;
+
         public MyRecordPredicate(Snapshot snapshot) {
             this.predicateChecker = new LvPredicateChecker(snapshot.getLog());
         }
 
         @Override
         public boolean test(Record record) {
+            if (timeLimitFomFilter != null && record.hasTime()) {
+                if (backward ? record.getTime() < timeLimitFomFilter : record.getTime() > timeLimitFomFilter) {
+                    stoppedByFilterTimeLimit = true;
+                    return false;
+                }
+            }
+
             if (!timeOk(record))
                 return false;
 

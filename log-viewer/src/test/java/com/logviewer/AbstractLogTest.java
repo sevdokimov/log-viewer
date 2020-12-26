@@ -4,8 +4,10 @@ import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.*;
 import com.logviewer.data2.net.Node;
+import com.logviewer.utils.TestPredicate;
 import com.logviewer.utils.Utils;
 import org.junit.After;
+import org.junit.Before;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -14,6 +16,7 @@ import org.springframework.lang.NonNull;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,6 +63,11 @@ public abstract class AbstractLogTest {
             }
         }
         tempFiles.clear();
+    }
+
+    @Before
+    public void clearTestPredicate() {
+        TestPredicate.clear();
     }
 
     protected synchronized ApplicationContext getCommonContext() {
@@ -226,6 +234,21 @@ public abstract class AbstractLogTest {
             } else {
                 assertEquals(expected, actual);
             }
+        }
+    }
+
+    protected static int recordIndex(Log log, String record) {
+        try {
+            String text = new String(Files.readAllBytes(log.getFile()), StandardCharsets.UTF_8);
+            int res = text.indexOf(record);
+            if (res < 0)
+                throw new IllegalStateException();
+
+            assert text.indexOf(record, res + record.length()) < 0;
+
+            return res;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

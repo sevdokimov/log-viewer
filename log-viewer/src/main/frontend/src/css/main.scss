@@ -16,6 +16,11 @@ $label-margin-bottom: 0;
 
 @import "node_modules/ngx-toastr/toastr-bs4-alert";
 
+@import 'node_modules/@angular/material/prebuilt-themes/deeppurple-amber';
+
+$material-design-icons-font-directory-path: '~material-design-icons-iconfont/dist/fonts/';
+@import '~material-design-icons-iconfont/src/material-design-icons';
+
 // Theme customization
 @import "src/theme/theme";
 @import "src/css/variables";
@@ -336,4 +341,38 @@ body {
 .top-panel-dropdown:hover > span {
   background: $top-element-hover;
   border-color: $top-element-border-color-hover;
+}
+
+// Custom dropdown
+.lv-dropdown-panel-holder {
+  position: relative;
+  overflow: visible;
+}
+
+.lv-dropdown-panel {
+  position: absolute;
+  display: block;
+  z-index: 1000;
+
+  // copy-pasted from Bootstrap .dropdown-menu
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+}
+
+.lv-dropdown-panel-right {
+  right: 0;
+  left: auto;
+}
+
+.highlighted-item {
+  box-shadow: 0 0 5px #28a745;
 }

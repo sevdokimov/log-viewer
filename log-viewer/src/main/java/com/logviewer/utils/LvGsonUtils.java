@@ -36,11 +36,11 @@ public class LvGsonUtils {
         gsonBuilder.registerTypeAdapterFactory(RuntimeTypeAdapterFactory.of(RecordPredicate.class)
                 .registerSubtype(TestPredicate.class)
                 .registerSubtype(NotPredicate.class)
+                .registerSubtype(DatePredicate.class)
                 .registerSubtype(ExceptionOnlyPredicate.class)
                 .registerSubtype(SubstringPredicate.class)
                 .registerSubtype(FieldArgPredicate.class)
                 .registerSubtype(GroovyPredicate.class)
-                .registerSubtype(ViewFilterPredicate.class)
                 .registerSubtype(FieldValueSetPredicate.class)
                 .registerSubtype(CompositeRecordPredicate.class));
 

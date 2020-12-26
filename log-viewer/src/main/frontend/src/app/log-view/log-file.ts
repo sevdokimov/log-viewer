@@ -6,6 +6,7 @@ export interface LogFile {
     url: string;
     id: string;
     connected: boolean;
+    hasFullDate: boolean;
 
     fields: FieldDescr[];
 }

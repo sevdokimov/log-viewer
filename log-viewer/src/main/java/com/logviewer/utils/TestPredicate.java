@@ -49,7 +49,7 @@ public class TestPredicate implements RecordPredicate {
             throw new RuntimeInterruptedException(e);
         }
 
-        return false;
+        return true;
     }
 
     public static boolean wasProcessed(String record) {
@@ -59,6 +59,12 @@ public class TestPredicate implements RecordPredicate {
     public static boolean wasProcessed(Predicate<Record> p) {
         synchronized (passed) {
             return passed.stream().anyMatch(p);
+        }
+    }
+
+    public static List<Record> getPassed() {
+        synchronized (passed) {
+            return new ArrayList<>(passed);
         }
     }
 

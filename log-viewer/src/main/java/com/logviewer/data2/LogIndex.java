@@ -29,18 +29,18 @@ public class LogIndex {
 
 //        Cache<Long, FindFirstProcessor> cache;
 
-        boolean useCatch;
+        boolean useCache;
 
         if (size > buffer.getSize()) { // Find without cache
             firstRecord = null;
             lastRecord = null;
-            useCatch = false;
+            useCache = false;
 //            cache = null;
         }
         else {
             firstRecord = this.firstRecord;
             lastRecord = this.lastRecord;
-            useCatch = true;
+            useCache = true;
 //            cache = this.cache;
 
             if (size != buffer.getSize()) {
@@ -59,7 +59,7 @@ public class LogIndex {
             firstRecord = new FindFirstProcessor();
             buffer.processRecords(0, false, firstRecord);
 
-            if (useCatch)
+            if (useCache)
                 this.firstRecord = firstRecord;
         }
 
@@ -81,7 +81,7 @@ public class LogIndex {
 
             assert lastRecord.result != null;
 
-            if (useCatch)
+            if (useCache)
                 this.lastRecord = lastRecord;
         }
 

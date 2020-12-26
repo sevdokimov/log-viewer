@@ -3,10 +3,9 @@ package com.logviewer.web.session;
 import com.logviewer.api.*;
 import com.logviewer.data2.*;
 import com.logviewer.domain.Permalink;
-import com.logviewer.filters.NotPredicate;
+import com.logviewer.filters.CompositeRecordPredicate;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.filters.SubstringPredicate;
-import com.logviewer.filters.ViewFilterPredicate;
 import com.logviewer.utils.Utils;
 import com.logviewer.utils.Wrappers;
 import com.logviewer.web.dto.events.*;
@@ -59,7 +58,7 @@ public class LogSession {
 
     private final List<SessionTask<?>> executions = new LinkedList<>();
 
-    private ViewFilterPredicate filter;
+    private RecordPredicate filter;
     private long stateVersion;
 
     private LogView[] logs;
@@ -149,10 +148,10 @@ public class LogSession {
             Collections.addAll(filters, permalink.getFilterPanelFilters());
 
         if (permalink.isHideUnmatched() && permalink.getSearchPattern() != null) {
-            filters.add(new NotPredicate(new SubstringPredicate(permalink.getSearchPattern())));
+            filters.add(new SubstringPredicate(permalink.getSearchPattern()));
         }
 
-        filter = new ViewFilterPredicate(filters.toArray(new RecordPredicate[0]));
+        filter = CompositeRecordPredicate.and(filters);
 
         CompletableFuture<LoadNextResponse> execution = execute(new LoadRecordTask(sender, logs, recordCount, filter, permalink.getOffset(),
                 false, permalink.getHashes()));
@@ -202,14 +201,7 @@ public class LogSession {
         initFilters(paths, savedFiltersName, filterState, false);
     }
 
-    private ViewFilterPredicate andPredicate(@Nullable RecordPredicate[] filter) {
-        if (filter == null || filter.length == 0)
-            return null;
-
-        return new ViewFilterPredicate(filter);
-    }
-
-    private boolean updateStateVersionAndFilters(long version, RecordPredicate[] filter) {
+    private boolean updateStateVersionAndFilters(long version, @Nullable RecordPredicate[] filter) {
         if (stateVersion >= version)
             return false;
 
@@ -221,7 +213,7 @@ public class LogSession {
 
         executions.clear();
 
-        this.filter = andPredicate(filter);
+        this.filter = CompositeRecordPredicate.and(filter);
 
         return true;
     }

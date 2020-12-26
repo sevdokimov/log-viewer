@@ -21,6 +21,11 @@ export interface NotPredicate extends Predicate {
     delegate: Predicate;
 }
 
+export interface DatePredicate extends Predicate {
+    date: number;
+    greater: boolean;
+}
+
 export interface FieldValueSetPredicate extends Predicate {
     fieldType: string;
     values: string[];

@@ -1,11 +1,12 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import {Predicate} from '@app/log-view/predicates';
+import {CompositeRecordPredicate, NotPredicate, Predicate} from '@app/log-view/predicates';
 import {LogFile} from '@app/log-view/log-file';
 import {Md5} from 'ts-md5';
 import {HttpClient} from '@angular/common/http';
 import {LevelFilterDescription} from '@app/log-view/top-filters/level-list/LevelFilterDescription';
 import * as equal from 'fast-deep-equal';
 import {ExceptionOnlyFilterFactory} from '@app/log-view/top-filters/exception-only/exception-only-filter-factory';
+import {DateIntervalFilterFactory} from '@app/log-view/top-filters/date-interval/date-interval-filter-factory';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -81,6 +82,10 @@ export class FilterPanelStateService {
 
         this.activeFilterEditors.exceptionOnly = new ExceptionOnlyFilterFactory();
 
+        if (!logs.find(l => !l.hasFullDate)) {
+            this.activeFilterEditors.dateRange = new DateIntervalFilterFactory();
+        }
+
         this.filterChanges.emit(this._state);
     }
 
@@ -155,6 +160,9 @@ export interface FilterState {
     exceptionsOnly?: boolean;
 
     namedFilters?: Filter[];
+
+    startDate?: number;
+    endDate?: number;
 }
 
 export interface Filter {
@@ -166,10 +174,27 @@ export interface Filter {
 class NamedFilterFilterFactory implements FilterFactory {
     addFilters(res: Predicate[], state: FilterState): void {
         if (state.namedFilters) {
+            let activeFilters: Predicate[] = [];
+
             for (let f of state.namedFilters) {
                 if (f.enabled && f.predicate) {
-                    res.push(f.predicate);
+                    activeFilters.push(f.predicate);
                 }
+            }
+
+            if (activeFilters.length > 0) {
+                let compoundFilter: Predicate;
+                if (activeFilters.length === 1) {
+                    compoundFilter = activeFilters[0];
+                } else {
+                    compoundFilter = <CompositeRecordPredicate>{
+                        type: 'CompositeRecordPredicate',
+                        isAnd: false,
+                        predicates: activeFilters,
+                    };
+                }
+
+                res.push(<NotPredicate>{type: 'NotPredicate', delegate: compoundFilter});
             }
         }
     }

@@ -13,7 +13,8 @@ import {GroovyPredicateEditorComponent} from './log-view/filters/groovy-predicat
 import {AceEditorDirective} from './utils/ace-editor.directive';
 import {FavoritesService} from './services/favorites.service';
 import {LogListPanelComponent} from './log-view/log-list-panel.component';
-import {BsDropdownModule, ModalModule} from 'ngx-bootstrap';
+import {ModalModule} from 'ngx-bootstrap';
+import {BsDropdownModule} from 'ngx-bootstrap/dropdown';
 import {ToastrModule} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {HttpClientModule} from '@angular/common/http';
@@ -23,6 +24,16 @@ import {ExceptionOnlyComponent} from '@app/log-view/top-filters/exception-only/e
 import {EventDetailsComponent} from '@app/log-view/event-details/event-details.component';
 import {FileStatusComponent} from '@app/log-view/file-status/file-status.component';
 import {ContextMenuModule} from 'ngx-contextmenu';
+import {LvDateIntervalComponent} from '@app/log-view/top-filters/date-interval/date-interval.component';
+import {NgxMatDatetimePickerModule, NgxMatTimepickerModule} from '@angular-material-components/datetime-picker';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatInputModule} from '@angular/material/input';
+import {MatCommonModule} from '@angular/material/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {NgxMomentDateModule} from '@angular-material-components/moment-adapter';
+import {MatMenuModule} from '@angular/material/menu';
 
 export const appRoutes: Routes = [
     {
@@ -56,6 +67,18 @@ export const appRoutes: Routes = [
         //        Ng2BootstrapModule.forRoot(),
 
         RouterModule.forRoot(appRoutes),
+
+        NgxMatDatetimePickerModule,
+        NgxMatTimepickerModule,
+        NgxMomentDateModule,
+
+        MatFormFieldModule,
+        MatDatepickerModule,
+        MatButtonModule,
+        MatInputModule,
+        MatIconModule,
+        MatCommonModule,
+        MatMenuModule,
     ],
     declarations: [
         // root
@@ -77,6 +100,7 @@ export const appRoutes: Routes = [
         TopFilterListComponent,
         LevelListComponent,
         ExceptionOnlyComponent,
+        LvDateIntervalComponent,
     ],
     providers: [FavoritesService],
 

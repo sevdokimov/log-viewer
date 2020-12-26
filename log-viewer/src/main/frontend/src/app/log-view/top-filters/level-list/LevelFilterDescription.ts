@@ -1,5 +1,5 @@
 import {FilterFactory, FilterState} from '@app/log-view/filter-panel-state.service';
-import {FieldValueSetPredicate, Predicate} from '@app/log-view/predicates';
+import {FieldValueSetPredicate, NotPredicate, Predicate} from '@app/log-view/predicates';
 
 export class LevelFilterDescription implements FilterFactory {
 
@@ -38,8 +38,10 @@ export class LevelFilterDescription implements FilterFactory {
             excludedLevelsWithSynonyms.push(...(this.synonyms[l] || []));
         }
 
-        res.push(<FieldValueSetPredicate>{type: 'FieldValueSetPredicate', fieldType: this.fieldType,
-            values: excludedLevelsWithSynonyms});
+        let exclude = <FieldValueSetPredicate>{type: 'FieldValueSetPredicate', fieldType: this.fieldType,
+            values: excludedLevelsWithSynonyms};
+
+        res.push(<NotPredicate>{type: 'NotPredicate', delegate: exclude});
     }
 
     compareFilterState(state1: FilterState, state2: FilterState): boolean {

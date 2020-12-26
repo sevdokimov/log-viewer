@@ -1,0 +1,65 @@
+<div #dateDropDown class="top-panel-dropdown lv-dropdown-panel-holder">
+    <span (click)="toggleFilterPanel()" class="interval-title">{{title}}&nbsp;<i class="fas fa-caret-down"></i></span>
+    <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
+        <div class="time-select-panel">
+            <div class="predefined-intervals-panel">
+                <button mat-button mat-stroked-button name="clear-button" (click)="clear()">Clear</button>
+
+                <button mat-button mat-stroked-button name="lastX-button" [matMenuTriggerFor]="lastXMenu">Last X min <i class="fas fa-caret-down"></i></button>
+
+                <mat-menu #lastXMenu="matMenu">
+                    <button mat-menu-item name="last5-button" (click)="lastXMin(5)">Last 5 min</button>
+                    <button mat-menu-item name="last15-button" (click)="lastXMin(15)">Last 15 min</button>
+                    <button mat-menu-item name="last60-button" (click)="lastXMin(60)">Last 60 min</button>
+                    <button mat-menu-item name="today-button" (click)="today()">Today</button>
+                    <button mat-menu-item name="yesterday-button" (click)="yesterday()">Yesterday</button>
+                </mat-menu>
+
+                <button mat-button mat-stroked-button name="since-current-button" (click)="sinceCurrentMoment()">Since current moment</button>
+            </div>
+
+            <form (ngSubmit)="onApply()">
+                <table class="time-select-table">
+                    <tr>
+                        <td>
+                            <mat-form-field>
+                                <input [(ngModel)]="startDate" name="startDate" placeholder="Start date"
+                                       matInput [ngxMatDatetimePicker]="pickerStartDate" autocomplete="off">
+
+                                <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
+                                <ngx-mat-datetime-picker  #pickerStartDate [showSeconds]="true">
+                                </ngx-mat-datetime-picker>
+
+                                <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearStartDate()">close</mat-icon>
+                            </mat-form-field>
+                        </td>
+                        <td>
+                            <mat-form-field>
+                                <input [(ngModel)]="endDate" name="endDate" placeholder="End date"
+                                       matInput [ngxMatDatetimePicker]="pickerEndDate" autocomplete="off">
+
+                                <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
+                                <ngx-mat-datetime-picker #pickerEndDate [showSeconds]="true">
+                                </ngx-mat-datetime-picker>
+
+                                <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearEndDate()">close</mat-icon>
+                            </mat-form-field>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="action-panel">
+                    <button mat-button mat-stroked-button title="Apply filter" (click)="onApply()" name="apply-button">
+                        <span class="mat-button-wrapper"><mat-icon>done</mat-icon></span>
+                    </button>
+
+                    <button mat-button mat-stroked-button title="Revert changes" (click)="onCancel()" name="cancel-button">
+                        <span class="mat-button-wrapper"><mat-icon>close</mat-icon></span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -28,6 +28,7 @@ public class LogViewerServlet extends HttpServlet {
 
     private static final Pattern[] RESOURCE_PATTERNS = new Pattern[]{
             Pattern.compile("fa-(?:brands|regular|solid)-\\d+(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
+            Pattern.compile("MaterialIcons-Regular(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
             Pattern.compile("[\\w\\-]+(\\.[0-9a-f]{20})?\\.(?:png|gif)"),
             Pattern.compile("(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{20})?\\.(?:css|js|js\\.map|css\\.map)"),
     };

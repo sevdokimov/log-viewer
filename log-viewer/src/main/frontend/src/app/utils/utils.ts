@@ -1,7 +1,6 @@
 import {SlStyle} from '../log-view/renderers/style';
 
 export class SlUtils {
-    static EMPTY_ARRAY: any[] = [];
 
     static renderFileSize(size: number): string {
         if (size < 4 * 1024) { return size + ' bytes'; }
@@ -194,5 +193,15 @@ export class SlUtils {
         }
 
         return path.substring(idx + 1);
+    }
+
+    static highlight(e: HTMLElement) {
+        if (!e) {
+            return;
+        }
+
+        e.classList.add('highlighted-item');
+
+        setTimeout(() => e.classList.remove('highlighted-item'), 300);
     }
 }

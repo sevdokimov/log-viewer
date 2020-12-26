@@ -260,4 +260,10 @@
     <ng-template contextMenuItem (execute)="showEventDetails($event.item)">
         Event details
     </ng-template>
+    <ng-template *ngIf="hasTimestamp" contextMenuItem (execute)="hideEventsByTimestamp($event.item, false)">
+        Hide events older than current
+    </ng-template>
+    <ng-template *ngIf="hasTimestamp" contextMenuItem (execute)="hideEventsByTimestamp($event.item, true)">
+        Hide events newer than current
+    </ng-template>
 </context-menu>

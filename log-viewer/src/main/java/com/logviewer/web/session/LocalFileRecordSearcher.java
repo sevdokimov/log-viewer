@@ -3,6 +3,7 @@ package com.logviewer.web.session;
 import com.logviewer.data2.*;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
+import com.logviewer.utils.PredicateUtils;
 import com.logviewer.web.session.tasks.SearchPattern;
 
 import java.util.ArrayDeque;
@@ -21,6 +22,7 @@ public class LocalFileRecordSearcher implements LogProcess {
     private final Position start;
     private final boolean backward;
     private final RecordPredicate filter;
+    private final Long timeLimitFomFilter;
     private final SearchPattern pattern;
     private final String hash;
     private final int recordCount;
@@ -48,6 +50,8 @@ public class LocalFileRecordSearcher implements LogProcess {
         this.listener = listener;
 
         assert recordCount > 0;
+
+        timeLimitFomFilter = PredicateUtils.extractTimeLimit(filter, !backward);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class LocalFileRecordSearcher implements LogProcess {
         future = executor.submit(() -> {
             try (Snapshot snapshot = snapshotFactory.get()) {
                 try {
-                    if (!snapshot.isValidHash(hash))
+                    if (hash != null && !snapshot.isValidHash(hash))
                         throw new LogCrashedException();
 
                     Queue<Pair<Record, Throwable>> queue = new ArrayDeque<>(recordCount);
@@ -74,6 +78,11 @@ public class LocalFileRecordSearcher implements LogProcess {
                     LvPredicateChecker predicateChecker = new LvPredicateChecker(snapshot.getLog());
 
                     Predicate<Record> predicate = record -> {
+                        if (timeLimitFomFilter != null && record.hasTime()) {
+                            if (backward ? record.getTime() < timeLimitFomFilter : record.getTime() > timeLimitFomFilter)
+                                return false;
+                        }
+
                         if (!timeOk(record))
                             return false;
 

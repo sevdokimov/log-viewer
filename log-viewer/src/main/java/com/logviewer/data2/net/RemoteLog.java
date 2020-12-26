@@ -103,8 +103,8 @@ public class RemoteLog implements LogView {
     }
 
     @Override
-    public LogProcess createRecordSearcher(Position start, boolean backward, RecordPredicate recordPredicate,
-                                           String hash, int recordCount, SearchPattern searchPattern, Consumer<SearchResult> listener) {
+    public LogProcess createRecordSearcher(@NonNull Position start, boolean backward, RecordPredicate recordPredicate,
+                                           @NonNull String hash, int recordCount, @NonNull SearchPattern searchPattern, @NonNull Consumer<SearchResult> listener) {
         return new RemoteLogProcess<>(new RecordSearcherRemoteTask(path.getFile(), serializedFormat,
                 start, backward, hash, LvGsonUtils.GSON.toJson(recordPredicate, RecordPredicate.class),
                 recordCount, searchPattern),

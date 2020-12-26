@@ -8,6 +8,7 @@ import com.logviewer.web.session.tasks.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.EOFException;
@@ -642,16 +643,16 @@ public class Log implements LogView {
 
     @Override
     public LogProcess loadRecords(RecordPredicate filter, int recordCountLimit,
-                                  Position start, boolean backward, String hash, long sizeLimit,
+                                  @Nullable Position start, boolean backward, String hash, long sizeLimit,
                                   @NonNull LogDataListener loadListener) {
         return new LocalFileRecordLoader(this::createSnapshot, executor, loadListener, start, filter, backward,
                 recordCountLimit, sizeLimit, hash);
     }
 
     @Override
-    public LogProcess createRecordSearcher(Position start, boolean backward, RecordPredicate recordPredicate,
-                                               String hash, int recordCount, SearchPattern searchPattern,
-                                               Consumer<SearchResult> listener) {
+    public LogProcess createRecordSearcher(@NonNull Position start, boolean backward, RecordPredicate recordPredicate,
+                                           @Nullable String hash, int recordCount, @NonNull SearchPattern searchPattern,
+                                           @NonNull Consumer<SearchResult> listener) {
         return new LocalFileRecordSearcher(this::createSnapshot, executor, start, backward, recordPredicate, hash,
                 recordCount, searchPattern, listener);
     }

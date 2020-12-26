@@ -25,8 +25,6 @@ public class LogSessionTestBase extends AbstractLogTest {
     @Before
     public void before() {
         Log.setLogIdGenerator(TestLogIdGenerator.INSTANCE);
-
-        TestPredicate.clear();
     }
 
     protected static Map<String, String> statuses(Map<String, RestStatus> map) {

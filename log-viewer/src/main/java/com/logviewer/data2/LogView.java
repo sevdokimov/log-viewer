@@ -28,9 +28,9 @@ public interface LogView {
                            @Nullable Position start, boolean backward, @Nullable String hash, long sizeLimit,
                            @NonNull LogDataListener loadListener);
 
-    LogProcess createRecordSearcher(Position start, boolean backward, RecordPredicate recordPredicate,
-                                        String hash, int recordCount, SearchPattern searchPattern,
-                                        Consumer<SearchResult> listener);
+    LogProcess createRecordSearcher(@NonNull Position start, boolean backward, RecordPredicate recordPredicate,
+                                    @Nullable String hash, int recordCount, @NonNull SearchPattern searchPattern,
+                                    @NonNull Consumer<SearchResult> listener);
 
 
     Destroyer addChangeListener(Consumer<FileAttributes> changeListener);

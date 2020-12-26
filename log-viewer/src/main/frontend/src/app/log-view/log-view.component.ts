@@ -13,7 +13,7 @@ import {BackendEventHandler, BackendEventHandlerHolder, Command, CommunicationSe
 import {Record} from './record';
 import {ViewConfigService} from './view-config.service';
 import {SearchPattern, SearchUtils} from './search';
-import {NotPredicate, Predicate, SubstringPredicate} from './predicates';
+import {Predicate, SubstringPredicate} from './predicates';
 import {SlUtils} from '../utils/utils';
 import {Md5} from 'ts-md5/dist/md5';
 import {RecordRendererService} from './record-renderer.service';
@@ -116,6 +116,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     filterErrorText: string;
 
     recordWithDetails: Record;
+
+    hasTimestamp: boolean;
 
     constructor(
         private changeDetectorRef: ChangeDetectorRef,
@@ -831,7 +833,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (this.searchHideUnmatched && this.searchPattern != null) {
             let sf: SubstringPredicate = {type: 'SubstringPredicate', search: this.searchPattern};
-            res = [<NotPredicate>{type: 'NotPredicate', delegate: sf}, ...res];
+            res = [sf, ...res];
         }
 
         return res;
@@ -1489,6 +1491,24 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (!event.initByPermalink) {
             this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
         }
+
+        this.hasTimestamp = !event.logs.find(l => !l.hasFullDate);
+    }
+
+    hideEventsByTimestamp(record: Record, next: boolean) {
+        if (!record.time) {
+            return;
+        }
+
+        this.filterPanelStateService.updateFilterState(state => {
+            if (next) {
+                state.endDate = record.time;
+            } else {
+                state.startDate = record.time;
+            }
+        });
+
+        SlUtils.highlight($('.search-bar lv-date-interval .interval-title')[0]);
     }
 }
 
