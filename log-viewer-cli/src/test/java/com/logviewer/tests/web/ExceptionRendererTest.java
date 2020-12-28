@@ -69,7 +69,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         openLog("rendering/exceptions.log");
 
         List<WebElement> exceptions = driver.findElementsByClassName("ex-wrapper");
-        assertEquals(3, exceptions.size());
+        assertEquals(4, exceptions.size());
 
         WebElement npe1 = exceptions.get(0);
         assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
@@ -86,6 +86,10 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         super.noImplicitWait(() -> assertEquals(0, re3.findElements(By.className("exception-message")).size()));
         assertEquals(2, re3.findElements(By.cssSelector(".ex-wrapper > .ex-stacktrace-line")).size());
         assertEquals(6, re3.findElements(By.cssSelector(".ex-stacktrace-line")).size());
+
+        WebElement re4 = exceptions.get(3);
+        assertEquals("java.lang.NullPointerException", re4.findElement(By.className("exception-class")).getText());
+        assertEquals(2, re4.findElements(By.className("ex-stacktrace-line")).size());
     }
 
     @Test

@@ -13,7 +13,7 @@ export class JavaExceptionRenderer implements TextRenderer {
     private rgxCausedBy: RegExp;
     private rgxItem: RegExp;
     private rgxItemSearch: RegExp;
-    private rgxEnd: RegExp = /\n\t\.\.\. (\d+) common frames omitted$/ymg;
+    private rgxEnd: RegExp = /\n\t\.\.\. (\d+) (?:common frames omitted|more)$/ymg;
 
     private static EX_I_CLASSLOADER = 1;
     private static EX_I_MODULE = 2;
