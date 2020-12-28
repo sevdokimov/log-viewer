@@ -14,6 +14,7 @@ public class FieldTypes {
     public static final String JAVA_CLASS = "class";
 
     public static final String MESSAGE = "message";
+    public static final String THREAD = "thread";
 
     public static final String NDC = "ndc";
     

@@ -1,4 +1,6 @@
 import {SlStyle} from '../log-view/renderers/style';
+import {Record} from '@app/log-view/record';
+import {LogFile} from '@app/log-view/log-file';
 
 export class SlUtils {
 
@@ -203,5 +205,56 @@ export class SlUtils {
         e.classList.add('highlighted-item');
 
         setTimeout(() => e.classList.remove('highlighted-item'), 300);
+    }
+
+    static fieldValue(record: Record, index: number): string {
+        let start = record.fieldsOffsetStart[index];
+        let end = record.fieldsOffsetEnd[index];
+
+        if (start == null || end == null || start < 0 && end < 0) {
+            return null;
+        }
+
+        return record.s.substring(start, end);
+    }
+
+
+    static fieldValueByType(record: Record, logs: LogFile[], type: string): string {
+        for (let l of logs) {
+            if (l.id === record.logId) {
+                for (let i = 0; i < l.fields.length; i++) {
+                    if (l.fields[i].type === type) {
+                        return SlUtils.fieldValue(record, i);
+                    }
+                }
+
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    static addIfNotExist<T>(m: T[], value: T): boolean {
+        if (m.includes(value)) {
+            return false;
+        }
+
+        m.push(value);
+        return true;
+    }
+
+    static delete<T>(m: T[], value: T): boolean {
+        if (!m) {
+            return false;
+        }
+
+        let idx = m.indexOf(value);
+        if (idx < 0) {
+            return false;
+        }
+
+        m.splice(idx, 1);
+        return true;
     }
 }

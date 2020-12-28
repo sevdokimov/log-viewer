@@ -40,7 +40,7 @@ public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
     }
 
     public static LvLayoutStretchNode threadNode() {
-        return new LvLayoutStretchNode("thread", "thread", true, 1);
+        return new LvLayoutStretchNode("thread", FieldTypes.THREAD, true, 1);
     }
 
     public static LvLayoutStretchNode messageNode() {

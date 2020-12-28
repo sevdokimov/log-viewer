@@ -17,7 +17,7 @@
 
         <div #filtersDd id="filters-dd" dropdown [autoClose]="false"
              class="dropdown top-panel-dropdown">
-            <span data-toggle="dropdown" dropdownToggle>Filters <i class="fas fa-caret-down"></i></span>
+            <span data-toggle="dropdown" dropdownToggle>Groovy Filters <i class="fas fa-caret-down"></i></span>
             <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
                 <sl-filter-panel (apply)="namedFilterDropDown.hide()"></sl-filter-panel>
             </div>
@@ -257,13 +257,36 @@
 </div>
 
 <context-menu #eventContextMenu>
-    <ng-template contextMenuItem (execute)="showEventDetails($event.item)">
+    <ng-template contextMenuItem (execute)="showEventDetails($event.item.record)">
         Event details
     </ng-template>
-    <ng-template *ngIf="hasTimestamp" contextMenuItem (execute)="hideEventsByTimestamp($event.item, false)">
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" let-item contextMenuItem
+                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, false)">
         Hide events older than current
     </ng-template>
-    <ng-template *ngIf="hasTimestamp" contextMenuItem (execute)="hideEventsByTimestamp($event.item, true)">
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" let-item contextMenuItem
+                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, true)">
         Hide events newer than current
     </ng-template>
+
+    <ng-template [visible]="contextMenuHandler.isThreadMenuItemVisible" let-item contextMenuItem [subMenu]="threadMenu">
+        Thread: <span class="menu-item-thread"><mark>{{item.thread}}</mark></span>&nbsp;&nbsp;
+    </ng-template>
+    <context-menu #threadMenu>
+        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByThread($event.item.thread)">
+            Show only "<span class="menu-item-thread">{{item.thread}}</span>"
+        </ng-template>
+        <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
+                     (execute)="contextMenuHandler.filterByThread($event.item.threadGroup)">
+            Show only "<span class="menu-item-thread"><span [innerHTML]="item.threadGroupHtml"></span></span>"
+        </ng-template>
+        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.excludeThread($event.item.thread)">
+            Hide "<span class="menu-item-thread">{{item.thread}}</span>"
+        </ng-template>
+        <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
+                     (execute)="contextMenuHandler.excludeThread($event.item.threadGroup)">
+            Hide "<span class="menu-item-thread"><span [innerHTML]="item.threadGroupHtml"></span></span>"
+        </ng-template>
+    </context-menu>
+
 </context-menu>

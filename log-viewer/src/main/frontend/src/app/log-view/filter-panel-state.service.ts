@@ -8,6 +8,7 @@ import * as equal from 'fast-deep-equal';
 import {ExceptionOnlyFilterFactory} from '@app/log-view/top-filters/exception-only/exception-only-filter-factory';
 import {DateIntervalFilterFactory} from '@app/log-view/top-filters/date-interval/date-interval-filter-factory';
 import {Record} from '@app/log-view/record';
+import {ThreadFilterFactory} from '@app/log-view/top-filters/thread-filter/thread-filter-factory';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -85,8 +86,12 @@ export class FilterPanelStateService {
 
         this.activeFilterEditors.exceptionOnly = new ExceptionOnlyFilterFactory();
 
-        if (!logs.find(l => !l.hasFullDate)) {
+        if (!logs.find(l => l.connected && !l.hasFullDate)) {
             this.activeFilterEditors.dateRange = new DateIntervalFilterFactory();
+        }
+
+        if (logs.find(l => l.fields.find(f => f.type === 'thread'))) {
+            this.activeFilterEditors.thread = new ThreadFilterFactory();
         }
 
         this.filterChanges.emit(this._state);
@@ -164,8 +169,12 @@ export interface FilterState {
 
     namedFilters?: Filter[];
 
-    startDate?: number;
-    endDate?: number;
+    date?: {
+        startDate?: number;
+        endDate?: number;
+    };
+
+    thread?: {includes?: string[], excludes?: string[]};
 }
 
 export interface Filter {

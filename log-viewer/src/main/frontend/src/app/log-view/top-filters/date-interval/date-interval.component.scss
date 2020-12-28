@@ -1,10 +1,5 @@
 @import "src/css/variables";
 
-:host {
-  display: inline-block;
-  position: relative;
-}
-
 .time-select-panel {
   padding: 5px;
 }
@@ -22,7 +17,7 @@
 }
 
 .predefined-intervals-panel {
-  padding-bottom: 5px;
+  padding-bottom: 10px;
 
   button {
     line-height: 25px;
@@ -34,7 +29,7 @@
 .clear-icon {
   font-size: 16px;
   height: 16px;
-  color: #800;
+  color: $close-icon-color;
   cursor: pointer;
   vertical-align: text-bottom;
 }

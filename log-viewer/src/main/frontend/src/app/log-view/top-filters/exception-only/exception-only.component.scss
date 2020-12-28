@@ -1,18 +1,7 @@
 @import "src/css/variables";
 
 :host {
-  display: inline;
-
-  > span {
-    display: inline-block;
-    width: 16px;
-    box-sizing: content-box;
-    font-size: 16px;
-    line-height: 1;
-    text-align: center;
-  }
-
-  > .tool-button-pressed {
-    color: #a00;
+  .top-panel-dropdown > span {
+    padding: 0 7px;
   }
 }

@@ -1,4 +1,5 @@
-<span class="tool-button"
-      [class.tool-button-pressed]="selected"
-      title="Show lines with an exception only"
-      (click)="onClick()"><i class="fas fa-bolt"></i></span>
+<div class="top-panel-dropdown closeable-filter"
+     title="Show only events with a stacktrace">
+    <span><i class="fas fa-bolt"></i> has stacktrace</span>
+    <mat-icon (click)="removeFilter()" class="remote-filter-icon" title="Remove filter">close</mat-icon>
+</div>

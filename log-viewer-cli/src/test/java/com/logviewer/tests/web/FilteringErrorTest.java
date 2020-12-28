@@ -1,9 +1,9 @@
 package com.logviewer.tests.web;
 
 import com.logviewer.data2.Filter;
-import com.logviewer.domain.FilterPanelState;
 import com.logviewer.filters.GroovyPredicate;
 import com.logviewer.mocks.TestFilterPanelState;
+import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;

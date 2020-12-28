@@ -234,7 +234,7 @@ export class RecordRendererService {
 
         let recPointer = <HTMLDivElement>document.createElement('DIV');
         recPointer.className = 'rec-pointer';
-        recPointer.title = 'Show event details (Right Mouse click)';
+        recPointer.title = 'Context menu for event (Right Mouse click)';
 
         e.append(recPointer);
 

@@ -4,13 +4,13 @@ import com.logviewer.TestUtils;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.Filter;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.domain.FilterPanelState;
 import com.logviewer.filters.FieldArgPredicate;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.mocks.InmemoryFilterStorage;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.tests.utils.WebTestUtils;
+import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -364,18 +364,17 @@ public class FilterChangingTest extends AbstractWebTestCase {
 
         assert !driver.getCurrentUrl().contains("filters=");
 
-        WebElement exceptionOnlyButton = driver.findElementByXPath("//lv-exception-only/span");
-
-        exceptionOnlyButton.click();
+        driver.findElementByCssSelector(".add-filter-menu .fa-plus").click();
+        driver.findElementById("add-stacktrace-filter").click();
 
         waitFor(() -> driver.findElementsByCssSelector("#records > .record").size() == 1);
         assert driver.getCurrentUrl().contains("filters=");
-        assert exceptionOnlyButton.getAttribute("class").contains("tool-button-pressed");
 
-        exceptionOnlyButton.click();
+        WebElement closeIcon = driver.findElement(By.cssSelector("lv-exception-only .remote-filter-icon"));
+        new Actions(driver).moveToElement(closeIcon).perform();
+        closeIcon.click();
 
         waitFor(() -> driver.findElementsByCssSelector("#records > .record").size() > 5);
         assert !driver.getCurrentUrl().contains("filters=");
-        assert !exceptionOnlyButton.getAttribute("class").contains("tool-button-pressed");
     }
 }

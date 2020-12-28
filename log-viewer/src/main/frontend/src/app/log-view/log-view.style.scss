@@ -252,10 +252,6 @@
   #filters-dd {
     padding-right: 10px;
   }
-
-  .file-list-block {
-    padding-right: 10px;
-  }
 }
 
 
@@ -359,4 +355,9 @@
   .search-option-selected .search-option-highlighter {
     visibility: visible;
   }
+}
+
+.menu-item-thread {
+  font-family: monospace;
+  color: black;
 }

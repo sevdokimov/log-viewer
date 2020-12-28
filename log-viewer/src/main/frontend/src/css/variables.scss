@@ -5,6 +5,9 @@ $top-element-border-color: #d7d7d7;
 $top-element-border-color-hover: #717171;
 $top-element-border-radius: 2px;
 
+$close-icon-color: #800;
+$top-filter-closer-size: 15px;
+
 @mixin log-text {
   word-break: break-all;
   white-space: pre-wrap;

@@ -14,14 +14,17 @@ public class RegexUtils {
     private RegexUtils() {
     }
 
+    public static void escapePattern(StringBuilder sb, char a) {
+        if (ESCAPED_CHARACTERS.indexOf(a) > 0) {
+            sb.append('\\');
+        }
+
+        sb.append(a);
+    }
+
     public static void escapePattern(StringBuilder sb, String text) {
         for (int i = 0, len = text.length(); i < len; i++) {
-            char a = text.charAt(i);
-            if (ESCAPED_CHARACTERS.indexOf(a) > 0) {
-                sb.append('\\');
-            }
-
-            sb.append(a);
+            escapePattern(sb, text.charAt(i));
         }
     }
 

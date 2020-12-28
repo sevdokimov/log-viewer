@@ -1,8 +1,8 @@
 package com.logviewer.impl;
 
 import com.google.common.collect.Iterables;
-import com.logviewer.domain.FilterPanelState;
 import com.logviewer.filters.GroovyPredicate;
+import com.logviewer.utils.FilterPanelState;
 import com.logviewer.utils.LvGsonUtils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;

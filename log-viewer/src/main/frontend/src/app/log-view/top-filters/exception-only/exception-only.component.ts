@@ -9,21 +9,17 @@ import {FilterEditorComponent} from '@app/log-view/top-filters/filter-editor-com
 })
 export class ExceptionOnlyComponent extends FilterEditorComponent {
 
-    selected: boolean;
-
     constructor(filterPanelStateService: FilterPanelStateService) {
         super(filterPanelStateService);
     }
 
     protected loadComponentState(state: FilterState) {
-        this.selected = state.exceptionsOnly;
+        
     }
 
-    onClick() {
-        this.selected = !this.selected;
-
+    removeFilter() {
         this.filterPanelStateService.updateFilterState(state => {
-            state.exceptionsOnly = this.selected ? true : undefined;
+            state.exceptionsOnly = undefined;
         });
     }
 }

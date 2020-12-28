@@ -1,0 +1,60 @@
+<div #threadDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter">
+    <span (click)="toggleFilterPanel()">{{title}}&nbsp;<i class="fas fa-caret-down"></i></span>
+    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    
+    <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
+        <div *ngIf="!includes.length && !excludes.length" class="noItems">
+            Empty thread filter
+        </div>
+
+        <div *ngIf="includes.length > 0">
+            <span class="hhh">Visible threads</span>
+
+            <div *ngFor="let t of includes" class="thread-block">
+                <span class="thread-name">{{t}}</span>
+
+                <mat-icon class="remove-icon" title="Remove" (click)="removeThread(t)">close</mat-icon>
+            </div>
+        </div>
+
+        <div *ngIf="excludes.length > 0">
+            <span class="hhh">Hidden threads</span>
+
+            <div *ngFor="let t of excludes" class="thread-block">
+                <span class="thread-name">{{t}}</span>
+
+                <mat-icon class="remove-icon" title="Remove" (click)="removeThread(t)">close</mat-icon>
+            </div>
+        </div>
+
+        <div class="input-panel">
+            <div class="form-group">
+                <div class="input-group">
+                    <input #inputElement
+                           placeholder="Thread name"
+                           aria-label="Thread name"
+                           class="form-control"
+                           [(ngModel)]="threadInput">
+
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button"
+                                (click)="addThreadName(true)"
+                                title="Show events from the thread, hide events from other threads"
+                                [disabled]="!threadInput">
+                            Show
+                        </button>
+
+                        <button class="btn btn-outline-secondary" type="button"
+                                (click)="addThreadName(false)"
+                                title="Hide from the thread"
+                                [disabled]="!threadInput">
+                            Hide
+                        </button>
+                    </div>
+                </div>
+
+                <small class="form-text text-muted">The asterisk works as a wildcard: http-bio-*-exec-*</small>
+            </div>
+        </div>
+    </div>
+</div>

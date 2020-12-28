@@ -1,7 +1,7 @@
 package com.logviewer.mocks;
 
 import com.logviewer.api.LvFilterPanelStateProvider;
-import com.logviewer.domain.FilterPanelState;
+import com.logviewer.utils.FilterPanelState;
 import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.TestListener;
 import org.springframework.lang.NonNull;

@@ -1,0 +1,51 @@
+@import "src/css/variables";
+
+:host {
+  display: inline-block;
+  position: relative;
+}
+
+.lv-dropdown-panel {
+  padding: 10px 15px;
+}
+
+.thread-block:hover {
+  background: #eee;
+}
+
+.thread-block {
+  padding: 1px 5px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.thread-name {
+  font-family: monospace;
+}
+
+.hhh {
+  color: #666;
+}
+
+.thread-block:hover .remove-icon {
+  visibility: visible;
+}
+
+.remove-icon {
+  width: $top-filter-closer-size;
+  height: $top-filter-closer-size;
+  font-size: $top-filter-closer-size;
+  color: $close-icon-color;
+
+  margin-left: 3px;
+  vertical-align: text-bottom;
+
+  visibility: hidden;
+  cursor: pointer;
+}
+
+.input-panel {
+  min-width: 400px;
+  padding-top: 10px;
+}

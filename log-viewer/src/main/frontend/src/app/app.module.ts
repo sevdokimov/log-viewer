@@ -34,6 +34,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {NgxMomentDateModule} from '@angular-material-components/moment-adapter';
 import {MatMenuModule} from '@angular/material/menu';
+import {LvThreadFilterComponent} from '@app/log-view/top-filters/thread-filter/thread-filter.component';
 
 export const appRoutes: Routes = [
     {
@@ -61,10 +62,6 @@ export const appRoutes: Routes = [
         ContextMenuModule.forRoot({
             useBootstrap4: true,
         }),
-        //        ReactiveFormsModule,
-
-        // TranslateModule.forRoot(),
-        //        Ng2BootstrapModule.forRoot(),
 
         RouterModule.forRoot(appRoutes),
 
@@ -85,7 +82,6 @@ export const appRoutes: Routes = [
         AppRoot,
 
         GlobalNavigation,
-        // SimpleNotificationsComponent,
         LogNavigatorComponent,
         LogViewComponent,
         FilterPanelComponent,
@@ -101,6 +97,7 @@ export const appRoutes: Routes = [
         LevelListComponent,
         ExceptionOnlyComponent,
         LvDateIntervalComponent,
+        LvThreadFilterComponent,
     ],
     providers: [FavoritesService],
 

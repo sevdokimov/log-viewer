@@ -1,9 +1,9 @@
 package com.logviewer.tests.web;
 
-import com.logviewer.domain.FilterPanelState;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
+import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -36,11 +36,12 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
     @Test
     public void filterTitleEmpty() {
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setDate(new FilterPanelState.DateFilter()));
         ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
 
         openLog("search.log");
 
-        assertThat(dateFilterHeader(), is("No time restriction"));
+        assertThat(dateFilterHeader(), is("Empty timestamp filter"));
     }
 
     @Test
@@ -106,6 +107,8 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
     @Test
     public void typeDateRestriction() {
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setDate(new FilterPanelState.DateFilter()));
+
         ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
 
         openLog("search.log");
@@ -141,6 +144,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
     @Test
     public void applyCancelButton() {
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setDate(new FilterPanelState.DateFilter()));
         ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
 
         openLog("search.log");
@@ -171,32 +175,6 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
     }
 
     @Test
-    public void clearButton() {
-        ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
-
-        openLog("search.log");
-
-        driver.findElementByTagName("lv-date-interval").click();
-        timeSelectPanel().findElement(By.name("startDate")).sendKeys("2012-01-01 00:39");
-
-        timeSelectPanel().findElement(By.name("apply-button")).click();
-
-        notExist(By.className("time-select-panel"));
-
-        assert getRecord().size() == 6;
-
-        driver.findElementByTagName("lv-date-interval").click();
-
-        timeSelectPanel().findElement(By.name("clear-button")).click();
-
-        notExist(By.className("time-select-panel"));
-
-        assert getRecord().size() > 6;
-
-        assertThat(dateFilterHeader(), is("No time restriction"));
-    }
-
-    @Test
     public void addFilterFromContextMenu() {
         ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
 
@@ -220,6 +198,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
     @Test
     public void startMoreThanEnd() {
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setDate(new FilterPanelState.DateFilter()));
         ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}]%m"));
 
         openLog("search.log");

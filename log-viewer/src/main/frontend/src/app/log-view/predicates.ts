@@ -34,3 +34,8 @@ export interface FieldValueSetPredicate extends Predicate {
 export interface ExceptionOnlyPredicate extends Predicate {
 
 }
+
+export interface ThreadPredicate extends Predicate {
+    includes?: string[];
+    excludes?: string[];
+}

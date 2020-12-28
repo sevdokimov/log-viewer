@@ -1,10 +1,10 @@
-<div #dateDropDown class="top-panel-dropdown lv-dropdown-panel-holder">
+<div #dateDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter">
     <span (click)="toggleFilterPanel()" class="interval-title">{{title}}&nbsp;<i class="fas fa-caret-down"></i></span>
+    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
         <div class="time-select-panel">
             <div class="predefined-intervals-panel">
-                <button mat-button mat-stroked-button name="clear-button" (click)="clear()">Clear</button>
-
                 <button mat-button mat-stroked-button name="lastX-button" [matMenuTriggerFor]="lastXMenu">Last X min <i class="fas fa-caret-down"></i></button>
 
                 <mat-menu #lastXMenu="matMenu">

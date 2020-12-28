@@ -4,6 +4,8 @@ import com.google.common.collect.Iterables;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -14,6 +16,29 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 public class EventDetailsTest extends AbstractWebTestCase {
+
+    @Test
+    public void openContextMenuByPointer() {
+        openLog("rendering/one-line-exception.log");
+
+        By menuItem = By.xpath("//ul[@class='dropdown-menu show']/li");
+
+        notExist(menuItem);
+
+        WebElement record = driver.findElementByClassName("record");
+        new Actions(driver).moveToElement(record).perform();
+
+        WebElement pointer = record.findElement(By.className("rec-pointer"));
+
+        Point pointerLocation = pointer.getLocation();
+
+        pointer.click();
+
+        WebElement menu = driver.findElement(menuItem);
+
+        assert Math.abs(pointerLocation.y - menu.getLocation().y) < 20;
+        assert Math.abs(pointerLocation.x - menu.getLocation().x) < 20;
+    }
 
     @Test
     public void testEventDetails() {

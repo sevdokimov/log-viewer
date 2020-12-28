@@ -2,12 +2,12 @@ package com.logviewer.tests.web;
 
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.domain.FilterPanelState;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
+import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 

@@ -43,6 +43,7 @@ import {HttpClient} from '@angular/common/http';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {Subscription} from 'rxjs';
 import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
+import {ContextMenuHandler} from '@app/log-view/context-menu';
 
 @Component({
     selector: 'sl-log-view',
@@ -54,6 +55,7 @@ import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
         RecordRendererService,
         ViewStateService,
         FilterPanelStateService,
+        ContextMenuHandler,
     ],
 })
 export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, BackendEventHandlerHolder {
@@ -117,8 +119,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     recordWithDetails: Record;
 
-    hasTimestamp: boolean;
-
     constructor(
         private changeDetectorRef: ChangeDetectorRef,
         private http: HttpClient,
@@ -132,6 +132,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         private toastr: ToastrService,
         private contextMenuService: ContextMenuService,
         private filterPanelStateService: FilterPanelStateService,
+        public contextMenuHandler: ContextMenuHandler,
     ) {
         this.filterPanelStateService.currentRecords = this.m;
     }
@@ -232,19 +233,23 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 this.setSelectedLine(index);
 
-                this.contextMenuService.show.next({
-                    contextMenu: this.eventContextMenu,
-                    event: event,
-                    item: this.m[index],
-                });
-
-                event.preventDefault();
-                event.stopPropagation();
+                this.openContextMenu(index,  event);
                 break;
             }
         }
 
         return false;
+    }
+
+    private openContextMenu(index: number, event: MouseEvent) {
+        this.contextMenuService.show.next({
+            contextMenu: this.eventContextMenu,
+            event: event,
+            item: this.contextMenuHandler.createItem(this.m[index], this.logs),
+        });
+
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     showEventDetails(record: Record) {
@@ -274,7 +279,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 this.setSelectedLine(index);
 
                 if ((<Element>event.target).classList.contains('rec-pointer')) {
-                    this.showEventDetails(this.m[index]);
+                    this.openContextMenu(index, event);
                 }
 
                 break;
@@ -1492,24 +1497,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (!event.initByPermalink) {
             this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
         }
-
-        this.hasTimestamp = !event.logs.find(l => !l.hasFullDate);
-    }
-
-    hideEventsByTimestamp(record: Record, next: boolean) {
-        if (!record.time) {
-            return;
-        }
-
-        this.filterPanelStateService.updateFilterState(state => {
-            if (next) {
-                state.endDate = record.time;
-            } else {
-                state.startDate = record.time;
-            }
-        });
-
-        SlUtils.highlight($('.search-bar lv-date-interval .interval-title')[0]);
     }
 }
 

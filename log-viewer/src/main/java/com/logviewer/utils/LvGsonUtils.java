@@ -39,6 +39,7 @@ public class LvGsonUtils {
                 .registerSubtype(DatePredicate.class)
                 .registerSubtype(ExceptionOnlyPredicate.class)
                 .registerSubtype(SubstringPredicate.class)
+                .registerSubtype(ThreadPredicate.class)
                 .registerSubtype(FieldArgPredicate.class)
                 .registerSubtype(GroovyPredicate.class)
                 .registerSubtype(FieldValueSetPredicate.class)

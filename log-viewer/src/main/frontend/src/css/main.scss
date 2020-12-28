@@ -323,6 +323,9 @@ body {
 
 .top-panel-dropdown {
   display: inline-block;
+  position: relative;
+
+  padding-right: $top-filter-closer-size;
 
   > span {
     display: inline-block;
@@ -371,6 +374,28 @@ body {
 .lv-dropdown-panel-right {
   right: 0;
   left: auto;
+}
+
+.closeable-filter.top-panel-dropdown {
+  padding-right: 0;
+
+  > .remote-filter-icon {
+    width: $top-filter-closer-size;
+    height: $top-filter-closer-size;
+    font-size: $top-filter-closer-size;
+    color: $close-icon-color;
+
+    visibility: hidden;
+    cursor: pointer;
+  }
+
+}
+
+.closeable-filter.top-panel-dropdown:hover {
+  > .remote-filter-icon {
+    visibility: visible;
+  }
+
 }
 
 .highlighted-item {

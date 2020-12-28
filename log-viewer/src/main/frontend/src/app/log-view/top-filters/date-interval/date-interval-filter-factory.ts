@@ -3,15 +3,15 @@ import {DatePredicate, Predicate} from '@app/log-view/predicates';
 
 export class DateIntervalFilterFactory implements FilterFactory {
     addFilters(res: Predicate[], state: FilterState): void {
-        if (state.startDate) {
-            res.push(<DatePredicate>{type: 'DatePredicate', date: state.startDate, greater: true});
+        if (state.date?.startDate) {
+            res.push(<DatePredicate>{type: 'DatePredicate', date: state.date.startDate, greater: true});
         }
-        if (state.endDate) {
-            res.push(<DatePredicate>{type: 'DatePredicate', date: state.endDate, greater: false});
+        if (state.date?.endDate) {
+            res.push(<DatePredicate>{type: 'DatePredicate', date: state.date.endDate, greater: false});
         }
     }
 
     compareFilterState(state1: FilterState, state2: FilterState): boolean {
-        return state1.startDate === state2.startDate && state1.endDate === state2.endDate;
+        return state1.date?.startDate === state2.date?.startDate && state1.date?.endDate === state2.date?.endDate;
     }
 }
