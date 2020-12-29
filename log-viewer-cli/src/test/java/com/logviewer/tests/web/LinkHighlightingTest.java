@@ -16,7 +16,8 @@ public class LinkHighlightingTest extends AbstractWebTestCase {
 
         driver.findElementByClassName("link-in-log");
 
-        assertEquals(Arrays.asList("http://localhost:8080/?aaa=bbb&ccc=12", "https://google.com"),
+        assertEquals(Arrays.asList("http://localhost:8080/?aaa=bbb&ccc=12", "https://google.com",
+                "https://my-host.com/foo#anchor-w3234"),
                 driver.findElementsByClassName("link-in-log").stream().map(WebElement::getText).collect(Collectors.toList())
                 );
     }
