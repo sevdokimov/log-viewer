@@ -65,6 +65,17 @@
                     <td><img [src]="fi.item.icon" height="16" width="16"></td>
 
                     <td class="name" [innerHTML]="fi.nameHtml"></td>
+
+                    <td>
+                        <span *ngIf="fi.item.size != null" class="file-attr" title="{{fi.item.size}} bytes">
+                            {{fi.item.size | slSize}}
+                        </span>
+                    </td>
+                    <td>
+                        <span *ngIf="fi.item.modificationTime" class="file-attr" title="Last modification time">
+                            {{fi.item.modificationTime | date : 'yyyy-MM-dd HH:mm:ss'}}
+                        </span>
+                    </td>
                 </tr>
             </table>
 

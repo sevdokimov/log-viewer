@@ -11,12 +11,15 @@ import org.openqa.selenium.interactions.Actions;
 import org.springframework.lang.NonNull;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -190,6 +193,26 @@ public class FsNavigationTest extends AbstractWebTestCase {
         assertEquals(Arrays.asList("fff.log", "fff1.log"), fileNames());
         WebElement filterInput = driver.findElementByCssSelector(".search-pane .filter-input");
         assertEquals("f", filterInput.getAttribute("value"));
+    }
+
+    @Test
+    public void sizeAndModificationDate() throws IOException {
+        openPage();
+
+        WebElement name = findFile("r2.log");
+        List<WebElement> td = name.findElements(By.xpath("../td"));
+
+        assertThat(td.get(2).getText(), matchesPattern("0\\b.*"));
+        assertThat(td.get(3).getText(), matchesPattern("\\d{4}-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d"));
+
+        name = findFile("r.log");
+        td = name.findElements(By.xpath("../td"));
+
+        URL fileUrl = getClass().getResource("/integration/navigation-root/r.log");
+        int fileSize = fileUrl.openConnection().getContentLength();
+
+        assertThat(td.get(2).getText(), matchesPattern(fileSize + "\\b.*"));
+        assertThat(td.get(3).getText(), matchesPattern("\\d{4}-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d"));
     }
 
     @Test

@@ -62,6 +62,14 @@
   width: 99%;
 }
 
+.file-list > tr > td {
+  padding-right: 7px;
+}
+
+.file-list > tr > td:last-child {
+  padding-right: 0;
+}
+
 .file-list-item.selected {
   background: #3f7ad7 !important;
   color: white !important;
@@ -95,4 +103,14 @@
     background: #ee0;
     color: black;
   }
+}
+
+.file-attr {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.file-list-item.selected .file-attr {
+  color: #eee;
 }

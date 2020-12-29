@@ -257,7 +257,7 @@ export class LogNavigatorComponent implements OnInit {
         if (fsItem.isDirectory) {
             this.selectDir(fsItem.path);
         } else {
-            let fileType = (<FileItem>fsItem).type;
+            let fileType = fsItem.type;
 
             if (fileType === 'log' || fileType === 'out' || fileType === 'text') {
                 if (inNewWindow) {
@@ -388,10 +388,8 @@ export interface FsItem {
     isDirectory: boolean;
 
     attr: { [key: string]: any };
-}
 
-export interface FileItem extends FsItem {
-    type: string;
-    size: number;
-    modificationTime: number;
+    type?: string;
+    size?: number;
+    modificationTime?: number;
 }
