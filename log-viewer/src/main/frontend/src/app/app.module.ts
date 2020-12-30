@@ -6,10 +6,8 @@ import {RouterModule, Routes} from '@angular/router';
 import {LogNavigatorComponent} from './log-navigator/log-navigator.component';
 import {LogViewComponent} from './log-view/log-view.component';
 import {FormsModule} from '@angular/forms';
-import {FilterPanelComponent} from './log-view/filter-panel.component';
 import {SlDurationPipe} from './utils/sl-duration.pipe';
 import {SlSizePipe} from './utils/sl-size.pipe';
-import {GroovyPredicateEditorComponent} from './log-view/filters/groovy-predicate-editor.component';
 import {AceEditorDirective} from './utils/ace-editor.directive';
 import {FavoritesService} from './services/favorites.service';
 import {LogListPanelComponent} from './log-view/log-list-panel.component';
@@ -35,6 +33,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {NgxMomentDateModule} from '@angular-material-components/moment-adapter';
 import {MatMenuModule} from '@angular/material/menu';
 import {LvThreadFilterComponent} from '@app/log-view/top-filters/thread-filter/thread-filter.component';
+import {LvGroovyFilterComponent} from '@app/log-view/top-filters/groovy-filter/groovy-filter.component';
 
 export const appRoutes: Routes = [
     {
@@ -84,9 +83,7 @@ export const appRoutes: Routes = [
         GlobalNavigation,
         LogNavigatorComponent,
         LogViewComponent,
-        FilterPanelComponent,
         LogListPanelComponent,
-        GroovyPredicateEditorComponent,
         EventDetailsComponent,
         FileStatusComponent,
 
@@ -97,6 +94,7 @@ export const appRoutes: Routes = [
         LevelListComponent,
         ExceptionOnlyComponent,
         LvDateIntervalComponent,
+        LvGroovyFilterComponent,
         LvThreadFilterComponent,
     ],
     providers: [FavoritesService],

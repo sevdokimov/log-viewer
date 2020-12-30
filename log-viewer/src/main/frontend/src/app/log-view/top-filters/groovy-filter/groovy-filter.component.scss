@@ -1,0 +1,56 @@
+@import "src/css/variables";
+
+.groovy-filter {
+  padding: 10px;
+  max-width: 700px;
+  width: 50vw;
+}
+
+.filter-name {
+  font-size: 12px;
+}
+
+.script-container {
+  border: 1px #aaa solid;
+  padding: 2px 0 2px 0;
+}
+
+.script-info {
+  font-size: 12px;
+}
+
+.field-in-info {
+  font-weight: bold;
+  color: #222;
+}
+
+.field-with-comma:first-child > .comma {
+  display: none;
+}
+
+.header-script {
+  font-style: italic;
+  color: peru;
+}
+
+.action-panel {
+  padding-top: 15px;
+  display: flex;
+}
+
+.action-panel > * {
+  margin-right: 15px;
+}
+
+.top-panel-dropdown.modified > span {
+  text-decoration: underline wavy #00f;
+}
+
+.modified-script-flag {
+  color: black;
+  font-weight: bold;
+}
+
+.modifier-name-flag {
+  color: black;
+}

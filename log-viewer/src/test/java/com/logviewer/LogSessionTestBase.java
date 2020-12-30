@@ -3,12 +3,11 @@ package com.logviewer;
 import com.logviewer.api.LvFilterPanelStateProvider;
 import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.config.LvTestConfig;
-import com.logviewer.data2.Filter;
 import com.logviewer.data2.Log;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.utils.FilterPanelState;
+import com.logviewer.utils.FilterPanelState.GroovyFilter;
 import com.logviewer.utils.TestLogIdGenerator;
-import com.logviewer.utils.TestPredicate;
 import com.logviewer.utils.TestSessionAdapter;
 import com.logviewer.web.dto.RestStatus;
 import org.junit.Before;
@@ -44,7 +43,8 @@ public class LogSessionTestBase extends AbstractLogTest {
         @Override
         @Bean
         public LvFilterPanelStateProvider testFilterSet() {
-            FilterPanelState filterPanelState = new FilterPanelState().setNamedFilters(new Filter("test-filter", true, new TestPredicate()));
+            GroovyFilter testFilter = new GroovyFilter("test-filter", "", "com.logviewer.utils.TestPredicate.handle($event)");
+            FilterPanelState filterPanelState = new FilterPanelState().groovyFilter(testFilter);
 
             return new TestFilterPanelState().addFilterSet("default", filterPanelState);
         }

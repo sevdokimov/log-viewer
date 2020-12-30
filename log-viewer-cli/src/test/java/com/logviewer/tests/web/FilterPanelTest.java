@@ -20,7 +20,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
 
         addFilterMenuClick();
 
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(1));
+        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(2));
     }
 
     @Test
@@ -35,9 +35,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
         notExist(By.tagName("lv-thread-filter"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(3));
-
-        assert !driver.findElementByClassName("no-filters-to-add").isDisplayed();
+        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(4));
 
         driver.findElementById("add-date-filter").click();
 
@@ -46,21 +44,21 @@ public class FilterPanelTest extends AbstractWebTestCase {
         driver.findElement(By.cssSelector("lv-date-interval .lv-dropdown-panel"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(2));
+        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(3));
         driver.findElementById("add-thread-filter").click();
         driver.findElement(By.cssSelector("lv-thread-filter .lv-dropdown-panel"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(1));
+        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(2));
         driver.findElementById("add-stacktrace-filter").click();
         driver.findElement(By.tagName("lv-exception-only"));
 
         addFilterMenuClick();
-        driver.findElementByClassName("no-filters-to-add").isDisplayed();
+        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(1));
     }
 
     private void addFilterMenuClick() {
-        driver.findElementByCssSelector(".add-filter-menu .fa-plus").click();
+        driver.findElementByCssSelector(".add-filter-menu .add-filter-button").click();
     }
 
 

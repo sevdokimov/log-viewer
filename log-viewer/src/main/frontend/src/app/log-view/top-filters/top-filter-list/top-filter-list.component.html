@@ -8,32 +8,6 @@
 
 <lv-thread-filter *ngIf="filterPanelStateService.activeFilterEditors.thread && filterPanelStateService.getFilterState().thread"></lv-thread-filter>
 
-<div class="add-filter-menu">
-    <div dropdown class="dropdown">
-        <span data-toggle="dropdown" dropdownToggle title="Add filter">
-            <i class="fas fa-plus"></i>
-        </span>
-
-        <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
-            <a id="add-date-filter" class="dropdown-item" href="#"
-               *ngIf="!filterPanelStateService.getFilterState().date && filterPanelStateService.activeFilterEditors.dateRange"
-               (click)="addDateFilter()">
-                Date filter
-            </a>
-            <a id="add-thread-filter" class="dropdown-item" href="#"
-               *ngIf="!filterPanelStateService.getFilterState().thread && filterPanelStateService.activeFilterEditors.thread"
-               (click)="addThreadFilter()">
-                Thread filter
-            </a>
-            <a id="add-stacktrace-filter" class="dropdown-item" href="#"
-               *ngIf="!filterPanelStateService.getFilterState().exceptionsOnly"
-               (click)="addStacktraceFilter()">
-                Events containing a stacktrace
-            </a>
-
-            <div class="noItems no-filters-to-add">
-                &lt;No filters to add&gt;
-            </div>
-        </div>
-    </div>
-</div>
+<lv-groovy-filter *ngFor="let g of filterPanelStateService.getFilterState().groovyFilters" [filterId]="g.id">
+    
+</lv-groovy-filter>

@@ -1,31 +1,12 @@
+@import "src/css/variables";
+
 :host {
   display: inline;
 
   margin-left: 10px;
-}
 
-.add-filter-menu {
-  float: right;
-  padding-right: 5px;
-}
-
-.add-filter-menu > div > span:hover {
-  background: #ddd;
-}
-
-.add-filter-menu > div > span {
-  font-size: 16px;
-  cursor: pointer;
-  padding: 3px;
-
-  border-radius: 50%;
-}
-
-.no-filters-to-add {
-  display: none;
-}
-
-.no-filters-to-add:first-child {
-  display: block;
-  padding-left: 10px;
+  > * {
+    display: inline-block;
+    margin-top: $filter-panel-top-margin;
+  }
 }

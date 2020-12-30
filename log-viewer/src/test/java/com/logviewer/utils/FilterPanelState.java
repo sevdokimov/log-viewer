@@ -1,7 +1,5 @@
 package com.logviewer.utils;
 
-import com.logviewer.data2.Filter;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +12,7 @@ public class FilterPanelState {
 
     private Boolean exceptionsOnly;
 
-    private Filter[] namedFilters;
+    private GroovyFilter[] groovyFilters;
 
     private DateFilter date;
     private ThreadFilter thread;
@@ -28,17 +26,17 @@ public class FilterPanelState {
         return this;
     }
 
-    public Filter[] getNamedFilters() {
-        return namedFilters;
-    }
-
-    public FilterPanelState setNamedFilters(Filter ... namedFilters) {
-        this.namedFilters = namedFilters;
+    public FilterPanelState setLevel(List<String> level) {
+        this.level = level;
         return this;
     }
 
-    public FilterPanelState setLevel(List<String> level) {
-        this.level = level;
+    public GroovyFilter[] getGroovyFilters() {
+        return groovyFilters;
+    }
+
+    public FilterPanelState groovyFilter(GroovyFilter ... filters) {
+        this.groovyFilters = filters;
         return this;
     }
 
@@ -103,6 +101,32 @@ public class FilterPanelState {
         private String[] excludes;
 
         private String[] includes;
+    }
+
+    public static class GroovyFilter {
+        private String id;
+
+        private String name;
+
+        private String script;
+
+        public GroovyFilter(String id, String name, String script) {
+            this.id = id;
+            this.name = name;
+            this.script = script;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getScript() {
+            return script;
+        }
     }
 
     public static class DateFilter {

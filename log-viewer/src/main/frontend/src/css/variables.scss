@@ -8,6 +8,8 @@ $top-element-border-radius: 2px;
 $close-icon-color: #800;
 $top-filter-closer-size: 15px;
 
+$filter-panel-top-margin: 3px;
+
 @mixin log-text {
   word-break: break-all;
   white-space: pre-wrap;

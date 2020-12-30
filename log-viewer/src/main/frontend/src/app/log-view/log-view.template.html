@@ -1,6 +1,36 @@
 <div class="search-bar">
 
     <div class="right-top-panel">
+        <div class="add-filter-menu">
+            <div dropdown class="dropdown">
+                <span data-toggle="dropdown" dropdownToggle class="add-filter-button">
+                    + Add filter
+                </span>
+
+                <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
+                    <a id="add-date-filter" class="dropdown-item" href="#"
+                       *ngIf="!filterPanelStateService.getFilterState().date && filterPanelStateService.activeFilterEditors.dateRange"
+                       (click)="filterPanelStateService.addDateFilter()">
+                        Date filter
+                    </a>
+                    <a id="add-thread-filter" class="dropdown-item" href="#"
+                       *ngIf="!filterPanelStateService.getFilterState().thread && filterPanelStateService.activeFilterEditors.thread"
+                       (click)="filterPanelStateService.addThreadFilter()">
+                        Thread filter
+                    </a>
+                    <a id="add-stacktrace-filter" class="dropdown-item" href="#"
+                       *ngIf="!filterPanelStateService.getFilterState().exceptionsOnly"
+                       (click)="filterPanelStateService.addStacktraceFilter()">
+                        Events containing a stacktrace
+                    </a>
+                    <a id="add-groovy-filter" class="dropdown-item" href="#"
+                       (click)="filterPanelStateService.addGroovyFilter()">
+                        Groovy filter
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown file-list-block">
             <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
                 <span id="successFileCount" title="Successfully opened files"
@@ -12,14 +42,6 @@
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses"></sl-log-list-panel>
-            </div>
-        </div>
-
-        <div #filtersDd id="filters-dd" dropdown [autoClose]="false"
-             class="dropdown top-panel-dropdown">
-            <span data-toggle="dropdown" dropdownToggle>Groovy Filters <i class="fas fa-caret-down"></i></span>
-            <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
-                <sl-filter-panel (apply)="namedFilterDropDown.hide()"></sl-filter-panel>
             </div>
         </div>
 
@@ -37,17 +59,18 @@
         </div>
     </div>
 
-    <div class="search-field">
-        <div class="input-group">
-            <input id="filterInput" type="text"
-                   class="form-control"
-                   placeholder="search..."
-                   [title]="searchRegexError ? searchRegexError : ''"
-                   [class.search-invalid-regex]="searchRegexError"
-                   (keyup)="filterInputKeyUp($event)"
-                   (keydown)="filterInputKeyDown($event)">
+    <div class="left-top-panel">
+        <div class="search-field">
+            <div class="input-group">
+                <input id="filterInput" type="text"
+                       class="form-control"
+                       placeholder="search..."
+                       [title]="searchRegexError ? searchRegexError : ''"
+                       [class.search-invalid-regex]="searchRegexError"
+                       (keyup)="filterInputKeyUp($event)"
+                       (keydown)="filterInputKeyDown($event)">
 
-            <div class="input-group-append">
+                <div class="input-group-append">
                 <span id="match-cases"
                       class="input-group-text search-option" title="Match Case"
                       (click)="caseSensitiveClick()"
@@ -56,8 +79,8 @@
 
                     <div class="search-option-highlighter"></div>
                 </span>
-            </div>
-            <div class="input-group-append">
+                </div>
+                <div class="input-group-append">
                 <span id="match-regex"
                       class="input-group-text search-option" title="Regexp mode"
                       (click)="regexModeClick()"
@@ -66,11 +89,10 @@
 
                     <div class="search-option-highlighter"></div>
                 </span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <span class="prev-next-panel">
         <img *ngIf="!searchHideUnmatched"
              id="findPrevArrow" src="img/previousOccurrence.png" title="Previous Occurrence (Shift+F3)"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
@@ -84,13 +106,15 @@
             <img id="applySearchFilter" src="img/apply-search-filter.png" width="20" title="Apply filter (F3)"
                  class="toolIcon" [class.tooliconDisabled]="!appliedFilterOutdated()"
                  (click)="applySearchFilter()">
-            
+
             <img src="img/nextOccurrence.png" class="toolIcon" style="visibility: hidden;">
         </span>
-    </span>
 
-    <input id="hide-unmatched" type="checkbox"
-           [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()"> <label for="hide-unmatched" class="non-bold-label">Hide unmatched</label>
+        <input id="hide-unmatched" type="checkbox"
+               [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()"> <label for="hide-unmatched"
+                                                                                                  class="non-bold-label">Hide
+        unmatched</label>
+    </div>
 
     <lv-top-filter></lv-top-filter>
 </div>

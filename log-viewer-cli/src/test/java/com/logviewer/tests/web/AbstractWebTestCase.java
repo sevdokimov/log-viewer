@@ -145,6 +145,12 @@ public abstract class AbstractWebTestCase {
         });
     }
 
+    protected void notExist(@NonNull WebElement element, @NonNull By by) {
+        noImplicitWait(() -> {
+            assert element.findElements(by).isEmpty();
+        });
+    }
+
     protected void noImplicitWait(Runnable run) {
         noImplicitWait(Executors.callable(run));
     }
@@ -297,16 +303,6 @@ public abstract class AbstractWebTestCase {
         } catch (UnsupportedFlavorException | IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    protected void filterState(int index, boolean enabled) {
-        driver.findElementById("filters-dd").click();
-
-        WebElement filterCheckbox = driver.findElementByCssSelector(".filter-table > tr:nth-child(" + (index + 1) + ") > td:first-child > input");
-        if (enabled != Boolean.parseBoolean(filterCheckbox.getAttribute("checked")))
-            driver.executeScript("arguments[0].click()", filterCheckbox);
-        
-        driver.executeScript("arguments[0].click()", driver.findElementByXPath("//sl-filter-panel/form/button[@type='submit']"));
     }
 
     protected WebElement recordByText(@NonNull String text) {

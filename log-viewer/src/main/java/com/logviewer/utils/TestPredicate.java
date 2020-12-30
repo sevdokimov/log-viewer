@@ -19,8 +19,7 @@ public class TestPredicate implements RecordPredicate {
 
     private static final Set<Record> waited = new HashSet<>();
 
-    @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public static void handle(Record record) {
         try {
             synchronized (TestPredicate.class) {
                 boolean added = false;
@@ -48,7 +47,11 @@ public class TestPredicate implements RecordPredicate {
         } catch (InterruptedException e) {
             throw new RuntimeInterruptedException(e);
         }
+    }
 
+    @Override
+    public boolean test(Record record, LogFilterContext ctx) {
+        handle(record);
         return true;
     }
 

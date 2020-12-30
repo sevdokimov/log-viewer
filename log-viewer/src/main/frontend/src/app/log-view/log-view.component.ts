@@ -37,7 +37,6 @@ import {
     UiConfigValidator
 } from './backend-events';
 import * as $ from 'jquery';
-import {BsDropdownDirective} from 'ngx-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {HttpClient} from '@angular/common/http';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
@@ -69,9 +68,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     records: ElementRef;
     @ViewChild('loadingProgressTop', {static: true})
     loadingProgressTop: ElementRef;
-
-    @ViewChild('filtersDd', { read: BsDropdownDirective })
-    namedFilterDropDown: BsDropdownDirective;
 
     @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent;
 
@@ -131,7 +127,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         public fwService: FavoritesService,
         private toastr: ToastrService,
         private contextMenuService: ContextMenuService,
-        private filterPanelStateService: FilterPanelStateService,
+        public filterPanelStateService: FilterPanelStateService,
         public contextMenuHandler: ContextMenuHandler,
     ) {
         this.filterPanelStateService.currentRecords = this.m;

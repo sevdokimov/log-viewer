@@ -139,10 +139,9 @@
 
 .search-bar {
   background: $top-panel-background;
-  padding: 2px 3px 4px 4px;
+  padding: 0 3px 4px 4px;
   border-bottom: 1px solid black;
   border-radius: 4px;
-  flex-grow: 0;
 }
 
 #filterInput {
@@ -243,15 +242,18 @@
   cursor: pointer;
 }
 
+.left-top-panel {
+  display: inline-block;
+  white-space: nowrap;
+
+  padding-top: $filter-panel-top-margin;
+}
+
 .right-top-panel {
   float: right;
   display: flex;
 
-  padding: 0 3px;
-
-  #filters-dd {
-    padding-right: 10px;
-  }
+  padding-top: $filter-panel-top-margin;
 }
 
 
@@ -312,17 +314,14 @@
   background-color: #fdd;
 }
 
-.prev-next-panel {
-  padding: 0 3px;
-  white-space: nowrap;
-}
-
 .has-problems-files {
   color: #e33;
 }
 
 .search-field {
   display: inline-block;
+
+  padding-right: 2px;
 
   input {
     padding: 1px 5px;
@@ -360,4 +359,23 @@
 .menu-item-thread {
   font-family: monospace;
   color: black;
+}
+
+.add-filter-menu {
+  float: right;
+  padding-right: 10px;
+}
+
+.add-filter-button:hover {
+  background: #ddd;
+}
+
+.add-filter-button {
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+
+  border-radius: 10px;
 }

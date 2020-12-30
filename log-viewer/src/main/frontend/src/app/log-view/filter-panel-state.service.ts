@@ -1,14 +1,16 @@
 import {EventEmitter, Injectable} from '@angular/core';
-import {CompositeRecordPredicate, NotPredicate, Predicate} from '@app/log-view/predicates';
+import {Predicate} from '@app/log-view/predicates';
 import {LogFile} from '@app/log-view/log-file';
 import {Md5} from 'ts-md5';
 import {HttpClient} from '@angular/common/http';
 import {LevelFilterDescription} from '@app/log-view/top-filters/level-list/LevelFilterDescription';
-import * as equal from 'fast-deep-equal';
 import {ExceptionOnlyFilterFactory} from '@app/log-view/top-filters/exception-only/exception-only-filter-factory';
 import {DateIntervalFilterFactory} from '@app/log-view/top-filters/date-interval/date-interval-filter-factory';
 import {Record} from '@app/log-view/record';
 import {ThreadFilterFactory} from '@app/log-view/top-filters/thread-filter/thread-filter-factory';
+import {GroovyFilterFactory} from '@app/log-view/top-filters/groovy-filter/groovy-filter-factory';
+import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
+import * as $ from 'jquery';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -27,11 +29,15 @@ export class FilterPanelStateService {
 
     activeFilterEditors: {[key: string]: FilterFactory} = {};
 
+    permanentFilters: FilterFactory[] = [new GroovyFilterFactory(), new ExceptionOnlyFilterFactory()];
+
     filterChanges = new EventEmitter<FilterState>();
 
     private updating: boolean;
 
     currentRecords: Record[];
+
+    openedDropdown: FilterWithDropdown;
 
     constructor(private http: HttpClient) {
     }
@@ -81,10 +87,6 @@ export class FilterPanelStateService {
             this.activeFilterEditors.level = new LevelFilterDescription(['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'],
                 'level');
         }
-
-        this.activeFilterEditors.namedFilters = new NamedFilterFilterFactory();
-
-        this.activeFilterEditors.exceptionOnly = new ExceptionOnlyFilterFactory();
 
         if (!logs.find(l => l.connected && !l.hasFullDate)) {
             this.activeFilterEditors.dateRange = new DateIntervalFilterFactory();
@@ -136,7 +138,11 @@ export class FilterPanelStateService {
     getActiveFilters(): Predicate[] {
         let res: Predicate[] = [];
 
-        for (const  factory of Object.values(this.activeFilterEditors)) {
+        for (const factory of Object.values(this.activeFilterEditors)) {
+            factory.addFilters(res, this._state);
+        }
+
+        for (const factory of this.permanentFilters) {
             factory.addFilters(res, this._state);
         }
 
@@ -152,7 +158,66 @@ export class FilterPanelStateService {
             }
         }
 
+        for (const factory of this.permanentFilters) {
+            if (!factory.compareFilterState(this._state, other)) {
+                return false;
+            }
+        }
+
         return true;
+    }
+
+    addDateFilter() {
+        this.updateFilterState(state => {
+            state.date = {};
+        });
+
+        setTimeout(() => $('lv-date-interval .closeable-filter > span')[0]?.click(), 0);
+
+        return false;
+    }
+
+    addThreadFilter() {
+        this.updateFilterState(state => {
+            state.thread = {};
+        });
+
+        setTimeout(() => $('lv-thread-filter .closeable-filter > span')[0]?.click(), 0);
+
+        return false;
+    }
+
+    addStacktraceFilter() {
+        this.updateFilterState(state => {
+            state.exceptionsOnly = true;
+        });
+
+        return false;
+    }
+
+    addGroovyFilter() {
+        let id: string;
+
+        this.updateFilterState(state => {
+            if (!state.groovyFilters) {
+                state.groovyFilters = [];
+            }
+
+            let array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+
+            id = '' + array[0];
+
+            state.groovyFilters.push({
+                id,
+                name: '',
+                script: '_.contains("some substring") || _ ==~ /some regexp \d+/ || _.length() > 0',
+            });
+        });
+
+        setTimeout(() => $('lv-groovy-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
+
+        return false;
     }
 }
 
@@ -167,7 +232,7 @@ export interface FilterState {
 
     exceptionsOnly?: boolean;
 
-    namedFilters?: Filter[];
+    groovyFilters?: GroovyFilter[];
 
     date?: {
         startDate?: number;
@@ -177,41 +242,10 @@ export interface FilterState {
     thread?: {includes?: string[], excludes?: string[]};
 }
 
-export interface Filter {
-    name?: string;
-    enabled?: boolean;
-    predicate: Predicate;
-}
+export interface GroovyFilter {
+    id: string;
 
-class NamedFilterFilterFactory implements FilterFactory {
-    addFilters(res: Predicate[], state: FilterState): void {
-        if (state.namedFilters) {
-            let activeFilters: Predicate[] = [];
+    name: string;
 
-            for (let f of state.namedFilters) {
-                if (f.enabled && f.predicate) {
-                    activeFilters.push(f.predicate);
-                }
-            }
-
-            if (activeFilters.length > 0) {
-                let compoundFilter: Predicate;
-                if (activeFilters.length === 1) {
-                    compoundFilter = activeFilters[0];
-                } else {
-                    compoundFilter = <CompositeRecordPredicate>{
-                        type: 'CompositeRecordPredicate',
-                        isAnd: false,
-                        predicates: activeFilters,
-                    };
-                }
-
-                res.push(<NotPredicate>{type: 'NotPredicate', delegate: compoundFilter});
-            }
-        }
-    }
-
-    compareFilterState(state1: FilterState, state2: FilterState): boolean {
-        return equal(state1.namedFilters || [], state2.namedFilters || []);
-    }
+    script: string;
 }

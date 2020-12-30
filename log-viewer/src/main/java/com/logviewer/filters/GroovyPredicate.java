@@ -103,6 +103,9 @@ public class GroovyPredicate implements RecordPredicate {
             if (Record.WHOLE_LINE.equals(name))
                 return record.getMessage();
 
+            if ("$event".equals(name))
+                return record;
+
             return ctx.getFieldValue(record, name);
         }
 
@@ -114,6 +117,9 @@ public class GroovyPredicate implements RecordPredicate {
         @Override
         public boolean hasVariable(String name) {
             if (Record.WHOLE_LINE.equals(name))
+                return true;
+
+            if ("$event".equals(name))
                 return true;
 
             return ctx.findFieldIndexByName(name) >= 0;
