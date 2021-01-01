@@ -30,6 +30,8 @@ export class LvTextFilterComponent extends FilterWithDropdown {
 
     includeExclude: string;
 
+    regexpError: string;
+
     constructor(filterPanelStateService: FilterPanelStateService) {
         super(filterPanelStateService);
     }
@@ -72,6 +74,10 @@ export class LvTextFilterComponent extends FilterWithDropdown {
     }
 
     onApply() {
+        if (this.regexpError) {
+            return false;
+        }
+
         this.filterPanelStateService.updateFilterState(state => {
             let f = this.findFilter(state);
             if (!f) {
@@ -111,6 +117,20 @@ export class LvTextFilterComponent extends FilterWithDropdown {
             this.onApply();
             event.preventDefault();
             return false;
+        }
+    }
+
+    checkRegexp() {
+        if (!this.pattern.regex) {
+            this.regexpError = null;
+        } else {
+            try {
+                // tslint:disable-next-line:no-unused-expression
+                new RegExp(this.pattern.s);
+                this.regexpError = null;
+            } catch (e) {
+                this.regexpError = e.message || 'Invalid regexp';
+            }
         }
     }
 }

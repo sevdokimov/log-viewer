@@ -17,8 +17,9 @@
   font-size: 12px;
 }
 
-.script-container {
-  margin: 2px 0;
+.regexp-error {
+  color: #a00;
+  font-size: 12px;
 }
 
 .script-info {
@@ -40,7 +41,7 @@
 }
 
 .action-panel {
-  padding-top: 15px;
+  padding-top: 10px;
   display: flex;
 }
 

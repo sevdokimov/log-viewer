@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class TextFilterTest extends AbstractWebTestCase {
 
     public static final By HEADERS = By.cssSelector("lv-text-filter .top-panel-dropdown");
-    public static final By TEXTAREA = By.cssSelector(".script-container textarea");
+    public static final By TEXTAREA = By.tagName("textarea");
     public static final By APPLY = By.cssSelector(".action-panel button[name=\"apply-button\"]");
     public static final By ADD_TEXT_FILTER = By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Text')]");
     public static final By MENU = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Text:')]");
@@ -60,7 +60,7 @@ public class TextFilterTest extends AbstractWebTestCase {
         driver.findElement(ADD_TEXT_FILTER).click();
 
         assertThat(driver.findElements(HEADERS).size(), is(1));
-        driver.findElement(By.cssSelector("lv-text-filter .lv-dropdown-panel .script-container textarea:focus")); // Dropdown opened automatically
+        driver.findElement(By.cssSelector("lv-text-filter .lv-dropdown-panel textarea:focus")); // Dropdown opened automatically
 
         new Actions(driver).sendKeys("exec-100").perform();
 
@@ -68,7 +68,7 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         filter.findElement(APPLY).click();
 
-        notExist(By.cssSelector("lv-text-filter .lv-dropdown-panel .script-container"));
+        notExist(By.cssSelector("lv-text-filter .lv-dropdown-panel"));
         checkRecordCount(3);
 
         checkSaveOnEnter(filter);
@@ -96,7 +96,7 @@ public class TextFilterTest extends AbstractWebTestCase {
     private void growAndRevert(WebElement filter) {
         filter.click();
 
-        WebElement textArea = filter.findElement(By.cssSelector(".script-container textarea"));
+        WebElement textArea = filter.findElement(By.cssSelector("textarea"));
         Dimension size = textArea.getSize();
 
         assert size.height > 10 && size.height < 100;
@@ -121,7 +121,7 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         filter.click();
 
-        textArea = filter.findElement(By.cssSelector(".script-container textarea"));
+        textArea = filter.findElement(By.cssSelector("textarea"));
 
         assertThat(textArea.getAttribute("value"), is(initValue));
 
@@ -220,6 +220,46 @@ public class TextFilterTest extends AbstractWebTestCase {
         filter.findElement(By.name("match-case-checkbox")).click();
         filter.findElement(APPLY).click();
         checkRecordCount(0);
+    }
+
+    @Test
+    public void regexpError() {
+        setFormat();
+        openLog("thread-filter-test.log");
+
+        notExist(HEADERS);
+
+        addFilterMenuClick();
+        driver.findElement(ADD_TEXT_FILTER).click();
+
+        WebElement filter = driver.findElement(HEADERS);
+
+        new Actions(driver).sendKeys(filter.findElement(TEXTAREA), "aaa").perform();
+        filter.findElement(By.name("regex-checkbox")).click();
+
+        assert filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        new Actions(driver).sendKeys(filter.findElement(TEXTAREA), "(").perform();
+
+        assert !filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        filter.findElement(By.name("regex-checkbox")).click();
+
+        assert filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        filter.findElement(By.name("regex-checkbox")).click();
+
+        assert !filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        new Actions(driver).sendKeys(filter.findElement(TEXTAREA), ")").perform();
+
+        assert filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        new Actions(driver).sendKeys(filter.findElement(TEXTAREA), "(").perform();
+
+        assert !filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
+
+        assert filter.findElement(APPLY).isDisplayed();
     }
 
     @Test

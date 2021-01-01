@@ -47,7 +47,7 @@
                     </div>
                     <div class="form-check form-check-inline" title="Use text as a regexp">
                         <input id="regex-checkbox" name="regex-checkbox" class="form-check-input" type="checkbox"
-                               [(ngModel)]="pattern.regex">
+                               [(ngModel)]="pattern.regex" (change)="checkRegexp()">
 
                         <label class="form-check-label" for="regex-checkbox">
                             Regexp
@@ -55,14 +55,17 @@
                     </div>
                 </div>
 
-                <div class="script-container">
-                    <textarea #textInput name="text" autosize [minRows]="2" maxRows="20" class="form-control"
-                              [(ngModel)]="pattern.s" (keydown)="editorKeyDown($event)"></textarea>
+                <textarea #textInput name="text" autosize [minRows]="2" maxRows="20" class="form-control"
+                          [(ngModel)]="pattern.s" (ngModelChange)="checkRegexp()"
+                          (keydown)="editorKeyDown($event)"></textarea>
+
+                <div class="regexp-error">
+                    {{regexpError}}&nbsp;
                 </div>
             </div>
 
             <div class="action-panel">
-                <button mat-stroked-button title="Apply filter" (click)="onApply()"
+                <button mat-stroked-button title="Apply filter" (click)="onApply()" [disabled]="!!regexpError"
                         name="apply-button">
                     Save
                 </button>
