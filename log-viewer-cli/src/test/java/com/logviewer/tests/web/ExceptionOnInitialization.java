@@ -9,6 +9,7 @@ import com.logviewer.data2.LogPath;
 import com.logviewer.data2.LogReader;
 import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,7 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
 
         openLog("1-7.log");
 
-        WebElement errorElement = driver.findElementByClassName("io-error");
+        WebElement errorElement = driver.findElement(By.className("io-error"));
         assert errorElement.getText().contains("java.lang.RuntimeException: Problem!!!");
     }
 

@@ -273,7 +273,7 @@ public class TextFilterTest extends AbstractWebTestCase {
     }
 
     private void addFilterMenuClick() {
-        driver.findElementByCssSelector(".add-filter-menu .add-filter-button").click();
+        driver.findElement(By.cssSelector(".add-filter-menu .add-filter-button")).click();
     }
 
 }

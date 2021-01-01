@@ -40,7 +40,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
     public void logNotFound() {
         openUrl("log", "path", "/notExistingLog");
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Log file does not exist");
     }
 
@@ -50,7 +50,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         openUrl("log", "path", "/notExistingLog.log", "path", "/notExists2.log");
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Log file does not exist");
     }
 
@@ -58,7 +58,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
     public void emptyLog() {
         openLog("empty.log");
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Log is empty");
     }
 
@@ -72,7 +72,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         openUrl("log", "path", emptyLog1, "path", emptyLog2.toString());
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Log is empty");
     }
 
@@ -84,7 +84,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         openUrl("log", "path", emptyLog1, "path", "/mot-found.log");
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Log is empty") : errorMsg.getText();
     }
 
@@ -94,7 +94,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         String path2 = getDataFilePath("1-100.log");
         openUrl("log", "path", path1, "path", path2);
 
-        WebElement errorMsg = driver.findElementByClassName("no-record-msg");
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Failed to read log");
 
         assert driver.findElementsByCssSelector(".file-list .file-error").size() == 2;
@@ -108,7 +108,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         String path2 = getDataFilePath("1-100.log");
         openUrl("log", "path", path1 + ".blabla.log", "path", path2 + ".blabla.log");
 
-        driver.findElementByClassName("file-not-found"); // Wait for rendering
+        driver.findElement(By.className("file-not-found")); // Wait for rendering
         assertEquals(2, driver.findElementsByClassName("file-not-found").size());
     }
 
@@ -121,7 +121,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         openUrl("log", "path", path1, "path", path2);
 
-        driver.findElementByClassName("file-error"); // Wait for rendering
+        driver.findElement(By.className("file-error")); // Wait for rendering
         List<WebElement> elements = driver.findElementsByClassName("file-error");
         assertEquals(2, elements.size());
 

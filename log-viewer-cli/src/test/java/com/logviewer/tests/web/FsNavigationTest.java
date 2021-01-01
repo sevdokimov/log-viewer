@@ -38,7 +38,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
         try {
             openUrl("/");
 
-            driver.findElementByXPath("//h4[text()='Favorites']");
+            driver.findElement(By.xpath("//h4[text()='Favorites']"));
 
             notExist(By.className("dir-content-panel"));
         } finally {
@@ -191,7 +191,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
         new Actions(driver).sendKeys("f").perform();
 
         assertEquals(Arrays.asList("fff.log", "fff1.log"), fileNames());
-        WebElement filterInput = driver.findElementByCssSelector(".search-pane .filter-input");
+        WebElement filterInput = driver.findElement(By.cssSelector(".search-pane .filter-input"));
         assertEquals("f", filterInput.getAttribute("value"));
     }
 
@@ -219,8 +219,8 @@ public class FsNavigationTest extends AbstractWebTestCase {
     public void clearSearchAfterNavigation() {
         openPage();
 
-        driver.findElementByCssSelector(".search-pane .tool-button").click();
-        WebElement filterInput = driver.findElementByCssSelector(".search-pane .filter-input");
+        driver.findElement(By.cssSelector(".search-pane .tool-button")).click();
+        WebElement filterInput = driver.findElement(By.cssSelector(".search-pane .filter-input"));
         new Actions(driver).sendKeys("searc").perform();
 
         assertEquals(Collections.singletonList("search"), fileNames());
@@ -231,7 +231,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
 
         assertEquals(6, fileNames().size());
 
-        driver.findElementByCssSelector(".search-pane .tool-button").click();
+        driver.findElement(By.cssSelector(".search-pane .tool-button")).click();
         filterInput.isDisplayed();
         new Actions(driver).sendKeys("aaa").perform();
 
@@ -245,8 +245,8 @@ public class FsNavigationTest extends AbstractWebTestCase {
         openPage();
 
         new Actions(driver).doubleClick(findFile("search")).perform();
-        driver.findElementByCssSelector(".search-pane .tool-button").click();
-        WebElement filterInput = driver.findElementByCssSelector(".search-pane .filter-input");
+        driver.findElement(By.cssSelector(".search-pane .tool-button")).click();
+        WebElement filterInput = driver.findElement(By.cssSelector(".search-pane .filter-input"));
         new Actions(driver).sendKeys("ab").perform();
 
         assertEquals(Arrays.asList("ab.log", "abc.log", "abc1.log"), fileNames());
@@ -273,8 +273,8 @@ public class FsNavigationTest extends AbstractWebTestCase {
 
         new Actions(driver).doubleClick(findFile("search")).perform();
 
-        driver.findElementByCssSelector(".search-pane .tool-button").click();
-        driver.findElementByCssSelector(".search-pane .filter-input");
+        driver.findElement(By.cssSelector(".search-pane .tool-button")).click();
+        driver.findElement(By.cssSelector(".search-pane .filter-input"));
         new Actions(driver).sendKeys("ab").perform(); // check that focus was not lost
 
         assertEquals(Arrays.asList("ab.log", "abc.log", "abc1.log"), fileNames());
@@ -287,7 +287,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
 
         new Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
 
-        assertEquals("a", driver.findElementByCssSelector(".search-pane .filter-input").getAttribute("value"));
+        assertEquals("a", driver.findElement(By.cssSelector(".search-pane .filter-input")).getAttribute("value"));
 
         assertEquals(Collections.nCopies(6, "a"), driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
                 .map(WebElement::getText).collect(Collectors.toList()));
@@ -306,7 +306,7 @@ public class FsNavigationTest extends AbstractWebTestCase {
         // don't lost focus after click to a file
         findFile("ab.log").click();
         checkSelectedFile("ab.log");
-        driver.findElementByCssSelector(".search-pane .filter-input:focus");
+        driver.findElement(By.cssSelector(".search-pane .filter-input:focus"));
     }
 
     private void openPage() {
@@ -334,14 +334,14 @@ public class FsNavigationTest extends AbstractWebTestCase {
     public void openFilterPanel() throws InterruptedException {
         openPage();
 
-        WebElement searchToggler = driver.findElementByCssSelector(".search-pane .tool-button");
+        WebElement searchToggler = driver.findElement(By.cssSelector(".search-pane .tool-button"));
         notExist(By.cssSelector(".search-pane .tool-button.tool-button-pressed"));
 
         searchToggler.click();
 
         driver.findElementsByCssSelector(".search-pane .tool-button.tool-button-pressed");
 
-        WebElement filterInput = driver.findElementByCssSelector(".search-pane .filter-input:focus");
+        WebElement filterInput = driver.findElement(By.cssSelector(".search-pane .filter-input:focus"));
 
         searchToggler.click();
 
@@ -353,15 +353,15 @@ public class FsNavigationTest extends AbstractWebTestCase {
     }
 
     private WebElement checkSelectedFile(String expectedSelectedFile) {
-        return driver.findElementByXPath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name'][normalize-space(.)='" + expectedSelectedFile + "']");
+        return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name'][normalize-space(.)='" + expectedSelectedFile + "']"));
     }
 
     private WebElement selectedFile() {
-        return driver.findElementByXPath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name']");
+        return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name']"));
     }
 
     private WebElement findFile(String name) {
-        return driver.findElementByXPath("//table[contains(@class,'file-list')]//td[contains(@class, 'name')][normalize-space(.) = '" + name + "']");
+        return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//td[contains(@class, 'name')][normalize-space(.) = '" + name + "']"));
     }
 
     private Path navigationRoot() {
@@ -383,6 +383,6 @@ public class FsNavigationTest extends AbstractWebTestCase {
     }
 
     private String currentPath() {
-        return driver.findElementByClassName("current-path").getText().replaceAll("\\s+", "");
+        return driver.findElement(By.className("current-path")).getText().replaceAll("\\s+", "");
     }
 }

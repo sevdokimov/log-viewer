@@ -76,7 +76,7 @@ public class ViewLogIntegrationTest extends AbstractWebTestCase {
 
         openLog("exeception-in-the-end.log");
 
-        WebElement logEnd = driver.findElementByClassName("log-end");
+        WebElement logEnd = driver.findElement(By.className("log-end"));
 
         Thread.sleep(100);
 

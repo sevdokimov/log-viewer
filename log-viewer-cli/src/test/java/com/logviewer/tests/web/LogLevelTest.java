@@ -9,6 +9,7 @@ import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.nio.charset.StandardCharsets;
@@ -37,7 +38,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         openLog("level-log4j.log");
 
-        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
         List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
@@ -51,7 +52,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         openLog("level-logback.log");
 
-        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
         List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
@@ -65,7 +66,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         openLog("level-logback.log");
 
-        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
         List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
@@ -106,7 +107,7 @@ public class LogLevelTest extends AbstractWebTestCase {
         waitFor(() -> getVisibleRecords().matches(".+TRACE.+\n.+FINEST.+\n.+FINER.+\n.+FINE.+\n.+TRACE.+"));
 
         // Test filter items
-        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
         List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(

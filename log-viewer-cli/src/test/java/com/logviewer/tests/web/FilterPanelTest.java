@@ -12,7 +12,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
     public void unknownLog() {
         openLog("1-7.log");
 
-        driver.findElementByTagName("lv-top-filter");
+        driver.findElement(By.tagName("lv-top-filter"));
 
         notExist(By.tagName("lv-exception-only"));
         notExist(By.tagName("lv-date-interval"));
@@ -28,7 +28,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
         ThreadFilterTest.setFormat();
         openLog("thread-filter-test.log");
 
-        driver.findElementByTagName("lv-top-filter");
+        driver.findElement(By.tagName("lv-top-filter"));
 
         notExist(By.tagName("lv-exception-only"));
         notExist(By.tagName("lv-date-interval"));
@@ -58,7 +58,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
     }
 
     private void addFilterMenuClick() {
-        driver.findElementByCssSelector(".add-filter-menu .add-filter-button").click();
+        driver.findElement(By.cssSelector(".add-filter-menu .add-filter-button")).click();
     }
 
 

@@ -22,16 +22,16 @@ public class ThreadFilterTest extends AbstractWebTestCase {
     public void noFilterIfLogHasNoTimestamp() {
         openLog("1-7.log");
 
-        driver.findElementByTagName("lv-top-filter");
+        driver.findElement(By.tagName("lv-top-filter"));
 
         new Actions(driver).contextClick(lastRecord()).perform();
 
-        driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]");
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]"));
         notExist(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Thread')]"));
     }
 
     private String filterHeader() {
-        return driver.findElementByCssSelector("lv-thread-filter .top-panel-dropdown > span").getText().trim();
+        return driver.findElement(By.cssSelector("lv-thread-filter .top-panel-dropdown > span")).getText().trim();
     }
 
     @Test
@@ -72,16 +72,16 @@ public class ThreadFilterTest extends AbstractWebTestCase {
     }
 
     private void clearFilter(String filterType) {
-        WebElement filterPanel = driver.findElementByTagName(filterType);
+        WebElement filterPanel = driver.findElement(By.tagName(filterType));
         new Actions(driver).moveToElement(filterPanel).perform();
-        WebElement closeIcon = driver.findElementByCssSelector(filterType + " .closeable-filter > .remote-filter-icon");
+        WebElement closeIcon = driver.findElement(By.cssSelector(filterType + " .closeable-filter > .remote-filter-icon"));
         closeIcon.click();
     }
 
     private void rightClickRecord(String recordText) {
         new Actions(driver).contextClick(recordByText(recordText)).perform();
 
-        WebElement menuItem = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Thread')]");
+        WebElement menuItem = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Thread')]"));
 
         new Actions(driver).moveToElement(menuItem).perform();
     }
@@ -172,8 +172,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         rightClickRecord("[2012.01.01 00:04][main] d");
 
-        WebElement show = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only main')]");
-        WebElement hide = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide main')]");
+        WebElement show = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only main')]"));
+        WebElement hide = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide main')]"));
 
         List<WebElement> allMenuItems = show.findElements(By.xpath("../*"));
 
@@ -181,7 +181,7 @@ public class ThreadFilterTest extends AbstractWebTestCase {
     }
 
     @Test
-    public void editThreads() throws InterruptedException {
+    public void editThreads() {
         setFormat();
 
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default",
@@ -194,7 +194,7 @@ public class ThreadFilterTest extends AbstractWebTestCase {
         By dropDown = By.cssSelector("lv-thread-filter > .lv-dropdown-panel");
         notExist(dropDown);
 
-        WebElement threadDropdownOpener = driver.findElementByCssSelector("lv-thread-filter .lv-dropdown-panel-holder > span");
+        WebElement threadDropdownOpener = driver.findElement(By.cssSelector("lv-thread-filter .lv-dropdown-panel-holder > span"));
         threadDropdownOpener.click();
 
         By threadBlocks = By.cssSelector("lv-thread-filter .lv-dropdown-panel .thread-block");

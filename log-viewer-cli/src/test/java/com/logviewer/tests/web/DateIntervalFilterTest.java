@@ -19,18 +19,18 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
     public void noFilterIfLogHasNoTimestamp() {
         openLog("1-7.log");
 
-        driver.findElementByTagName("lv-top-filter");
+        driver.findElement(By.tagName("lv-top-filter"));
 
         notExist(By.tagName("lv-date-interval"));
 
         new Actions(driver).contextClick(lastRecord()).perform();
 
-        driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]");
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]"));
         notExist(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'older')]"));
     }
 
     private String dateFilterHeader() {
-        return driver.findElementByTagName("lv-date-interval").getText().trim();
+        return driver.findElement(By.tagName("lv-date-interval")).getText().trim();
     }
 
     @Test
@@ -101,7 +101,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
     }
 
     private WebElement timeSelectPanel() {
-        return driver.findElementByClassName("time-select-panel");
+        return driver.findElement(By.className("time-select-panel"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         openLog("search.log");
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
 
         assertThat(timeSelectPanel().findElement(By.name("startDate")).getAttribute("value"), is(""));
         assertThat(timeSelectPanel().findElement(By.name("endDate")).getAttribute("value"), is(""));
@@ -125,7 +125,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         assert getRecord().size() == 6;
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
 
         assertThat(timeSelectPanel().findElement(By.name("startDate")).getAttribute("value"), is("2012-01-01 00:39:00"));
         assertThat(timeSelectPanel().findElement(By.name("endDate")).getAttribute("value"), is(""));
@@ -137,7 +137,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
         notExist(By.className("time-select-panel"));
         assert getRecord().size() == 4;
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
         assertThat(timeSelectPanel().findElement(By.name("endDate")).getAttribute("value"), is("2012-01-01 00:42:00"));
     }
 
@@ -148,7 +148,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         openLog("search.log");
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
         timeSelectPanel().findElement(By.name("startDate")).sendKeys("2012-01-01 00:39");
 
         timeSelectPanel().findElement(By.name("apply-button")).click();
@@ -157,7 +157,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         assert getRecord().size() == 6;
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
 
         setValue(timeSelectPanel().findElement(By.name("startDate")), "2012-01-01 00:00");
 
@@ -180,7 +180,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(recordByText("[2012.01.01 00:41][        ::] sss 41 41")).perform();
 
-        driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'older')]").click();
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'older')]")).click();
 
         assert getRecord().size() == 4;
 
@@ -188,7 +188,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(recordByText("[2012.01.01 00:43][      ::::] sss 43 43")).perform();
 
-        driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'newer')]").click();
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'newer')]")).click();
 
         assert getRecord().size() == 3;
         assertThat(dateFilterHeader(), is("2012-01-01 00:41 - 2012-01-01 00:43"));
@@ -201,19 +201,19 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         openLog("search.log");
 
-        driver.findElementByTagName("lv-date-interval").click();
+        driver.findElement(By.tagName("lv-date-interval")).click();
         timeSelectPanel().findElement(By.name("startDate")).sendKeys("2012-05-05 00:39");
         timeSelectPanel().findElement(By.name("endDate")).sendKeys("2012-01-01 00:39");
 
-        driver.findElementByClassName("time-range-error");
+        driver.findElement(By.className("time-range-error"));
 
         timeSelectPanel().findElement(By.name("startDate")).sendKeys(Keys.ENTER);
 
-        driver.findElementByClassName("time-range-error");
+        driver.findElement(By.className("time-range-error"));
 
         timeSelectPanel().findElement(By.name("apply-button")).click();
 
-        driver.findElementByClassName("time-range-error");
+        driver.findElement(By.className("time-range-error"));
 
         timeSelectPanel().findElement(By.className("clear-icon")).click();
 

@@ -390,7 +390,7 @@ public abstract class AbstractWebTestCase {
     }
 
     protected void closeAlert(String classname) {
-        driver.findElementByCssSelector("." + classname + ".ngx-toastr").click();
+        driver.findElement(By.cssSelector("." + classname + ".ngx-toastr")).click();
 
         waitFor(() -> {
             return noImplicitWait(() -> driver.findElementsByCssSelector(".toast-success.ngx-toastr").isEmpty());

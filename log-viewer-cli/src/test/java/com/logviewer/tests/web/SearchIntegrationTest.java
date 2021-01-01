@@ -104,7 +104,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         assertEquals(":::::", join(driver.findElements(By.className("search-result"))));
 
         filterInput.sendKeys("\\");
-        driver.findElementByCssSelector("#filterInput.search-invalid-regex");
+        driver.findElement(By.cssSelector("#filterInput.search-invalid-regex"));
         assert filterInput.getAttribute("title").contains("\\") : filterInput.getAttribute("title");
         notExist(By.className("search-result"));
 
@@ -118,9 +118,9 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         notExist(By.className("search-result"));
 
         filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE, "ss");
-        driver.findElementByClassName("search-result");
+        driver.findElement(By.className("search-result"));
         filterInput.sendKeys("S");
-        driver.findElementByClassName("search-result");
+        driver.findElement(By.className("search-result"));
 
         driver.findElementById("match-cases").click();
 
@@ -131,13 +131,13 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys("\\b");
         notExist(By.className("search-result"));
         driver.findElementById("match-regex").click();
-        driver.findElementByClassName("search-result");
+        driver.findElement(By.className("search-result"));
         driver.findElementById("match-cases").click();
         notExist(By.className("search-result"));
     }
 
     @Test
-    public void searchLong() throws InterruptedException {
+    public void searchLong() {
         openLog("search.log");
         setHeight(5);
         driver.navigate().refresh();

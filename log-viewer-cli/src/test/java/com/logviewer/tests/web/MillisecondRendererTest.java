@@ -6,6 +6,7 @@ import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
 
         openLog("rendering/milliseconds.log");
 
-        driver.findElementByClassName("text-milliseconds"); // wait for rendering
+        driver.findElement(By.className("text-milliseconds")); // wait for rendering
         List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
 
         checkAllMillis(elements);
@@ -37,7 +38,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
 
         openLog("rendering/milliseconds.log");
 
-        driver.findElementByClassName("text-milliseconds"); // wait for rendering
+        driver.findElement(By.className("text-milliseconds")); // wait for rendering
         List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
 
         checkAllMillis(elements);
@@ -50,7 +51,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
 
         openLog("rendering/milliseconds.log");
 
-        driver.findElementByClassName("text-milliseconds"); // wait for rendering
+        driver.findElement(By.className("text-milliseconds")); // wait for rendering
         List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
 
         checkAllMillis(elements);

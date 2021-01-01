@@ -1,6 +1,7 @@
 package com.logviewer.tests.web;
 
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.Arrays;
@@ -14,7 +15,7 @@ public class LinkHighlightingTest extends AbstractWebTestCase {
     public void testLinkHighlighting() {
         openLog("log-with-link.log");
 
-        driver.findElementByClassName("link-in-log");
+        driver.findElement(By.className("link-in-log"));
 
         assertEquals(Arrays.asList("http://localhost:8080/?aaa=bbb&ccc=12", "https://google.com",
                 "https://my-host.com/foo#anchor-w3234"),

@@ -1,6 +1,5 @@
 package com.logviewer.tests.web;
 
-import com.logviewer.data2.LogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
@@ -56,7 +55,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         driver.get(link1);
         assert !recordByText("1").isDisplayed();
         assert recordByText("2").isDisplayed();
-        assertEquals("5", driver.findElementByCssSelector("#records > .selected-line").getText());
+        assertEquals("5", driver.findElement(By.cssSelector("#records > .selected-line")).getText());
 
         notExist(By.id("brokenLinkGoTail"));
 
@@ -106,7 +105,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         assertEquals("[2012.01.01 00:03][      aaaa] sss 3 3", getVisibleRecords());
 
-        driver.findElementByCssSelector("#applySearchFilterBlock .tooliconDisabled");
+        driver.findElement(By.cssSelector("#applySearchFilterBlock .tooliconDisabled"));
 
         filterInput.sendKeys(Keys.BACK_SPACE, Keys.BACK_SPACE, Keys.BACK_SPACE);
 
@@ -116,13 +115,13 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         driver.get(link);
 
-        driver.findElementByCssSelector("#applySearchFilterBlock .tooliconDisabled");
+        driver.findElement(By.cssSelector("#applySearchFilterBlock .tooliconDisabled"));
         filterInput = driver.findElementById("filterInput");
         assertEquals("2012.01.01 00:03", filterInput.getAttribute("value"));
 
         assertEquals("[2012.01.01 00:03][      aaaa] sss 3 3", getVisibleRecords());
 
-        driver.findElementByCssSelector("#hide-unmatched:checked");
+        driver.findElement(By.cssSelector("#hide-unmatched:checked"));
         assertEquals("2012.01.01 00:03", join(driver.findElementsByClassName("search-result")));
     }
 
@@ -158,7 +157,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         openLog("level-logback.log");
 
-        driver.findElementByCssSelector("lv-level-list > div > span").click();
+        driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
         WebElement warn = driver.findElementsByCssSelector(".level-drop-down .level-name").stream().filter(r -> r.getText().equals("WARN")).findFirst().get();
         warn.click();
 

@@ -25,7 +25,7 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         notExist(menuItem);
 
-        WebElement record = driver.findElementByClassName("record");
+        WebElement record = driver.findElement(By.className("record"));
         new Actions(driver).moveToElement(record).perform();
 
         WebElement pointer = record.findElement(By.className("rec-pointer"));

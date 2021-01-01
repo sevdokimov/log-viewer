@@ -22,7 +22,7 @@ public class BracketHighlighterTest extends AbstractWebTestCase {
 
         openLog("rendering/brackets-highlighting.log");
 
-        driver.findElementByClassName("text-milliseconds"); // wait for rendering
+        driver.findElement(By.className("text-milliseconds")); // wait for rendering
         List<WebElement> elements = driver.findElementsByCssSelector(".text-milliseconds, .lv-bracket");
 
         Assert.assertEquals(Arrays.asList("86400000ms", "(", "58532ms", "[", "]", ")", "{", "[", "]", "[", "{",
