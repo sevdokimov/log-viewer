@@ -2,7 +2,6 @@ import {Record} from './record';
 import {SlUtils} from '@app/utils/utils';
 import {LogFile} from '@app/log-view/log-file';
 import {Injectable} from '@angular/core';
-import * as $ from 'jquery';
 import {FilterPanelStateService} from '@app/log-view/filter-panel-state.service';
 
 @Injectable()
@@ -13,6 +12,10 @@ export class ContextMenuHandler {
 
     isThreadMenuItemVisible(item: Item) {
         return item.thread;
+    }
+
+    isTextMenuItemVisible(item: Item) {
+        return item.selectedText;
     }
 
     isDateMenuItemVisible(item: Item) {
@@ -27,7 +30,6 @@ export class ContextMenuHandler {
         let res: Item = {record};
 
         let thread = SlUtils.fieldValueByType(record, logs, 'thread');
-        let threadGroup = null;
         if (thread) {
             res.thread = thread;
             
@@ -38,7 +40,44 @@ export class ContextMenuHandler {
             }
         }
 
+        if (document.getSelection().rangeCount === 1) {
+            let range = document.getSelection().getRangeAt(0);
+
+            if (ContextMenuHandler.isSameRecordElement(range)) {
+                res.selectedText = document.getSelection().toString();
+                res.selectedTextVisible = SlUtils.trimText(res.selectedText, 30);
+            }
+        }
+
         return res;
+    }
+
+    private static isSameRecordElement(range: Range) {
+        let selectionStartRecord = ContextMenuHandler.parentRecordElement(range.startContainer);
+        if (!selectionStartRecord) {
+            return false;
+        }
+
+        let selectionEndRecord = ContextMenuHandler.parentRecordElement(range.endContainer);
+
+        return selectionStartRecord === selectionEndRecord;
+    }
+
+    private static parentRecordElement(e: Node): Element {
+        while (true) {
+            if (!e) {
+                return null;
+            }
+
+            if ((<Element>e).tagName === 'DIV') {
+                let classList = (<Element>e).classList;
+                if (classList && classList.contains('record')) {
+                    return <Element>e;
+                }
+            }
+
+            e = e.parentElement;
+        }
     }
 
     hideEventsByTimestamp(record: Record, next: boolean) {
@@ -57,7 +96,7 @@ export class ContextMenuHandler {
             }
         });
 
-        SlUtils.highlight($('.search-bar lv-date-interval .interval-title')[0]);
+        SlUtils.highlight('.search-bar lv-date-interval .interval-title');
     }
 
     excludeThread(thread: string) {
@@ -72,12 +111,41 @@ export class ContextMenuHandler {
 
             SlUtils.addIfNotExist(state.thread.excludes, thread);
         });
+
+        ContextMenuHandler.highlightThreadFilter();
     }
 
     filterByThread(thread: string) {
         this.filterPanelStateService.updateFilterState(state => {
             state.thread = {includes: [thread]};
         });
+
+        ContextMenuHandler.highlightThreadFilter();
+    }
+
+    private static highlightThreadFilter() {
+        SlUtils.highlight('.search-bar lv-thread-filter .top-panel-dropdown > span');
+    }
+
+    filterByText(text: string, exclude: boolean) {
+        let id = this.filterPanelStateService.generateRandomId();
+
+        this.filterPanelStateService.updateFilterState(state => {
+            if (!state.textFilters) {
+                state.textFilters = [];
+            }
+
+            state.textFilters.push({
+                id,
+                name: '',
+                pattern: {
+                    s: text,
+                },
+                exclude,
+            });
+        });
+
+        SlUtils.highlight('.search-bar lv-text-filter .top-panel-dropdown[filter-id="' + id + '"]');
     }
 }
 
@@ -86,4 +154,6 @@ export interface Item {
     thread?: string;
     threadGroup?: string;
     threadGroupHtml?: string;
+    selectedText?: string;
+    selectedTextVisible?: string;
 }

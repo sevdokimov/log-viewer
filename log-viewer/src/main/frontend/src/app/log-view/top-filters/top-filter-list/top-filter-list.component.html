@@ -11,3 +11,7 @@
 <lv-groovy-filter *ngFor="let g of filterPanelStateService.getFilterState().groovyFilters" [filterId]="g.id">
     
 </lv-groovy-filter>
+
+<lv-text-filter *ngFor="let f of filterPanelStateService.getFilterState().textFilters" [filterId]="f.id">
+    
+</lv-text-filter>

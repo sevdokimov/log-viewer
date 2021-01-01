@@ -94,8 +94,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide \"exec-1\"')]");
-        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide \"exec-*\"')]");
+        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide exec-1')]");
+        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide exec-*')]");
         notExist(submenu);
         notExist(submenuWildcard);
 
@@ -131,8 +131,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only \"exec-1\"')]");
-        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only \"exec-*\"')]");
+        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only exec-1')]");
+        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only exec-*')]");
         notExist(submenu);
         notExist(submenuWildcard);
 
@@ -172,8 +172,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         rightClickRecord("[2012.01.01 00:04][main] d");
 
-        WebElement show = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only \"main\"')]");
-        WebElement hide = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide \"main\"')]");
+        WebElement show = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only main')]");
+        WebElement hide = driver.findElementByXPath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide main')]");
 
         List<WebElement> allMenuItems = show.findElements(By.xpath("../*"));
 

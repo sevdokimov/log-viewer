@@ -351,6 +351,14 @@ public abstract class AbstractWebTestCase {
         return record.getLocation().y - logPanePosition;
     }
 
+    protected void checkRecordCount(int number) {
+        if (number == 0) {
+            driver.findElement(By.cssSelector(".empty-log-message .no-record-msg"));
+        } else {
+            waitFor(() -> getRecord().size() == number);
+        }
+    }
+
     protected List<WebElement> getRecord() {
         return driver.findElementsByCssSelector("#records > .record");
     }
@@ -405,5 +413,9 @@ public abstract class AbstractWebTestCase {
         }
 
         throw new IllegalArgumentException("Invalid date format: " + date);
+    }
+
+    protected static void setValue(@NonNull WebElement element, @NonNull String value) {
+        driver.executeScript("arguments[0].value='" + value.replaceAll("['\\\\]", "\\\\$0").replace("\n", "\\n") + "';", element);
     }
 }

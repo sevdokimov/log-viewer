@@ -1,0 +1,77 @@
+<div #groovyDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter"
+     [attr.filter-id]="filterId" [class.modified]="hasChanges()">
+
+    <span (click)="toggleFilterPanel()">
+        <span *ngIf="titleName">{{titleName}}</span>
+
+        <span *ngIf="!titleName">
+            Text: <span class="header-script">{{titleText}}</span>
+        </span>
+        &nbsp;<i class="fas fa-caret-down"></i>
+    </span>
+    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    
+    <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
+        <form class="text-filter" (ngSubmit)="onApply()">
+            <div class="position-relative">
+                <mat-form-field class="filter-name" appearance="fill">
+                    <mat-label>Filter name <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
+                    <input name="name-filter-input" [(ngModel)]="name" matInput>
+                </mat-form-field>
+
+                <div class="include-exclude-group">
+                    <label>
+                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="include"> Show only matched
+                    </label>
+                    <label>
+                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="exclude"> Hide matched
+                    </label>
+                </div>
+            </div>
+
+            <div class="position-relative">
+                <span class="small">
+                    Text
+                    <span *ngIf="pattern.s !== patternOriginal.s" class="modified-script-flag"
+                          title="Script contains unsaved changed"> *</span>
+                </span>
+
+                <div class="search-controls">
+                    <div class="form-check form-check-inline">
+                        <input id="match-case-checkbox" name="match-case-checkbox" class="form-check-input" type="checkbox"
+                               [(ngModel)]="pattern.matchCase">
+                        
+                        <label class="form-check-label" for="match-case-checkbox">
+                            Match case
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline" title="Use text as a regexp">
+                        <input id="regex-checkbox" name="regex-checkbox" class="form-check-input" type="checkbox"
+                               [(ngModel)]="pattern.regex">
+
+                        <label class="form-check-label" for="regex-checkbox">
+                            Regexp
+                        </label>
+                    </div>
+                </div>
+
+                <div class="script-container">
+                    <textarea #textInput name="text" autosize [minRows]="2" maxRows="20" class="form-control"
+                              [(ngModel)]="pattern.s" (keydown)="editorKeyDown($event)"></textarea>
+                </div>
+            </div>
+
+            <div class="action-panel">
+                <button mat-stroked-button title="Apply filter" (click)="onApply()"
+                        name="apply-button">
+                    Save
+                </button>
+
+                <button mat-button mat-stroked-button title="Revert changes" (click)="onCancel()" name="cancel-button">
+                    Revert
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+

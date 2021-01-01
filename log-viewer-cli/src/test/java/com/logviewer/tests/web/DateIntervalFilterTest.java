@@ -6,7 +6,6 @@ import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.utils.FilterPanelState;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -160,8 +159,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         driver.findElementByTagName("lv-date-interval").click();
 
-        JavascriptExecutor j = (JavascriptExecutor)driver;
-        j.executeScript("arguments[0].value='2012-01-01 00:00';", timeSelectPanel().findElement(By.name("startDate")));
+        setValue(timeSelectPanel().findElement(By.name("startDate")), "2012-01-01 00:00");
 
         assertThat(timeSelectPanel().findElement(By.name("startDate")).getAttribute("value"), is("2012-01-01 00:00"));
 

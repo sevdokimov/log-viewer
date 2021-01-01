@@ -557,7 +557,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             return;
         }
 
-        if ((<Element>event.target).tagName === 'INPUT') { return; }
+        let targetTagName = (<Element>event.target).tagName;
+
+        if (targetTagName === 'INPUT' || targetTagName === 'TEXTAREA') {
+            return;
+        }
 
         switch (event.which) {
             case 38:

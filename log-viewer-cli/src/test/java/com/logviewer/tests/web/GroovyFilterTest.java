@@ -5,6 +5,7 @@ import com.logviewer.utils.FilterPanelState;
 import com.logviewer.utils.FilterPanelState.GroovyFilter;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -71,6 +72,7 @@ public class GroovyFilterTest extends AbstractWebTestCase {
         driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Groovy')]")).click();
 
         assertThat(driver.findElements(HEADERS).size(), is(1));
+        driver.findElement(By.cssSelector(".lv-dropdown-panel")); // Dropdown opened automatically
 
         addFilterMenuClick();
         driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Groovy')]")).click();
@@ -79,6 +81,7 @@ public class GroovyFilterTest extends AbstractWebTestCase {
 
         List<WebElement> filters = driver.findElements(HEADERS);
         assertThat(filters.size(), is(3));
+        assertThat(driver.findElements(By.cssSelector(".lv-dropdown-panel")).size(), is(1)); // One dropdown only is opened as the same time
 
         checkEditing(filters.get(2));
 
@@ -106,16 +109,32 @@ public class GroovyFilterTest extends AbstractWebTestCase {
         notExist(filter, By.className("lv-dropdown-panel"));
         assertThat(filter.getAttribute("class"), not(containsString("modified")));
 
+        checkSaveOnButtonClick(filter);
+        checkSaveOnEnter(filter);
+    }
+
+    private void checkSaveOnButtonClick(WebElement filter) {
         filter.click();
-        nameInput = filter.findElement(By.cssSelector(".lv-dropdown-panel .filter-name input"));
+        WebElement nameInput = filter.findElement(By.cssSelector(".lv-dropdown-panel .filter-name input"));
         assertThat(nameInput.getAttribute("value"), is(""));
 
         new Actions(driver).sendKeys(nameInput, "aaa").perform();
 
-        buttons = filter.findElements(By.cssSelector(".action-panel button"));
-        buttons.get(0).click();
+        List<WebElement> buttons = filter.findElements(By.cssSelector(".action-panel button"));
+        buttons.get(0).click(); // "Save" button
 
         assertThat(filter.getText().trim(), is("aaa"));
+    }
+
+    private void checkSaveOnEnter(WebElement filter) {
+        filter.click();
+        WebElement nameInput = filter.findElement(By.cssSelector(".lv-dropdown-panel .filter-name input"));
+        setValue(nameInput, "");
+        new Actions(driver).sendKeys(nameInput, "ttt", Keys.ENTER).perform();
+
+        notExist(filter, By.className("lv-dropdown-panel"));
+        assertThat(filter.getText().trim(), is("ttt"));
+
     }
 
     private void addFilterMenuClick() {

@@ -67,13 +67,13 @@ export class SearchUtils {
         if (!p1 || !p2) { return false; }
 
         return (
-            p1.s === p2.s && p1.matchCase === p2.matchCase && p1.regex === p2.regex
+            (p1.s ?? '') === (p2.s ?? '') && !!p1.matchCase === !!p2.matchCase && !!p1.regex === !!p2.regex
         );
     }
 }
 
 export interface SearchPattern {
     s: string;
-    matchCase: boolean;
-    regex: boolean;
+    matchCase?: boolean;
+    regex?: boolean;
 }

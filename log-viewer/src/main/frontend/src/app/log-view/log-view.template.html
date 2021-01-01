@@ -23,6 +23,10 @@
                        (click)="filterPanelStateService.addStacktraceFilter()">
                         Events containing a stacktrace
                     </a>
+                    <a id="add-text-filter" class="dropdown-item" href="#"
+                       (click)="filterPanelStateService.addTextFilter()">
+                        Text filter
+                    </a>
                     <a id="add-groovy-filter" class="dropdown-item" href="#"
                        (click)="filterPanelStateService.addGroovyFilter()">
                         Groovy filter
@@ -281,9 +285,20 @@
 </div>
 
 <context-menu #eventContextMenu>
-    <ng-template contextMenuItem (execute)="showEventDetails($event.item.record)">
-        Event details
+
+    <ng-template [visible]="contextMenuHandler.isTextMenuItemVisible" let-item contextMenuItem [subMenu]="textMenu">
+        Text: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;
     </ng-template>
+    <context-menu #textMenu>
+        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.item.selectedText, false)">
+            Only events containing <mark>{{item.selectedTextVisible}}</mark>
+        </ng-template>
+
+        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.item.selectedText, true)">
+            Hide events containing <mark class="menu-item-text">{{item.selectedTextVisible}}</mark>
+        </ng-template>
+    </context-menu>
+
     <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" let-item contextMenuItem
                  (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, false)">
         Hide events older than current
@@ -298,19 +313,22 @@
     </ng-template>
     <context-menu #threadMenu>
         <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByThread($event.item.thread)">
-            Show only "<span class="menu-item-thread">{{item.thread}}</span>"
+            Show only <mark>{{item.thread}}</mark>
         </ng-template>
         <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
                      (execute)="contextMenuHandler.filterByThread($event.item.threadGroup)">
-            Show only "<span class="menu-item-thread"><span [innerHTML]="item.threadGroupHtml"></span></span>"
+            Show only <mark [innerHTML]="item.threadGroupHtml"></mark>
         </ng-template>
         <ng-template contextMenuItem let-item (execute)="contextMenuHandler.excludeThread($event.item.thread)">
-            Hide "<span class="menu-item-thread">{{item.thread}}</span>"
+            Hide <mark class="menu-item-thread">{{item.thread}}</mark>
         </ng-template>
         <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
                      (execute)="contextMenuHandler.excludeThread($event.item.threadGroup)">
-            Hide "<span class="menu-item-thread"><span [innerHTML]="item.threadGroupHtml"></span></span>"
+            Hide <mark [innerHTML]="item.threadGroupHtml"></mark>
         </ng-template>
     </context-menu>
 
+    <ng-template contextMenuItem (execute)="showEventDetails($event.item.record)">
+        Event details
+    </ng-template>
 </context-menu>

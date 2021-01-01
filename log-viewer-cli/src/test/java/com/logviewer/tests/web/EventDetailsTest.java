@@ -51,7 +51,7 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(rec).perform();
 
-        driver.findElementByCssSelector(".dropdown-menu li:first-child").click();
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]")).click();
 
         List<WebElement> fieldLabels = driver.findElementsByCssSelector("sl-event-details .field .field-label");
 

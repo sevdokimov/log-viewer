@@ -1,0 +1,74 @@
+@import "src/css/variables";
+
+.text-filter {
+  padding: 10px;
+  width: 50vw;
+  max-width: 700px;
+
+  position: relative;
+}
+
+.search-controls {
+  float: right;
+  padding-bottom: 2px;
+}
+
+.filter-name {
+  font-size: 12px;
+}
+
+.script-container {
+  margin: 2px 0;
+}
+
+.script-info {
+  font-size: 12px;
+}
+
+.field-in-info {
+  font-weight: bold;
+  color: #222;
+}
+
+.field-with-comma:first-child > .comma {
+  display: none;
+}
+
+.header-script {
+  font-style: italic;
+  color: #777777;
+}
+
+.action-panel {
+  padding-top: 15px;
+  display: flex;
+}
+
+.action-panel > * {
+  margin-right: 15px;
+}
+
+.top-panel-dropdown.modified > span {
+  text-decoration: underline wavy #00f;
+}
+
+.modified-script-flag {
+  color: black;
+  font-weight: bold;
+}
+
+.modifier-name-flag {
+  color: black;
+}
+
+.include-exclude-group {
+  padding: 3px 0 3px 3px;
+  
+  position: absolute;
+  right: 0;
+  bottom: 0;
+
+  label:first-child {
+    padding-right: 5px;
+  }
+}

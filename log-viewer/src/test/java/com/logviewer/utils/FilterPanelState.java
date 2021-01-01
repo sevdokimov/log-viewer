@@ -1,5 +1,7 @@
 package com.logviewer.utils;
 
+import com.logviewer.web.session.tasks.SearchPattern;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,6 +15,8 @@ public class FilterPanelState {
     private Boolean exceptionsOnly;
 
     private GroovyFilter[] groovyFilters;
+
+    private TextFilter[] textFilters;
 
     private DateFilter date;
     private ThreadFilter thread;
@@ -37,6 +41,15 @@ public class FilterPanelState {
 
     public FilterPanelState groovyFilter(GroovyFilter ... filters) {
         this.groovyFilters = filters;
+        return this;
+    }
+
+    public TextFilter[] getTextFilters() {
+        return textFilters;
+    }
+
+    public FilterPanelState textFilter(TextFilter ... filters) {
+        this.textFilters = filters;
         return this;
     }
 
@@ -126,6 +139,23 @@ public class FilterPanelState {
 
         public String getScript() {
             return script;
+        }
+    }
+
+    public static class TextFilter {
+        private String id;
+
+        private String name;
+
+        private SearchPattern pattern;
+
+        private boolean exclude;
+
+        public TextFilter(String id, String name, SearchPattern pattern, boolean exclude) {
+            this.id = id;
+            this.name = name;
+            this.pattern = pattern;
+            this.exclude = exclude;
         }
     }
 

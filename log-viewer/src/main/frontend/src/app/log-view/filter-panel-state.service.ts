@@ -11,6 +11,8 @@ import {ThreadFilterFactory} from '@app/log-view/top-filters/thread-filter/threa
 import {GroovyFilterFactory} from '@app/log-view/top-filters/groovy-filter/groovy-filter-factory';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import * as $ from 'jquery';
+import {SearchPattern} from '@app/log-view/search';
+import {TextFilterFactory} from '@app/log-view/top-filters/text-filter/text-filter-factory';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -29,7 +31,7 @@ export class FilterPanelStateService {
 
     activeFilterEditors: {[key: string]: FilterFactory} = {};
 
-    permanentFilters: FilterFactory[] = [new GroovyFilterFactory(), new ExceptionOnlyFilterFactory()];
+    permanentFilters: FilterFactory[] = [new TextFilterFactory(), new ExceptionOnlyFilterFactory(), new GroovyFilterFactory()];
 
     filterChanges = new EventEmitter<FilterState>();
 
@@ -203,10 +205,7 @@ export class FilterPanelStateService {
                 state.groovyFilters = [];
             }
 
-            let array = new Uint32Array(1);
-            window.crypto.getRandomValues(array);
-
-            id = '' + array[0];
+            id = this.generateRandomId();
 
             state.groovyFilters.push({
                 id,
@@ -216,6 +215,35 @@ export class FilterPanelStateService {
         });
 
         setTimeout(() => $('lv-groovy-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
+
+        return false;
+    }
+
+    generateRandomId(): string {
+        let array = new Uint32Array(1);
+        window.crypto.getRandomValues(array);
+
+        return '' + array[0];
+    }
+
+    addTextFilter() {
+        let id: string;
+
+        this.updateFilterState(state => {
+            if (!state.textFilters) {
+                state.textFilters = [];
+            }
+
+            id = this.generateRandomId();
+
+            state.textFilters.push({
+                id,
+                name: '',
+                pattern: {s: ''},
+            });
+        });
+
+        setTimeout(() => $('lv-text-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
 
         return false;
     }
@@ -234,6 +262,8 @@ export interface FilterState {
 
     groovyFilters?: GroovyFilter[];
 
+    textFilters?: TextFilter[];
+
     date?: {
         startDate?: number;
         endDate?: number;
@@ -248,4 +278,13 @@ export interface GroovyFilter {
     name: string;
 
     script: string;
+}
+
+export interface TextFilter {
+    id: string;
+
+    name: string;
+
+    pattern: SearchPattern;
+    exclude?: boolean;
 }

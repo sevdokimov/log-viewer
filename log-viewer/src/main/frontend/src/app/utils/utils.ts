@@ -1,6 +1,7 @@
 import {SlStyle} from '../log-view/renderers/style';
 import {Record} from '@app/log-view/record';
 import {LogFile} from '@app/log-view/log-file';
+import * as $ from 'jquery';
 
 export class SlUtils {
 
@@ -197,7 +198,17 @@ export class SlUtils {
         return path.substring(idx + 1);
     }
 
-    static highlight(e: HTMLElement) {
+    static highlight(selector: string) {
+        let e = $(selector)[0];
+
+        if (e) {
+            SlUtils.highlightNow(e);
+        } else {
+            setTimeout(() => SlUtils.highlightNow($(selector)[0]), 0);
+        }
+    }
+    
+    static highlightNow(e: HTMLElement) {
         if (!e) {
             return;
         }
@@ -256,5 +267,16 @@ export class SlUtils {
 
         m.splice(idx, 1);
         return true;
+    }
+
+    static trimText(s: string, maxLength: number) {
+        SlUtils.assert(maxLength > 2);
+
+        let res = s.replace(/\s+/g, ' ').trim();
+        if (res.length > maxLength) {
+            res = res.substring(0, maxLength - 1).trim() + '...';
+        }
+
+        return res;
     }
 }
