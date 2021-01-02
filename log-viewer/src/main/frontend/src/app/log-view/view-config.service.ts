@@ -222,10 +222,7 @@ export class ViewConfigService {
 
             let fakeImage: HTMLImageElement = document.createElement('img');
 
-            let rndVal = new Uint32Array(1);
-            crypto.getRandomValues(rndVal);
-
-            fakeImage.src = 'http://myregexp.com/log-viewer-statistic/0.1.3/sending-usage-statistics_can_be_disabled_by_removing_send-usage-statistics_property_in_the_configuration-' + rndVal + '.png';
+            fakeImage.src = 'http://myregexp.com/log-viewer-statistic/0.1.3/sending-usage-statistics_can_be_disabled_by_removing_send-usage-statistics_property_in_the_configuration.png';
             fakeImage.style.position = 'absolute';
             fakeImage.style.left = '-101px';
             fakeImage.style.top = '-101px';
