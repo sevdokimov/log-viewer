@@ -205,6 +205,34 @@ export class ViewConfigService {
 
             this.textRenderers.push({supportedTypes: highlighter['text-type'], renderer});
         }
+
+        this.sendStatisticIfNeeded();
+    }
+
+    private sendStatisticIfNeeded() {
+        if (!this.uiConfig['send-usage-statistics']) {
+            return;
+        }
+
+        let date = localStorage.getItem('last-send-usage-statistics');
+
+        // send statistic not often than once per day.
+        if (!date || parseInt(date, 10) + 24 * 60 * 60 * 1000 < new Date().getTime()) {
+            localStorage.setItem('last-send-usage-statistics', '' + new Date().getTime());
+
+            let iframe: HTMLIFrameElement = document.createElement('iframe');
+            iframe.src = 'http://myregexp.com/log-viewer-statistic.html?version=0.1.3&comment=Usage_statistics_You_can_disable_it_by_commenting_last-send-usage-statistics_property_in_the_configuration';
+            iframe.style.visibility = 'hidden';
+            iframe.style.position = 'absolute';
+            iframe.style.right = '-100px';
+            iframe.style.left = '-110px';
+            iframe.style.bottom = '-100px';
+            iframe.style.top = '-110px';
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+
+            document.body.appendChild(iframe);
+        }
     }
 
     getTextRenderers(): { supportedTypes: string[], renderer: TextRenderer}[] {

@@ -32,6 +32,8 @@ export interface UiConfig {
     'text-highlighters': { [key: string]: TextHighlighterConfig };
 
     properties: { [key: string]: any };
+
+    'send-usage-statistics': boolean;
 }
 
 export class UiConfigValidator {
