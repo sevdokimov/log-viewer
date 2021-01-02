@@ -220,18 +220,19 @@ export class ViewConfigService {
         if (!date || parseInt(date, 10) + 24 * 60 * 60 * 1000 < new Date().getTime()) {
             localStorage.setItem('last-send-usage-statistics', '' + new Date().getTime());
 
-            let iframe: HTMLIFrameElement = document.createElement('iframe');
-            iframe.src = 'http://myregexp.com/log-viewer-statistic.html?version=0.1.3&comment=Usage_statistics_You_can_disable_it_by_commenting_last-send-usage-statistics_property_in_the_configuration';
-            iframe.style.visibility = 'hidden';
-            iframe.style.position = 'absolute';
-            iframe.style.right = '-100px';
-            iframe.style.left = '-110px';
-            iframe.style.bottom = '-100px';
-            iframe.style.top = '-110px';
-            iframe.style.width = '10px';
-            iframe.style.height = '10px';
+            let fakeImage: HTMLImageElement = document.createElement('img');
 
-            document.body.appendChild(iframe);
+            let rndVal = new Uint32Array(1);
+            crypto.getRandomValues(rndVal);
+
+            fakeImage.src = 'http://myregexp.com/log-viewer-statistic/0.1.3/sending-usage-statistics_can_be_disabled_by_removing_send-usage-statistics_property_in_the_configuration-' + rndVal + '.png';
+            fakeImage.style.position = 'absolute';
+            fakeImage.style.left = '-101px';
+            fakeImage.style.top = '-101px';
+            fakeImage.style.right = '-100px';
+            fakeImage.style.bottom = '-100px';
+
+            document.body.appendChild(fakeImage);
         }
     }
 
