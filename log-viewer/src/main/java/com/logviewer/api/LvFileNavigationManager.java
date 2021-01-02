@@ -1,6 +1,7 @@
 package com.logviewer.api;
 
 import com.logviewer.files.FileType;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.nio.file.Path;
@@ -11,7 +12,7 @@ public interface LvFileNavigationManager {
     /**
      * @param path Directory to list or {@code null}.
      */
-    @Nullable
+    @NonNull
     List<LvFsItem> getChildren(@Nullable Path path) throws SecurityException;
 
     @Nullable

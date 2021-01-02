@@ -48,7 +48,7 @@ export class RequestState {
                 // Request is obsolete. Only latest request should be handled.
                 if (this.counter !== reqNumber) { return; }
 
-                this.errorMsg = err.statusText;
+                this.errorMsg = err.error || err.statusText;
                 this.errorStatus = err.status;
                 this.loading = false;
 

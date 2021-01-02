@@ -54,7 +54,7 @@ public class FileManagerTest extends AbstractLogTest {
 
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir), f -> f.getPath(), subdir2);
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir.getParent()), f -> f.getPath(), tmpDir);
-        assertNull(manager.getChildren(subdir1));
+        TestUtils.assertError(SecurityException.class, () -> manager.getChildren(subdir1));
         TestUtils.assertEqualsUnorder(manager.getChildren(subdir2), f -> f.getPath(), log2);
 
         try (Snapshot snapshot = getLogService().openLog(aLog.toString(), LogService.DEFAULT_FORMAT).createSnapshot()) {
@@ -70,7 +70,7 @@ public class FileManagerTest extends AbstractLogTest {
 
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir), f -> f.getPath(), subdir1);
         TestUtils.assertEqualsUnorder(manager.getChildren(tmpDir.getParent()), f -> f.getPath(), tmpDir);
-        assertNull(manager.getChildren(subdir2));
+        TestUtils.assertError(SecurityException.class, () -> manager.getChildren(subdir2));
         TestUtils.assertEqualsUnorder(manager.getChildren(subdir1), f -> f.getPath(), aLog);
 
         try (Snapshot snapshot = getLogService().openLog(bLog.toString(), LogService.DEFAULT_FORMAT).createSnapshot()) {

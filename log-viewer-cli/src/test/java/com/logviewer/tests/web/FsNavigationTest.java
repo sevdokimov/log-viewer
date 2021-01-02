@@ -19,13 +19,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class FsNavigationTest extends AbstractWebTestCase {
 
     public static final List<String> ALL_ROOT_FILES = Arrays.asList("aaa", "bbb", "case-match", "fff", "search", "r.log", "r2.log");
+
+    public static final By EDIT_PATH_ICON = By.cssSelector(".current-path .edit-icon");
+    public static final By PATH_EDITOR_FOCUSED = By.cssSelector(".current-path-edited input[type=\"text\"]:focus");
+    public static final By INPUT_PATH = By.cssSelector(".current-path-edited input[type=\"text\"]:focus");
 
     protected static LvFileAccessManagerImpl accessManager() {
         return ctx.getBean(LvFileAccessManagerImpl.class);
@@ -350,6 +354,108 @@ public class FsNavigationTest extends AbstractWebTestCase {
         notExist(By.cssSelector(".search-pane .tool-button.tool-button-pressed"));
 
         assert !filterInput.isDisplayed();
+    }
+
+    @Test
+    public void openingClosingPathEditor() {
+        openPage();
+
+        assertThat(currentPath(), is(navigationRoot().toString()));
+
+        // Start edit and cancel by Escape
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        notExist(EDIT_PATH_ICON);
+
+        driver.findElement(By.cssSelector(".current-path-edited input[type=\"text\"]:focus"));
+        assertThat(getSelectedText(), is(navigationRoot().toString()));
+
+        new Actions(driver).sendKeys(Keys.ESCAPE).perform();
+
+        // Test that keyboard navigation still works
+        checkSelectedFile("aaa");
+        new Actions(driver).sendKeys(Keys.DOWN).perform();
+        checkSelectedFile("bbb");
+        new Actions(driver).sendKeys(Keys.UP).perform();
+        checkSelectedFile("aaa");
+
+        driver.findElement(EDIT_PATH_ICON);
+        notExist(By.cssSelector(".current-path-edited"));
+
+        // Start edit and cancel by Cancel button
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        new Actions(driver).sendKeys("/abc").perform();
+
+        assertThat(driver.findElement(PATH_EDITOR_FOCUSED).getAttribute("value"), is("/abc"));
+
+        driver.findElement(By.cssSelector(".current-path-edited button[name=\"cancel-button\"]")).click();
+
+        driver.findElement(EDIT_PATH_ICON);
+        assertThat(currentPath(), is(navigationRoot().toString()));
+
+        // Test that keyboard navigation still works
+        checkSelectedFile("aaa");
+        new Actions(driver).sendKeys(Keys.DOWN).perform();
+        checkSelectedFile("bbb");
+    }
+
+    @Test
+    public void selectFileByTypePath() {
+        openPage();
+
+        // Open file
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        setValue(driver.findElement(INPUT_PATH), "");
+        new Actions(driver)
+                .sendKeys(driver.findElement(INPUT_PATH), navigationRoot().toString() + "/aaa/a2.log")
+                .sendKeys(Keys.ENTER)
+                .perform();
+
+        checkSelectedFile("a2.log");
+        assertThat(currentPath(), is(navigationRoot().toString() + "/aaa"));
+
+        // Open directory
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        setValue(driver.findElement(INPUT_PATH), "");
+        new Actions(driver)
+                .sendKeys(driver.findElement(INPUT_PATH), navigationRoot().toString() + "/bbb")
+                .sendKeys(Keys.ENTER)
+                .perform();
+
+        checkSelectedFile("b.log");
+        assertThat(currentPath(), is(navigationRoot().toString() + "/bbb"));
+
+        new Actions(driver).sendKeys(Keys.DOWN).perform(); // check that navigation still works
+        checkSelectedFile("b2.log");
+
+        // Open unexisting directory
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        setValue(driver.findElement(INPUT_PATH), "");
+        new Actions(driver)
+                .sendKeys(driver.findElement(INPUT_PATH), navigationRoot().toString() + "/zxcbvbvcb")
+                .sendKeys(Keys.ENTER)
+                .perform();
+
+        assertThat(currentPath(), is(navigationRoot().toString() + "/zxcbvbvcb"));
+
+        assertThat(driver.findElement(By.cssSelector(".dir-content-panel .alert-danger")).getText().trim(), is("Directory not found"));
+
+        // Open unaccessible directory
+        driver.findElement(EDIT_PATH_ICON).click();
+
+        setValue(driver.findElement(INPUT_PATH), "");
+        new Actions(driver)
+                .sendKeys(driver.findElement(INPUT_PATH), navigationRoot().getParent().toString() + "/zzz")
+                .sendKeys(Keys.ENTER)
+                .perform();
+
+        assertThat(currentPath(), is(navigationRoot().getParent().toString() + "/zzz"));
+
+        assertThat(driver.findElement(By.cssSelector(".dir-content-panel .alert-danger")).getText().trim(), containsString("not accessible"));
     }
 
     private WebElement checkSelectedFile(String expectedSelectedFile) {

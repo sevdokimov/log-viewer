@@ -29,13 +29,37 @@
         <hr>
 
         <div *ngIf="showFileTree" class="dir-content-panel">
-            <div class="current-path">
+            <div *ngIf="editingCurrentDir" class="current-path-edited">
+                <div class="input-group">
+                    <input id="path-input" #pathInput type="text" class="form-control" placeholder="Current path"
+                           [(ngModel)]="editedCurrentDirValue" (keydown)="pathInputKeyDown($event)"
+                           aria-label="Current path" aria-describedby="basic-addon2">
+
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" name="open-button"
+                                (click)="openEditedPath()">
+                            Open
+                        </button>
+                        
+                        <button class="btn btn-outline-secondary" type="button" name="cancel-button"
+                                (click)="cancelEditing()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="!editingCurrentDir" class="current-path">
+                <div class="edit-icon" title="Edit path" (click)="startPathEditing()">
+                    <i class="far fa-edit"></i>
+                </div>
+
                 <span *ngIf="currentDirItems.length === 0" class="path-item">&nbsp;</span>
 
                 <span *ngFor="let path of currentDirItems; let idx = index" class="path-item">
                     <a href="#" (click)="selectDir(constructPathFromPrefix(idx))">{{path}}</a>
                     <span class="path-separator">
-                        <span *ngIf="path !== '/'">/</span>
+                        <span *ngIf="!path.endsWith('/')">/</span>
                     </span>
                 </span>
             </div>
@@ -58,7 +82,9 @@
 
             <div *ngIf="dirContentLoading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{dirContentLoading.errorMsg}}</div>
 
-            <table *ngIf="dirContent" class="file-list">
+            <div *ngIf="dirContent?.error" class="alert alert-danger" style="white-space: pre-wrap;">{{dirContent.error}}</div>
+
+            <table *ngIf="dirContent?.content" class="file-list">
                 <tr *ngFor="let fi of visibleDirItems" [class.selected]="selectedPath === fi.item.path"
                     class="file-list-item"
                     (click)="select($event, fi.item.path)" (dblclick)="dblClick(fi.item, $event)">
@@ -79,9 +105,9 @@
                 </tr>
             </table>
 
-            <div *ngIf="dirContent && dirContent.length === 0" class="noItems">&lt;the folder is empty&gt;</div>
+            <div *ngIf="dirContent?.content?.length === 0" class="noItems">&lt;the folder is empty&gt;</div>
 
-            <div *ngIf="dirContent && dirContent.length > 0 && visibleDirItems.length === 0" class="noItems">
+            <div *ngIf="dirContent?.content?.length && visibleDirItems.length === 0" class="noItems">
                 &lt;no file matches the filter&gt;
             </div>
         </div>

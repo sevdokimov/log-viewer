@@ -167,10 +167,8 @@ public class Log implements LogView {
                     if (!file.isAbsolute())
                         throw new NoSuchFileException(file.toString());
 
-                    String accessDenyMessage = accessManager.checkAccess(file);
-
-                    if (accessDenyMessage != null) {
-                        throw new DirectoryNotVisibleException(file.toString(), "You cannot open \"" + file + "\": " + accessDenyMessage);
+                    if (!accessManager.isFileVisible(file)) {
+                        throw new DirectoryNotVisibleException(file.toString(), accessManager.errorMessage(file));
                     }
 
                     BasicFileAttributes attrs = Files.readAttributes(file, BasicFileAttributes.class);

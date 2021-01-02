@@ -16,6 +16,8 @@ export class LogNavigatorComponent implements OnInit {
     searchField: ElementRef;
     @ViewChild('rootElement', {static: true})
     rootElement: ElementRef;
+    @ViewChild('pathInput', {static: false})
+    pathInput: ElementRef;
 
     initialLoading: RequestState = new RequestState(true);
 
@@ -28,12 +30,15 @@ export class LogNavigatorComponent implements OnInit {
     favoritesEditable: boolean;
     showFileTree: boolean;
 
+    editingCurrentDir: boolean;
+    editedCurrentDirValue: string;
+
     currentDir: string;
     currentDirItems: string[];
 
     selectedPath: string;
 
-    dirContent: FsItem[];
+    dirContent: DirContent;
 
     visibleDirItems: {item: FsItem, nameHtml: string}[];
 
@@ -56,13 +61,22 @@ export class LogNavigatorComponent implements OnInit {
             this.showFileTree = res.showFileTree;
 
             if (res.showFileTree) {
-                this.currentDir = res.initPath;
-                this.currentDirItems = LogNavigatorComponent.parsePath(res.initPath);
+                this.setCurrentDir(res.initPath);
                 this.setDirContent(res.initDirContent);
             }
 
             this.fwService.editable = this.favoritesEditable;
         });
+    }
+
+    private setCurrentDir(dir: string) {
+        this.currentDir = dir;
+        this.currentDirItems = LogNavigatorComponent.parsePath(dir);
+    }
+
+    cancelEditing() {
+        this.editingCurrentDir = false;
+        this.rootElement.nativeElement.focus();
     }
 
     removeFromFavorites(path: string) {
@@ -77,7 +91,7 @@ export class LogNavigatorComponent implements OnInit {
     }
 
     constructPathFromPrefix(idx: number): string {
-        return this.currentDirItems.slice(0, idx + 1).join('/');
+        return SlUtils.normalizePath(this.currentDirItems.slice(0, idx + 1).join('/'));
     }
 
     selectDir(dir: string) {
@@ -85,8 +99,7 @@ export class LogNavigatorComponent implements OnInit {
             return;
         }
 
-        this.currentDir = dir;
-        this.currentDirItems = LogNavigatorComponent.parsePath(dir);
+        this.setCurrentDir(dir);
 
         this.dirContent = null;
         this.visibleDirItems = null;
@@ -94,7 +107,7 @@ export class LogNavigatorComponent implements OnInit {
         this.closeSearch();
 
         this.dirContentLoading.process(
-            this.http.get<FsItem[]>('rest/navigator/listDir', {params: {dir}}),
+            this.http.get<DirContent>('rest/navigator/listDir', {params: {dir}}),
             items => {
                 if (dir !== this.currentDir) {
                     return;
@@ -125,7 +138,7 @@ export class LogNavigatorComponent implements OnInit {
         }, 0);
     }
 
-    private setDirContent(dirContent: FsItem[]) {
+    private setDirContent(dirContent: DirContent) {
         this.dirContent = dirContent;
 
         this.doSearch();
@@ -136,11 +149,11 @@ export class LogNavigatorComponent implements OnInit {
     private doSearch() {
         this.visibleDirItems = [];
 
-        if (!this.dirContent) { return; }
+        if (!this.dirContent?.content) { return; }
 
         let filter = this.typedText;
 
-        for (let item of this.dirContent) {
+        for (let item of this.dirContent.content) {
             let name = this.currentDir ? item.name : item.path;
             
             let nameHtml: string;
@@ -226,24 +239,21 @@ export class LogNavigatorComponent implements OnInit {
             return [];
         }
 
-        path = path.replace(/\\\\/g, '/').replace(/\/{2,}/g, '/');
-
-        if (path === '/') {
-            return ['/'];
-        }
-
-        if (path.endsWith('/')) {
-            path = path.substr(0, path.length - 1);
-        }
+        path = SlUtils.normalizePath(path);
 
         let res: string[] = [];
 
         if (path.startsWith('/')) {
             res.push('/');
             path = path.substring(1);
+        } else if (/^[a-z]:\//i.test(path)) {
+            res.push(path.substring(0, 3));
+            path = path.substring(3);
         }
 
-        res.push(...path.split('/'));
+        if (path.length > 0) {
+            res.push(...path.split('/'));
+        }
 
         return res;
     }
@@ -284,6 +294,10 @@ export class LogNavigatorComponent implements OnInit {
     }
 
     fakeKeyPressed(event: KeyboardEvent) {
+        if ((<Element>event.target).id === 'path-input') {
+            return;
+        }
+
         if (event.charCode !== 0) {
             if (!this.filterOpened) {
                 this.openSearch();
@@ -294,6 +308,10 @@ export class LogNavigatorComponent implements OnInit {
     }
 
     fakeInputPressed(event: KeyboardEvent) {
+        if ((<Element>event.target).id === 'path-input') {
+            return;
+        }
+
         if (event.charCode !== 0) {
             return;
         }
@@ -366,6 +384,56 @@ export class LogNavigatorComponent implements OnInit {
         this.doSearch();
         this.adjustSelection();
     }
+
+    startPathEditing() {
+        this.editedCurrentDirValue = this.currentDir;
+        this.editingCurrentDir = true;
+
+        setTimeout(() => {
+            this.pathInput.nativeElement.focus();
+            this.pathInput.nativeElement.select();
+        }, 0);
+    }
+
+    pathInputKeyDown(event: KeyboardEvent) {
+        if (event.keyCode === 27) { // escape
+            this.cancelEditing();
+            return false;
+        } else if (event.keyCode === 13) {
+            this.openEditedPath();
+            return false;
+        }
+    }
+
+    openEditedPath() {
+        if (this.editedCurrentDirValue !== this.currentDir) {
+            this.setCurrentDir(this.editedCurrentDirValue);
+
+            this.dirContent = null;
+            this.visibleDirItems = null;
+
+            this.closeSearch();
+
+            this.dirContentLoading.process(
+                this.http.get<OpenCustomDirResponse>('rest/navigator/openCustomDir', {params: {dir: this.currentDir}}),
+                resp => {
+                    if (resp.newCurrentDir && this.currentDir !== resp.newCurrentDir) {
+                        this.setCurrentDir(resp.newCurrentDir);
+                    }
+
+                    this.setDirContent(resp.content);
+
+                    if (resp.selectedPath) {
+                        this.selectedPath = resp.selectedPath;
+                    } else {
+                        this.adjustSelection();
+                    }
+                }
+            );
+        }
+
+        this.cancelEditing();
+    }
 }
 
 interface RestInitState {
@@ -376,7 +444,7 @@ interface RestInitState {
     showFileTree: boolean;
     initPath?: string;
 
-    initDirContent: FsItem[];
+    initDirContent: DirContent;
 }
 
 export interface FsItem {
@@ -392,4 +460,15 @@ export interface FsItem {
     type?: string;
     size?: number;
     modificationTime?: number;
+}
+
+interface OpenCustomDirResponse {
+    newCurrentDir: string;
+    selectedPath?: string;
+    content: DirContent;
+}
+
+interface DirContent {
+    content: FsItem[];
+    error: string;
 }

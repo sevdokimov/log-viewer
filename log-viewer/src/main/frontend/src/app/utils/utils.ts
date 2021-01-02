@@ -141,7 +141,7 @@ export class SlUtils {
     }
 
     static normalizePath(path: string): string {
-        path = path.replace(/\\\\/g, '/').replace(/\/{2,}/g, '/');
+        path = path.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 
         if (path.length > 1 && path.endsWith('/')) {
             path = path.substr(0, path.length - 1);

@@ -12,9 +12,11 @@ public interface LvFileAccessManager {
      * @return {@code null} if user can read file, otherwise an error message.
      */
     @Nullable
-    String checkAccess(Path path);
+    boolean isFileVisible(Path path);
 
     boolean isDirectoryVisible(Path dir);
+
+    String errorMessage(Path path);
 
     @NonNull
     List<Path> getRoots();

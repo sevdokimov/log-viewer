@@ -7,6 +7,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,13 +48,14 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
         return null; // null means list of roots (c:\ , d:\ , f:\)
     }
 
+    @NonNull
     @Override
-    public List<LvFsItem> getChildren(@Nullable Path path) {
+    public List<LvFsItem> getChildren(@Nullable Path path) throws SecurityException {
         if (path != null && !path.isAbsolute())
-            return null;
+            throw new SecurityException("path must be absolute");
 
         if (path != null && !fileAccessManager.isDirectoryVisible(path))
-            return null;
+            throw new SecurityException(fileAccessManager.errorMessage(path));
 
         Stream<Path> paths;
 
@@ -69,11 +71,13 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
                     return fileAccessManager.isDirectoryVisible(f);
                 }
 
-                return fileAccessManager.checkAccess(f) == null;
+                return fileAccessManager.isFileVisible(f);
             })
                     .map(LvFsItemImpl::create)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
+        } catch (AccessDeniedException e) {
+            throw new SecurityException("Not enough permissions to access file or directory");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

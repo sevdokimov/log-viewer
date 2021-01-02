@@ -75,19 +75,24 @@ public class LvFileAccessManagerImpl implements LvFileAccessManager {
 
     @Nullable
     @Override
-    public String checkAccess(Path file) {
+    public boolean isFileVisible(Path file) {
         if (!file.isAbsolute())
-            throw new IllegalArgumentException("Path is not absolute: " + file);
+            return false;
 
         if (descriptors == null)
-            return null;
+            return true;
 
         for (PathPattern descriptor : descriptors) {
             if (descriptor.matchFile(file))
-                return null;
+                return true;
         }
 
-        return "You cannot open \"" + file + "\"";
+        return false;
+    }
+
+    @Override
+    public String errorMessage(Path path) {
+        return "\"" + path + "' is not accessible due to LogViewer configuration";
     }
 
     @Override

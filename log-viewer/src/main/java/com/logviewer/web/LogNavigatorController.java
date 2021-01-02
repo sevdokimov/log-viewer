@@ -1,11 +1,10 @@
 package com.logviewer.web;
 
+import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFileNavigationManager;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.files.FileType;
 import com.logviewer.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
@@ -21,8 +20,6 @@ import java.util.*;
 
 public class LogNavigatorController extends AbstractRestRequestHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LogNavigatorController.class);
-
     private static final String DIR_ICON = "assets/dir.png";
 
     public static final String CFG_FS_NAVIGATION_ENABLED = "log-viewer.fs-navigation.enabled";
@@ -31,6 +28,8 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
     private FavoriteLogService favoriteLogService;
     @Autowired
     private LvFileNavigationManager fileManager;
+    @Autowired
+    private LvFileAccessManager fileAccessManager;
     @Autowired
     private Environment environment;
 
@@ -55,15 +54,19 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         return environment.getProperty(CFG_FS_NAVIGATION_ENABLED, Boolean.class, true);
     }
 
-    private List<FsItem> getDirContent(@Nullable Path dir) {
+    /**
+     * @return {error: string, content: FsItem[]}
+     */
+    private RestContent getDirContent(@Nullable Path dir) {
         if (!isFileTreeAllowed())
-            throw new RestException(403, "File system navigation is disabled");
+            return new RestContent("File system navigation is disabled");
 
-        List<LvFileNavigationManager.LvFsItem> items = fileManager.getChildren(dir);
-        if (items == null)
-            return null;
-
-        return createFileItems(items);
+        try {
+            List<LvFileNavigationManager.LvFsItem> items = fileManager.getChildren(dir);
+            return new RestContent(createFileItems(items));
+        } catch (SecurityException e) {
+            return new RestContent(e.getMessage());
+        }
     }
 
     private List<FsItem> createFileItems(List<LvFileNavigationManager.LvFsItem> files) {
@@ -88,24 +91,49 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
     }
 
     @Endpoint
-    public List<?> listDir() {
+    public RestContent listDir() {
         String dir = getRequest().getParameter("dir");
 
-        List<LvFileNavigationManager.LvFsItem> files = fileManager.getChildren(Paths.get(dir));
-        if (files == null)
-            throw new RestException(401, "Failed to read " + dir);
+        return getDirContent(Paths.get(dir));
+    }
 
-        return createFileItems(files);
+    @Endpoint
+    public RestOpenPathResponse openCustomDir() {
+        String dir = getRequest().getParameter("dir");
+
+        if (!isFileTreeAllowed())
+            return new RestOpenPathResponse("File system navigation is disabled");
+
+        Path path = Paths.get(dir);
+
+        if (!path.isAbsolute())
+            return new RestOpenPathResponse("Path is not absolute");
+
+        if (Files.isDirectory(path))
+            return new RestOpenPathResponse(getDirContent(path), null, dir);
+
+        if (Files.isRegularFile(path)) {
+            if (!fileAccessManager.isFileVisible(path))
+                return new RestOpenPathResponse(fileAccessManager.errorMessage(path));
+
+            return new RestOpenPathResponse(getDirContent(path.getParent()), path.toString(), path.getParent().toString());
+        }
+
+        if (!fileAccessManager.isDirectoryVisible(path)) {
+            return new RestOpenPathResponse(fileAccessManager.errorMessage(path));
+        }
+
+        return new RestOpenPathResponse("Directory not found");
     }
 
     @Endpoint(method = FormSubmitEvent.MethodType.POST)
-    public List<RestFileState> addFavoriteLog(String path) throws IOException {
+    public List<RestFileState> addFavoriteLog(String path) {
         List<String> favorites = favoriteLogService.addFavoriteLog(path);
         return getRestFavorites(favorites);
     }
 
     @Endpoint(method = FormSubmitEvent.MethodType.POST)
-    public List<RestFileState> removeFavoriteLog(String path) throws IOException {
+    public List<RestFileState> removeFavoriteLog(String path) {
         List<String> favorites = favoriteLogService.removeFavorite(path);
         return getRestFavorites(favorites);
     }
@@ -143,13 +171,43 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
 
         private String initPath;
 
-        private List<FsItem> initDirContent;
+        // {error: string, content: FsItem[]}
+        private RestContent initDirContent;
     }
 
     public static class RestFileState {
         private String path;
         private Long size;
         private Long lastModification;
+    }
+
+    private static class RestContent {
+        private String error;
+        private List<FsItem> content;
+
+        public RestContent(String error) {
+            this.error = error;
+        }
+
+        public RestContent(List<FsItem> content) {
+            this.content = content;
+        }
+    }
+
+    private static class RestOpenPathResponse {
+        private RestContent content;
+        private String selectedPath;
+        private String newCurrentDir;
+
+        public RestOpenPathResponse(String error) {
+            this(new RestContent(error), null, null);
+        }
+
+        public RestOpenPathResponse(RestContent content, String selectedPath, String newCurrentDir) {
+            this.content = content;
+            this.selectedPath = selectedPath;
+            this.newCurrentDir = newCurrentDir;
+        }
     }
 
     private static abstract class FsItem implements Comparable<FsItem> {
