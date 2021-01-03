@@ -27,6 +27,7 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[2020-01-01 18:11:00,000] [     WARN] ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] %m%n");
         checkLine("[2020-01-01 18:11:00,000] [WARN   ] ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] %m%n");
         checkLine("[2020-01-01 18:11:00,000] [WARN   ]    ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%level] %m%n");
+        checkLine("[2020/01/01 18:11:00,000] [WARN   ]    ddddd", "[%d{yyyy/MM/dd HH:mm:ss.SSS}] [%level] %m%n");
 
         checkLine("[2020-01-01 18:11:00,000][WARN   ]    ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}][%level] %m%n");
 
@@ -56,6 +57,8 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("2020-01-01 18:11:00.000 mmm", "%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n");
         checkLine("[2020-01-01 18:11:00.000][zzz] mmm", "[%d{yyyy-MM-dd HH:mm:ss.SSS}]%m%n");
         checkLine("2020-01-01 18:11:00.000+06: mmm", "%d{yyyy-MM-dd HH:mm:ss.SSSX}: %m%n");
+        checkLine("2020/04/17 19:08:43.561 18866 140483982022400 S+  Thread: SystemBusIO1", "%d{yyyy/MM/dd HH:mm:ss.SSS} %m%n");
+        checkLine("2020-02-10T06:26:39.901Z 0 [Warning] InnoDB: New log files created, LSN=45790)", "%d{yyyy-MM-dd HH:mm:ss.SSSXX} %m%n");
     }
 
     @Test

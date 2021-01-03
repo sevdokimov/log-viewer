@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class LvLayoutLog4jISO8601DateTest {
 
@@ -49,6 +50,21 @@ public class LvLayoutLog4jISO8601DateTest {
         df.setTimeZone(TimeZone.getTimeZone("GMT-0800"));
         s = "2000-12-31 23:59:59,999-08";
         parse = field.parse(s, 0, s.length());
+        assertEquals(s.length(), parse);
+        assertEquals(df.parse(s).getTime(), field.getCurrentDate());
+    }
+
+    @Test
+    public void timzeZoneZ() throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSSXXX");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        LvLayoutLog4jISO8601Date field = new LvLayoutLog4jISO8601Date(true, 5);
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999", 0, "2000-12-31 23:59:59,999".length()));
+        assertEquals(LvLayoutNode.PARSE_FAILED, field.parse("2000-12-31 23:59:59,999k", 0, "2000-12-31 23:59:59,999k".length()));
+
+        String s = "2000-12-31 23:59:59,999Z";
+        int parse = field.parse(s, 0, s.length());
         assertEquals(s.length(), parse);
         assertEquals(df.parse(s).getTime(), field.getCurrentDate());
     }
@@ -103,6 +119,7 @@ public class LvLayoutLog4jISO8601DateTest {
         assertEquals(s.length(), field.parse("2000-12-31 23:59:59,999", 0, s.length()));
         assertEquals(s.length(), field.parse("2000-12-31_23:59:59,999", 0, s.length()));
         assertEquals(s.length(), field.parse("2000-12-31_23:59:59.999", 0, s.length()));
+        assertEquals(s.length(), field.parse("2000/12/31_23:59:59.999", 0, s.length()));
     }
 
     @Test
@@ -118,6 +135,14 @@ public class LvLayoutLog4jISO8601DateTest {
         assert field != null;
 
         assertEquals(s.length(), field.parse("2000-12-31T23:59:59", 0, s.length()));
+
+        s = "2030/12/31_23:59:59";
+        field = LvLayoutLog4jISO8601Date.fromPattern("yyyy/MM/dd_HH:mm:ss");
+        assert field != null;
+
+        assertEquals(s.length(), field.parse("2000/12/31_23:59:59", 0, s.length()));
+
+        assertNull(LvLayoutLog4jISO8601Date.fromPattern("yyyy/MM-dd_HH:mm:ss"));
     }
 
     @Test

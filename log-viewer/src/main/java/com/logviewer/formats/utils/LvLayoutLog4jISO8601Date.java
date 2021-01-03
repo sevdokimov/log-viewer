@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
-    private static final Pattern SUPPORTED_PATTERN = Pattern.compile("yyyy-MM-dd(?:'T'|[_T ])HH:mm:ss([,.]SSS)?(XX?)?");
+    private static final Pattern SUPPORTED_PATTERN = Pattern.compile("yyyy([-/])MM\\1dd(?:'T'|[_T ])HH:mm:ss(?<milliiseconds>[,.]SSS)?(?<timezone>XX?)?");
 
     private final boolean hasMilliseconds;
 
@@ -44,7 +44,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
     @Override
     public int parse(String s, int offset, int end) {
-        int expectedLength = (hasMilliseconds ? 23 : 19) + timezone;
+        int expectedLength = (hasMilliseconds ? 23 : 19);
 
         if (end - offset < expectedLength) {
             return PARSE_FAILED;
@@ -56,7 +56,8 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
         offset += 4;
 
-        if (s.charAt(offset++) != '-')
+        char dateSeparator = s.charAt(offset++);
+        if (dateSeparator != '-' && dateSeparator != '/')
             return PARSE_FAILED;
 
         int mm = readInt(s, offset, offset + 2);
@@ -65,7 +66,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
         offset += 2;
 
-        if (s.charAt(offset++) != '-')
+        if (s.charAt(offset++) != dateSeparator)
             return PARSE_FAILED;
 
         int dd = readInt(s, offset, offset + 2);
@@ -144,8 +145,21 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
             return offset + timezone;
         }
 
+        if (offset >= s.length())
+            return -1;
+
         char sign = s.charAt(offset);
+
+        if (sign == 'Z') {
+            currentTimezoneStr = "Z";
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return offset + 1;
+        }
+
         if (sign != '-' && sign != '+')
+            return -1;
+
+        if (offset + timezone > s.length())
             return -1;
 
         char first = s.charAt(offset + 1);
@@ -200,14 +214,14 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
         if (!matcher.matches())
             return null;
 
-        String timezoneStr = matcher.group(2);
+        String timezoneStr = matcher.group("timezone");
 
         int timezone = 0;
         if (timezoneStr != null) {
             timezone = timezoneStr.length() == 1 ? 3 : 5;
         }
 
-        return new LvLayoutLog4jISO8601Date(matcher.group(1) != null, timezone);
+        return new LvLayoutLog4jISO8601Date(matcher.group("milliiseconds") != null, timezone);
     }
 
     @Override

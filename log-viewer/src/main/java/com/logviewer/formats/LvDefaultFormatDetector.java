@@ -23,7 +23,7 @@ public class LvDefaultFormatDetector {
 
     static final String UNKNOWN_FORMAT = "???";
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[12]\\d-(?:1[12]|0\\d)-(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)([,.]\\d\\d\\d)?([-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[12]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
 
     private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[12]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])(?:[0-5]\\d)(?:[0-5]\\d)([,.]?\\d\\d\\d)?\\b");
 
@@ -144,15 +144,17 @@ public class LvDefaultFormatDetector {
         Matcher matcher = DATE_ISO8601.matcher(line); // 2020-05-29 18:50:12,333
         if (matcher.find()) {
             StringBuilder sb = new StringBuilder();
-            sb.append("%d{yyyy-MM-dd HH:mm:ss");
-            if (matcher.group(1) != null)
+            String dateSeparator = matcher.group(1);
+            
+            sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd HH:mm:ss");
+            if (matcher.group("millis") != null)
                 sb.append(".SSS");
 
-            String timeZone = matcher.group(2);
+            String timeZone = matcher.group("timezone");
             if (timeZone != null) {
                 sb.append('X');
 
-                if (timeZone.length() == 5) {
+                if (timeZone.equals("Z") || timeZone.length() == 5) {
                     sb.append('X');
                 } else {
                     assert timeZone.length() == 3;
