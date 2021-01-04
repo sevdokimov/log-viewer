@@ -1,23 +1,6 @@
-## Installation
-Download LogViewer from [Github releases](https://github.com/sevdokimov/log-viewer/releases) and unpack it to any folder.<br>
-Make sure the machine has installed Java 8 or later.
-
-## Usage
-
-Run `log-viewer-0.1.3/logviewer.sh` 
-
-Web UI will be available at http://localhost:8111. There will be a file tree where you can select a log to view. 
-
-Also, you can open the log by the direct link _h<span>t</span>tp://localhost:8111/log?***log=$pathToLogFile***_. Several log files can be
-opened in one view, pass several "log" query parameters, for example: _h<span>tt</span>p://localhost:8111/log?log=***$pathToLogFile1***&log=***$pathToLogFile2***&log=***$pathToLogFile3***_<br> 
-Note: all log files must have full timestamp, otherwise LogViewer cannot merge them.
-
-## Configuration
-
 Configuration is located in `log-viewer-0.1.3/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
-format. 
 
-#### List of available log files
+### List of available log files
 
 A list of available log files are defined in `logs = [ ... ]` section of the configuration file. The default configuration
 gives access to all files with ".log" extension:
@@ -49,9 +32,40 @@ Each `{ path: "..." }` section opens access to log files by a pattern. The patte
 of any characters except "/", "**" matches a sequence of any characters include "/".<br>
 ${HOME} will be replaced with the environment variable "HOME", it is a feature of [HOCON](https://github.com/lightbend/config#uses-of-substitutions).
 
-#### Log format
+### Network
+`log-viewer.server.port` property specifies the port
 
-LogViewer detects the format of log files automatically. If the format cannot be detected automatically or if you want specify
+`log-viewer.server.interface` allow to specify the network interface to bind the web UI. Setting `log-viewer.server.interface=localhost` will disable non-local connections.  
+
+### Shortcuts
+Full file paths don't look good in the URL parameters. You can specify a shortcut for one or several log files in `log-paths` section<br>
+Example:
+
+```
+log-paths = {
+    zzz = {
+        file = [${HOME}"/my-app/logs/my-app.log", ${HOME}"/aother-app/logs/aother-app.log"]
+    }
+}
+```
+
+When user opens `http://localhost:8111/log?log=zzz`, he will see the events from `my-app.log` and `aother-app.log` on one page.
+
+You can specify the logs located on other nodes as well:
+```
+log-paths = {
+    zzz = {
+        file = ${HOME}"/my-app/logs/my-app.log"
+        host = ["node-cn-01", "node-cn-02", "node-cn-03"]
+    }
+}
+```
+`http://localhost:8111/log?log=zzz` page will show events from `my-app.log` files located on the 3 remote nodes.<br>
+Note: `node-cn-01`, `node-cn-02` and `node-cn-03` must have running Log-Viewer instances.
+
+### Log format
+
+LogViewer detects the format of log files automatically. If the format cannot be detected automatically or if you want to specify
 the format more detailed, you can add `format` section beside `path` definition.
 
 In the following example all files with ".log" extension in `${HOME}"/my-app/logs` directory will be parsed as Log4J generated logs
