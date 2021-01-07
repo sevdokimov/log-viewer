@@ -8,8 +8,12 @@ import java.util.regex.Pattern;
 
 public class FileTypes {
 
+    private static final String SYSLOG = "/var/log/syslog(?:\\.\\d+)?";
+
+    private static final String LOG_WITH_DATE = ".*\\.log(?:\\.(?:\\d+|[12]\\d\\d\\d([-.])\\d\\d\\1\\d\\d))?";
+
     public static final FileType LOG = new FileType("log",
-            Pattern.compile(".*\\.log(?:\\.(?:\\d+|[12]\\d\\d\\d([-.])\\d\\d\\1\\d\\d))?", Pattern.CASE_INSENSITIVE),
+            Pattern.compile(SYSLOG + '|' + LOG_WITH_DATE, Pattern.CASE_INSENSITIVE),
             "assets/file-types/text.png");
 
     public static final FileType OUT = new FileType("out",

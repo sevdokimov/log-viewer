@@ -8,6 +8,12 @@ public class FileTypesTest {
 
     @Test
     public void fileTypeDetection() {
+        assertEquals(FileTypes.LOG, FileTypes.detectType("/var/log/syslog"));
+        assertEquals(FileTypes.LOG, FileTypes.detectType("/var/log/syslog.1"));
+        assertEquals(FileTypes.LOG, FileTypes.detectType("/var/log/syslog.100"));
+        assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("/var/syslog"));
+        assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("/var/log/zzzz"));
+        
         assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log"));
         assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log.1"));
         assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log.10"));
@@ -20,5 +26,7 @@ public class FileTypesTest {
 
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.zzz"));
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.log.z"));
+
+        assertEquals(FileTypes.JAVA, FileTypes.detectType("/aaa.java"));
     }
 }

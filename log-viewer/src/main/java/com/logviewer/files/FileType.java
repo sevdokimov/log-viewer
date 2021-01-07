@@ -27,4 +27,9 @@ public class FileType {
     public String getIcon() {
         return icon;
     }
+
+    @Override
+    public String toString() {
+        return typeId;
+    }
 }
