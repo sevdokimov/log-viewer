@@ -29,6 +29,7 @@ public class TextFilterTest extends AbstractWebTestCase {
             "range.selectNode(arguments[0]);" +
             "window.getSelection().removeAllRanges();" +
             "window.getSelection().addRange(range);";
+    public static final By TEXT_AREA_REGEX = By.cssSelector("textarea.regex-mode");
 
     @Test
     public void hugeTitles() {
@@ -211,7 +212,10 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         filter.click();
         setValue(filter.findElement(TEXTAREA), "EXEC-\\d+");
+        notExist(filter, TEXT_AREA_REGEX);
         filter.findElement(By.name("regex-checkbox")).click();
+        filter.findElement(TEXT_AREA_REGEX);
+
         filter.findElement(APPLY).click();
         checkRecordCount(5);
 

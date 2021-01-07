@@ -55,7 +55,8 @@
                     </div>
                 </div>
 
-                <textarea #textInput name="text" autosize [minRows]="2" maxRows="20" class="form-control"
+                <textarea #textInput name="text" autosize [minRows]="2" maxRows="20"
+                          class="form-control" [class.regex-mode]="pattern.regex"
                           [(ngModel)]="pattern.s" (ngModelChange)="checkRegexp()"
                           (keydown)="editorKeyDown($event)"></textarea>
 
