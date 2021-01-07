@@ -29,8 +29,8 @@ public class FileWatcherService implements DisposableBean {
 
     private final Map<Path, Pair<WatchKey, List<WatcherDestroyer>>> listeners = new HashMap<>();
 
-    public Destroyer watchDirectory(@NonNull Path path, @NonNull Consumer<List<Path>> listener) throws IOException {
-        Path dir = path.toAbsolutePath();
+    public Destroyer watchDirectory(@NonNull Path dir, @NonNull Consumer<List<Path>> listener) throws IOException {
+        assert dir.isAbsolute();
 
         if (Files.exists(dir) && !Files.isDirectory(dir)) {
             throw new IllegalArgumentException("path must be a directory: " + dir);

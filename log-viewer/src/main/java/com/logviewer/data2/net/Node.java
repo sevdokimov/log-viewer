@@ -7,6 +7,8 @@ import java.io.Serializable;
 
 public class Node implements Serializable {
 
+    private final String sshUser;
+
     private final String host;
 
     private final Integer port;
@@ -16,8 +18,17 @@ public class Node implements Serializable {
     }
 
     public Node(@NonNull String host, @Nullable Integer port) {
+        this(null, host, port);
+    }
+
+    public Node(@Nullable String sshUser, @NonNull String host, @Nullable Integer port) {
+        this.sshUser = sshUser;
         this.host = host;
         this.port = port;
+    }
+
+    public String getSshUser() {
+        return sshUser;
     }
 
     @NonNull

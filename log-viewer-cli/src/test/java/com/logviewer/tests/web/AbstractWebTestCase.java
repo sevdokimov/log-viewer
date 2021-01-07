@@ -9,6 +9,7 @@ import com.logviewer.data2.LogContextHolder;
 import com.logviewer.data2.LogService;
 import com.logviewer.impl.InmemoryFavoritesService;
 import com.logviewer.services.LvFileAccessManagerImpl;
+import com.logviewer.tests.pages.LogPage;
 import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.TestListener;
 import com.logviewer.utils.Utils;
@@ -53,7 +54,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
-public abstract class AbstractWebTestCase {
+public abstract class AbstractWebTestCase implements LogPage {
 
     private static final int TEST_PORT = 8333;
 
@@ -62,7 +63,7 @@ public abstract class AbstractWebTestCase {
     protected static final int LINE_HEIGHT = 16;
     public static final int WAIT_FOR_TIMEOUT = 3000;
 
-    protected static RemoteWebDriver driver;
+    public static RemoteWebDriver driver;
 
     protected static Path dataDir;
     protected static Path tmpDir;
@@ -323,11 +324,11 @@ public abstract class AbstractWebTestCase {
     }
 
     protected String copyPermalink() {
-        driver.findElement(By.id("menu-icon")).click();
+        driver.findElement(MENU).click();
         driver.findElementById("copyPermalink").click();
 
         closeSuccessAlert();
-        driver.findElement(By.id("menu-icon")).click();
+        driver.findElement(MENU).click();
 
         return getClipboardText();
     }

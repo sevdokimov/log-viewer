@@ -2,6 +2,7 @@ package com.logviewer.web.dto.events;
 
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.LogView;
+import com.logviewer.utils.Utils;
 import com.logviewer.web.dto.RestLog;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigRenderOptions;
@@ -26,6 +27,8 @@ public class EventSetViewState extends BackendEvent {
 
     private final String filterState;
 
+    private final String localhostName = Utils.LOCAL_HOST_NAME;
+    
     public EventSetViewState(LogView[] logs, Config uiConfig, FavoriteLogService favoriteLogService,
                              Map<String, String> globalSavedFilters, String filterState,
                              boolean initByPermalink) {

@@ -1,6 +1,7 @@
 package com.logviewer;
 
 import com.logviewer.config.LogViewerServerConfig;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.RestRecord;
 import com.logviewer.web.dto.RestStatus;
 import com.logviewer.web.dto.events.EventScrollToEdgeResponse;
@@ -41,7 +42,7 @@ public class LogSessionRemoteTest extends LogSessionTest {
 
         LogSession session = LogSession.fromContext(adapter,context);
 
-        session.init(new String[]{super.getTestLog("multilog/server-a.log"), invalidUrl}, null, null);
+        session.init(LogList.of(super.getTestLog("multilog/server-a.log"), invalidUrl), null, null);
         session.scrollToEdge(2, 2, null, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);

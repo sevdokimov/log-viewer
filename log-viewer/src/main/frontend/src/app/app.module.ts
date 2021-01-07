@@ -36,17 +36,13 @@ import {LvThreadFilterComponent} from '@app/log-view/top-filters/thread-filter/t
 import {LvGroovyFilterComponent} from '@app/log-view/top-filters/groovy-filter/groovy-filter.component';
 import {LvTextFilterComponent} from '@app/log-view/top-filters/text-filter/text-filter.component';
 import {AutosizeModule} from 'ngx-autosize';
+import {MainPageComponent} from '@app/main-page/main-page.component';
 
 export const appRoutes: Routes = [
     {
         path: '',
-        component: LogNavigatorComponent,
-        data: {title: 'Log navigator'},
-    },
-    {
-        path: 'sources',
-        component: LogNavigatorComponent,
-        data: {title: 'Log navigator'},
+        component: MainPageComponent,
+        data: {title: 'File system'},
     },
     {path: 'log', component: LogViewComponent, data: {title: 'Log view'}},
 ];
@@ -90,6 +86,8 @@ export const appRoutes: Routes = [
         LogListPanelComponent,
         EventDetailsComponent,
         FileStatusComponent,
+
+        MainPageComponent,
 
         AceEditorDirective,
         SlDurationPipe,

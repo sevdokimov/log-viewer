@@ -1,4 +1,4 @@
-<div #rootElement class="container main-pane" (keydown)="fakeInputPressed($event)" (keypress)="fakeKeyPressed($event)" tabindex="-1" autofocus>
+<div #rootElement (keydown)="fakeInputPressed($event)" (keypress)="fakeKeyPressed($event)" tabindex="-1" autofocus>
     <div *ngIf="initialLoading.loading">
         <img src="assets/progress.gif"> Loading log list...
     </div>
@@ -12,7 +12,7 @@
         </div>
 
         <div *ngFor="let l of favorites" class="favorite-item" [class.not-exist]="l.size == null">
-            <a [routerLink]="['/log']" [queryParams]="{log: l.path}">{{l.path}}</a>
+            <a href="#" (click)="favoriteClick(l.path, $event)">{{l.path}}</a>
             <span class="log-size">
                 <span title="File size">{{l.size | slSize}}</span>,
                 <span title="Modification time">{{l.lastModification | date : 'medium'}}</span>

@@ -83,4 +83,9 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
         }
     }
 
+    // For tests only.
+    public LvFileNavigationManagerImpl setDefaultDirectory(@NonNull String defaultDirectory) {
+        this.defaultDirectory = defaultDirectory;
+        return this;
+    }
 }

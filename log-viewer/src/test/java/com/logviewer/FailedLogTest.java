@@ -1,6 +1,7 @@
 package com.logviewer;
 
 import com.logviewer.data2.Position;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.events.EventNextDataLoaded;
 import com.logviewer.web.dto.events.EventScrollToEdgeResponse;
 import com.logviewer.web.dto.events.EventSearchResponse;
@@ -23,7 +24,7 @@ public class FailedLogTest extends LogSessionTestBase {
 
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(new String[]{getTestLog("log.log"), "/unexisting-log.log"}, null, null);
+        session.init(LogList.of(getTestLog("log.log"), "/unexisting-log.log"), null, null);
         session.scrollToEdge(3, 2, null, false);
 
         EventScrollToEdgeResponse resp = adapter.waitForType(EventScrollToEdgeResponse.class);

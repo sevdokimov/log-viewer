@@ -2,13 +2,16 @@ package com.logviewer.domain;
 
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.session.tasks.SearchPattern;
 
 import java.util.Map;
 
 public class Permalink {
 
-    private String[] paths;
+    private Map logListQueryParams;
+
+    private LogList logList;
 
     private SearchPattern searchPattern;
     private boolean hideUnmatched;
@@ -42,12 +45,22 @@ public class Permalink {
         this.hideUnmatched = hideUnmatched;
     }
 
-    public String[] getPaths() {
-        return paths;
+    public Map getLogListQueryParams() {
+        return logListQueryParams;
     }
 
-    public void setPaths(String[] paths) {
-        this.paths = paths;
+    public Permalink setLogListQueryParams(Map logListQueryParams) {
+        this.logListQueryParams = logListQueryParams;
+        return this;
+    }
+
+    public LogList getLogList() {
+        return logList;
+    }
+
+    public Permalink setLogList(LogList logList) {
+        this.logList = logList;
+        return this;
     }
 
     public String getSavedFiltersName() {

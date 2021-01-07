@@ -678,7 +678,7 @@ public class Log implements LogView {
 
     private Destroyer createFileListener() {
         try {
-            return fileWatcherService.watchDirectory(file.getParent(), files -> {
+            return fileWatcherService.watchDirectory(file.toAbsolutePath().getParent(), files -> {
                 if (files.contains(file)) {
                     boolean scheduled = timer.scheduleTask(logChangedTaskKey, this::notifyLogChanged,
                             CHANGE_NOTIFICATION_TIMEOUT);

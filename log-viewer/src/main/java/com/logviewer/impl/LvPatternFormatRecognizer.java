@@ -28,8 +28,7 @@ public class LvPatternFormatRecognizer implements LvFormatRecognizer {
     @Nullable
     @Override
     public LogFormat getFormat(Path canonicalPath) {
-        if (!canonicalPath.isAbsolute())
-            throw new IllegalArgumentException("Path is not absolute: " + canonicalPath);
+        canonicalPath = canonicalPath.toAbsolutePath();
 
         for (Pair<PathPattern, LogFormat> pair : formats) {
             if (pair.getFirst().matchFile(canonicalPath))

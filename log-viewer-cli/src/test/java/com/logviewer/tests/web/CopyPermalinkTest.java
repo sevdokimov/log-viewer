@@ -46,9 +46,13 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         String link1 = copyPermalink();
 
+        String url = driver.getCurrentUrl();
+
         driver.get(link0);
         assert recordByText("1").isDisplayed();
         assert recordByText("2").isDisplayed();
+
+        assertEquals(url, driver.getCurrentUrl());
 
         notExist(By.cssSelector("#records > .selected-line"));
 

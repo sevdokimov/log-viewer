@@ -22,7 +22,7 @@ public class LogViewController extends AbstractRestRequestHandler {
         String hash = hashAndPermalink[0];
         Permalink permalink = LvGsonUtils.GSON.fromJson(hashAndPermalink[1], Permalink.class);
 
-        if (permalink.getPaths() == null || permalink.getPaths().length == 0
+        if ((permalink.getLogList() == null)
                 || permalink.getOffset() == null || permalink.getHashes() == null) {
             throw new IllegalArgumentException();
         }

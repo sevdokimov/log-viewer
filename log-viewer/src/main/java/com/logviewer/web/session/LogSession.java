@@ -8,6 +8,7 @@ import com.logviewer.filters.RecordPredicate;
 import com.logviewer.filters.SubstringPredicate;
 import com.logviewer.utils.Utils;
 import com.logviewer.utils.Wrappers;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.events.*;
 import com.logviewer.web.rmt.Remote;
 import com.logviewer.web.session.tasks.LoadNextResponse;
@@ -74,11 +75,12 @@ public class LogSession {
         return logs;
     }
 
-    private void initFilters(@NonNull String[] paths, @Nullable String filterStateName, @Nullable String filterState,
+    private void initFilters(@NonNull LogList logFileList,
+                             @Nullable String filterStateName, @Nullable String filterState,
                              boolean isInitByPermalink) {
-        Set<LogPath> logPaths = parsePathParameter(paths);
+        Set<LogPath> logPathsFinal = toPathSet(logFileList);
 
-        Map<String, LogView> logsMap = Utils.safeGet(logService.openLogs(logPaths));
+        Map<String, LogView> logsMap = Utils.safeGet(logService.openLogs(logPathsFinal));
         logs = logsMap.values().toArray(new LogView[0]);
 
         if (logs.length > 1) {
@@ -139,7 +141,8 @@ public class LogSession {
 
         stateVersion = 1;
 
-        initFilters(permalink.getPaths(), permalink.getSavedFiltersName(), permalink.getFilterState(), true);
+        initFilters(permalink.getLogList(), permalink.getSavedFiltersName(), permalink.getFilterState(), true);
+
         if (logs.length == 0)
             return;
 
@@ -185,7 +188,7 @@ public class LogSession {
     }
 
     @Remote
-    public synchronized void init(@NonNull String[] paths,
+    public synchronized void init(@NonNull LogList logList,
                                   @Nullable String savedFiltersName, @Nullable String filterStateHash) {
         if (stateVersion != 0)
             throw new IllegalStateException(String.valueOf(stateVersion));
@@ -198,7 +201,7 @@ public class LogSession {
             filterState = filterStorage.loadFilterStateByHash(filterStateHash);
         }
 
-        initFilters(paths, savedFiltersName, filterState, false);
+        initFilters(logList, savedFiltersName, filterState, false);
     }
 
     private boolean updateStateVersionAndFilters(long version, @Nullable RecordPredicate[] filter) {
@@ -440,30 +443,57 @@ public class LogSession {
         protected abstract void handle(T res);
     }
 
-    private Set<LogPath> parsePathParameter(@Nullable String[] pathsFromHttpParameter) {
-        if (pathsFromHttpParameter == null)
-            return Collections.emptySet();
-
+    private Set<LogPath> toPathSet(@NonNull LogList logList) {
         Set<LogPath> res = new LinkedHashSet<>();
 
-        for (String pathFromHttpParameter : pathsFromHttpParameter) {
-            pathFromHttpParameter = pathFromHttpParameter.trim();
+        if (logList.getPathsInLegacyFormat() != null) {
+            for (String pathFromHttpParameter : logList.getPathsInLegacyFormat()) {
+                pathFromHttpParameter = pathFromHttpParameter.trim();
 
-            Collection<LogPath> paths = null;
+                Collection<LogPath> paths = null;
 
-            for (LvPathResolver resolver : pathResolvers) {
-                paths = resolver.resolvePath(pathFromHttpParameter);
-                if (paths != null)
-                    break;
+                for (LvPathResolver resolver : pathResolvers) {
+                    paths = resolver.resolvePath(pathFromHttpParameter);
+                    if (paths != null)
+                        break;
+                }
+
+                if (paths == null)
+                    paths = LogPath.parsePathFromHttpParameter(pathFromHttpParameter);
+
+                res.addAll(paths);
             }
+        }
 
-            if (paths == null)
-                paths = LogPath.parsePathFromHttpParameter(pathFromHttpParameter);
+        if (logList.getFiles() != null) {
+            for (String file : logList.getFiles()) {
+                res.add(new LogPath(null, file));
+            }
+        }
 
-            res.addAll(paths);
+        if (logList.getSsh() != null) {
+            for (String sshPath : logList.getSsh()) {
+                parseSshPath(res, sshPath);
+            }
+        }
+
+        if (logList.getBookmarks() != null) {
+            for (String bookmark : logList.getBookmarks()) {
+                for (LvPathResolver resolver : pathResolvers) {
+                    Collection<LogPath> paths = resolver.resolvePath(bookmark);
+                    if (paths != null) {
+                        res.addAll(paths);
+                        break;
+                    }
+                }
+            }
         }
 
         return res;
+    }
+
+    private static void parseSshPath(Set<LogPath> res, String sshPath) {
+        throw new UnsupportedOperationException();
     }
 
     public static LogSession fromContext(@NonNull SessionAdapter sender, @NonNull ApplicationContext ctx) {

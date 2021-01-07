@@ -4,6 +4,7 @@ import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.TestPredicate;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.events.*;
 import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.tasks.SearchPattern;
@@ -43,7 +44,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(new String[]{getTestLog("multilog/server-a.log"), getTestLog("multilog/server-b.log")}, null, null);
+        session.init(LogList.of(getTestLog("multilog/server-a.log"), getTestLog("multilog/server-b.log")), null, null);
         session.scrollToEdge(3, 2, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(2), recordsSorted(),
@@ -65,7 +66,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(createMultifileLog(getTestLog("multilog/multilog.log")), "default", null);
+        session.init(LogList.of(createMultifileLog(getTestLog("multilog/multilog.log"))), "default", null);
         session.scrollToEdge(3, 2, new RecordPredicate[]{new TestPredicate()}, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);
@@ -149,7 +150,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(createMultifileLog(getTestLog("multilog/search.log")), "default", null);
+        session.init(LogList.of(createMultifileLog(getTestLog("multilog/search.log"))), "default", null);
         session.scrollToEdge(3, 2, new RecordPredicate[]{new TestPredicate()}, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);
@@ -225,7 +226,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(createMultifileLog(getTestLog("multilog/search3.log")), "default", null);
+        session.init(LogList.of(createMultifileLog(getTestLog("multilog/search3.log"))), "default", null);
         session.scrollToEdge(3, 2, new RecordPredicate[]{new TestPredicate()}, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);
@@ -250,7 +251,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(new String[]{getTestLog("multilog/server-a.log")}, "default", null);
+        session.init(LogList.of(getTestLog("multilog/server-a.log")), "default", null);
         session.scrollToEdge(3, 2, new RecordPredicate[]{new TestPredicate()}, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);
@@ -274,7 +275,7 @@ public class LogSessionTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(createMultifileLog(getTestLog("multilog/multilog.log")), "default", null);
+        session.init(LogList.of(createMultifileLog(getTestLog("multilog/multilog.log"))), "default", null);
 
         EventSetViewState init = adapter.waitForType(EventSetViewState.class);
 

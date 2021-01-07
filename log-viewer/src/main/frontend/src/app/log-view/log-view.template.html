@@ -45,7 +45,7 @@
                 <i class="fas fa-caret-down"></i>
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-                <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses"></sl-log-list-panel>
+                <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses" (addLogClicked)="showOpenLogDialog()"></sl-log-list-panel>
             </div>
         </div>
 
@@ -53,7 +53,11 @@
             <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu">
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
                 <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
-                <a href="#" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to current position</a>
+
+                <a href="javascript:void(0)" id="add-log-menu-item" class="dropdown-item" (click)="showOpenLogDialog()">Add log to the view</a>
+
+                <a href="javascript:void(0)" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to the current position</a>
+                
                 <a href="javascript:void(0)" *ngIf="fwService.editable && logs.length === 1" class="dropdown-item"
                    (click)="addToFavorites()">
                     <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
@@ -281,6 +285,18 @@
         </div>
 
         <sl-event-details [record]="recordWithDetails"></sl-event-details>
+    </div>
+</div>
+
+<div *ngIf="modalWindow === 'open-log'" class="sl-overlay">
+    <div class="modal-background sl-overlay"></div>
+
+    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+        </div>
+
+        <sl-navigator (openFile)="addNewLog($event)"></sl-navigator>
     </div>
 </div>
 

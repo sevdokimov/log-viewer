@@ -1,12 +1,15 @@
+:host {
+  display: block;
+
+  > div {
+    outline: none;
+  }
+}
+
 .log-size {
   font-size: 12px;
   color: #999;
   margin-left: 4px;
-}
-
-.main-pane {
-  padding-top: 10px;
-  outline: none;
 }
 
 .file-non-exist {

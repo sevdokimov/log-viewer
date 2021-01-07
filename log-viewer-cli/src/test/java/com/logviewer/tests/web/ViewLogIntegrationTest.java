@@ -2,6 +2,7 @@ package com.logviewer.tests.web;
 
 import com.logviewer.TestUtils;
 import com.logviewer.mocks.TestFormatRecognizer;
+import com.logviewer.tests.pages.LogPage;
 import org.junit.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -11,7 +12,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class ViewLogIntegrationTest extends AbstractWebTestCase {
+public class ViewLogIntegrationTest extends AbstractWebTestCase implements LogPage {
 
     @Test
     public void highlightOnType() {
@@ -46,7 +47,7 @@ public class ViewLogIntegrationTest extends AbstractWebTestCase {
     public void testLogViewFavoritesIcon() throws InterruptedException {
         String filePath = openLog("empty.log");
 
-        driver.findElement(By.id("menu-icon")).click();
+        driver.findElement(MENU).click();
 
         WebElement favIcon = driver.findElement(By.className("favorite-icon"));
         assert !favIcon.getAttribute("className").contains("in-favorites");
@@ -60,7 +61,7 @@ public class ViewLogIntegrationTest extends AbstractWebTestCase {
         assert favIcon.getAttribute("className").contains("in-favorites");
         assert favoriteLogService.getFavorites().contains(filePath);
 
-        driver.findElement(By.id("menu-icon")).click();
+        driver.findElement(MENU).click();
         favLink.click();
         Thread.sleep(200);
 

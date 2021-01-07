@@ -2,6 +2,7 @@ package com.logviewer.tests.web;
 
 import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.services.PathPattern;
+import com.logviewer.tests.pages.ChooserPage;
 import com.logviewer.web.LogNavigatorController;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -18,12 +19,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.logviewer.tests.pages.ChooserPage.findFile;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class FsNavigationTest extends AbstractWebTestCase {
+public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage {
 
     public static final List<String> ALL_ROOT_FILES = Arrays.asList("aaa", "bbb", "case-match", "fff", "search", "r.log", "r2.log");
 
@@ -464,10 +466,6 @@ public class FsNavigationTest extends AbstractWebTestCase {
 
     private WebElement selectedFile() {
         return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name']"));
-    }
-
-    private WebElement findFile(String name) {
-        return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//td[contains(@class, 'name')][normalize-space(.) = '" + name + "']"));
     }
 
     private Path navigationRoot() {

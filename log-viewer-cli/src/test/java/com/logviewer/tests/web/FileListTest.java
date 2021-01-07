@@ -1,6 +1,5 @@
 package com.logviewer.tests.web;
 
-import com.logviewer.TestUtils;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
@@ -15,13 +14,13 @@ public class FileListTest extends AbstractWebTestCase {
         ctx.getBean(TestFormatRecognizer.class).setFormat(new LogbackLogFormat("[%d{yyyy.MM.dd HH:mm}]%message%n"));
 
         String path = getDataFilePath("search.log");
-        openUrl("log", "path", path, "path", "/unexist_.log");
+        openUrl("log", "path", path, "path", "/unexist_.log", "path", "unexisted_non_absolute");
         setHeight(5);
 
         WebElement fileStatDropdown = driver.findElementById("file-stat-dropdown");
         fileStatDropdown.click();
 
-        driver.findElementsByCssSelector("sl-log-list-panel .file-not-found");
+        assert driver.findElementsByCssSelector("sl-log-list-panel .file-not-found").size() == 2;
 
         new Actions(driver).sendKeys(Keys.HOME).perform();
 

@@ -22,7 +22,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
     public void noLogPath() {
         openUrl("log");
 
-        WebElement noLogMessage = driver.findElementById("no-log-paths");
+        WebElement noLogMessage = driver.findElement(MESSAGE_NO_LOG_PATH);
 
         noLogMessage.findElement(By.linkText("file browser"));
     }
@@ -31,7 +31,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
     public void noLogPath2() {
         openUrl("log", "path", "");
 
-        WebElement noLogMessage = driver.findElementById("no-log-paths");
+        WebElement noLogMessage = driver.findElement(MESSAGE_NO_LOG_PATH);
 
         noLogMessage.findElement(By.linkText("file browser"));
     }

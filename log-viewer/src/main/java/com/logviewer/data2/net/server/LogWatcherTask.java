@@ -28,7 +28,7 @@ public class LogWatcherTask implements RemoteTask<FileAttributes> {
 
     @Override
     public void start(@NonNull RemoteTaskContext<FileAttributes> ctx) {
-        Path path = Paths.get(this.path);
+        Path path = Paths.get(this.path).toAbsolutePath();
         try {
             closeable = ctx.getLogService().getFileWatcherService().watchDirectory(path.getParent(), changedDirs -> {
                 if (changedDirs.contains(path)) {

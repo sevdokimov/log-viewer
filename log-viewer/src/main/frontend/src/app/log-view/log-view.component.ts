@@ -43,6 +43,8 @@ import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-s
 import {Subscription} from 'rxjs';
 import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
 import {ContextMenuHandler} from '@app/log-view/context-menu';
+import {LogPathUtils} from '@app/utils/log-path-utills';
+import {OpenEvent} from '@app/log-navigator/log-navigator.component';
 
 @Component({
     selector: 'sl-log-view',
@@ -186,8 +188,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private filtersChanged() {
-        let p = this.createParams();
-        this.router.navigate([], {queryParams: p});
+        this.router.navigate([], {queryParams: this.createParams()});
         this.activeFilterChanged();
     }
 
@@ -307,7 +308,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             } else {
                 this.commService.send(
                     new Command('init', {
-                        paths: LogViewComponent.getLogPaths(params),
+                        logList: LogPathUtils.extractLogList(params),
                         savedFiltersName: this.selectedFilterStateName,
                         filterStateHash: SlUtils.lastParam(params.filters),
                     })
@@ -446,7 +447,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         let param = this.createParams();
 
         let linkData = JSON.stringify({
-            paths: param.log,
+            logListQueryParams: LogPathUtils.getListParamMap(param),
+            logList: LogPathUtils.extractLogList(param),
             searchPattern: this.searchPattern,
             hideUnmatched: this.searchHideUnmatched,
             savedFiltersName: param.filterSetName,
@@ -473,7 +475,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             );
 
         let l = window.location;
-        let link = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString({state: linkHash, path: param.log});
+        let link = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString({state: linkHash});
 
         console.info('Permalink to current view has been copied: ' + link);
 
@@ -765,26 +767,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         setTimeout(() => $('#filterInput').focus(), 1);
     }
 
-    private static getLogPaths(params: Params): string[] {
-        let logPath: string[] = [];
-
-        let p = params.path;
-        if (typeof p === 'string') {
-            logPath.push(p);
-        } else if (p && Array.isArray(p)) {
-            logPath.push(...p);
-        }
-
-        p = params.log;
-        if (typeof p === 'string') {
-            logPath.push(p);
-        } else if (p && Array.isArray(p)) {
-            logPath.push(...p);
-        }
-
-        return logPath;
-    }
-
     private onViewMovedTop() {
         if (this.shiftView < 0) {
             if (!this.hasRecordBefore) {
@@ -817,9 +799,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private createParams(): Params {
-        let params = this.route.snapshot.queryParams;
+        return {
+            ...LogPathUtils.getListParamMap(this.route.snapshot.queryParams),
+            ...this.createFilterParam(),
+        };
+    }
 
-        let res: Params = {log: LogViewComponent.getLogPaths(params)};
+    private createFilterParam(): {[key: string]: string} {
+        let res: {[key: string]: string} = {};
 
         if (this.selectedFilterStateName !== 'default') {
             res.filterSetName = this.selectedFilterStateName;
@@ -1376,8 +1363,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView = event.shiftView;
 
-        let p = this.createParams();
-        this.router.navigate([], {queryParams: p});
+        let queryParams = Object.assign(event.logListQueryParams, this.createFilterParam());
+        this.router.navigate([], {queryParams});
 
         this.state = State.STATE_OPENED;
 
@@ -1469,7 +1456,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             return;
         }
 
-        this.viewConfig.setRendererCfg(event.logs, uiConfig);
+        this.viewConfig.setRendererCfg(event.logs, uiConfig, event.localhostName);
         this.inFavorites = event.inFavorites;
         this.fwService.editable = event.favEditable;
 
@@ -1497,6 +1484,27 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (!event.initByPermalink) {
             this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
         }
+    }
+
+    showOpenLogDialog() {
+        this.modalWindow = 'open-log';
+    }
+
+    addNewLog(event: OpenEvent) {
+        if (this.logs.find(l => (!l.node || l.node === this.viewConfig.localhostName) && l.path === event.path)) {
+            this.toastr.info('"' + SlUtils.extractName(event.path) + '" is already present on the view');
+            this.modalWindow = null;
+            return;
+        }
+
+        let params = this.createParams();
+
+        LogPathUtils.addParam(params, 'f', event.path);
+
+        let l = window.location;
+        let link = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString(params);
+        
+        window.location.href = link;
     }
 }
 

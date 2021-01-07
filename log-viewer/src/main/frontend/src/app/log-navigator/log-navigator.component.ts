@@ -1,6 +1,5 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {RequestState} from '../utils/request-state';
-import {Router} from '@angular/router';
 import {FavoritesService, RestFileState} from '../services/favorites.service';
 import {HttpClient} from '@angular/common/http';
 import {SlUtils} from '@app/utils/utils';
@@ -10,7 +9,7 @@ import {SlUtils} from '@app/utils/utils';
     templateUrl: './log-navigator.template.html',
     styleUrls: ['./log-navigator.style.scss'],
 })
-export class LogNavigatorComponent implements OnInit {
+export class LogNavigatorComponent implements OnInit, AfterViewInit {
 
     @ViewChild('searchField')
     searchField: ElementRef;
@@ -18,6 +17,8 @@ export class LogNavigatorComponent implements OnInit {
     rootElement: ElementRef;
     @ViewChild('pathInput', {static: false})
     pathInput: ElementRef;
+
+    @Output() openFile = new EventEmitter<OpenEvent>();
 
     initialLoading: RequestState = new RequestState(true);
 
@@ -47,9 +48,12 @@ export class LogNavigatorComponent implements OnInit {
     constructor(
         private http: HttpClient,
         public fwService: FavoritesService,
-        private router: Router
     ) {
 
+    }
+
+    ngAfterViewInit(): void {
+        this.rootElement.nativeElement.focus();
     }
 
     ngOnInit() {
@@ -270,15 +274,14 @@ export class LogNavigatorComponent implements OnInit {
             let fileType = fsItem.type;
 
             if (fileType === 'log' || fileType === 'out' || fileType === 'text') {
-                if (inNewWindow) {
-                    window.open('log?path=' + encodeURI(fsItem.path));
-                } else {
-                    this.router.navigate(['/log'], {
-                        queryParams: {path: fsItem.path}
-                    });
-                }
+                this.openFile.emit({path: fsItem.path, isCtrlClick: inNewWindow});
             }
         }
+    }
+
+    favoriteClick(path: string, event: MouseEvent) {
+        this.openFile.emit({path: path, isCtrlClick: event.ctrlKey});
+        return false;
     }
 
     dblClick(fsItem: FsItem, evt: MouseEvent) {
@@ -471,4 +474,9 @@ interface OpenCustomDirResponse {
 interface DirContent {
     content: FsItem[];
     error: string;
+}
+
+export interface OpenEvent {
+    path: string;
+    isCtrlClick: boolean;
 }

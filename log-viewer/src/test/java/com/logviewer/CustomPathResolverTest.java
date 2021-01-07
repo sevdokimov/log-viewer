@@ -5,6 +5,7 @@ import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.api.LvPathResolver;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.LogPath;
+import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.events.EventScrollToEdgeResponse;
 import com.logviewer.web.session.LogSession;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class CustomPathResolverTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MyConfig.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(new String[]{"abc", getTestLog("multilog/server-a.log")}, "default", null);
+        session.init(LogList.of("abc", getTestLog("multilog/server-a.log")), "default", null);
         session.scrollToEdge(3, 2, null, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);

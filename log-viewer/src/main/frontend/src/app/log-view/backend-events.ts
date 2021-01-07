@@ -3,6 +3,7 @@ import {FieldTypeDescription} from './view-config.service';
 import {Record} from './record';
 import {Position} from './position';
 import {SearchPattern} from './search';
+import {LogList} from '@app/utils/log-path-utills';
 
 export interface BackendEvent {
     name: string;
@@ -22,6 +23,8 @@ export interface EventSetViewState extends BackendEvent {
 
     globalSavedFilters: { [key: string]: string };
     filterState?: string;
+
+    localhostName: string;
 
     initByPermalink: boolean;
 }
@@ -98,6 +101,8 @@ export interface DataHolderEvent extends StatusHolderEvent {
 }
 
 export interface EventInitByPermalink extends DataHolderEvent {
+    logListQueryParams: any;
+    logList: LogList;
     selectedLine: Position;
     shiftView: number;
     searchPattern: SearchPattern;

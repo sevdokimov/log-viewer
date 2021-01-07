@@ -14,6 +14,8 @@ export class ViewConfigService {
 
     uiConfig: UiConfig;
 
+    localhostName: string;
+
     logLabelRenders: { [key: string]: () => HTMLElement };
 
     private textRenderers: { supportedTypes: string[], renderer: TextRenderer}[] = [];
@@ -172,8 +174,10 @@ export class ViewConfigService {
         return res;
     }
 
-    setRendererCfg(logs: LogFile[], uiConfig: UiConfig) {
+    setRendererCfg(logs: LogFile[], uiConfig: UiConfig, localhostName: string) {
         this.uiConfig = uiConfig;
+
+        this.localhostName = localhostName;
 
         this.logLabelRenders = ViewConfigService.generateRenders(
             logs.filter(l => l.connected)

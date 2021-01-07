@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {LogFile, RestStatus} from './log-file';
 
 @Component({
@@ -11,6 +11,8 @@ export class LogListPanelComponent implements OnChanges {
     logs: LogFile[];
     @Input()
     statuses: { [key: string]: RestStatus } = {};
+
+    @Output() addLogClicked = new EventEmitter();
 
     showNodeName: boolean;
 
