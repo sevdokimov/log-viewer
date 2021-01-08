@@ -2,9 +2,9 @@ package com.logviewer.perfomance;
 
 import ch.qos.logback.core.spi.ScanException;
 import com.logviewer.AbstractLogTest;
+import com.logviewer.data2.Record;
 import com.logviewer.data2.*;
 import com.logviewer.filters.GroovyPredicate;
-import com.logviewer.filters.JsPredicate;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
@@ -39,12 +39,6 @@ public class PerformanceTest extends AbstractLogTest {
     @Ignore
     public void testGroovy() throws InterruptedException, IOException, LogCrashedException, ScanException {
         doPredicateTest(new GroovyPredicate("level == 'ERROR' || level == 'WARN'"));
-    }
-
-    @Test
-    @Ignore
-    public void testJs() throws InterruptedException, IOException, LogCrashedException, ScanException {
-        doPredicateTest(new JsPredicate("level === 'ERROR' || level === 'WARN'"));
     }
 
     @Test

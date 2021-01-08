@@ -32,7 +32,7 @@ public class LogService implements InitializingBean, DisposableBean {
 
     public static final LogFormat DEFAULT_FORMAT = new SimpleLogFormat(Charset.defaultCharset());
 
-    private final Map<Pair<Path, String>, Log> logs = new ConcurrentHashMap<>();
+    private final Map<Pair<Path, Long>, Log> logs = new ConcurrentHashMap<>();
 
     private ExecutorService executor;
 

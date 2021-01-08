@@ -1,5 +1,6 @@
 package com.logviewer;
 
+import com.logviewer.data2.Record;
 import com.logviewer.data2.*;
 import com.logviewer.filters.*;
 import com.logviewer.formats.RegexLogFormat;
@@ -99,29 +100,8 @@ public class PredicateTest extends AbstractLogTest {
     }
 
     @Test
-    public void jsFilters() throws InterruptedException, IOException, LogCrashedException {
-        assertRecordEquals(records, new JsPredicate("_.contains('[WAR"));
-        assertRecordEquals(records, new JsPredicate("_.xxxxx()"));
-
-        assertRecordEquals(records, new JsPredicate("_.indexOf('[ERROR]  ') >= 0"), "5");
-        assertRecordEquals(records, new JsPredicate("level === 'ERROR'"), "4", "5");
-        assertRecordEquals(records, new JsPredicate("parseInt(index) > 3"), "4", "5");
-        assertRecordEquals(records, new JsPredicate("msg.match(/^[i ]+$/i) != null"), "2", "3");
-    }
-
-    @Test
     public void fieldSetPredicate() {
         assertRecordEquals(records, new FieldValueSetPredicate(FieldTypes.LEVEL_LOGBACK, Arrays.asList("INFO", "WARN", "ZZZ")),
                 "1", "2", "3");
-    }
-
-    @Test
-    public void jsContext() throws InterruptedException, IOException, LogCrashedException {
-        assertRecordEquals(records, new JsPredicate("function xxx() {\n" +
-                "  try {if (zzz) return false} catch (e) {}" +
-                "  zzz = 1;\n" +
-                "  return true;\n" +
-                "}\n" +
-                "xxx()"), "1", "2", "3", "4", "5");
     }
 }

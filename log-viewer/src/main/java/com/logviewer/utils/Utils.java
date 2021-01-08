@@ -6,7 +6,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -231,11 +230,11 @@ public class Utils {
         return -1;
     }
 
-    public static String getFormatHash(LogFormat format) {
+    public static Long getFormatHash(LogFormat format) {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             Utils.putUnencodedChars(digest, LvGsonUtils.GSON.toJson(format));
-            return DatatypeConverter.printHexBinary(digest.digest());
+            return ByteBuffer.wrap(digest.digest()).getLong();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

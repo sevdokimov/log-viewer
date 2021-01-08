@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,7 +39,10 @@ public class Log implements LogView {
             Utils.putUnencodedChars(digest, Utils.LOCAL_HOST_NAME);
             digest.update((byte) '|');
             Utils.putUnencodedChars(digest, path);
-            return DatatypeConverter.printHexBinary(digest.digest()).substring(0, 16);
+
+            long hash = ByteBuffer.wrap(digest.digest()).getLong();
+
+            return Long.toHexString(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
