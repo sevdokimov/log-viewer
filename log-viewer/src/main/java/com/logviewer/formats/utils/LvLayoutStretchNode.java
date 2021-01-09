@@ -6,9 +6,12 @@ import org.springframework.lang.Nullable;
 
 public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
 
-    private final boolean removeSpacesBefore;
+    protected final boolean removeSpacesBefore;
 
-    private final int minSize;
+    protected final int minSize;
+
+    protected int start;
+    protected int end;
 
     public LvLayoutStretchNode(@NonNull String fieldName, @Nullable String fieldType, boolean removeSpacesBefore, int minSize) {
         super(fieldName, fieldType);
@@ -17,12 +20,28 @@ public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
         assert minSize >= 0;
     }
 
-    @Override
-    public int parse(String s, int offset, int end) {
-        if (offset + minSize > end)
-            return PARSE_FAILED;
+    public int getStart() {
+        return start;
+    }
 
-        return -1 - minSize;
+    public int getEnd() {
+        return end;
+    }
+
+    public boolean reset(String s, int start, int endStr) {
+        this.start = start;
+
+        if (start + minSize > endStr)
+            return false;
+        
+        this.end = start + minSize;
+
+        return true;
+    }
+
+    @Override
+    public final int parse(String s, int offset, int end) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -45,5 +64,15 @@ public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
 
     public static LvLayoutStretchNode messageNode() {
         return new LvLayoutStretchNode("msg", FieldTypes.MESSAGE, true, 0);
+    }
+
+    public boolean grow(String s, int targetPosition, int endStr) {
+        assert targetPosition <= endStr;
+
+        if (end < targetPosition) {
+            end = targetPosition;
+        }
+
+        return true;
     }
 }

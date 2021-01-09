@@ -146,8 +146,6 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
         this.dirContent = dirContent;
 
         this.doSearch();
-
-        this.adjustSelection();
     }
 
     private doSearch() {
@@ -171,6 +169,8 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
 
             this.visibleDirItems.push({item, nameHtml});
         }
+
+        this.adjustSelection();
     }
 
     private static highlightOccurrence(s: string, filter: string): string {
@@ -385,7 +385,6 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
 
     filterChanged() {
         this.doSearch();
-        this.adjustSelection();
     }
 
     startPathEditing() {

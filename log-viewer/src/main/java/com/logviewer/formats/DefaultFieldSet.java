@@ -120,7 +120,7 @@ public class DefaultFieldSet {
 
         private final LongSupplier dateExtractor;
 
-        private final StretchField[] stretchFields;
+        private final int[] stretchFields;
 
         private String s;
         private long start;
@@ -135,7 +135,7 @@ public class DefaultFieldSet {
             }
 
             dateExtractor = createDateExtractor();
-            stretchFields = new StretchField[layoutCopy.length];
+            stretchFields = new int[layoutCopy.length];
         }
 
         @Nullable
@@ -182,7 +182,33 @@ public class DefaultFieldSet {
                         }
                     }
 
-                    nextIdx = part.parse(s, idx, endStr);
+                    if (part instanceof LvLayoutStretchNode) {
+                        LvLayoutStretchNode stretchNode = (LvLayoutStretchNode) part;
+
+                        if (!stretchNode.reset(s, idx, endStr)) {
+                            nextIdx = LvLayoutNode.PARSE_FAILED;
+                        } else {
+                            if (i + 1 < layoutCopy.length) {
+                                stretchFields[stretchFieldSize++] = i;
+
+                                idx = stretchNode.getEnd();
+                                assert idx <= endStr;
+                                i++;
+                                continue;
+                            } else {
+                                if (stretchNode.grow(s, endStr, endStr)) {
+                                    assert stretchNode.getEnd() == endStr;
+                                    stretchFields[stretchFieldSize++] = i;
+
+                                    break; // parsing finished successfully
+                                }
+                                
+                                nextIdx = LvLayoutNode.PARSE_FAILED;
+                            }
+                        }
+                    } else {
+                        nextIdx = part.parse(s, idx, endStr);
+                    }
                 }
 
                 if (nextIdx == LvLayoutNode.PARSE_FAILED) {
@@ -190,20 +216,34 @@ public class DefaultFieldSet {
                         if (stretchFieldSize == 0)
                             return false;
 
-                        StretchField stretchField = stretchFields[stretchFieldSize - 1];
-                        if (++stretchField.endPosition < endStr) {
-                            idx = stretchField.endPosition;
-                            i = stretchField.partIndex + 1;
+                        i = stretchFields[stretchFieldSize - 1];
+                        LvLayoutStretchNode stretchNode = (LvLayoutStretchNode) layoutCopy[i];
 
-                            if (layoutCopy[i] instanceof LvLayoutNodeSearchable) {
-                                int searchNext = ((LvLayoutNodeSearchable)layoutCopy[i]).search(s, idx, endStr);
-                                if (searchNext >= 0) {
-                                    stretchField.endPosition = searchNext;
-                                    idx = searchNext;
+                        if (stretchNode.getEnd() < endStr) {
+                            i++;
+                            LvLayoutNode nextNode = layoutCopy[i];
+
+                            if (!(nextNode instanceof LvLayoutNodeSearchable)) {
+                                if (stretchNode.grow(s, stretchNode.getEnd() + 1, endStr)) {
+                                    idx = stretchNode.getEnd();
                                     continue mainLoop;
                                 }
                             } else {
-                                continue mainLoop;
+                                idx = stretchNode.getEnd() + 1;
+                                while (true) {
+                                    int searchNext = ((LvLayoutNodeSearchable)nextNode).search(s, idx, endStr);
+                                    if (searchNext < 0)
+                                        break;
+
+                                    if (!stretchNode.grow(s, searchNext, endStr))
+                                        break;
+
+                                    idx = stretchNode.getEnd();
+                                    if (idx == searchNext)
+                                        continue mainLoop;
+
+                                    assert idx > searchNext;
+                                }
                             }
                         }
 
@@ -219,38 +259,6 @@ public class DefaultFieldSet {
                         fieldOffset[fieldIdx * 2 + 1] = -1;
                     }
                 } else {
-                    if (nextIdx < 0) {
-                        int minSkip = -(nextIdx + 1);
-
-                        StretchField stretchField = new StretchField(i, idx, idx + minSkip);
-                        assert stretchField.endPosition <= endStr;
-
-                        stretchFields[stretchFieldSize++] = stretchField;
-
-                        i++;
-
-                        if (i == layoutCopy.length) {
-                            stretchField.endPosition = endStr;
-                            idx = endStr;
-                            break;
-                        }
-
-                        idx = stretchField.endPosition;
-
-                        if (layoutCopy[i] instanceof LvLayoutNodeSearchable) {
-                            int searchNext = ((LvLayoutNodeSearchable)layoutCopy[i]).search(s, idx, endStr);
-                            if (searchNext >= 0) {
-                                stretchField.endPosition = searchNext;
-                                idx = searchNext;
-                            } else {
-                                stretchField.endPosition = endStr; // not found
-                                idx = endStr;
-                            }
-                        }
-
-                        continue;
-                    }
-
                     if (fieldIdx >= 0) {
                         fieldOffset[fieldIdx * 2] = idx;
                         fieldOffset[fieldIdx * 2 + 1] = nextIdx;
@@ -268,13 +276,14 @@ public class DefaultFieldSet {
             hasMore = length < end - start;
 
             for (int i = 0; i < stretchFieldSize; i++) {
-                StretchField stretchField = stretchFields[i];
+                int nodeIdx = stretchFields[i];
+                LvLayoutStretchNode stretchField = (LvLayoutStretchNode) layoutCopy[nodeIdx];
 
-                int fieldIdx = fieldIndex[stretchField.partIndex];
+                int fieldIdx = fieldIndex[nodeIdx];
 
                 if (fieldIdx >= 0) {
-                    fieldOffset[fieldIdx * 2] = stretchField.startPosition;
-                    fieldOffset[fieldIdx * 2 + 1] = stretchField.endPosition;
+                    fieldOffset[fieldIdx * 2] = stretchField.getStart();
+                    fieldOffset[fieldIdx * 2 + 1] = stretchField.getEnd();
                 }
             }
 
@@ -338,13 +347,16 @@ public class DefaultFieldSet {
     }
 
     private static class StretchField {
+        LvLayoutStretchNode node;
+
         int partIndex;
 
         int startPosition;
 
         int endPosition;
 
-        public StretchField(int partIndex, int startPosition, int endPosition) {
+        public StretchField(LvLayoutStretchNode node, int partIndex, int startPosition, int endPosition) {
+            this.node = node;
             this.partIndex = partIndex;
             this.startPosition = startPosition;
             this.endPosition = endPosition;

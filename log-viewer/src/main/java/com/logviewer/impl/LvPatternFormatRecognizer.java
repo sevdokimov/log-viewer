@@ -31,8 +31,12 @@ public class LvPatternFormatRecognizer implements LvFormatRecognizer {
         canonicalPath = canonicalPath.toAbsolutePath();
 
         for (Pair<PathPattern, LogFormat> pair : formats) {
-            if (pair.getFirst().matchFile(canonicalPath))
-                return pair.getSecond();
+            if (pair.getFirst().matchFile(canonicalPath)) {
+                if (pair.getSecond() != null) {
+                    return pair.getSecond();
+                }
+            }
+
         }
 
         return null;

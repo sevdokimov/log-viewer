@@ -30,4 +30,8 @@ public abstract class LvLayoutCustomTypeNode implements LvLayoutNode {
     @Override
     public abstract LvLayoutNode clone();
 
+    @Override
+    public String toString() {
+        return fieldName;
+    }
 }

@@ -51,7 +51,7 @@ public class LvPatternFormatRecognizerTest {
                 "logs = [\n" +
                 "{" +
                 "  path: \"**/*.log\"\n" +
-                "}" +
+                "},\n" +
                 "{" +
                 "  path:\"/aaa/**/aaa.log\"\n" +
                 "  format: {type: \"LogbackLogFormat\", pattern: \"%date [%thread] %level %logger - %msg%n\"}" +

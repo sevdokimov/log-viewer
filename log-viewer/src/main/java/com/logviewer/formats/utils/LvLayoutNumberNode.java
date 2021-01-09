@@ -7,13 +7,20 @@ public class LvLayoutNumberNode extends LvLayoutCustomTypeNode {
 
     private final boolean canBeNegative;
 
+    private final boolean canHaveFraction;
+
     public LvLayoutNumberNode(@NonNull String fieldName, @Nullable String fieldType) {
-        this(fieldName, fieldType, false);
+        this(fieldName, fieldType, false, false);
     }
 
     public LvLayoutNumberNode(@NonNull String fieldName, @Nullable String fieldType, boolean canBeNegative) {
+        this(fieldName, fieldType, canBeNegative, false);
+    }
+
+    public LvLayoutNumberNode(@NonNull String fieldName, @Nullable String fieldType, boolean canBeNegative, boolean canHaveFraction) {
         super(fieldName, fieldType);
         this.canBeNegative = canBeNegative;
+        this.canHaveFraction = canHaveFraction;
     }
 
     @Override
@@ -35,14 +42,33 @@ public class LvLayoutNumberNode extends LvLayoutCustomTypeNode {
         if (c < '0' || c > '9')
             return PARSE_FAILED;
 
-        for (int i = offset + 1; i < end; i++) {
-            c = s.charAt(i);
+        do {
+            offset++;
+            if (offset == end)
+                return offset;
 
-            if (c < '0' || c > '9')
-                return i;
+            c = s.charAt(offset);
+        } while (c >= '0' && c <= '9');
+
+        if (canHaveFraction && c == '.') {
+            if (offset + 1 < end) {
+                c = s.charAt(offset + 1);
+                if (c >= '0' && c <= '9') {
+                    offset += 2;
+
+                    while (offset < end) {
+                        c = s.charAt(offset);
+                        if (c >= '0' && c <= '9') {
+                            offset++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
-        return end;
+        return offset;
     }
 
     @Override
@@ -52,7 +78,7 @@ public class LvLayoutNumberNode extends LvLayoutCustomTypeNode {
 
     @Override
     public LvLayoutNumberNode clone() {
-        return new LvLayoutNumberNode(getFieldName(), getFieldType(), canBeNegative);
+        return new LvLayoutNumberNode(getFieldName(), getFieldType(), canBeNegative, canHaveFraction);
     }
 
 //    @Override

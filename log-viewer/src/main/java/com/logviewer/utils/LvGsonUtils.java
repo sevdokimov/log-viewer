@@ -11,6 +11,7 @@ import com.logviewer.filters.*;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.formats.SimpleLogFormat;
 import com.logviewer.logLibs.LoggerLibSupport;
+import com.logviewer.logLibs.nginx.NginxLogFormat;
 import org.springframework.lang.NonNull;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class LvGsonUtils {
 
         RuntimeTypeAdapterFactory<LogFormat> logFormatFactory = RuntimeTypeAdapterFactory.of(LogFormat.class)
                 .registerSubtype(RegexLogFormat.class)
+                .registerSubtype(NginxLogFormat.class)
                 .registerSubtype(SimpleLogFormat.class);
 
         LoggerLibSupport.getSupportedLogLibs().flatMap(LoggerLibSupport::getFormatClasses).forEach(logFormatFactory::registerSubtype);

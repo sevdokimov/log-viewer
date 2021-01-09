@@ -403,6 +403,17 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
     }
 
     @Test
+    public void selectionOnFilteringStart() {
+        openPage();
+
+        checkSelectedFile("aaa");
+
+        new Actions(driver).sendKeys("f").perform();
+
+        checkSelectedFile("fff");
+    }
+
+    @Test
     public void selectFileByTypePath() {
         openPage();
 

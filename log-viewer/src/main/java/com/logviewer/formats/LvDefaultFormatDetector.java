@@ -2,6 +2,8 @@ package com.logviewer.formats;
 
 import com.logviewer.data2.LogFormat;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
+import com.logviewer.logLibs.nginx.NginxLogFormat;
+import com.logviewer.utils.Pair;
 import com.logviewer.utils.TextRange;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -23,15 +25,17 @@ public class LvDefaultFormatDetector {
 
     static final String UNKNOWN_FORMAT = "???";
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[12]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
 
-    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[12]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])(?:[0-5]\\d)(?:[0-5]\\d)([,.]?\\d\\d\\d)?\\b");
+    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])(?:[0-5]\\d)(?:[0-5]\\d)([,.]?\\d\\d\\d)?\\b");
 
-    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[12]\\d (?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?:([,.])\\d\\d\\d)?\\b");
+    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?:([,.])\\d\\d\\d)?\\b");
 
     private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)\\b");
 
     private static final Pattern LEVEL = Pattern.compile("\\b(?:ERROR|WARN|INFO|DEBUG|TRACE|SEVERE|WARNING|CONFIG|FINE|FINER|FINEST|FATAL)\\b");
+
+    private static final Pattern NGINX_PATTERN = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3} - [^\\[\\]\\s]+ \\[\\d\\d/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/20[012]\\d:\\d\\d:\\d\\d:\\d\\d [+-][012]\\d[03]0] ");
 
     private static final Pattern THREAD_ITEM = Pattern.compile(" *(\\[[^\\[\\]\n]+]) *");
 
@@ -79,14 +83,14 @@ public class LvDefaultFormatDetector {
 
         String s = new String(data, 0, length, StandardCharsets.UTF_8);
 
-        Map<String, Integer> map = new HashMap<>();
+        Map<Pair<Boolean, String>, Integer> map = new HashMap<>();
 
         for (StringTokenizer st = new StringTokenizer(s, "\n"); st.hasMoreTokens(); ) {
             String line = st.nextToken();
             if (line.trim().isEmpty() || line.startsWith("\tat") || line.startsWith("Caused by: "))
                 continue;
 
-            String format = detectFormatOfLine(line);
+            Pair<Boolean, String> format = detectFormatOfLine(line);
             if (format != null) {
                 map.compute(format, (key, val) -> val == null ? 1 : val + 1);
             }
@@ -95,12 +99,17 @@ public class LvDefaultFormatDetector {
         if (map.isEmpty())
             return null;
 
-        String format = Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey();
-        if (format == null || format.equals(UNKNOWN_FORMAT))
+        Pair<Boolean, String> format = Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey();
+        if (format == null || format.getSecond().equals(UNKNOWN_FORMAT))
             return null;
 
-        if (map.get(format) > map.values().stream().mapToInt(x -> x).sum() * 2 / 3)
-            return new Log4jLogFormat(null, format, false);
+        if (map.get(format) > map.values().stream().mapToInt(x -> x).sum() * 2 / 3) {
+            if (format.getFirst()) {
+                return new Log4jLogFormat(null, format.getSecond(), false);
+            } else {
+                return new NginxLogFormat(format.getSecond());
+            }
+        }
 
         return null;
     }
@@ -137,7 +146,32 @@ public class LvDefaultFormatDetector {
         return new TextRange(start, end + 1);
     }
 
-    static String detectFormatOfLine(String line) {
+    static Pair<Boolean, String> detectFormatOfLine(String line) {
+        String res = detectLog4jFormatOfLine(line);
+
+        if (res == null || res.equals(UNKNOWN_FORMAT)) {
+            String nginx = detectNginxFormatOfLine(line);
+            if (nginx != null) {
+                return Pair.of(false, nginx);
+            }
+        }
+
+        if (res == null)
+            return null;
+
+        return Pair.of(true, res);
+    }
+
+    static String detectNginxFormatOfLine(String line) {
+        Matcher matcher = NGINX_PATTERN.matcher(line);
+        if (matcher.lookingAt()) {
+            return "$remote_addr - $remote_user [$time_local] $any";
+        }
+
+        return null;
+    }
+
+    static String detectLog4jFormatOfLine(String line) {
         String dateField;
         TextRange datePos;
 

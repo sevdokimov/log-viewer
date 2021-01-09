@@ -2,6 +2,7 @@ package com.logviewer.formats;
 
 import com.logviewer.AbstractLogTest;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
+import com.logviewer.utils.Pair;
 import org.junit.Test;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -105,6 +106,19 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
     }
 
     @Test
+    public void nginx() {
+        Pair<Boolean, String> pair = LvDefaultFormatDetector.detectFormatOfLine("195.154.122.76 - - [01/Jan/2021:00:21:07 +0300] \"GET /ideaPlugin.html HTTP/1.1\" 200 2366 \"-\" \"Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)\"");
+        assert pair != null;
+        assert !pair.getFirst();
+        assert pair.getSecond().equals("$remote_addr - $remote_user [$time_local] $any");
+
+        pair = LvDefaultFormatDetector.detectFormatOfLine(" 195.154.122.76 - - [01/Jan/2021:00:21:07 +0300] \"GET /ideaPlugin.html HTTP/1.1\" 200 2366 \"-\" \"Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)\"");
+        assert pair != null;
+        assert pair.getFirst();
+        assert pair.getSecond().equals(LvDefaultFormatDetector.UNKNOWN_FORMAT);
+    }
+
+    @Test
     public void testUnknownFormat() {
         checkLine("13:12:10 fsdff", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("INFO fsdff", LvDefaultFormatDetector.UNKNOWN_FORMAT);
@@ -159,7 +173,7 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
     }
 
     private void checkLine(@NonNull String line, @Nullable String format) {
-        String detectedFormat = LvDefaultFormatDetector.detectFormatOfLine(line);
+        String detectedFormat = LvDefaultFormatDetector.detectLog4jFormatOfLine(line);
         assertEquals(format, detectedFormat);
 
         if (format == null || format.equals(LvDefaultFormatDetector.UNKNOWN_FORMAT))
