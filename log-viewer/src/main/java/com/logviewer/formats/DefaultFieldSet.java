@@ -314,7 +314,7 @@ public class DefaultFieldSet {
                 throw new IllegalStateException();
 
             s = s + new String(data, offset, length, charset);
-            fieldOffset[lastFieldOffset + 1] += length;
+            fieldOffset[lastFieldOffset + 1] = s.length();
         }
 
         @Override
@@ -343,23 +343,6 @@ public class DefaultFieldSet {
             s = null;
 
             return res;
-        }
-    }
-
-    private static class StretchField {
-        LvLayoutStretchNode node;
-
-        int partIndex;
-
-        int startPosition;
-
-        int endPosition;
-
-        public StretchField(LvLayoutStretchNode node, int partIndex, int startPosition, int endPosition) {
-            this.node = node;
-            this.partIndex = partIndex;
-            this.startPosition = startPosition;
-            this.endPosition = endPosition;
         }
     }
 }
