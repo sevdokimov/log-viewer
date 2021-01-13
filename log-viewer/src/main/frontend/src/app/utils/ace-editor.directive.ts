@@ -1,7 +1,7 @@
 import {AfterViewInit, Directive, ElementRef, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import * as ace from 'brace';
 import 'brace/theme/monokai';
-import 'brace/mode/groovy';
+import 'brace/mode/javascript';
 
 @Directive({
     selector: '[behAceEditor]'
@@ -11,7 +11,7 @@ export class AceEditorDirective implements AfterViewInit, OnDestroy {
     _options: any = {};
     _readOnly: boolean = false;
     _theme: string = 'monokai';
-    _mode: string = 'groovy';
+    _mode: string = 'javascript';
     _autoUpdateContent: boolean = true;
     editor: any;
     oldText: any;

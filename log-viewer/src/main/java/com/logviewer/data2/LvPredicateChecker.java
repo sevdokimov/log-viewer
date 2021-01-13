@@ -2,14 +2,21 @@ package com.logviewer.data2;
 
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
+import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-public class LvPredicateChecker implements LogFilterContext {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+public class LvPredicateChecker implements LogFilterContext, AutoCloseable {
 
     private final LogView logView;
     private final LogFormat logFormat;
     private final String logId;
+
+    private Map<String, Object> context;
 
     public LvPredicateChecker(LogView logView) {
         this.logView = logView;
@@ -42,6 +49,16 @@ public class LvPredicateChecker implements LogFilterContext {
         return logFormat.getFields();
     }
 
+    @NonNull
+    @Override
+    public <T> T getProperty(String name, Function<String, T> factory) {
+        if (context == null) {
+            context = new HashMap<>();
+        }
+
+        return (T)context.computeIfAbsent(name, factory);
+    }
+
     public Pair<Record, Throwable> applyFilter(@NonNull Record record, @Nullable RecordPredicate filter) {
         try {
             if (filter != null && !filter.test(record, this))
@@ -51,5 +68,16 @@ public class LvPredicateChecker implements LogFilterContext {
         }
 
         return new Pair<>(record, null);
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (context != null) {
+            for (Object value : context.values()) {
+                if (value instanceof AutoCloseable) {
+                    Utils.closeQuietly((AutoCloseable) value);
+                }
+            }
+        }
     }
 }

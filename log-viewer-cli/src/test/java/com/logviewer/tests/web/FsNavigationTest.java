@@ -332,8 +332,8 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
         new Actions(driver).sendKeys("aAa").perform();
 
         assertEquals(Arrays.asList("aaa1.log", "AAA2.log"), fileNames());
-        assertEquals(Arrays.asList("aaa", "AAA"), driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
-                .map(WebElement::getText).collect(Collectors.toList()));
+        assertEquals("aaaAAA", driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
+                .map(WebElement::getText).collect(Collectors.joining()));
     }
 
     @Test
@@ -369,8 +369,11 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
 
         notExist(EDIT_PATH_ICON);
 
-        driver.findElement(By.cssSelector(".current-path-edited input[type=\"text\"]:focus"));
-        assertThat(getSelectedText(), is(navigationRoot().toString()));
+        WebElement input = driver.findElement(By.cssSelector(".current-path-edited input[type=\"text\"]:focus"));
+
+        assertThat(input.getAttribute("value"), is(navigationRoot().toString()));
+        assertThat(input.getAttribute("selectionEnd"), is(String.valueOf(navigationRoot().toString().length())));
+        assertThat(input.getAttribute("selectionStart"), is("0"));
 
         new Actions(driver).sendKeys(Keys.ESCAPE).perform();
 

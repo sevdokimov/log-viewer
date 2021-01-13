@@ -43,7 +43,7 @@ public class LvGsonUtils {
                 .registerSubtype(SubstringPredicate.class)
                 .registerSubtype(ThreadPredicate.class)
                 .registerSubtype(FieldArgPredicate.class)
-                .registerSubtype(GroovyPredicate.class)
+                .registerSubtype(JsPredicate.class)
                 .registerSubtype(FieldValueSetPredicate.class)
                 .registerSubtype(CompositeRecordPredicate.class));
 

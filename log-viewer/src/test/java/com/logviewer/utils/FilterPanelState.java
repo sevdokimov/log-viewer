@@ -14,7 +14,7 @@ public class FilterPanelState {
 
     private Boolean exceptionsOnly;
 
-    private GroovyFilter[] groovyFilters;
+    private JsFilter[] jsFilters;
 
     private TextFilter[] textFilters;
 
@@ -35,12 +35,12 @@ public class FilterPanelState {
         return this;
     }
 
-    public GroovyFilter[] getGroovyFilters() {
-        return groovyFilters;
+    public JsFilter[] getJsFilters() {
+        return jsFilters;
     }
 
-    public FilterPanelState groovyFilter(GroovyFilter ... filters) {
-        this.groovyFilters = filters;
+    public FilterPanelState jsFilter(JsFilter... filters) {
+        this.jsFilters = filters;
         return this;
     }
 
@@ -116,14 +116,14 @@ public class FilterPanelState {
         private String[] includes;
     }
 
-    public static class GroovyFilter {
+    public static class JsFilter {
         private String id;
 
         private String name;
 
         private String script;
 
-        public GroovyFilter(String id, String name, String script) {
+        public JsFilter(String id, String name, String script) {
             this.id = id;
             this.name = name;
             this.script = script;

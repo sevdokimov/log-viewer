@@ -33,7 +33,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {NgxMomentDateModule} from '@angular-material-components/moment-adapter';
 import {MatMenuModule} from '@angular/material/menu';
 import {LvThreadFilterComponent} from '@app/log-view/top-filters/thread-filter/thread-filter.component';
-import {LvGroovyFilterComponent} from '@app/log-view/top-filters/groovy-filter/groovy-filter.component';
+import {LvJsFilterComponent} from '@app/log-view/top-filters/js-filter/js-filter.component';
 import {LvTextFilterComponent} from '@app/log-view/top-filters/text-filter/text-filter.component';
 import {AutosizeModule} from 'ngx-autosize';
 import {MainPageComponent} from '@app/main-page/main-page.component';
@@ -96,7 +96,7 @@ export const appRoutes: Routes = [
         LevelListComponent,
         ExceptionOnlyComponent,
         LvDateIntervalComponent,
-        LvGroovyFilterComponent,
+        LvJsFilterComponent,
         LvTextFilterComponent,
         LvThreadFilterComponent,
     ],

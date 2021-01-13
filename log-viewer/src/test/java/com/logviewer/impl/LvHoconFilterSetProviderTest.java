@@ -18,7 +18,7 @@ public class LvHoconFilterSetProviderTest {
             "    default: {\n" +
             "        exceptionsOnly: true\n" +
 
-            "        groovyFilters: [\n" +
+            "        jsFilters: [\n" +
             "          {\n" +
             "              \"name\": \"Errors only\",\n" +
             "              \"id\": f1,\n" +
@@ -40,9 +40,9 @@ public class LvHoconFilterSetProviderTest {
 
         FilterPanelState state = LvGsonUtils.GSON.fromJson(Iterables.getOnlyElement(filterSets.values()), FilterPanelState.class);
 
-        assertEquals(1, state.getGroovyFilters().length);
+        assertEquals(1, state.getJsFilters().length);
 
-        assertEquals("Errors only", state.getGroovyFilters()[0].getName());
+        assertEquals("Errors only", state.getJsFilters()[0].getName());
 
         assert state.getExceptionsOnly();
     }

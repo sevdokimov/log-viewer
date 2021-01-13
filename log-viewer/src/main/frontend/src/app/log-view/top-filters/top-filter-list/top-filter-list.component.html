@@ -8,9 +8,9 @@
 
 <lv-thread-filter *ngIf="filterPanelStateService.activeFilterEditors.thread && filterPanelStateService.getFilterState().thread"></lv-thread-filter>
 
-<lv-groovy-filter *ngFor="let g of filterPanelStateService.getFilterState().groovyFilters" [filterId]="g.id">
+<lv-js-filter *ngFor="let g of filterPanelStateService.getFilterState().jsFilters" [filterId]="g.id">
     
-</lv-groovy-filter>
+</lv-js-filter>
 
 <lv-text-filter *ngFor="let f of filterPanelStateService.getFilterState().textFilters" [filterId]="f.id">
     

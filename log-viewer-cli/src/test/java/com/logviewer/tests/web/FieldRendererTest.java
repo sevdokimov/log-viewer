@@ -11,6 +11,10 @@ import org.openqa.selenium.WebElement;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class FieldRendererTest extends AbstractWebTestCase {
 
     public static final RegexLogFormat FORMAT = new RegexLogFormat(StandardCharsets.UTF_8, "(\\d+)", false,
@@ -36,9 +40,9 @@ public class FieldRendererTest extends AbstractWebTestCase {
         openLog("1-7.log");
 
         WebElement element = driver.findElement(By.xpath("//div[@class='record']//*[@class='zzz'][text()='7']"));
-        Assert.assertEquals("rgba(0, 0, 170, 1)", element.getCssValue("color"));
-        Assert.assertEquals("700", element.getCssValue("font-weight"));
-        Assert.assertEquals("italic", element.getCssValue("font-style"));
+        assertThat(element.getCssValue("color"), anyOf(is("rgba(0, 0, 170, 1)"), is("rgb(0, 0, 170)")));
+        assertThat(element.getCssValue("font-weight"), is("700"));
+        assertThat(element.getCssValue("font-style"), is("italic"));
     }
 
     @Test

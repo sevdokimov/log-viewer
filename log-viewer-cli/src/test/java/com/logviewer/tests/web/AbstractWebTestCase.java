@@ -140,6 +140,10 @@ public abstract class AbstractWebTestCase implements LogPage {
         ctx.getBeansOfType(TestListener.class).values().forEach(TestListener::beforeTest);
     }
 
+    protected void notExistWait(@NonNull By by) {
+        waitFor(() -> noImplicitWait(() -> driver.findElements(by).isEmpty()));
+    }
+
     protected void notExist(@NonNull By by) {
         noImplicitWait(() -> {
             assert driver.findElements(by).isEmpty();

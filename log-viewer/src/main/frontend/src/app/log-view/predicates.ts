@@ -4,7 +4,7 @@ export interface Predicate {
     type: string;
 }
 
-export interface GroovyPredicate extends Predicate {
+export interface JsPredicate extends Predicate {
     script: string;
 }
 

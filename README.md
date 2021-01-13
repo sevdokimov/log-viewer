@@ -13,7 +13,7 @@ No indexing.
 ### Features
 
 1. Highlighting fields, lines, parent brackets. Highlighting makes the log much more readable.
-1. Event filtering by a level, logger, date, thread, etc... Filtering by a custom condition written on Groovy is available as well.
+1. Event filtering by a level, logger, date, thread, etc... Filtering by a custom condition written on JavaScript is available as well.
    [more details](_docs/filters.md)
 1. Merging events from several log files and showing its as one log. If log files are located on different
 machines, all machines must have run LogViewer.

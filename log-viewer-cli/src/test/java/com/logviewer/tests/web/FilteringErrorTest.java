@@ -2,7 +2,7 @@ package com.logviewer.tests.web;
 
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.utils.FilterPanelState;
-import com.logviewer.utils.FilterPanelState.GroovyFilter;
+import com.logviewer.utils.FilterPanelState.JsFilter;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -14,7 +14,7 @@ public class FilteringErrorTest extends AbstractWebTestCase {
     @Test
     public void filteringError() {
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState()
-                .groovyFilter(new GroovyFilter("id", "", "zzz.ppppp")));
+                .jsFilter(new JsFilter("id", "", "function (text) { return ppppp == 'aaa' }")));
 
         openLog("1-7.log");
 

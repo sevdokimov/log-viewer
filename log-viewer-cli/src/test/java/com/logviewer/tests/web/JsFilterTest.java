@@ -2,7 +2,7 @@ package com.logviewer.tests.web;
 
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.utils.FilterPanelState;
-import com.logviewer.utils.FilterPanelState.GroovyFilter;
+import com.logviewer.utils.FilterPanelState.JsFilter;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -17,9 +17,9 @@ import static com.logviewer.tests.web.ThreadFilterTest.setFormat;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class GroovyFilterTest extends AbstractWebTestCase {
+public class JsFilterTest extends AbstractWebTestCase {
 
-    public static final By HEADERS = By.cssSelector("lv-groovy-filter .top-panel-dropdown");
+    public static final By HEADERS = By.cssSelector("lv-js-filter .top-panel-dropdown");
 
     private List<String> filterHeaders() {
         return driver.findElements(HEADERS).stream()
@@ -30,24 +30,25 @@ public class GroovyFilterTest extends AbstractWebTestCase {
     @Test
     public void initFilterExclude() {
         setFormat();
-        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().groovyFilter(
-                new GroovyFilter("1", "", "   \n\n\t  thread   ==\t\t 'exec-100'"),
-                new GroovyFilter("2", "                                                         always-  true", "true")
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().jsFilter(
+                new JsFilter("1", "", "   \n  // zzz  \n\n/* asdas\n\ndad */ \n\t function zzz(text, fields) {\n\n\treturn fields.thread   ==\t\t 'exec-100' }"),
+                new JsFilter("2", "", "   \n  // zzz  \n\n/* asdas\n\ndad */ \n\t function(t, f) {\n\n\treturn f.thread   ==\t\t 'exec-100' } \n// comment\n "),
+                new JsFilter("3", "                                                         always-  true", "function (){return true}")
         ));
 
         openLog("thread-filter-test.log");
 
         assertThat(getRecord().size(), is(3));
-        assertThat(filterHeaders(), is(Arrays.asList("Script: thread == 'exec-100'", "always- true")));
+        assertThat(filterHeaders(), is(Arrays.asList("Script: fields.thread == 'exec-100'", "Script: f.thread == 'exec-100'", "always- true")));
         assert getRecord().stream().map(WebElement::getText).allMatch(t -> t.contains("exec-100"));
     }
 
     @Test
     public void hugeTitles() {
         setFormat();
-        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().groovyFilter(
-                new GroovyFilter("1", "", "thread == 'exec-100 || false || false || false || false || false || false || false || false || false || false || false || false || false'"),
-                new GroovyFilter("2", "always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true ", "true")
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().jsFilter(
+                new JsFilter("1", "", "function (text){return thread == 'exec-100 || false || false || false || false || false || false || false || false || false || false || false || false || false'}"),
+                new JsFilter("2", "always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true always-true ", "true")
         ));
 
         openLog("thread-filter-test.log");
@@ -69,15 +70,15 @@ public class GroovyFilterTest extends AbstractWebTestCase {
 
         addFilterMenuClick();
 
-        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Groovy')]")).click();
+        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'JavaScript')]")).click();
 
         assertThat(driver.findElements(HEADERS).size(), is(1));
         driver.findElement(By.cssSelector(".lv-dropdown-panel")); // Dropdown opened automatically
 
         addFilterMenuClick();
-        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Groovy')]")).click();
+        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'JavaScript')]")).click();
         addFilterMenuClick();
-        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Groovy')]")).click();
+        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'JavaScript')]")).click();
 
         List<WebElement> filters = driver.findElements(HEADERS);
         assertThat(filters.size(), is(3));

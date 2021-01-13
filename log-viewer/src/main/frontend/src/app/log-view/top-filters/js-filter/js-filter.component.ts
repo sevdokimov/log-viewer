@@ -6,23 +6,23 @@ import {SlUtils} from '@app/utils/utils';
 import {AceEditorDirective} from '@app/utils/ace-editor.directive';
 
 @Component({
-    selector: 'lv-groovy-filter',
-    templateUrl: './groovy-filter.component.html',
-    styleUrls: ['./groovy-filter.component.scss'],
+    selector: 'lv-js-filter',
+    templateUrl: './js-filter.component.html',
+    styleUrls: ['./js-filter.component.scss'],
 })
-export class LvGroovyFilterComponent extends FilterWithDropdown {
+export class LvJsFilterComponent extends FilterWithDropdown {
 
     @ViewChild(AceEditorDirective)
     private aceEditor: AceEditorDirective;
 
-    @ViewChild('groovyDropDown', {static: true})
+    @ViewChild('panelDropDown', {static: true})
     private dropDownElement: ElementRef;
 
     @Input() filterId: string;
 
     scriptEditorOptions = {
         maxLines: 20,
-        minLines: 3,
+        minLines: 5,
         showPrintMargin: false,
         highlightActiveLine: false,
         highlightGutterLine: false,
@@ -66,7 +66,7 @@ export class LvGroovyFilterComponent extends FilterWithDropdown {
     }
 
     private findFilter(state: FilterState) {
-        return state.groovyFilters?.find(it => it.id === this.filterId);
+        return state.jsFilters?.find(it => it.id === this.filterId);
     }
 
     protected loadComponentState(state: FilterState) {
@@ -84,7 +84,9 @@ export class LvGroovyFilterComponent extends FilterWithDropdown {
         this.originalScript = this.script;
 
         if (!this.titleName) {
-            this.titleScript = SlUtils.trimText(this.script, 40);
+            let s = this.script.replace(/^(\s+|\/\/.+\n|\/\*[^*]*\*\/)*function(?:\s+[a-zA-Z0-9_$]+)?\([^)]*\)\s*\{\s*return\b/, '');
+            s = s.replace(/}(\s+|\/\/.+\n|\/\*[^*]*\*\/)*$/, '');
+            this.titleScript = SlUtils.trimText(s, 40);
         }
     }
 
@@ -111,7 +113,7 @@ export class LvGroovyFilterComponent extends FilterWithDropdown {
     removeFilter() {
         this.filterPanelStateService.updateFilterState(state => {
             let f = this.findFilter(state);
-            SlUtils.delete(state.groovyFilters, f);
+            SlUtils.delete(state.jsFilters, f);
         });
     }
 

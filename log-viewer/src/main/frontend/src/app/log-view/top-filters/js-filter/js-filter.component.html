@@ -1,4 +1,4 @@
-<div #groovyDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter"
+<div #panelDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter"
      [attr.filter-id]="filterId"
      [class.modified]="originalName !== name || originalScript !== script">
 
@@ -13,7 +13,7 @@
     <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
     
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
-        <form class="groovy-filter" (ngSubmit)="onApply()">
+        <form class="js-filter" (ngSubmit)="onApply()">
             <div class="name-panel">
                 <mat-form-field class="filter-name" appearance="fill">
                     <mat-label>Filter name <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
@@ -22,7 +22,7 @@
             </div>
 
             <span class="small">
-                    Condition for filtering event (Groovy)
+                    Function that determines whether the event will be shown or not (JavaScript)
                     <span *ngIf="script !== originalScript" class="modified-script-flag" title="Script contains unsaved changed"> *</span>
             </span>
 
@@ -33,16 +33,16 @@
                      [text]="script"
                      (textChanged)="onScriptChanged($event)"
                      (keydown)="editorKeyDown($event)"
-                     [mode]="'groovy'">
+                     [mode]="'javascript'">
                 </div>
             </div>
 
             <div class="script-info text-secondary">
-                Use "<span class="field-in-info">_</span>" variable to access the entire event text.
+                <span class="field-in-info">text</span> - entire event text.
                 <span *ngIf="fieldList.length">
                     <br>
-                    Log fields can be accessible by a name:
-
+                    <span class="field-in-info">fields</span> - object containing event fields. The following fields are present
+                    in the current log:
                     <span>
                         <span *ngFor="let field of fieldList" class="field-with-comma">
                             <span class="comma">, </span>

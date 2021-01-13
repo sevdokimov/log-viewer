@@ -11,7 +11,7 @@ import {SearchPattern, SearchUtils} from '@app/log-view/search';
 })
 export class LvTextFilterComponent extends FilterWithDropdown {
 
-    @ViewChild('groovyDropDown', {static: true})
+    @ViewChild('panelDropDown', {static: true})
     private dropDownElement: ElementRef;
 
     @ViewChild('textInput', {static: false})

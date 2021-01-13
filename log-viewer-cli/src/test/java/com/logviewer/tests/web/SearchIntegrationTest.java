@@ -80,10 +80,14 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         prevArrow.click();
         driver.findElement(By.className("search-result"));
 
-        filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+        clearInput(filterInput);
 
         assert prevArrow.getAttribute("class").contains("tooliconDisabled");
         assert nextArrow.getAttribute("class").contains("tooliconDisabled");
+    }
+
+    private void clearInput(WebElement filterInput) {
+        new Actions(driver).keyDown(Keys.CONTROL).sendKeys(filterInput, "a").keyUp(Keys.CONTROL).sendKeys(Keys.DELETE).perform();
     }
 
     @Test
@@ -117,7 +121,9 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         assertEquals("", filterInput.getAttribute("title"));
         notExist(By.className("search-result"));
 
-        filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE, "ss");
+        setValue(filterInput, "");
+        filterInput.sendKeys("ss");
+
         driver.findElement(By.className("search-result"));
         filterInput.sendKeys("S");
         driver.findElement(By.className("search-result"));
@@ -143,47 +149,56 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         driver.navigate().refresh();
 
         WebElement filterInput = driver.findElementById("filterInput");
-        filterInput.sendKeys(" a]", Keys.chord(Keys.SHIFT, Keys.F3));
+        filterInput.sendKeys(" a]");
+        shiftF3(filterInput);
 
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
         notExist(By.className("search-result"));
 
-        filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-        filterInput.sendKeys(" A]", Keys.chord(Keys.SHIFT, Keys.F3));
+        clearInput(filterInput);
+        filterInput.sendKeys(" A]");
+        shiftF3(filterInput);
 
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
         driver.findElementById("match-cases").click();
-        filterInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.F3));
+        shiftF3(filterInput);
 
         notExist(By.className("search-result"));
 
         driver.findElementById("match-cases").click();
-        filterInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.F3));
+        shiftF3(filterInput);
+
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
-        notExist(By.className("search-result"));
+        notExistWait(By.className("search-result"));
         driver.findElementById("match-regex").click();
 
-        filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-        filterInput.sendKeys(" A\\]", Keys.chord(Keys.SHIFT, Keys.F3));
+        setValue(filterInput, "");
+        filterInput.sendKeys(" A\\]");
+        shiftF3(filterInput);
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
         notExist(By.className("search-result"));
         driver.findElementById("match-cases").click();
-        filterInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.F3));
+        shiftF3(filterInput);
 
         closeInfoAlert();
 
         notExist(By.className("search-result"));
 
-        filterInput.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-        filterInput.sendKeys(" a\\]", Keys.chord(Keys.SHIFT, Keys.F3));
+        setValue(filterInput, "");
+        filterInput.sendKeys(" a\\]");
+        shiftF3(filterInput);
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+    }
+
+    private void shiftF3(WebElement filterInput) {
+        new Actions(driver).keyDown(Keys.SHIFT).sendKeys(filterInput, Keys.F3).keyUp(Keys.SHIFT).perform();
     }
 
     @Test

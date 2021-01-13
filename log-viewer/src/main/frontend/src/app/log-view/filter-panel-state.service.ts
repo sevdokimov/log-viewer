@@ -8,7 +8,7 @@ import {ExceptionOnlyFilterFactory} from '@app/log-view/top-filters/exception-on
 import {DateIntervalFilterFactory} from '@app/log-view/top-filters/date-interval/date-interval-filter-factory';
 import {Record} from '@app/log-view/record';
 import {ThreadFilterFactory} from '@app/log-view/top-filters/thread-filter/thread-filter-factory';
-import {GroovyFilterFactory} from '@app/log-view/top-filters/groovy-filter/groovy-filter-factory';
+import {JsFilterFactory} from '@app/log-view/top-filters/js-filter/js-filter-factory';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import * as $ from 'jquery';
 import {SearchPattern} from '@app/log-view/search';
@@ -31,7 +31,7 @@ export class FilterPanelStateService {
 
     activeFilterEditors: {[key: string]: FilterFactory} = {};
 
-    permanentFilters: FilterFactory[] = [new TextFilterFactory(), new ExceptionOnlyFilterFactory(), new GroovyFilterFactory()];
+    permanentFilters: FilterFactory[] = [new TextFilterFactory(), new ExceptionOnlyFilterFactory(), new JsFilterFactory()];
 
     filterChanges = new EventEmitter<FilterState>();
 
@@ -197,24 +197,26 @@ export class FilterPanelStateService {
         return false;
     }
 
-    addGroovyFilter() {
+    addJsFilter() {
         let id: string;
 
         this.updateFilterState(state => {
-            if (!state.groovyFilters) {
-                state.groovyFilters = [];
+            if (!state.jsFilters) {
+                state.jsFilters = [];
             }
 
             id = this.generateRandomId();
 
-            state.groovyFilters.push({
+            state.jsFilters.push({
                 id,
                 name: '',
-                script: '_.contains("some substring") || _ ==~ /some regexp \d+/ || _.length() > 0',
+                script: 'function isVisibleEvent(text, fields) {\n' +
+                    '    return text.length > 0 || fields.msg.includes(\'some substring\')\n' +
+                    '}',
             });
         });
 
-        setTimeout(() => $('lv-groovy-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
+        setTimeout(() => $('lv-js-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
 
         return false;
     }
@@ -260,7 +262,7 @@ export interface FilterState {
 
     exceptionsOnly?: boolean;
 
-    groovyFilters?: GroovyFilter[];
+    jsFilters?: JsFilter[];
 
     textFilters?: TextFilter[];
 
@@ -272,7 +274,7 @@ export interface FilterState {
     thread?: {includes?: string[], excludes?: string[]};
 }
 
-export interface GroovyFilter {
+export interface JsFilter {
     id: string;
 
     name: string;

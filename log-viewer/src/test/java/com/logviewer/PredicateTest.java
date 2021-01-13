@@ -1,12 +1,12 @@
 package com.logviewer;
 
-import com.logviewer.data2.Record;
 import com.logviewer.data2.*;
-import com.logviewer.filters.*;
+import com.logviewer.filters.CompositeRecordPredicate;
+import com.logviewer.filters.FieldArgPredicate;
+import com.logviewer.filters.FieldValueSetPredicate;
+import com.logviewer.filters.RecordPredicate;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.formats.RegexLogFormat.RegexField;
-import groovy.lang.MissingMethodException;
-import org.codehaus.groovy.control.MultipleCompilationErrorsException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,28 +75,6 @@ public class PredicateTest extends AbstractLogTest {
         assertRecordEquals(records,
                 new CompositeRecordPredicate(false, new FieldArgPredicate("level", "INFO"), new FieldArgPredicate("msg", "i", FieldArgPredicate.Operator.CONTAINS)),
                 "2", "3", "4");
-    }
-
-    @Test
-    public void groovyFilters() {
-        try {
-            assertRecordEquals(records, new GroovyPredicate("_.contains('[WAR"));
-            assert false;
-        } catch (MultipleCompilationErrorsException ignored) {
-
-        }
-
-        try {
-            assertRecordEquals(records, new GroovyPredicate("_.xxxxx()"));
-            assert false;
-        } catch (MissingMethodException ignored) {
-
-        }
-
-        assertRecordEquals(records, new GroovyPredicate("_.contains('[ERROR]  ')"), "5");
-        assertRecordEquals(records, new GroovyPredicate("level == 'ERROR'"), "4", "5");
-        assertRecordEquals(records, new GroovyPredicate("Integer.parseInt(index) > 3"), "4", "5");
-        assertRecordEquals(records, new GroovyPredicate("msg ==~ /(?i)[i ]+/"), "2", "3");
     }
 
     @Test

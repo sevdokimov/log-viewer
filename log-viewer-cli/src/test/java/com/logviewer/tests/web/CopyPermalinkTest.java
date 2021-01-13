@@ -136,7 +136,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         WebElement filterInput = driver.findElementById("filterInput");
         filterInput.sendKeys("2012.01.01 00:03");
-        filterInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.F3));
+        new Actions(driver).keyDown(Keys.SHIFT).sendKeys(filterInput, Keys.F3).keyUp(Keys.SHIFT).perform();
 
         List<WebElement> searchRes = driver.findElementsByClassName("search-result");
 
