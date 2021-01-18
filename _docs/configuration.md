@@ -32,6 +32,26 @@ Each `{ path: "..." }` section opens access to log files by a pattern. The patte
 of any characters except "/", "**" matches a sequence of any characters include "/".<br>
 ${HOME} will be replaced with the environment variable "HOME", it is a feature of [HOCON](https://github.com/lightbend/config#uses-of-substitutions).
 
+### Authentication
+Basic authentication may be configured. The list of users can be defined in `users = [...]` section.
+Passwords can be defined as plain text or as MD5 checksum. 
+Example:
+```
+authentication.enabled = true
+
+users = [
+  { 
+      name: "user1", 
+      password: "1" 
+  },
+  { 
+      name: "user2", 
+      password-md5: "c81e728d9d4c2f636f067f89cc14862c" // The password is "2". Specified as md5 hash of "2" string.
+  } 
+]
+
+```
+
 ### Network
 `log-viewer.server.port` property specifies the port
 
