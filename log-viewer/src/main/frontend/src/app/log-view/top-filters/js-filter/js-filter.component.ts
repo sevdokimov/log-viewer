@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
+import {FilterPanelStateService, FilterState, JsFilter} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {ViewConfigService} from '@app/log-view/view-config.service';
 import {SlUtils} from '@app/utils/utils';
@@ -8,7 +8,7 @@ import {AceEditorDirective} from '@app/utils/ace-editor.directive';
 @Component({
     selector: 'lv-js-filter',
     templateUrl: './js-filter.component.html',
-    styleUrls: ['./js-filter.component.scss'],
+    styleUrls: ['./js-filter.component.scss', '../disabled-filter.scss'],
 })
 export class LvJsFilterComponent extends FilterWithDropdown {
 
@@ -40,6 +40,8 @@ export class LvJsFilterComponent extends FilterWithDropdown {
     originalScript: string;
     name: string;
     originalName: string;
+
+    enabled: boolean = true;
 
     fieldList: string[];
 
@@ -88,6 +90,13 @@ export class LvJsFilterComponent extends FilterWithDropdown {
             s = s.replace(/}(\s+|\/\/.+\n|\/\*[^*]*\*\/)*$/, '');
             this.titleScript = SlUtils.trimText(s, 40);
         }
+
+        this.enabled = !f.disabled;
+    }
+
+    private saveText(f: JsFilter) {
+        f.name = this.name?.trim();
+        f.script = this.script;
     }
 
     onApply() {
@@ -97,9 +106,7 @@ export class LvJsFilterComponent extends FilterWithDropdown {
                 return;
             }
 
-            f.name = this.name?.trim();
-
-            f.script = this.script;
+            this.saveText(f);
         });
 
         this.dropdownShown = false;
@@ -136,5 +143,17 @@ export class LvJsFilterComponent extends FilterWithDropdown {
 
         event.preventDefault();
         return false;
+    }
+
+    enableDisable() {
+        this.filterPanelStateService.updateFilterState(state => {
+            let f = this.findFilter(state);
+            if (!f) {
+                return;
+            }
+
+            f.disabled = !this.enabled;
+            this.saveText(f);
+        });
     }
 }

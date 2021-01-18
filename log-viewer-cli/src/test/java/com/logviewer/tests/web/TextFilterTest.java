@@ -1,5 +1,6 @@
 package com.logviewer.tests.web;
 
+import com.google.common.collect.Iterables;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.utils.FilterPanelState;
 import com.logviewer.web.session.tasks.SearchPattern;
@@ -47,6 +48,50 @@ public class TextFilterTest extends AbstractWebTestCase {
         assertThat(headers.size(), is(1));
 
         assert headers.get(0).getSize().width <= 400;
+    }
+
+    @Test
+    public void enablingDisabling() {
+        setFormat();
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().textFilter(
+                new FilterPanelState.TextFilter("1", "", new SearchPattern("exec-100"), false).disable()
+        ));
+
+        openLog("thread-filter-test.log");
+
+        checkRecordCount(7);
+
+        WebElement panel = Iterables.getOnlyElement(driver.findElements(HEADERS));
+
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span.disabled-filter")); // title has "disabled-filter" class
+
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span")).click();
+
+        panel.findElement(By.tagName("lv-switch")).click();
+
+        checkRecordCount(3);
+
+        WebElement textArea = panel.findElement(By.cssSelector("textarea"));
+
+        setValue(textArea, "");
+        new Actions(driver).sendKeys(textArea, "[main]").perform();
+
+        panel.findElement(By.tagName("lv-switch")).click();
+
+        checkRecordCount(7);
+
+        assertThat(textArea.getAttribute("value"), is("[main]"));
+
+        driver.navigate().refresh();
+
+        checkRecordCount(7);
+
+        panel = Iterables.getOnlyElement(driver.findElements(HEADERS));
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span.disabled-filter")).click();
+
+        panel.findElement(By.tagName("lv-switch")).click();
+
+        checkRecordCount(2);
     }
 
     @Test

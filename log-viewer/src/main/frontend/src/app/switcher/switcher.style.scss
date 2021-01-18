@@ -1,0 +1,128 @@
+$width: 32px;
+$height: 16px;
+$border-width: 1px;
+
+$toggler-width: 10px;
+$toggler-height: 10px;
+$toggler-margin: 2px;
+
+$on-border-color: #34da39;
+$off-border-color: #d7d7d7;
+
+$on-background-color: #22ad26;
+$on-hover-background-color: #8aea8d;
+$off-background-color: #eff1f2;
+
+$on-toggle-background-color: #fff;
+$off-toggle-background-color: #909090;
+
+$hover-box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.28);
+$focused-box-shadow: 0 0 0 2px rgba(#248cf1, 0.5);
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  line-height: 12px;
+  cursor: pointer;
+  text-align: initial;
+
+  &.disabled {
+    cursor: default;
+  }
+
+  &.reversed {
+    flex-direction: row-reverse;
+  }
+
+  &:focus {
+    outline: none;
+
+    &:not(.focused-by-click) {
+      .toggle-container {
+        box-shadow: 0 0 0 2px rgba(#248cf1, 0.5);
+      }
+    }
+  }
+}
+
+.toggle-container {
+  display: none;
+  position: relative;
+  width: 32px;
+  height: 16px;
+  border-radius: 8px;
+  background-color: white;
+
+  transition: all 0.2s ease-in-out;
+
+  .toggler {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    position: absolute;
+    top: (($height - $toggler-height) / 2) - $border-width;
+
+    transition: transform .3s cubic-bezier(
+        0.175, 0.885, 0.320, 1.275
+    ),
+    background-color 0.2s ease-in-out;
+  }
+
+  &.on {
+    display: inline-block;
+
+    background-color: $on-background-color !important;
+    border: solid $border-width $on-border-color;
+
+    .toggler {
+      background-color: $on-toggle-background-color;
+      transform: translateX($width - $toggler-width - $toggler-margin - $border-width * 2);
+    }
+
+    :host:not(.disabled):hover & {
+      background-color: lighten($on-background-color, 20%) !important;
+
+      .toggler {
+        box-shadow: $hover-box-shadow;
+      }
+    }
+  }
+
+  &.off {
+    display: inline-block;
+
+    background-color: $off-background-color;
+    border: solid $border-width $off-border-color;
+
+    .toggler {
+      background-color: $off-toggle-background-color;
+      transform: translateX($toggler-margin);
+    }
+
+    :host:not(.disabled):hover & {
+      .toggler {
+        box-shadow: $hover-box-shadow;
+      }
+    }
+  }
+
+  :host.disabled & {
+    opacity: 0.5;
+  }
+}
+
+.switcher-text {
+  user-select: none;
+  margin-left: 5px;
+  position: relative;
+
+  :host.disabled & {
+    color: #909090;
+  }
+
+  :host.reversed & {
+    margin-left: 0;
+    margin-right: 5px;
+  }
+}

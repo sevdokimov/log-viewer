@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
+import {FilterPanelStateService, FilterState, TextFilter} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {SlUtils} from '@app/utils/utils';
 import {SearchPattern, SearchUtils} from '@app/log-view/search';
@@ -7,7 +7,7 @@ import {SearchPattern, SearchUtils} from '@app/log-view/search';
 @Component({
     selector: 'lv-text-filter',
     templateUrl: './text-filter.component.html',
-    styleUrls: ['./text-filter.component.scss'],
+    styleUrls: ['./text-filter.component.scss', '../disabled-filter.scss'],
 })
 export class LvTextFilterComponent extends FilterWithDropdown {
 
@@ -18,6 +18,8 @@ export class LvTextFilterComponent extends FilterWithDropdown {
     private textInput: ElementRef;
 
     @Input() filterId: string;
+
+    enabled: boolean = true;
 
     titleName: string;
     titleText: string;
@@ -71,6 +73,16 @@ export class LvTextFilterComponent extends FilterWithDropdown {
                 this.titleText = '<empty>';
             }
         }
+
+        this.checkRegexp();
+
+        this.enabled = !f.disabled;
+    }
+
+    private saveText(f: TextFilter) {
+        f.name = this.name?.trim();
+        f.pattern = Object.assign({}, this.pattern);
+        f.exclude = this.includeExclude === 'exclude';
     }
 
     onApply() {
@@ -84,9 +96,7 @@ export class LvTextFilterComponent extends FilterWithDropdown {
                 return;
             }
 
-            f.name = this.name?.trim();
-            f.pattern = Object.assign({}, this.pattern);
-            f.exclude = this.includeExclude === 'exclude';
+            this.saveText(f);
         });
 
         this.dropdownShown = false;
@@ -132,5 +142,17 @@ export class LvTextFilterComponent extends FilterWithDropdown {
                 this.regexpError = e.message || 'Invalid regexp';
             }
         }
+    }
+
+    enableDisable() {
+        this.filterPanelStateService.updateFilterState(state => {
+            let f = this.findFilter(state);
+            if (!f) {
+                return;
+            }
+
+            f.disabled = !this.enabled;
+            this.saveText(f);
+        });
     }
 }

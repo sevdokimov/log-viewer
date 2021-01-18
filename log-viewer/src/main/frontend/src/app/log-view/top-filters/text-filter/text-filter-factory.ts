@@ -6,7 +6,7 @@ export class TextFilterFactory implements FilterFactory {
     addFilters(res: Predicate[], state: FilterState): void {
         if (state.textFilters) {
             for (let f of state.textFilters) {
-                if (f.pattern?.s) {
+                if (f.pattern?.s && !f.disabled) {
                     let p: Predicate = <SubstringPredicate>{type: 'SubstringPredicate', search: Object.assign({}, f.pattern)};
 
                     if (f.exclude) {

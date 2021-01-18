@@ -1,8 +1,9 @@
 <div #panelDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter"
-     [attr.filter-id]="filterId"
-     [class.modified]="originalName !== name || originalScript !== script">
+     [attr.filter-id]="filterId">
 
-    <span (click)="toggleFilterPanel()">
+    <span (click)="toggleFilterPanel()"
+          [class.disabled-filter]="!enabled"
+          [class.modified]="originalName !== name || originalScript !== script">
         <span *ngIf="titleName">{{titleName}}</span>
 
         <span *ngIf="!titleName">
@@ -19,6 +20,11 @@
                     <mat-label>Filter name <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
                     <input name="name-filter-input" [(ngModel)]="name" matInput>
                 </mat-form-field>
+
+                <div style="float: right">
+                    <lv-switch [(value)]="enabled" (valueChange)="enableDisable()"
+                               [title]="enabled ? 'Disable filter' : 'Enable filter'"></lv-switch>
+                </div>
             </div>
 
             <span class="small">
@@ -65,4 +71,3 @@
         </form>
     </div>
 </div>
-

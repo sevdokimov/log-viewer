@@ -1,7 +1,9 @@
 <div #panelDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter"
-     [attr.filter-id]="filterId" [class.modified]="hasChanges()">
+     [attr.filter-id]="filterId">
 
-    <span (click)="toggleFilterPanel()">
+    <span (click)="toggleFilterPanel()"
+          [class.disabled-filter]="!enabled"
+          [class.modified]="hasChanges()">
         <span *ngIf="titleName">{{titleName}}</span>
 
         <span *ngIf="!titleName">
@@ -26,6 +28,11 @@
                     <label>
                         <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="exclude"> Hide matched
                     </label>
+                </div>
+
+                <div style="float: right">
+                    <lv-switch [(value)]="enabled" (valueChange)="enableDisable()"
+                               [title]="enabled ? 'Disable filter' : 'Enable filter'"></lv-switch>
                 </div>
             </div>
 

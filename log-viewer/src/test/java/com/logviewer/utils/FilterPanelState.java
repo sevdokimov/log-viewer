@@ -123,6 +123,8 @@ public class FilterPanelState {
 
         private String script;
 
+        private Boolean disabled;
+
         public JsFilter(String id, String name, String script) {
             this.id = id;
             this.name = name;
@@ -140,6 +142,11 @@ public class FilterPanelState {
         public String getScript() {
             return script;
         }
+
+        public JsFilter disable() {
+            disabled = true;
+            return this;
+        }
     }
 
     public static class TextFilter {
@@ -151,11 +158,18 @@ public class FilterPanelState {
 
         private boolean exclude;
 
+        private Boolean disabled;
+
         public TextFilter(String id, String name, SearchPattern pattern, boolean exclude) {
             this.id = id;
             this.name = name;
             this.pattern = pattern;
             this.exclude = exclude;
+        }
+
+        public TextFilter disable() {
+            disabled = true;
+            return this;
         }
     }
 

@@ -280,6 +280,8 @@ export interface JsFilter {
     name: string;
 
     script: string;
+
+    disabled?: boolean;
 }
 
 export interface TextFilter {
@@ -289,4 +291,6 @@ export interface TextFilter {
 
     pattern: SearchPattern;
     exclude?: boolean;
+
+    disabled?: boolean;
 }

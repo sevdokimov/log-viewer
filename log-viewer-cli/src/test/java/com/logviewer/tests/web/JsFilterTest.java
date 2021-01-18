@@ -1,5 +1,6 @@
 package com.logviewer.tests.web;
 
+import com.google.common.collect.Iterables;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.utils.FilterPanelState;
 import com.logviewer.utils.FilterPanelState.JsFilter;
@@ -20,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class JsFilterTest extends AbstractWebTestCase {
 
     public static final By HEADERS = By.cssSelector("lv-js-filter .top-panel-dropdown");
+    public static final By JS_MENU_ITEM = By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'JavaScript')]");
 
     private List<String> filterHeaders() {
         return driver.findElements(HEADERS).stream()
@@ -61,6 +63,36 @@ public class JsFilterTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void enablingDisabling() {
+        setFormat();
+
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().jsFilter(
+                new JsFilter("1", "", "function zzz(text, fields) {return fields.thread   == 'exec-100' }").disable()
+        ));
+
+        openLog("thread-filter-test.log");
+
+        checkRecordCount(7);
+
+        WebElement panel = Iterables.getOnlyElement(driver.findElements(HEADERS));
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span.disabled-filter")); // title has "disabled-filter" class
+
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span")).click();
+
+        panel.findElement(By.tagName("lv-switch")).click();
+
+        String classes = panel.findElement(By.cssSelector(".top-panel-dropdown > span")).getAttribute("class");
+        assert !classes.contains("disabled-filter");
+
+        checkRecordCount(3);
+
+        panel.findElement(By.tagName("lv-switch")).click();
+        panel.findElement(By.cssSelector(".top-panel-dropdown > span.disabled-filter"));
+
+        checkRecordCount(7);
+    }
+
+    @Test
     public void addingRemoving() {
         setFormat();
 
@@ -70,7 +102,7 @@ public class JsFilterTest extends AbstractWebTestCase {
 
         addFilterMenuClick();
 
-        driver.findElement(By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'JavaScript')]")).click();
+        driver.findElement(JS_MENU_ITEM).click();
 
         assertThat(driver.findElements(HEADERS).size(), is(1));
         driver.findElement(By.cssSelector(".lv-dropdown-panel")); // Dropdown opened automatically
@@ -102,13 +134,13 @@ public class JsFilterTest extends AbstractWebTestCase {
         WebElement nameInput = filter.findElement(By.cssSelector(".lv-dropdown-panel .filter-name input"));
         new Actions(driver).sendKeys(nameInput, "aaa").perform();
 
-        assertThat(filter.getAttribute("class"), containsString("modified"));
+        filter.findElement(By.cssSelector(".top-panel-dropdown > span.modified"));
 
         List<WebElement> buttons = filter.findElements(By.cssSelector(".action-panel button"));
         buttons.get(1).click();
 
         notExist(filter, By.className("lv-dropdown-panel"));
-        assertThat(filter.getAttribute("class"), not(containsString("modified")));
+        assertThat(filter.findElement(By.cssSelector(".top-panel-dropdown > span")).getAttribute("class"), not(containsString("modified")));
 
         checkSaveOnButtonClick(filter);
         checkSaveOnEnter(filter);

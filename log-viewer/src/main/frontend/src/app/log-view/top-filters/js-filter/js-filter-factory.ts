@@ -6,7 +6,9 @@ export class JsFilterFactory implements FilterFactory {
     addFilters(res: Predicate[], state: FilterState): void {
         if (state.jsFilters) {
             for (let f of state.jsFilters) {
-                res.push(<JsPredicate>{type: 'JsPredicate', script: f.script});
+                if (!f.disabled) {
+                    res.push(<JsPredicate>{type: 'JsPredicate', script: f.script});
+                }
             }
         }
     }
