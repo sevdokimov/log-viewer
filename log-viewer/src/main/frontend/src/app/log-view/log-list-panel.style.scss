@@ -1,6 +1,9 @@
 :host {
   padding: 3px 5px;
   display: block;
+
+  max-height: 80vh;
+  overflow: auto;
 }
 
 .log-table > tr:hover {
