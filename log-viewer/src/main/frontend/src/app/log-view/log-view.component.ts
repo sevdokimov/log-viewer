@@ -862,6 +862,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         } else {
             let topRecordCount = Math.ceil((this.headHeight(mainRecordIdx) - this.shiftView) / LogViewComponent.lineHeight) + 1;
 
+            if (topRecordCount <= 0) {
+                topRecordCount = 1;
+            }
+
             this.commService.send(
                 new Command('loadingDataAfterFilterChanged', {
                     topRecordCount,
