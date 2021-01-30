@@ -364,6 +364,14 @@ public abstract class AbstractWebTestCase implements LogPage {
         }
     }
 
+    protected void select(WebElement element) {
+        driver.executeScript("" +
+                "var range = document.createRange(); " +
+                "range.selectNode(arguments[0]);" +
+                "window.getSelection().removeAllRanges();" +
+                "window.getSelection().addRange(range);", element);
+    }
+
     protected List<WebElement> getRecord() {
         return driver.findElementsByCssSelector("#records > .record");
     }

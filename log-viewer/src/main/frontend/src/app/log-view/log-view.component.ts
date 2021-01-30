@@ -257,11 +257,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     clickRecord(event: MouseEvent) {
         if (this.state !== State.STATE_OPENED || this.modalWindow != null) { return; }
 
-        if (window.getSelection().toString().length > 0) { return; }
-
         if (this.recRenderer.handleClick(event)) {
             return;
         }
+
+        if (window.getSelection().toString().length > 0) { return; }
 
         for (let e = <Element>event.target; e; e = e.parentElement) {
             if (e.classList.contains('filtering-error')) {

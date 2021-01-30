@@ -35,8 +35,7 @@ export class RecordRendererService {
 
         this.initLabelWidthIfNeeded(target);
 
-        let before =
-            target.children.length === start ? null : target.children.item(start);
+        let before = target.children.length === start ? null : target.children.item(start);
 
         for (let i = start; i < end; i++) {
             let rec = this.render(m[i]);

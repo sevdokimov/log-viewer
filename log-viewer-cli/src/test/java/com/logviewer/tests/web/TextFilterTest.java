@@ -26,11 +26,6 @@ public class TextFilterTest extends AbstractWebTestCase {
     public static final By APPLY = By.cssSelector(".action-panel button[name=\"apply-button\"]");
     public static final By ADD_TEXT_FILTER = By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Text')]");
     public static final By MENU = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Text:')]");
-    public static final String SELECT_RECORD_SCRIPT = "" +
-            "var range = document.createRange(); " +
-            "range.selectNode(arguments[0]);" +
-            "window.getSelection().removeAllRanges();" +
-            "window.getSelection().addRange(range);";
     public static final By TEXT_AREA_REGEX = By.cssSelector("textarea.regex-mode");
 
     @Test
@@ -324,7 +319,7 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         WebElement record = recordByText("[2012.01.01 00:01][exec-1] b").findElement(By.cssSelector(".rec-text"));
 
-        driver.executeScript(SELECT_RECORD_SCRIPT, record);
+        select(record);
 
         new Actions(driver).contextClick(record).perform();
 
@@ -341,7 +336,7 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         checkRecordCount(7);
 
-        driver.executeScript(SELECT_RECORD_SCRIPT, record);
+        select(record);
 
         new Actions(driver).contextClick(record).perform();
 

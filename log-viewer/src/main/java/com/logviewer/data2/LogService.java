@@ -91,6 +91,9 @@ public class LogService implements InitializingBean, DisposableBean {
             LOG.warn("Failed to get canonical path from " + path, e);
         }
 
+        if (!accessManager.isFileVisible(path))
+            return null;
+
         for (LvFormatRecognizer formatRecognizer : formatRecognizers) {
             LogFormat formatName = formatRecognizer.getFormat(path);
 
