@@ -280,7 +280,7 @@ export class RecordRendererService {
         if (r.hasMore) {
             let moreDiv = document.createElement('DIV');
             (<SlElement>moreDiv).virtual = true;
-            moreDiv.className = 'has-more';
+            moreDiv.className = 'has-more lv-virtual';
             moreDiv.innerText =
                 '...the log record is too big (' +
                 SlUtils.renderFileSize(r.end - r.start) +

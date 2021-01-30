@@ -137,10 +137,13 @@ body {
   background: #9cf;
 }
 
+.lv-virtual {
+  user-select: none;
+}
+
 .coll-expander,
 .coll-collapser {
   cursor: pointer;
-  user-select: none;
 }
 
 .coll-wrapper.expanded .coll-expander {

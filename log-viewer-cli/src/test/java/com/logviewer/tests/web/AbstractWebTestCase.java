@@ -18,7 +18,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -335,6 +337,18 @@ public abstract class AbstractWebTestCase implements LogPage {
         driver.findElement(MENU).click();
 
         return getClipboardText();
+    }
+
+    protected String copySelection() {
+        new Actions(driver).keyDown(Keys.CONTROL).sendKeys("c").keyUp(Keys.CONTROL).perform();
+
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable contents = clipboard.getContents(null);
+        try {
+            return (String) contents.getTransferData(DataFlavor.stringFlavor);
+        } catch (IOException | UnsupportedFlavorException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int parseCssSize(String cssValue) {

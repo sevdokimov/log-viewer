@@ -242,7 +242,7 @@ export class JavaExceptionRenderer implements TextRenderer {
 
         if (bigExpander) {
             let expanderDown = document.createElement('DIV');
-            expanderDown.className = 'ex-coll-expander-down coll-expander';
+            expanderDown.className = 'ex-coll-expander-down coll-expander lv-virtual';
             expanderDown.title = 'Expand ' + (end - start) + ' hidden elements';
             (<SlElement>expanderDown).virtual = true;
             collWrapper.appendChild(expanderDown);

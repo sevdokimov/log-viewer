@@ -31,7 +31,7 @@ export class ClassNameFieldRenderer implements FieldRenderer {
         wrapper.title = s;
 
         let expander = document.createElement('SPAN');
-        expander.className = 'coll-expander cls-package-expander';
+        expander.className = 'coll-expander cls-package-expander lv-virtual';
         expander.innerText = '~.';
         (<SlElement>expander).virtual = true;
 

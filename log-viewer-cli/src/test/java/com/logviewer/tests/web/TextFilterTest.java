@@ -1,7 +1,9 @@
 package com.logviewer.tests.web;
 
 import com.google.common.collect.Iterables;
+import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFilterPanelState;
+import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.utils.FilterPanelState;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.hamcrest.CoreMatchers;
@@ -12,12 +14,16 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
 import static com.logviewer.tests.web.ThreadFilterTest.setFormat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class TextFilterTest extends AbstractWebTestCase {
 
@@ -27,6 +33,7 @@ public class TextFilterTest extends AbstractWebTestCase {
     public static final By ADD_TEXT_FILTER = By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Text')]");
     public static final By MENU = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Text:')]");
     public static final By TEXT_AREA_REGEX = By.cssSelector("textarea.regex-mode");
+    public static final By ONLY_EVENT_CONTAINIG = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Only events containing')]");
 
     @Test
     public void hugeTitles() {
@@ -310,6 +317,30 @@ public class TextFilterTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void selectionFoldedElement() throws IOException, InterruptedException {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new LogbackLogFormat("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level %logger %msg%n"));
+
+        String logPath = openLog("rendering/strange-exception-line.log");
+
+        String text = new String(Files.readAllBytes(Paths.get(logPath)));
+
+        select(lastRecord().findElement(By.cssSelector(".rec-text")));
+        new Actions(driver).contextClick(lastRecord()).perform();
+
+        new Actions(driver).moveToElement(driver.findElement(MENU)).perform();
+
+        driver.findElement(ONLY_EVENT_CONTAINIG).click();
+
+        checkRecordCount(1);
+
+        WebElement filter = driver.findElement(HEADERS);
+        filter.click();
+        String textFilterValue = filter.findElement(TEXTAREA).getAttribute("value");
+
+        assertEquals(text, textFilterValue);
+    }
+
+    @Test
     public void excludeIncludeFromContextMenu() {
         setFormat();
 
@@ -319,13 +350,17 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         WebElement record = recordByText("[2012.01.01 00:01][exec-1] b").findElement(By.cssSelector(".rec-text"));
 
+        new Actions(driver).contextClick(record).perform();
+        notExist(ONLY_EVENT_CONTAINIG); // no selection - no "Only events containing" menu item
+        new Actions(driver).sendKeys(Keys.ESCAPE).perform(); // close context menu
+
         select(record);
 
         new Actions(driver).contextClick(record).perform();
 
         new Actions(driver).moveToElement(driver.findElement(MENU)).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Only events containing')]")).click();
+        driver.findElement(ONLY_EVENT_CONTAINIG).click();
 
         notExist(MENU);
 

@@ -3,6 +3,7 @@ import {SlUtils} from '@app/utils/utils';
 import {LogFile} from '@app/log-view/log-file';
 import {Injectable} from '@angular/core';
 import {FilterPanelStateService} from '@app/log-view/filter-panel-state.service';
+import * as $ from 'jquery';
 
 @Injectable()
 export class ContextMenuHandler {
@@ -40,27 +41,47 @@ export class ContextMenuHandler {
             }
         }
 
-        if (document.getSelection().rangeCount === 1) {
-            let range = document.getSelection().getRangeAt(0);
+        let selectedText = ContextMenuHandler.getSelectedText();
 
-            if (ContextMenuHandler.isSameRecordElement(range)) {
-                res.selectedText = document.getSelection().toString();
-                res.selectedTextVisible = SlUtils.trimText(res.selectedText, 30);
-            }
+        if (selectedText) {
+            res.selectedText = selectedText;
+            res.selectedTextVisible = SlUtils.trimText(res.selectedText, 30);
         }
 
         return res;
     }
 
-    private static isSameRecordElement(range: Range) {
-        let selectionStartRecord = ContextMenuHandler.parentRecordElement(range.startContainer);
-        if (!selectionStartRecord) {
-            return false;
+    private static getSelectedText(): string {
+        let rangeCount = document.getSelection().rangeCount;
+        if (!rangeCount) {
+            return null;
         }
 
-        let selectionEndRecord = ContextMenuHandler.parentRecordElement(range.endContainer);
+        let selectedTextContainer = document.createElement('DIV');
 
-        return selectionStartRecord === selectionEndRecord;
+        let record = null;
+
+        for (let i = 0; i < rangeCount; i++) {
+            let range = document.getSelection().getRangeAt(i);
+
+            let rangeStart = ContextMenuHandler.parentRecordElement(range.startContainer);
+            let rangeEnd = ContextMenuHandler.parentRecordElement(range.endContainer);
+            if (rangeStart !== rangeEnd || !rangeStart) {
+                return null;
+            }
+
+            if (record == null) {
+                record = rangeStart;
+            } else if (record !== rangeStart) {
+                return null;
+            }
+
+            selectedTextContainer.append(range.cloneContents());
+        }
+
+        $('.lv-virtual', selectedTextContainer).remove();
+
+        return selectedTextContainer.innerText;
     }
 
     private static parentRecordElement(e: Node): Element {
