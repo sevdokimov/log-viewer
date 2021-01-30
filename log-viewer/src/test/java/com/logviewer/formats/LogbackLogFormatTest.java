@@ -243,4 +243,23 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         assertTrue(record.getTime() <= 0);
     }
 
+    @Test
+    public void testwEx() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %msg%n%wEx");
+        Record record = read(logFormat, "10:40:11 aaa");
+
+        assertTrue(record.getTime() <= 0);
+    }
+
+    @Test
+    public void testProcessId() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %processId %msg%wEx");
+
+        Record record1 = read(logFormat, "10:40:11 1 aaa");
+        assertEquals("1", record1.getFieldText(1));
+
+        Record record2 = read(logFormat, "10:40:11 1111 aaa");
+        assertEquals("1111", record2.getFieldText(1));
+    }
+
 }

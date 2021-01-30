@@ -158,7 +158,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
         }
 
         if (converter instanceof ProcessIdPatternConverter) {
-            return new LvLayoutNumberNode("pid", null);
+            return new LvLayoutNumberNode("pid", FieldTypes.PROCESS_ID);
         }
 
         if (converter instanceof RelativeTimePatternConverter) {

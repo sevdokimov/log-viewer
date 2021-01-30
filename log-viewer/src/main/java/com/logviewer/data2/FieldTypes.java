@@ -20,6 +20,8 @@ public class FieldTypes {
     
     public static final String MDC = "mdc";
 
+    public static final String PROCESS_ID = "number/processId";
+
     public static final String NUMBER = "number";
 
     public static final String USERNAME = "username";

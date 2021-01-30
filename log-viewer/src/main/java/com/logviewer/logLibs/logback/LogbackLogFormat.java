@@ -19,12 +19,12 @@ import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
 
-    private static final int NODE_LITERAL = 0; // Node.LITERAL
-    private static final int NODE_SIMPLE_KEYWORD = 1; // Node.COMPOSITE_KEYWORD
-    private static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
+    protected static final int NODE_LITERAL = 0; // Node.LITERAL
+    protected static final int NODE_SIMPLE_KEYWORD = 1; // Node.COMPOSITE_KEYWORD
+    protected static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
 
     private static final Set<String> TEXT_FILEDS = new HashSet<>(Arrays.asList("ex", "exception", "throwable",
-            "xEx", "xException", "xThrowable", "X", "mdc", "m", "msg", "message"));
+            "xEx", "xException", "xThrowable", "wEx", "wex", "X", "mdc", "m", "msg", "message"));
 
     public LogbackLogFormat(@NonNull String pattern) {
         super(null, pattern);
@@ -122,6 +122,9 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                     case "L":
                     case "line":
                         return new LvLayoutNumberNode("line", null, true);
+
+                    case "processId":
+                        return new LvLayoutNumberNode("pid", FieldTypes.PROCESS_ID);
 
                     case "p":
                     case "le":
