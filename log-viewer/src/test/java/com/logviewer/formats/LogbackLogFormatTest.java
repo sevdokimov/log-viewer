@@ -5,6 +5,7 @@ import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import com.logviewer.AbstractLogTest;
+import com.logviewer.TestUtils;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.LogFormat;
@@ -54,6 +55,18 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void nameCollision() {
         LogFormat logFormat = new LogbackLogFormat(null, "%d %d %d");
         assertEquals(Arrays.asList("date", "date_1", "date_2"), Stream.of(logFormat.getFields()).map(LogFormat.FieldDescriptor::name).collect(Collectors.toList()));
+    }
+
+    @Test
+    public void invalidPattern1() {
+        LogFormat logFormat = new LogbackLogFormat(null, "%d %d %");
+        TestUtils.assertError(IllegalArgumentException.class, () -> logFormat.getFields());
+    }
+
+    @Test
+    public void invalidPattern2() {
+        LogFormat logFormat = new LogbackLogFormat(null, "%d %d %dfdsfsdf");
+        TestUtils.assertError(IllegalArgumentException.class, () -> logFormat.getFields());
     }
 
     @Test

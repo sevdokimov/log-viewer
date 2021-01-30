@@ -135,12 +135,12 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                         return null;
 
                     default:
-                        throw new UnsupportedOperationException("log encoder pattern contains unsupported terms [pattern=\""
+                        throw new IllegalArgumentException("log encoder pattern contains unsupported terms [pattern=\""
                                 + pattern + "\", term=" + n.toString() + "]");
                 }
 
             default:
-                throw new RuntimeException("Unknown node type: " + n.getType() + ", pattern=" + pattern);
+                throw new IllegalArgumentException("Unknown node type: " + n.getType() + ", pattern=" + pattern);
         }
     }
 

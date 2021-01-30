@@ -50,7 +50,7 @@ public class LogbackConfigImporter implements Supplier<Map<Path, LogFormat>> {
                     logFormat.getFields(); // check errors.
                 } catch (IllegalArgumentException e) {
                     LOG.error("Failed to import log configuration, invalid pattern: " + patternEncoder.getPattern(), e);
-                    return;
+                    logFormat = null;
                 }
 
                 visibleDirectories.add(new VisibleDirectory(parent.getPath(), Pattern.quote(file.getName())));
