@@ -105,9 +105,17 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 .build();
 
         // "2011-11-13 18:33:45"
+        check("%levelzzz{www}%n", event, "ERROR");
+        check("%levelzzz%n", event, "ERROR");
+        check("%levelzzz{}%n", event, "ERROR");
+        check("%%l%level%n", event, "ERROR");
+
         check1("%-5p [%t]: %m%n", event, "ERROR", "thread-pool-11", "The log message");
         check1("[%d{ISO8601}][%-5p][%t][%c{1}] %m%n", event, "~2011-10-13.18:33:45,000", "ERROR", "thread-pool-11", "Gson", "The log message");
         check1("%d{ABSOLUTE} %m%n", event, "18:33:45,000", "The log message");
+
+        check("%d{yyyyMMdd HHmm}{EST} %m%n", event, "20111013 0933", "The log message");
+        check("%d{yyyyMMdd HHmm}{UTC} %m%n", event, "20111013 1433", "The log message");
         check1("%d{DATE} %m%n", event, "13 Oct 2011 18:33:45,000", "The log message");
         check1("%d{HH:mm:ss,SSS} %5p [%t] - %m%n", event, "18:33:45,000", "ERROR", "thread-pool-11", "The log message");
         check1("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", event, "2011-10-13 18:33:45", "ERROR", "Gson", "~\\d+", "The log message");

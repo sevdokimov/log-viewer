@@ -13,6 +13,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -21,6 +22,9 @@ public class Log4jConfigImporter implements Supplier<Map<Path, LogFormat>> {
 
     @Override
     public Map<Path, LogFormat> get() {
+        if (!(LogManager.getContext() instanceof LoggerContext))
+            return Collections.emptyMap();
+
         LoggerContext context = (LoggerContext) LogManager.getContext();
 
         Map<Path, LogFormat> res = new HashMap<>();

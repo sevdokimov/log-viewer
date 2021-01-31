@@ -30,10 +30,15 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
     private transient String currentTimezoneStr;
 
     public LvLayoutLog4jISO8601Date(boolean hasMilliseconds) {
-        this(hasMilliseconds, 0);
+        this(hasMilliseconds, 0, null);
     }
 
     public LvLayoutLog4jISO8601Date(boolean hasMilliseconds, int timezone) {
+        this(hasMilliseconds, timezone, null);
+    }
+
+    public LvLayoutLog4jISO8601Date(boolean hasMilliseconds, int timezone, TimeZone zone) {
+        super(zone);
         this.hasMilliseconds = hasMilliseconds;
 
         if (timezone != 0 && timezone != 3 && timezone != 5)
@@ -118,8 +123,12 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
             sss = 0;
         }
 
-        if (calendar == null)
+        if (calendar == null) {
             calendar = Calendar.getInstance();
+
+            if (zone != null)
+                calendar.setTimeZone(zone);
+        }
 
         if (timezone > 0) {
             offset = parseAndSetTimezone(s, offset, calendar);
@@ -225,7 +234,7 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
     }
 
     @Override
-    public LvLayoutNode clone() {
-        return new LvLayoutLog4jISO8601Date(hasMilliseconds, timezone);
+    public LvLayoutDateNode clone() {
+        return new LvLayoutLog4jISO8601Date(hasMilliseconds, timezone, zone);
     }
 }

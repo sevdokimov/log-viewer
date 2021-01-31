@@ -1,10 +1,13 @@
 package com.logviewer.formats.utils;
 
 import com.logviewer.utils.LvDateUtils;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
@@ -14,10 +17,13 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
     private transient ParsePosition parsePosition;
 
-    public LvLayoutSimpleDateNode(String format) {
+    public LvLayoutSimpleDateNode(@NonNull String format) {
+        this(format, null);
+    }
+
+    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable TimeZone zone) {
+        super(zone);
         this.format = format;
-        dateFormat = new SimpleDateFormat(format);
-        parsePosition = new ParsePosition(0);
     }
 
     public String getFormat() {
@@ -28,6 +34,9 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
     public int parse(String s, int offset, int end) {
         if (dateFormat == null) {
             dateFormat = new SimpleDateFormat(format);
+            if (zone != null)
+                dateFormat.setTimeZone(zone);
+
             parsePosition = new ParsePosition(0);
         }
 
@@ -50,7 +59,7 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
     }
 
     @Override
-    public LvLayoutNode clone() {
-        return new LvLayoutSimpleDateNode(format);
+    public LvLayoutDateNode clone() {
+        return new LvLayoutSimpleDateNode(format, zone);
     }
 }

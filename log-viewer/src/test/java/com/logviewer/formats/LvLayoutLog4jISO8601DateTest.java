@@ -1,5 +1,6 @@
 package com.logviewer.formats;
 
+import com.logviewer.formats.utils.LvLayoutDateNode;
 import com.logviewer.formats.utils.LvLayoutLog4jISO8601Date;
 import com.logviewer.formats.utils.LvLayoutNode;
 import org.junit.Test;
@@ -120,6 +121,33 @@ public class LvLayoutLog4jISO8601DateTest {
         assertEquals(s.length(), field.parse("2000-12-31_23:59:59,999", 0, s.length()));
         assertEquals(s.length(), field.parse("2000-12-31_23:59:59.999", 0, s.length()));
         assertEquals(s.length(), field.parse("2000/12/31_23:59:59.999", 0, s.length()));
+    }
+
+    @Test
+    public void withTimezone() throws ParseException {
+        checkLayoutWithTimeZone(new LvLayoutLog4jISO8601Date(true));
+    }
+
+    public static void checkLayoutWithTimeZone(LvLayoutDateNode field) throws ParseException {
+        String s = "2030-12-31 23:59:59,999";
+
+        field = field.withTimeZone(TimeZone.getTimeZone("EST"));
+
+        if (field.parse(s, 0, s.length()) != s.length())
+            throw new RuntimeException();
+
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+
+        format.setTimeZone(field.getZone());
+        assertEquals(format.parse(s).getTime(), field.getCurrentDate());
+
+        field.withTimeZone(TimeZone.getTimeZone("GMT"));
+
+        if (field.parse(s, 0, s.length()) != s.length())
+            throw new RuntimeException();
+
+        format.setTimeZone(field.getZone());
+        assertEquals(format.parse(s).getTime(), field.getCurrentDate());
     }
 
     @Test
