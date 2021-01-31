@@ -79,6 +79,14 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     protected abstract LvLayoutNode[] parseLayout(@NonNull String pattern) throws IllegalArgumentException;
 
+    @Override
+    public void validate() throws IllegalArgumentException {
+        if (pattern == null || pattern.isEmpty())
+            throw new RuntimeException("'pattern' field is empty");
+
+        getDelegate();
+    }
+
     protected static void mergeMessageFields(List<LvLayoutNode> nodes) {
         for (int i = 0; i + 1 < nodes.size(); ) {
             LvLayoutNode n1 = nodes.get(i);

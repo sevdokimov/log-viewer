@@ -1,5 +1,6 @@
 package com.logviewer.impl;
 
+import com.google.gson.JsonParseException;
 import com.logviewer.api.LvFormatRecognizer;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.services.PathPattern;
@@ -54,9 +55,22 @@ public class LvPatternFormatRecognizer implements LvFormatRecognizer {
                 LogFormat logFormat = null;
 
                 if (cfg.hasPath(FORMAT)) {
-                    String formatJson = cfg.getObject(FORMAT).render(ConfigRenderOptions.concise());
+                    ConfigObject filterObj = cfg.getObject(FORMAT);
+                    String formatJson = filterObj.render(ConfigRenderOptions.concise());
 
-                    logFormat = LvGsonUtils.GSON.fromJson(formatJson, LogFormat.class);
+                    try {
+                        logFormat = LvGsonUtils.GSON.fromJson(formatJson, LogFormat.class);
+                    } catch (JsonParseException e) {
+                        throw new IllegalArgumentException("Invalid configuration [line=" + filterObj.origin().lineNumber() +
+                                "]: failed to load the log format", e);
+                    }
+
+                    try {
+                        logFormat.validate();
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("Invalid configuration [line=" + filterObj.origin().lineNumber() +
+                                "]: invalid log format: " + e.getMessage());
+                    }
                 }
 
                 res.add(Pair.of(PathPattern.fromPattern(path), logFormat));

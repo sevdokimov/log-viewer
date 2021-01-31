@@ -41,7 +41,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
             Parser parser = new Parser(pattern);
             t = parser.parse();
         } catch (ScanException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
 
         List<LvLayoutNode> nodes = new ArrayList<>();

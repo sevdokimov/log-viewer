@@ -34,6 +34,8 @@ public interface LogFormat {
      */
     boolean hasFullDate();
 
+    void validate() throws IllegalArgumentException;
+
     interface FieldDescriptor {
         FieldDescriptor[] EMPTY_ARRAY = new FieldDescriptor[0];
 

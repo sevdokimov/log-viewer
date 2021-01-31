@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class RegexLogFormat implements LogFormat, Cloneable {
 
@@ -75,8 +76,14 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
         if (res == null) {
             String regex = this.regex;
+            if (regex == null || regex.isEmpty())
+                throw new IllegalArgumentException("'regex' field is empty");
 
-            res = Pattern.compile(regex);
+            try {
+                res = Pattern.compile(regex);
+            } catch (PatternSyntaxException e) {
+                throw new IllegalArgumentException("Invalid pattern [" + regex + "] " + e.getMessage(), e);
+            }
 
             pattern = res;
         }
@@ -88,7 +95,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         return new SimpleDateFormat(datePattern);
     }
 
-    private void validate() {
+    public void validate() throws IllegalArgumentException {
         int groupCount = getPattern().matcher("").groupCount();
 
         Set<Object> usedGroups = new HashSet<>();
@@ -115,10 +122,10 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
         if (dateFieldIdx != null) {
             if (dateFieldIdx >= fields.length)
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Invalid 'dateFieldIdx': " + dateFieldIdx + " >= " + fields.length);
 
             if (datePattern == null)
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
 
             createDateFormatter(); // validate date format
         }

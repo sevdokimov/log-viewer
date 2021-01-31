@@ -55,6 +55,11 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
         public boolean hasFullDate() {
             throw new RuntimeException("Problem!!!");
         }
+
+        @Override
+        public void validate() throws IllegalArgumentException {
+
+        }
     }
 
     @Configuration

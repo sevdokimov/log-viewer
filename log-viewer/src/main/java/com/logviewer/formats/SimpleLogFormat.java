@@ -40,6 +40,11 @@ public class SimpleLogFormat implements LogFormat {
         return false;
     }
 
+    @Override
+    public void validate() throws IllegalArgumentException {
+
+    }
+
     public void setCharset(Charset charset) {
         this.charset = charset;
     }

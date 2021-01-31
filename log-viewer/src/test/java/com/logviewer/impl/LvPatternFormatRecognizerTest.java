@@ -1,5 +1,6 @@
 package com.logviewer.impl;
 
+import com.logviewer.TestUtils;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.typesafe.config.Config;
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class LvPatternFormatRecognizerTest {
 
@@ -62,6 +64,59 @@ public class LvPatternFormatRecognizerTest {
 
         assertThat(manager.getFormat(Paths.get("/sss.log")), nullValue());
         assertThat(manager.getFormat(Paths.get("/aaa/wwww/aaa.log")), notNullValue());
+    }
+
+    @Test
+    public void testInvalidFormat1() {
+        Config config = ConfigFactory.parseString("" +
+                "logs = [\n" +
+                "{\n" +
+                "  path: \"**/*.log\"\n" +
+                "},\n" +
+                "{\n" +
+                "  path:\"/aaa/**/aaa.log\"\n" +
+                "  format: {pattern: \"%date [%thread] %level %logger - %msg%n\"}\n" +
+                "}\n" +
+                "]");
+
+        IllegalArgumentException e = TestUtils.assertError(IllegalArgumentException.class, () -> LvPatternFormatRecognizer.fromHocon(config));
+        assertTrue(e.getMessage().contains("line=7"));
+    }
+
+    @Test
+    public void testInvalidFormat2() {
+        Config config = ConfigFactory.parseString("" +
+                "logs = [\n" +
+                "{\n" +
+                "  path: \"**/*.log\"\n" +
+                "},\n" +
+                "{\n" +
+                "  path:\"/aaa/**/aaa.log\"\n" +
+                "  format: {type: \"LogbackLogFormat\"}\n" +
+                "}\n" +
+                "]");
+
+
+        IllegalArgumentException e = TestUtils.assertError(IllegalArgumentException.class, () -> LvPatternFormatRecognizer.fromHocon(config));
+        assertTrue(e.getMessage().contains("line=7"));
+    }
+
+    @Test
+    public void testInvalidFormat3() {
+        Config config = ConfigFactory.parseString("" +
+                "logs = [\n" +
+                "{\n" +
+                "  path: \"**/*.log\"\n" +
+                "},\n" +
+                "{\n" +
+                "  path:\"/aaa/**/aaa.log\"\n" +
+                "  format: {type: \"LogbackLogFormat\", pattern: \"%date [%thread] %level %logger - %msg%n%\"}\n" +
+                "}\n" +
+                "]");
+
+
+        IllegalArgumentException e = TestUtils.assertError(IllegalArgumentException.class, () -> LvPatternFormatRecognizer.fromHocon(config));
+        assertTrue(e.getMessage().contains("line=7"));
     }
 
 }

@@ -64,7 +64,15 @@ public class Log4jConfigImporter implements Supplier<Map<Path, LogFormat>> {
 
                 String conversionPattern = patternLayout.getConversionPattern();
 
-                res.put(path, new Log4jLogFormat(conversionPattern));
+                Log4jLogFormat logFormat = new Log4jLogFormat(conversionPattern);
+                try {
+                    logFormat.validate();
+                } catch (IllegalArgumentException e) {
+                    LOG.error("Failed to import log configuration, invalid pattern: " + conversionPattern, e);
+                    logFormat = null;
+                }
+
+                res.put(path, logFormat);
             }
         }
     }
