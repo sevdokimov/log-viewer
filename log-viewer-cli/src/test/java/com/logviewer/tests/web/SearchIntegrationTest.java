@@ -173,7 +173,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
 
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
-        new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
+        new Actions(driver).sendKeys(Keys.ESCAPE, Keys.ESCAPE, Keys.END).perform();
         notExistWait(By.className("search-result"));
         driver.findElementById("match-regex").click();
 
@@ -182,7 +182,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         shiftF3(filterInput);
         assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
 
-        new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
+        new Actions(driver).sendKeys(Keys.ESCAPE, Keys.ESCAPE, Keys.END).perform();
         notExist(By.className("search-result"));
         driver.findElementById("match-cases").click();
         shiftF3(filterInput);

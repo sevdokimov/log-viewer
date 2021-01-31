@@ -264,7 +264,7 @@ export class JavaExceptionRenderer implements TextRenderer {
         collBody.className = 'coll-body coll-body-1px ex-coll-body';
 
         let collapser = document.createElement('DIV');
-        collapser.className = 'coll-collapser';
+        collapser.className = 'coll-collapser lv-virtual';
 
         let collapserTop = document.createElement('DIV');
         collapserTop.className = 'top';
