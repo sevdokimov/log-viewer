@@ -1,6 +1,7 @@
 package com.logviewer.logLibs.log4j;
 
 import com.logviewer.data2.LogFormat;
+import com.logviewer.logLibs.logback.LogbackConfigImporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Layout;
@@ -9,27 +10,35 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class Log4jConfigImporter implements Supplier<Map<Path, LogFormat>> {
 
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LogbackConfigImporter.class);
+
     @Override
     public Map<Path, LogFormat> get() {
-        if (!(LogManager.getContext() instanceof LoggerContext))
-            return Collections.emptyMap();
-
-        LoggerContext context = (LoggerContext) LogManager.getContext();
-
         Map<Path, LogFormat> res = new HashMap<>();
 
-        Configuration configuration = context.getConfiguration();
+        configure(res, LogManager.getContext(true));
+        configure(res, LogManager.getContext(false));
+
+        return res;
+    }
+
+    private void configure(Map<Path, LogFormat> res, org.apache.logging.log4j.spi.LoggerContext context) {
+        if (!(context instanceof LoggerContext))
+            return;
+            
+        Configuration configuration = ((LoggerContext)context).getConfiguration();
 
         for (Appender appender : configuration.getAppenders().values()) {
             Path path;
@@ -42,6 +51,13 @@ public class Log4jConfigImporter implements Supplier<Map<Path, LogFormat>> {
                 continue;
             }
 
+            try {
+                path = path.toRealPath();
+            } catch (IOException e) {
+                LOG.error("Failed to get path for log: " + path, e);
+                continue;
+            }
+
             Layout<? extends Serializable> layout = appender.getLayout();
             if (layout instanceof PatternLayout) {
                 PatternLayout patternLayout = (PatternLayout) layout;
@@ -51,7 +67,5 @@ public class Log4jConfigImporter implements Supplier<Map<Path, LogFormat>> {
                 res.put(path, new Log4jLogFormat(conversionPattern));
             }
         }
-
-        return res;
     }
 }
