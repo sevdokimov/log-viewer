@@ -226,7 +226,7 @@ export class ViewConfigService {
 
             let fakeImage: HTMLImageElement = document.createElement('img');
 
-            fakeImage.src = 'http://myregexp.com/log-viewer-statistic/0.1.4/sending-usage-statistics_can_be_disabled_by_removing_send-usage-statistics_property_in_the_configuration.png';
+            fakeImage.src = 'http://myregexp.com/log-viewer-statistic/0.1.6/sending-usage-statistics_can_be_disabled_by_removing_send-usage-statistics_property_in_the_configuration.png';
             fakeImage.style.position = 'absolute';
             fakeImage.style.left = '-101px';
             fakeImage.style.top = '-101px';
