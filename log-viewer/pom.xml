@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+    <modelVersion>4.0.0</modelVersion>
+    
     <parent>
         <groupId>com.logviewer</groupId>
         <artifactId>log-parent</artifactId>
         <version>0.1.7-SNAPSHOT</version>
     </parent>
-
-    <modelVersion>4.0.0</modelVersion>
 
     <artifactId>log-viewer</artifactId>
 
@@ -27,8 +26,12 @@
             </plugin>
         </plugins>
     </build>
-
     <dependencies>
+        <dependency>
+            <groupId>com.logviewer</groupId>
+            <artifactId>log-viewer-frontend</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -41,50 +44,42 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.2.4</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>2.8.8</version>
         </dependency>
-
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
             <version>1.3.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
             <version>1.7.13</version>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>5.0.16.RELEASE</version>
         </dependency>
-
         <!--Log libraries support-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -95,14 +90,12 @@
             <artifactId>log4j-core</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -133,51 +126,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>build-frontend</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.6</version>
-
-                        <configuration>
-                            <workingDirectory>src/main/frontend</workingDirectory>
-                            <nodeVersion>v12.13.1</nodeVersion>
-                            <npmVersion>6.12.1</npmVersion>
-                            <installDirectory>target/npmWd</installDirectory>
-                        </configuration>
-
-                        <executions>
-                            <execution>
-                                <id>Install node and npm</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>install-node-and-npm</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>build</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>run-script build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>
