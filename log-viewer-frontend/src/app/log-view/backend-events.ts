@@ -92,6 +92,7 @@ export interface EventResponseAfterFilterChanged extends StatusHolderEvent {
 
 export interface EventSearchResponse extends StatusHolderEvent {
     records: Record[];
+    foundIdx: number;
     hasSkippedLine: boolean;
     requestId: number;
 }

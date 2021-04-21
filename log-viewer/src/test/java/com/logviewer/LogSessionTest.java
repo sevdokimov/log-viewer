@@ -162,9 +162,8 @@ public class LogSessionTest extends LogSessionTestBase {
 
         //
         session.searchNext(new Position("a.log", TestUtils.date(0, 1), 0), false, 3, new SearchPattern("xxx"), hashes, 2, 2);
-        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(2),
-                searchResult(false, "150101 10:00:01 zzz a", "150101 10:00:01 xxx b"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(2), searchResult(false, "150101 10:00:01 zzz a",
+            "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a"));
 
         //
         TestPredicate.clear();
@@ -173,9 +172,8 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.waitForRecord("150101 10:00:04 b");
         TestPredicate.unlock(lock);
 
-        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(3),
-                searchResult(true, "150101 10:00:03 a", "150101 10:00:04 b"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(3), searchResult(true, "150101 10:00:03 a",
+            "150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a"));
 
         //
         lock = TestPredicate.lock("150101 10:00:04 b");
@@ -184,9 +182,8 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.waitForRecord("150101 10:00:06 a");
         TestPredicate.unlock(lock);
 
-        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(4),
-                searchResult(true, "150101 10:00:03 a", "150101 10:00:04 b"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(4), searchResult(true, "150101 10:00:03 a",
+            "150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a"));
 
         // Backward
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 2, new SearchPattern("qssxcgr"), hashes, 2, 5);
@@ -194,21 +191,19 @@ public class LogSessionTest extends LogSessionTestBase {
 
         //
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 2, new SearchPattern("xxx"), hashes, 2, 6);
-        adapter.check(EventSearchResponse.class, stateVersion(2),
-                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), searchResult(true, "150101 10:00:01 zzz a",
+            "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a"));
 
         //
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 3, new SearchPattern("xxx"), hashes, 2, 6);
-        adapter.check(EventSearchResponse.class, stateVersion(2),
-                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), searchResult(true, "150101 10:00:01 zzz a",
+            "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a"));
 
         //
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 4, new SearchPattern("xxx"), hashes, 2, 7);
-        adapter.check(EventSearchResponse.class, stateVersion(2),
-                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b"));
-        adapter.waitForType(EventNextDataLoaded.class);
+        adapter.check(EventSearchResponse.class, stateVersion(2), searchResult(true, "150101 10:00:01 zzz a",
+            "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a",
+            "150101 10:00:04 b"));
 
         //
         TestPredicate.clear();
@@ -217,8 +212,9 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.waitForRecord("150101 10:00:01 zzz a");
         TestPredicate.unlock(lock);
 
-        adapter.check(EventSearchResponse.class, stateVersion(2),
-                searchResult(false, "150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a"));
+        adapter.check(EventSearchResponse.class, stateVersion(2), searchResult(false, "150101 10:00:01 xxx b",
+            "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b", "150101 10:00:05 a",
+            "150101 10:00:06 a"));
     }
 
     @Test
@@ -242,8 +238,8 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.waitForRecord("150101 10:00:09 b");
         TestPredicate.unlock(lock);
 
-        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(2),
-                searchResult(true, "150101 10:00:06 a", "150101 10:00:06 ccc c"));
+        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(2), searchResult(true, "150101 10:00:06 a",
+            "150101 10:00:06 ccc c", "150101 10:00:07 a", "150101 10:00:07 b"));
     }
 
     @Test

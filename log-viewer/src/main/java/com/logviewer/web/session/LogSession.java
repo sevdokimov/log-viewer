@@ -15,6 +15,7 @@ import com.logviewer.web.session.tasks.LoadNextResponse;
 import com.logviewer.web.session.tasks.LoadRecordTask;
 import com.logviewer.web.session.tasks.SearchPattern;
 import com.logviewer.web.session.tasks.SearchTask;
+import com.logviewer.web.session.tasks.SearchTask.SearchResponse;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigResolveOptions;
@@ -334,29 +335,46 @@ public class LogSession {
 
     @Remote
     public synchronized void searchNext(Position start, boolean backward, int recordCount, SearchPattern pattern,
-                             @NonNull Map<String, String> hashes, long stateVersion, long requestId) {
-        if (this.stateVersion > stateVersion)
+        @NonNull Map<String, String> hashes, long stateVersion, long requestId) {
+        if (!checkStateVersion(stateVersion)) {
             return;
+        }
 
-        if (this.stateVersion < stateVersion)
-            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion=" + stateVersion);
+        SearchTask searchTask = new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter);
 
-        CompletableFuture<SearchTask.SearchResponse> execution = execute(new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter));
-
-        execution.whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
-            @Override
-            protected void handle(SearchTask.SearchResponse res) {
-                sender.send(new EventSearchResponse(res.getStatuses(), stateVersion, res, requestId));
-
-                if (res.getData() != null) { // if found
-                    int foundIdx = backward ? 0 : res.getData().size() - 1;
-                    Record found = res.getData().get(foundIdx).getFirst();
-                    assert pattern.matcher().test(found.getMessage());
-
-                    loadNext(new Position(found, backward), backward, recordCount, hashes, stateVersion);
-                }
+        execute(searchTask).thenCompose(searchRes -> {
+            if (searchRes.getData() == null) {
+                return CompletableFuture.completedFuture(new EventSearchResponse(searchRes, stateVersion, requestId));
             }
-        });
+
+            int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
+            Record found = searchRes.getData().get(foundIdx).getFirst();
+            assert pattern.matcher().test(found.getMessage());
+
+            LoadRecordTask loadTask = new LoadRecordTask(sender, logs, recordCount, filter, new Position(found,
+                backward), backward, hashes);
+
+            return execute(loadTask).thenApply(loadRes -> {
+                SearchResponse combRes = combineResponse(searchRes, loadRes, backward);
+                int newFoundIdx = foundIdx + (backward ? loadRes.getData().size() : 0);
+                return new EventSearchResponse(combRes, stateVersion, requestId, newFoundIdx);
+            });
+        }).whenComplete((res, ex) -> sender.send(res));
+    }
+
+    private SearchResponse combineResponse(SearchResponse search, LoadNextResponse load, boolean backward) {
+        search.getStatuses().putAll(load.getStatuses());
+        search.getData().addAll(backward ? 0 : search.getData().size(), load.getData());
+        return search;
+    }
+
+    private boolean checkStateVersion(long stateVersion) {
+        if (this.stateVersion < stateVersion) {
+            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion="
+                + stateVersion);
+        }
+
+        return this.stateVersion == stateVersion;
     }
 
     private void cancelExecutions(Predicate<SessionTask<?>> filter) {
