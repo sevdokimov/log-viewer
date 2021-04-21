@@ -139,7 +139,7 @@ public class TestSessionAdapter implements SessionAdapter {
     public static Consumer<StatusHolderEvent> noError() {
         return event -> {
             for (RestStatus status : event.statuses.values()) {
-                assert status.getError() == null;
+                assert status.getErrorType() == null;
             }
         };
     }

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Position} from './position';
-import {RestStatus} from '@app/log-view/log-file';
+import {ErrorType, RestStatus} from '@app/log-view/log-file';
 import {EventsLogChanged, StatusHolderEvent} from '@app/log-view/backend-events';
 
 @Injectable()
@@ -55,7 +55,7 @@ export class ViewStateService {
                 size += status.size;
                 filesValidCount++;
             } else {
-                if (status.errorType === 'LogCrashedException') {
+                if (status.errorType === ErrorType.LOG_CRASHED_EXCEPTION) {
                     return false;
                 }
             }
@@ -70,7 +70,11 @@ export class ViewStateService {
 
         for (let logId of Object.keys(this.statuses)) {
             if (!this.statuses[logId].hash) {
-                if (this.statuses[logId].errorType === 'NoSuchFileException') { filesNotFoundCount++; } else { filesErrorCount++; }
+                if (this.statuses[logId].errorType === ErrorType.FILE_NOT_FOUND) {
+                    filesNotFoundCount++;
+                } else {
+                    filesErrorCount++;
+                }
             }
         }
 

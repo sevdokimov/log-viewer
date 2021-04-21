@@ -30,7 +30,7 @@ public class LogSessionTestBase extends AbstractLogTest {
         Map<String, String> res = new HashMap<>();
 
         for (Map.Entry<String, RestStatus> entry : map.entrySet()) {
-            if (entry.getValue().getError() == null) {
+            if (entry.getValue().getErrorType() == null) {
                 res.put(entry.getKey(), entry.getValue().getHash());
             }
         }

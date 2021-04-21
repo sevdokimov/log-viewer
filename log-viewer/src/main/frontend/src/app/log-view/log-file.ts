@@ -12,19 +12,23 @@ export interface LogFile {
 }
 
 export interface RestStatus {
-    error: string;
-    errorMessage: string;
-    errorType: string;
     hash: string;
     size: number;
     lastModification: number;
+
+    errorType: ErrorType;
+    errorMessage: string;
+    detailedErrorMessage: string;
 }
 
 export enum ErrorType {
     FILE_NOT_FOUND = 'NoSuchFileException', // Not found
     ACCESS_DENIED = 'AccessDeniedException', // Access Deny
-    IO_EXCEPTION = 'IOException', //
     DIR_NOT_VISIBLE = 'DirectoryNotVisibleException', //
     CONNECTION_PROBLEM = 'ConnectionProblem', //
-    NoDateField = 'NoDateField' //
+    IO_EXCEPTION = 'IOException', //
+    NoDateField = 'NoDateField', //
+
+    LOG_CRASHED_EXCEPTION = 'LogCrashedException',
+    INTERNAL_ERROR = 'internal_error',
 }

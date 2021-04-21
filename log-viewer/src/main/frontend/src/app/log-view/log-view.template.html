@@ -35,13 +35,14 @@
             </div>
         </div>
 
-        <div *ngIf="logs?.length > 1" dropdown class="dropdown top-panel-dropdown file-list-block">
+        <div dropdown class="dropdown top-panel-dropdown file-list-block">
             <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
-                <span id="successFileCount" title="Successfully opened files"
-                      [class.has-problems-files]="vs.filesValidCount < logs.length">{{vs.filesValidCount}}</span>
-                /
+                <span *ngIf="vs.filesValidCount < logs.length">
+                    <span id="successFileCount" class="has-problems-files" title="Successfully opened files">{{vs.filesValidCount}}</span>
+                    /
+                </span>
                 <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
-                logs
+                {{logs.length === 1 ? 'log' : 'logs'}}
                 <i class="fas fa-caret-down"></i>
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>

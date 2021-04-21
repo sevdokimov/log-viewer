@@ -10,3 +10,11 @@
 .file-error {
   color: #922;
 }
+
+.stacktrace-panel {
+  height: 80vh;
+  overflow: auto;
+
+  white-space: pre-wrap;
+  font-size: 11px;
+}

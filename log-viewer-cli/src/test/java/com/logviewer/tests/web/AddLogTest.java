@@ -1,19 +1,16 @@
 package com.logviewer.tests.web;
 
-import com.logviewer.data2.LogFormat;
 import com.logviewer.impl.LvFileNavigationManagerImpl;
-import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.tests.pages.ChooserPage;
 import com.logviewer.tests.pages.LogPage;
+import com.logviewer.tests.utils.TestLogFormats;
 import org.junit.Test;
 import org.openqa.selenium.interactions.Actions;
 
 import java.nio.file.Paths;
 
 public class AddLogTest extends AbstractWebTestCase implements LogPage {
-
-    private static final LogFormat FORMAT = new LogbackLogFormat("%date{yyMMdd HH:mm:ss} %msg%n");
 
     @Test
     public void addLogFromMenu() {
@@ -22,7 +19,7 @@ public class AddLogTest extends AbstractWebTestCase implements LogPage {
         ctx.getBean(LvFileNavigationManagerImpl.class).setDefaultDirectory(Paths.get(fileA).getParent().toString());
 
         try {
-            ctx.getBean(TestFormatRecognizer.class).setFormat(FORMAT);
+            ctx.getBean(TestFormatRecognizer.class).setFormat(TestLogFormats.MULTIFILE);
 
             openUrl("log");
 
