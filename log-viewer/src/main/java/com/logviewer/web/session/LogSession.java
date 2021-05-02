@@ -6,6 +6,7 @@ import com.logviewer.domain.Permalink;
 import com.logviewer.filters.CompositeRecordPredicate;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.filters.SubstringPredicate;
+import com.logviewer.utils.LvTimer;
 import com.logviewer.utils.Utils;
 import com.logviewer.utils.Wrappers;
 import com.logviewer.web.dto.LogList;
@@ -22,6 +23,7 @@ import com.typesafe.config.ConfigResolveOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
@@ -31,10 +33,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -54,6 +52,8 @@ public class LogSession {
     @Autowired
     private LvFilterStorage filterStorage;
     @Autowired
+    private LvTimer lvTimer;
+    @Autowired
     private LvPermalinkStorage permalinkStorage;
     @Autowired(required = false)
     private List<LvFilterPanelStateProvider> filterSetProviders = Collections.emptyList();
@@ -62,7 +62,7 @@ public class LogSession {
     @Autowired(required = false)
     private List<LvPathResolver> pathResolvers = Collections.emptyList();
 
-    private final Queue<SessionTask<?>> executions = new ConcurrentLinkedQueue<>();
+    private final List<SessionTask<?>> executions = new LinkedList<>();
 
     private RecordPredicate filter;
     private long stateVersion;
@@ -72,18 +72,19 @@ public class LogSession {
 
     private static volatile Config defaultConfig;
 
-    private int taskTimeoutMS = 100;
+    @Value("${log-viewer.wait-for-data-timeout:100}")
+    private int waitForDataTimeoutMS = 100;
     
     public LogSession(SessionAdapter sessionAdapter) {
         this.sender = sessionAdapter;
     }
 
-    public int getTaskTimeoutMS() {
-        return taskTimeoutMS;
+    public int getWaitForDataTimeoutMS() {
+        return waitForDataTimeoutMS;
     }
     
-    public void setTaskTimeoutMS(int taskTimeoutMS) {
-        this.taskTimeoutMS = taskTimeoutMS;
+    public void setWaitForDataTimeoutMS(int waitForDataTimeoutMS) {
+        this.waitForDataTimeoutMS = waitForDataTimeoutMS;
     }
     
     
@@ -319,11 +320,8 @@ public class LogSession {
 
     @Remote
     public synchronized void loadNext(Position start, boolean backward, int recordCount, Map<String, String> hashes, long stateVersion) {
-        if (this.stateVersion > stateVersion)
+        if (!checkStateVersion(stateVersion))
             return;
-
-        if (this.stateVersion < stateVersion)
-            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion=" + stateVersion);
 
         for (SessionTask<?> task : executions) {
             if (task instanceof LoadRecordTask) {
@@ -351,38 +349,46 @@ public class LogSession {
     @Remote
     public synchronized void searchNext(Position start, boolean backward, int recordCount, SearchPattern pattern,
         @NonNull Map<String, String> hashes, long stateVersion, long requestId, boolean loadNext) {
-        if (!checkStateVersion(stateVersion)) {
+        if (!checkStateVersion(stateVersion))
             return;
-        }
 
         SearchTask searchTask = new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter);
 
-        execute(searchTask).thenCompose(searchRes -> {
-            if (searchRes.getData() == null) {
-                return CompletableFuture.completedFuture(new EventSearchResponse(searchRes, stateVersion, requestId));
-            }
+        execute(searchTask).whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
+            @Override
+            protected void handle(SearchTask.SearchResponse searchRes) {
+                if (!loadNext || searchRes.getData() == null) {
+                    sender.send(new EventSearchResponse(searchRes, stateVersion, requestId));
+                    return;
+                }
 
-             
-            int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
-            Record found = searchRes.getData().get(foundIdx).getFirst();
-            assert pattern.matcher().test(found.getMessage());
-            
-            if(loadNext) {
-                LoadRecordTask loadTask = new LoadRecordTask(sender, logs, recordCount, filter, new Position(found,
-                    backward), backward, hashes);
-                try {
-                    LoadNextResponse loadRes = execute(loadTask).get(taskTimeoutMS, TimeUnit.MILLISECONDS);
-                    SearchResponse combRes = combineResponse(searchRes, loadRes, backward);
-                    int newFoundIdx = foundIdx + (backward ? loadRes.getData().size() : 0);
-                    return CompletableFuture.completedFuture(new EventSearchResponse(combRes, stateVersion, requestId, newFoundIdx));
-                }
-                catch (TimeoutException | InterruptedException | ExecutionException e) {
-                    // ignore loading next request and return just the previously searched results
-                }
+                int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
+                Record found = searchRes.getData().get(foundIdx).getFirst();
+                assert pattern.matcher().test(found.getMessage());
+
+                SendEventTask sendEventTask = new SendEventTask(new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx));
+                lvTimer.schedule(sendEventTask, waitForDataTimeoutMS);
+
+                LoadRecordTask loadRecordTask = new LoadRecordTask(sender, logs, recordCount, filter,
+                        new Position(found, backward), backward, hashes);
+
+                execute(loadRecordTask).whenComplete(new LogExecutionHandler<LoadNextResponse>() {
+                    @Override
+                    protected void handle(LoadNextResponse loadRes) {
+                        sendEventTask.cancel();
+
+                        if (sendEventTask.isSent) {
+                            sender.send(new EventNextDataLoaded(loadRes.getStatuses(), stateVersion, loadRes, start, backward));
+                        } else {
+                            SearchResponse combRes = combineResponse(searchRes, loadRes, backward);
+                            int newFoundIdx = foundIdx + (backward ? loadRes.getData().size() : 0);
+
+                            sender.send(new EventSearchResponse(combRes, stateVersion, requestId, newFoundIdx));
+                        }
+                    }
+                });
             }
-            
-            return CompletableFuture.completedFuture(new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx));
-        }).whenComplete((res, ex) -> sender.send(res));
+        });
     }
 
     private SearchResponse combineResponse(SearchResponse search, LoadNextResponse load, boolean backward) {
@@ -413,24 +419,27 @@ public class LogSession {
     }
 
     private <T> CompletableFuture<T> execute(SessionTask<T> task) {
+        assert Thread.holdsLock(this);
+
         CompletableFuture<T> future = new CompletableFuture<>();
 
         executions.add(task);
 
-        new Thread(() -> {
-            task.execute((res, e) -> {
+        task.execute((res, e) -> {
+            synchronized (LogSession.this) {
                 executions.remove(task);
+
                 if (e != null) {
                     future.completeExceptionally(e);
                 } else {
                     future.complete(res);
                 }
-            }); 
-        }).start();
-        
+            }
+        });
+
         return future;
     }
-    
+
     public synchronized void shutdown() {
         for (SessionTask<?> task : executions) {
             task.cancel();
@@ -538,5 +547,39 @@ public class LogSession {
         LogSession res = new LogSession(sender);
         ctx.getAutowireCapableBeanFactory().autowireBeanProperties(res, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
         return res;
+    }
+
+    private class SendEventTask extends TimerTask {
+
+        private final EventSearchResponse eventSearchResponse;
+        private boolean isSent;
+        private boolean isCanceled;
+
+        public SendEventTask(EventSearchResponse eventSearchResponse) {
+            this.eventSearchResponse = eventSearchResponse;
+        }
+
+        @Override
+        public void run() {
+            synchronized (LogSession.this) {
+                try {
+                    if (isCanceled || !checkStateVersion(eventSearchResponse.stateVersion))
+                        return;
+
+                    sender.send(eventSearchResponse);
+                } catch (RuntimeException e) {
+                    LOG.error("Failed to send message", e);
+                }
+
+                isSent = true;
+            }
+        }
+
+        @Override
+        public boolean cancel() {
+            boolean res = super.cancel();
+            isCanceled = true;
+            return res;
+        }
     }
 }

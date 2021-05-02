@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import static com.logviewer.utils.TestSessionAdapter.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class LogSessionTest extends LogSessionTestBase {
 
@@ -207,6 +208,42 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.unlock(lock);
 
         adapter.check(EventSearchResponse.class, stateVersion(2), searchResult(false,"150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a"));
+
+        // load records after found line
+        session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
+        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
+            searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
+                    "150101 10:00:05 a", "150101 10:00:06 a").accept(res);
+
+            assertEquals(3, res.foundIdx);
+        });
+
+        // load records after found line (backward)
+        session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 4, new SearchPattern("10:00:04 b"), hashes, 2, 9, true);
+        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
+            searchResult(false, "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
+                    "150101 10:00:05 a", "150101 10:00:06 a").accept(res);
+
+            assertEquals(4, res.foundIdx);
+        });
+
+        // load records after found line (waiting)
+        TestPredicate.clear();
+        lock = TestPredicate.lock("150101 10:00:05 a");
+
+        session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
+        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
+            searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b").accept(res);
+
+            assertEquals(3, res.foundIdx);
+        });
+
+        TestPredicate.unlock(lock);
+
+        adapter.check(EventNextDataLoaded.class, resp -> {
+            TestUtils.check(resp.data.records, "150101 10:00:05 a", "150101 10:00:06 a");
+            assertFalse(resp.data.hasNextLine);
+        });
     }
 
     @Test
