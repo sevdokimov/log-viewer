@@ -693,6 +693,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 hashes: this.vs.hashes,
                 stateVersion: this.stateVersion,
                 requestId: req.id,
+                loadNext: true,
             })
         );
 
@@ -1298,9 +1299,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         SearchUtils.doSimpleSearch(data, this.searchPattern);
 
-        let nextOccurrenceIds = req.d > 0 ? data.length - 1 : 0;
-
-        SlUtils.assert(data[nextOccurrenceIds].searchRes.length > 0);
+        let nextOccurrenceIdx = event.foundIdx;
+        SlUtils.assert(data[nextOccurrenceIdx].searchRes.length > 0);
 
         if (!event.hasSkippedLine) {
             if (req.d < 0) {
@@ -1316,7 +1316,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                     return;
                 }
 
-                nextOccurrenceIds += this.m.length;
+                nextOccurrenceIdx += this.m.length;
                 this.addRecords(data);
 
                 this.hasRecordAfter = true;
@@ -1331,9 +1331,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView = 0;
 
-        this.setSelectedLine(nextOccurrenceIds);
+        this.setSelectedLine(nextOccurrenceIdx);
 
-        this.scrollToLine(nextOccurrenceIds);
+        this.scrollToLine(nextOccurrenceIdx);
     }
 
     @BackendEventHandler()

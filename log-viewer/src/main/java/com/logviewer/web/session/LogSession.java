@@ -15,6 +15,7 @@ import com.logviewer.web.session.tasks.LoadNextResponse;
 import com.logviewer.web.session.tasks.LoadRecordTask;
 import com.logviewer.web.session.tasks.SearchPattern;
 import com.logviewer.web.session.tasks.SearchTask;
+import com.logviewer.web.session.tasks.SearchTask.SearchResponse;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigResolveOptions;
@@ -30,6 +31,10 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -57,7 +62,7 @@ public class LogSession {
     @Autowired(required = false)
     private List<LvPathResolver> pathResolvers = Collections.emptyList();
 
-    private final List<SessionTask<?>> executions = new LinkedList<>();
+    private final Queue<SessionTask<?>> executions = new ConcurrentLinkedQueue<>();
 
     private RecordPredicate filter;
     private long stateVersion;
@@ -67,10 +72,21 @@ public class LogSession {
 
     private static volatile Config defaultConfig;
 
+    private int taskTimeoutMS = 100;
+    
     public LogSession(SessionAdapter sessionAdapter) {
         this.sender = sessionAdapter;
     }
 
+    public int getTaskTimeoutMS() {
+        return taskTimeoutMS;
+    }
+    
+    public void setTaskTimeoutMS(int taskTimeoutMS) {
+        this.taskTimeoutMS = taskTimeoutMS;
+    }
+    
+    
     public LogView[] getLogs() {
         return logs;
     }
@@ -334,29 +350,54 @@ public class LogSession {
 
     @Remote
     public synchronized void searchNext(Position start, boolean backward, int recordCount, SearchPattern pattern,
-                             @NonNull Map<String, String> hashes, long stateVersion, long requestId) {
-        if (this.stateVersion > stateVersion)
+        @NonNull Map<String, String> hashes, long stateVersion, long requestId, boolean loadNext) {
+        if (!checkStateVersion(stateVersion)) {
             return;
+        }
 
-        if (this.stateVersion < stateVersion)
-            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion=" + stateVersion);
+        SearchTask searchTask = new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter);
 
-        CompletableFuture<SearchTask.SearchResponse> execution = execute(new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter));
+        execute(searchTask).thenCompose(searchRes -> {
+            if (searchRes.getData() == null) {
+                return CompletableFuture.completedFuture(new EventSearchResponse(searchRes, stateVersion, requestId));
+            }
 
-        execution.whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
-            @Override
-            protected void handle(SearchTask.SearchResponse res) {
-                sender.send(new EventSearchResponse(res.getStatuses(), stateVersion, res, requestId));
-
-                if (res.getData() != null) { // if found
-                    int foundIdx = backward ? 0 : res.getData().size() - 1;
-                    Record found = res.getData().get(foundIdx).getFirst();
-                    assert pattern.matcher().test(found.getMessage());
-
-                    loadNext(new Position(found, backward), backward, recordCount, hashes, stateVersion);
+             
+            int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
+            Record found = searchRes.getData().get(foundIdx).getFirst();
+            assert pattern.matcher().test(found.getMessage());
+            
+            if(loadNext) {
+                LoadRecordTask loadTask = new LoadRecordTask(sender, logs, recordCount, filter, new Position(found,
+                    backward), backward, hashes);
+                try {
+                    LoadNextResponse loadRes = execute(loadTask).get(taskTimeoutMS, TimeUnit.MILLISECONDS);
+                    SearchResponse combRes = combineResponse(searchRes, loadRes, backward);
+                    int newFoundIdx = foundIdx + (backward ? loadRes.getData().size() : 0);
+                    return CompletableFuture.completedFuture(new EventSearchResponse(combRes, stateVersion, requestId, newFoundIdx));
+                }
+                catch (TimeoutException | InterruptedException | ExecutionException e) {
+                    // ignore loading next request and return just the previously searched results
                 }
             }
-        });
+            
+            return CompletableFuture.completedFuture(new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx));
+        }).whenComplete((res, ex) -> sender.send(res));
+    }
+
+    private SearchResponse combineResponse(SearchResponse search, LoadNextResponse load, boolean backward) {
+        search.getStatuses().putAll(load.getStatuses());
+        search.getData().addAll(backward ? 0 : search.getData().size(), load.getData());
+        return search;
+    }
+
+    private boolean checkStateVersion(long stateVersion) {
+        if (this.stateVersion < stateVersion) {
+            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion="
+                + stateVersion);
+        }
+
+        return this.stateVersion == stateVersion;
     }
 
     private void cancelExecutions(Predicate<SessionTask<?>> filter) {
@@ -372,27 +413,24 @@ public class LogSession {
     }
 
     private <T> CompletableFuture<T> execute(SessionTask<T> task) {
-        assert Thread.holdsLock(this);
-
         CompletableFuture<T> future = new CompletableFuture<>();
 
         executions.add(task);
 
-        task.execute((res, e) -> {
-            synchronized (LogSession.this) {
+        new Thread(() -> {
+            task.execute((res, e) -> {
                 executions.remove(task);
-
                 if (e != null) {
                     future.completeExceptionally(e);
                 } else {
                     future.complete(res);
                 }
-            }
-        });
-
+            }); 
+        }).start();
+        
         return future;
     }
-
+    
     public synchronized void shutdown() {
         for (SessionTask<?> task : executions) {
             task.cancel();
