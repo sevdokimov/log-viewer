@@ -357,7 +357,7 @@ public class LogSession {
         execute(searchTask).whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
             @Override
             protected void handle(SearchTask.SearchResponse searchRes) {
-                if (!loadNext || searchRes.getData() == null) {
+                if (searchRes.getData() == null) {
                     sender.send(new EventSearchResponse(searchRes, stateVersion, requestId));
                     return;
                 }
@@ -366,7 +366,14 @@ public class LogSession {
                 Record found = searchRes.getData().get(foundIdx).getFirst();
                 assert pattern.matcher().test(found.getMessage());
 
-                SendEventTask sendEventTask = new SendEventTask(new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx));
+                EventSearchResponse searchResponse = new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx);
+
+                if (!loadNext) {
+                    sender.send(searchResponse);
+                    return;
+                }
+
+                SendEventTask sendEventTask = new SendEventTask(searchResponse);
                 lvTimer.schedule(sendEventTask, waitForDataTimeoutMS);
 
                 LoadRecordTask loadRecordTask = new LoadRecordTask(sender, logs, recordCount, filter,

@@ -181,7 +181,8 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.waitForRecord("150101 10:00:06 a");
         TestPredicate.unlock(lock);
 
-        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(4), searchResult(true, "150101 10:00:03 a", "150101 10:00:04 b"));
+        adapter.check(EventSearchResponse.class, stateVersion(2), reqId(4), searchResult(true, "150101 10:00:03 a", "150101 10:00:04 b"),
+                res -> assertEquals(1, res.foundIdx));
 
         // Backward
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 2, new SearchPattern("qssxcgr"), hashes, 2, 5, false);
@@ -211,32 +212,26 @@ public class LogSessionTest extends LogSessionTestBase {
 
         // load records after found line
         session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
-        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
-            searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
-                    "150101 10:00:05 a", "150101 10:00:06 a").accept(res);
-
-            assertEquals(3, res.foundIdx);
-        });
+        adapter.check(EventSearchResponse.class, stateVersion(2),
+                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
+                "150101 10:00:05 a", "150101 10:00:06 a"),
+                res -> assertEquals(3, res.foundIdx));
 
         // load records after found line (backward)
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 4, new SearchPattern("10:00:04 b"), hashes, 2, 9, true);
-        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
-            searchResult(false, "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
-                    "150101 10:00:05 a", "150101 10:00:06 a").accept(res);
-
-            assertEquals(4, res.foundIdx);
-        });
+        adapter.check(EventSearchResponse.class, stateVersion(2),
+                searchResult(false, "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
+                        "150101 10:00:05 a", "150101 10:00:06 a"),
+                res -> assertEquals(4, res.foundIdx));
 
         // load records after found line (waiting)
         TestPredicate.clear();
         lock = TestPredicate.lock("150101 10:00:05 a");
 
         session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
-        adapter.check(EventSearchResponse.class, stateVersion(2), res -> {
-            searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b").accept(res);
-
-            assertEquals(3, res.foundIdx);
-        });
+        adapter.check(EventSearchResponse.class, stateVersion(2),
+                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b"),
+                res -> assertEquals(3, res.foundIdx));
 
         TestPredicate.unlock(lock);
 
