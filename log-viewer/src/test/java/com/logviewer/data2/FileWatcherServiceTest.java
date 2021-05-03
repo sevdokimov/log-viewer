@@ -2,9 +2,9 @@ package com.logviewer.data2;
 
 import com.google.common.collect.Sets;
 import com.logviewer.utils.Destroyer;
-import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,7 +60,7 @@ public class FileWatcherServiceTest {
         }
         finally {
             ws.destroy();
-            FileUtils.deleteDirectory(dir.toFile());
+            FileSystemUtils.deleteRecursively(dir);
         }
 
     }
@@ -101,9 +101,8 @@ public class FileWatcherServiceTest {
             assert changes.isEmpty();
         }
         finally {
-            FileUtils.deleteDirectory(dir.toFile());
+            FileSystemUtils.deleteRecursively(dir.toFile());
         }
-
     }
 
     public static boolean isWatcherThreadStarted() {
