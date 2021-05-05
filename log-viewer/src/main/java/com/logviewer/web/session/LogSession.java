@@ -16,7 +16,6 @@ import com.logviewer.web.session.tasks.LoadNextResponse;
 import com.logviewer.web.session.tasks.LoadRecordTask;
 import com.logviewer.web.session.tasks.SearchPattern;
 import com.logviewer.web.session.tasks.SearchTask;
-import com.logviewer.web.session.tasks.SearchTask.SearchResponse;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigResolveOptions;
@@ -387,21 +386,12 @@ public class LogSession {
                         if (sendEventTask.isSent) {
                             sender.send(new EventNextDataLoaded(loadRes.getStatuses(), stateVersion, loadRes, start, backward));
                         } else {
-                            SearchResponse combRes = combineResponse(searchRes, loadRes, backward);
-                            int newFoundIdx = foundIdx + (backward ? loadRes.getData().size() : 0);
-
-                            sender.send(new EventSearchResponse(combRes, stateVersion, requestId, newFoundIdx));
+                            sender.send(new EventSearchResponse(searchRes, loadRes, stateVersion, requestId, backward));
                         }
                     }
                 });
             }
         });
-    }
-
-    private SearchResponse combineResponse(SearchResponse search, LoadNextResponse load, boolean backward) {
-        search.getStatuses().putAll(load.getStatuses());
-        search.getData().addAll(backward ? 0 : search.getData().size(), load.getData());
-        return search;
     }
 
     private boolean checkStateVersion(long stateVersion) {

@@ -11,6 +11,7 @@ import com.logviewer.utils.Pair;
 import com.logviewer.web.session.LogDataListener;
 import com.logviewer.web.session.LogProcess;
 import com.logviewer.web.session.Status;
+import org.springframework.lang.NonNull;
 
 public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
 
@@ -42,12 +43,12 @@ public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
 
         return log.loadRecords(LvGsonUtils.GSON.fromJson(filter, RecordPredicate.class), recordCountLimit, start, backward, hash, sizeLimit, new LogDataListener() {
             @Override
-            public void onData(RecordList data) {
+            public void onData(@NonNull RecordList data) {
                 ctx.send(data);
             }
 
             @Override
-            public void onFinish(Status status, boolean eof) {
+            public void onFinish(@NonNull Status status, boolean eof) {
                 ctx.sendAndCloseChannel(Pair.of(status, eof));
             }
         });

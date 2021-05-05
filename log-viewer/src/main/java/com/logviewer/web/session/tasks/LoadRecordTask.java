@@ -7,6 +7,7 @@ import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
 import com.logviewer.web.session.*;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.*;
@@ -128,7 +129,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
         }
 
         @Override
-        public void onData(RecordList newRecords) {
+        public void onData(@NonNull RecordList newRecords) {
             synchronized (LoadRecordTask.this) {
                 if (finished)
                     return;
@@ -161,7 +162,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
         }
 
         @Override
-        public void onFinish(Status status, boolean eof) {
+        public void onFinish(@NonNull Status status, boolean eof) {
             synchronized (LoadRecordTask.this) {
                 if (finished)
                     return;
