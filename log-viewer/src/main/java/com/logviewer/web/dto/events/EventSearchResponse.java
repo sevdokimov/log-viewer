@@ -13,6 +13,7 @@ public class EventSearchResponse extends StatusHolderEvent {
     public final long foundIdx;
     public final boolean hasSkippedLine;
     public final long requestId;
+    public final boolean hasNextLine;
 
     public EventSearchResponse(SearchTask.SearchResponse res, long stateVersion, long requestId, long foundIdx) {
         super(res.getStatuses(), stateVersion);
@@ -21,6 +22,7 @@ public class EventSearchResponse extends StatusHolderEvent {
         this.foundIdx = foundIdx;
         hasSkippedLine = res.hasSkippedLine();
         this.requestId = requestId;
+        hasNextLine = true;
     }
 
     public EventSearchResponse(SearchTask.SearchResponse res, long stateVersion, long requestId) {
@@ -49,6 +51,8 @@ public class EventSearchResponse extends StatusHolderEvent {
 
             foundIdx = beforeOccurrence.size() - 1;
         }
+
+        hasNextLine = loadRes.hasNextLine();
     }
 
     @Override

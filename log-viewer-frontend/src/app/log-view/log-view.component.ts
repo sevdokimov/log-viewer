@@ -1303,14 +1303,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         SlUtils.assert(data[nextOccurrenceIdx].searchRes.length > 0);
 
         if (!event.hasSkippedLine) {
-            if (req.d < 0) {
+            if (req.d < 0) { // is backward search
                 if (!Record.containPosition(req.start, this.m[0])) {
                     return;
                 }
 
                 this.addRecords(data, 0);
-
-                this.hasRecordBefore = true;
             } else {
                 if (!Record.containPosition(req.start, this.m[this.m.length - 1])) {
                     return;
@@ -1318,8 +1316,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 nextOccurrenceIdx += this.m.length;
                 this.addRecords(data);
-
-                this.hasRecordAfter = true;
             }
         } else {
             this.hasRecordAfter = true;
@@ -1327,6 +1323,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
             this.clearRecords();
             this.addRecords(data);
+        }
+
+        if (req.d < 0) { // is backward search
+            this.hasRecordBefore = event.hasNextLine;
+        } else {
+            this.hasRecordAfter = event.hasNextLine;
         }
 
         this.shiftView = 0;

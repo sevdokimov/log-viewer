@@ -95,6 +95,7 @@ export interface EventSearchResponse extends StatusHolderEvent {
     foundIdx: number;
     hasSkippedLine: boolean;
     requestId: number;
+    hasNextLine: boolean;
 }
 
 export interface DataHolderEvent extends StatusHolderEvent {

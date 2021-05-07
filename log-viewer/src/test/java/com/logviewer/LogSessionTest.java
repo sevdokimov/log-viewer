@@ -19,8 +19,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.logviewer.utils.TestSessionAdapter.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class LogSessionTest extends LogSessionTestBase {
 
@@ -215,6 +214,7 @@ public class LogSessionTest extends LogSessionTestBase {
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
                 "150101 10:00:05 a", "150101 10:00:06 a"),
+                res -> assertFalse(res.hasNextLine),
                 res -> assertEquals(3, res.foundIdx));
 
         // load records after found line (backward)
@@ -222,15 +222,25 @@ public class LogSessionTest extends LogSessionTestBase {
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(false, "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
                         "150101 10:00:05 a", "150101 10:00:06 a"),
+                res -> assertTrue(res.hasNextLine),
                 res -> assertEquals(4, res.foundIdx));
 
         // load records after found line (waiting)
         TestPredicate.clear();
         lock = TestPredicate.lock("150101 10:00:05 a");
 
+        session.loadNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, hashes, 2);
+
+        adapter.check(EventNextDataLoaded.class, res -> {
+            System.out.println(res.data.records.toString());
+        });
+        TestPredicate.unlock(lock);
+        lock = TestPredicate.lock("150101 10:00:05 a");
+
         session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b"),
+                res -> assertTrue(res.hasNextLine),
                 res -> assertEquals(3, res.foundIdx));
 
         TestPredicate.unlock(lock);
