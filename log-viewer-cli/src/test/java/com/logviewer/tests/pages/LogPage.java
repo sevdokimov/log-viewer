@@ -8,7 +8,7 @@ public interface LogPage {
 
     By MESSAGE_NO_LOG_PATH = By.id("no-log-paths");
 
-    By RECORDS = By.id("no-log-paths");
+    By RECORDS = By.xpath("//div[@id='records']/div[@class='record']");
 
     interface Menu {
         By ITEM_ADD_LOG = By.id("add-log-menu-item");

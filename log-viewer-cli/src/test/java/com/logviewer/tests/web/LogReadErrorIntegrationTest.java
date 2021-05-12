@@ -6,13 +6,17 @@ import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.utils.Utils;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -100,6 +104,26 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         assert driver.findElementsByCssSelector(".file-list .file-error").size() == 2;
         assertEquals("0", driver.findElementById("successFileCount").getText());
         assertEquals("2", driver.findElementById("totalFileCount").getText());
+    }
+
+    @Test
+    public void breakLog() throws IOException {
+        Path tmpLog = tmpDir.resolve("log.log");
+        Files.write(tmpLog, IntStream.rangeClosed(11, 100).mapToObj(String::valueOf).collect(Collectors.joining("\n")).getBytes());
+
+        openLog(tmpLog);
+
+        setHeight(10);
+
+        recordByText("100");
+
+        Files.delete(tmpLog);
+
+        new Actions(driver).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).perform();
+
+        assert !driver.findElementById("records").isDisplayed();
+
+        driver.findElement(By.cssSelector(".file-not-found"));
     }
 
     @Test

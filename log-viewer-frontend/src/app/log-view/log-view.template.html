@@ -133,7 +133,7 @@
         <span><img src="assets/progress.gif"> Loading...</span>
     </div>
 
-    <div id="heightLimiter">
+    <div id="heightLimiter" [style.display]="vs.filesValidCount === 0 ? 'none' : 'block'">
         <div #logView id="logView">
             <div #loadingProgressTop id="loading-progress-top">
                 <img src="img/loader13.gif">
@@ -168,7 +168,7 @@
         </div>
     </div>
 
-    <div *ngIf="logs && state === 0 && !hasRecordAfter && !hasRecordBefore && m.length === 0" class="empty-log-message-container">
+    <div *ngIf="logs && state === 0 && (!hasRecordAfter && !hasRecordBefore && m.length === 0 || vs.filesValidCount === 0)" class="empty-log-message-container">
         <div *ngIf="logs.length === 0" class="empty-log-message-container">
             <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
                 Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>
