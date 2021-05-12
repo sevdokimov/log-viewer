@@ -1,6 +1,6 @@
 import {ConnectionService} from '@app/log-view/connection.service';
 import {BackendEvent} from '@app/log-view/backend-events';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 
 export class WebSocketConnection implements ConnectionService {
 
@@ -40,7 +40,7 @@ export class WebSocketConnection implements ConnectionService {
     }
 
     startup(): void {
-        SlUtils.assert(!this.ws);
+        LvUtils.assert(!this.ws);
 
         let ws = new WebSocket(this.getWsUrl());
 

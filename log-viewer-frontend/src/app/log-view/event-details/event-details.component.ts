@@ -13,7 +13,7 @@ import {FieldDescr, ViewConfigService} from '../view-config.service';
 import {Record} from '@app/log-view/record';
 import {LogFile} from '@app/log-view/log-file';
 import {ViewStateService} from '@app/log-view/view-state.service';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {RecordRendererService} from '@app/log-view/record-renderer.service';
 
 @Component({
@@ -45,7 +45,7 @@ export class EventDetailsComponent implements OnChanges, AfterViewInit {
 
             this.log = this.viewConfig.logById[r.logId];
 
-            this.timestamp = r.time ? SlUtils.formatDate(r.time) : null;
+            this.timestamp = r.time ? LvUtils.formatDate(r.time) : null;
 
             this.fields = [];
 
@@ -69,7 +69,7 @@ export class EventDetailsComponent implements OnChanges, AfterViewInit {
     ngAfterViewInit() {
         let fieldValues = this.fieldValues.toArray();
 
-        SlUtils.assert(fieldValues.length === this.fields.length);
+        LvUtils.assert(fieldValues.length === this.fields.length);
 
         for (let i = 0; i < this.fields.length; i++) {
             fieldValues[i].nativeElement.append(this.fields[i].html);

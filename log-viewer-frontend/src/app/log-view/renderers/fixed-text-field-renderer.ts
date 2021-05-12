@@ -1,6 +1,6 @@
 import {FieldRenderer} from '@app/log-view/renderers/renderer';
 import {SlStyle} from '@app/log-view/renderers/style';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {Record} from '@app/log-view/record';
 
 export class FixedTextFieldRenderer implements FieldRenderer {
@@ -14,7 +14,7 @@ export class FixedTextFieldRenderer implements FieldRenderer {
             e.append(s);
         } else {
             let span = document.createElement('SPAN');
-            SlUtils.applyStyle(span, style);
+            LvUtils.applyStyle(span, style);
             span.innerText = s;
             e.append(span);
         }

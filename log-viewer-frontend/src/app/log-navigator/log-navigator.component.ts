@@ -2,7 +2,7 @@ import {AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, View
 import {RequestState} from '../utils/request-state';
 import {FavoritesService, RestFileState} from '../services/favorites.service';
 import {HttpClient} from '@angular/common/http';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 
 @Component({
     selector: 'lv-navigator',
@@ -95,7 +95,7 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
     }
 
     constructPathFromPrefix(idx: number): string {
-        return SlUtils.normalizePath(this.currentDirItems.slice(0, idx + 1).join('/'));
+        return LvUtils.normalizePath(this.currentDirItems.slice(0, idx + 1).join('/'));
     }
 
     selectDir(dir: string) {
@@ -161,7 +161,7 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
             let nameHtml: string;
 
             if (!filter) {
-                nameHtml = SlUtils.escapeHtml(name);
+                nameHtml = LvUtils.escapeHtml(name);
             } else {
                 nameHtml = LogNavigatorComponent.highlightOccurrence(name, filter);
                 if (!nameHtml) { continue; }
@@ -187,20 +187,20 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
         }
 
         while (k >= 0) {
-            res += SlUtils.escapeHtml(s.substring(idx, k));
-            res += '<span class="occurrence">' + SlUtils.escapeHtml(s.substring(k, k + filter.length)) + '</span>';
+            res += LvUtils.escapeHtml(s.substring(idx, k));
+            res += '<span class="occurrence">' + LvUtils.escapeHtml(s.substring(k, k + filter.length)) + '</span>';
 
             idx = k + filter.length;
             k = lowerCaseS.indexOf(filter, idx);
         }
 
-        res += SlUtils.escapeHtml(s.substring(idx));
+        res += LvUtils.escapeHtml(s.substring(idx));
 
         return res;
     }
 
     private adjustSelection() {
-        SlUtils.assert(this.visibleDirItems != null);
+        LvUtils.assert(this.visibleDirItems != null);
 
         if (this.visibleDirItems.length === 0) {
             return;
@@ -211,20 +211,20 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
             return;
         }
 
-        if (SlUtils.isChild(this.currentDir, this.selectedPath)) {
+        if (LvUtils.isChild(this.currentDir, this.selectedPath)) {
             if (this.currentDir === this.selectedPath) {
                 this.selectedPath = this.visibleDirItems[0].item.path;
                 return;
             }
 
-            let idx = this.visibleDirItems.findIndex(fs => SlUtils.isChild(fs.item.path, this.selectedPath));
+            let idx = this.visibleDirItems.findIndex(fs => LvUtils.isChild(fs.item.path, this.selectedPath));
             if (idx >= 0) {
                 this.selectedPath = this.visibleDirItems[idx].item.path;
                 return;
             }
 
             let orderedFiles = this.visibleDirItems.map(fs => fs.item.name).sort();
-            idx = SlUtils.binarySearch(orderedFiles, this.selectedPath.substring(this.currentDir.length + 1));
+            idx = LvUtils.binarySearch(orderedFiles, this.selectedPath.substring(this.currentDir.length + 1));
             if (idx >= 0) {
                 this.selectedPath = this.visibleDirItems[idx].item.path;
                 return;
@@ -243,7 +243,7 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
             return [];
         }
 
-        path = SlUtils.normalizePath(path);
+        path = LvUtils.normalizePath(path);
 
         let res: string[] = [];
 

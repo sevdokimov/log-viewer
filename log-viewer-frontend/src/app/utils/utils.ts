@@ -3,7 +3,7 @@ import {Record} from '@app/log-view/record';
 import {LogFile} from '@app/log-view/log-file';
 import * as $ from 'jquery';
 
-export class SlUtils {
+export class LvUtils {
 
     static renderFileSize(size: number): string {
         if (size < 4 * 1024) { return size + ' bytes'; }
@@ -88,7 +88,7 @@ export class SlUtils {
         while (e.firstChild) { e.removeChild(e.firstChild); }
     }
 
-    static assert(f: boolean, message?: string) {
+    static assert(f: boolean, message?: string): asserts f {
         if (!f) {
             throw new Error(message);
         }
@@ -151,8 +151,8 @@ export class SlUtils {
     }
 
     static isChild(parent: string, child: string): boolean {
-        parent = SlUtils.normalizePath(parent);
-        child = SlUtils.normalizePath(child);
+        parent = LvUtils.normalizePath(parent);
+        child = LvUtils.normalizePath(child);
 
         if (!child.startsWith(parent)) {
             return false;
@@ -189,7 +189,7 @@ export class SlUtils {
     }
 
     static extractName(path: string): string {
-        path = SlUtils.normalizePath(path);
+        path = LvUtils.normalizePath(path);
         let idx = path.lastIndexOf('/');
         if (idx < 0) {
             return path;
@@ -202,9 +202,9 @@ export class SlUtils {
         let e = $(selector)[0];
 
         if (e) {
-            SlUtils.highlightNow(e);
+            LvUtils.highlightNow(e);
         } else {
-            setTimeout(() => SlUtils.highlightNow($(selector)[0]), 0);
+            setTimeout(() => LvUtils.highlightNow($(selector)[0]), 0);
         }
     }
     
@@ -229,13 +229,12 @@ export class SlUtils {
         return record.s.substring(start, end);
     }
 
-
     static fieldValueByType(record: Record, logs: LogFile[], type: string): string {
         for (let l of logs) {
             if (l.id === record.logId) {
                 for (let i = 0; i < l.fields.length; i++) {
                     if (l.fields[i].type === type) {
-                        return SlUtils.fieldValue(record, i);
+                        return LvUtils.fieldValue(record, i);
                     }
                 }
 
@@ -270,7 +269,7 @@ export class SlUtils {
     }
 
     static trimText(s: string, maxLength: number) {
-        SlUtils.assert(maxLength > 2);
+        LvUtils.assert(maxLength > 2);
 
         let res = s.replace(/\s+/g, ' ').trim();
         if (res.length > maxLength) {

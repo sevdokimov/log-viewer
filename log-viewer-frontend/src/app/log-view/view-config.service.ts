@@ -3,7 +3,7 @@ import {FieldRenderer, TextRenderer} from './renderers/renderer';
 import {TextFieldRenderer} from './renderers/text-field-renderer';
 import {LogFile} from './log-file';
 import {PathUtils} from '../utils/path-utils';
-import {SlUtils} from '../utils/utils';
+import {LvUtils} from '../utils/utils';
 import {UiConfig} from '@app/log-view/backend-events';
 import {ObjectFactory} from '@app/utils/object-factory';
 import {SlStyle} from '@app/log-view/renderers/style';
@@ -76,7 +76,7 @@ export class ViewConfigService {
     private static generateNodeLabels(nodes: string[]): { [key: string]: string } {
         let res: { [key: string]: string } = {};
 
-        nodes = SlUtils.distinct(nodes);
+        nodes = LvUtils.distinct(nodes);
 
         if (nodes.length === 0) { return res; }
 
@@ -134,7 +134,7 @@ export class ViewConfigService {
     private static generatePathLabels(paths: string[]): { [key: string]: string } {
         let res: { [key: string]: string } = {};
 
-        paths = SlUtils.distinct(paths);
+        paths = LvUtils.distinct(paths);
 
         if (paths.length === 0) { return res; }
 

@@ -1,5 +1,5 @@
 import {Record} from './record';
-import {SlUtils} from '../utils/utils';
+import {LvUtils} from '../utils/utils';
 import {Injectable} from '@angular/core';
 import {FieldDescr, ViewConfigService} from './view-config.service';
 import {ViewStateService} from './view-state.service';
@@ -18,8 +18,8 @@ export class RecordRendererService {
     renderRange(m: Record[], start: number, end: number, target: HTMLElement) {
         if (end === start) { return; }
         if (end < start) { throw 'end < start: ' + end + ' < ' + start; }
-        SlUtils.assert(start >= 0, 'start < 0');
-        SlUtils.assert(end <= m.length, 'end > m.length');
+        LvUtils.assert(start >= 0, 'start < 0');
+        LvUtils.assert(end <= m.length, 'end > m.length');
 
         if (target.children.length !== m.length - (end - start)) {
             throw 'Inconsistent array length: ' +
@@ -28,9 +28,9 @@ export class RecordRendererService {
             (m.length - (end - start));
         }
 
-        if (start > 0) { SlUtils.assert(Record.compareTo(m[start - 1], m[start]) < 0); }
+        if (start > 0) { LvUtils.assert(Record.compareTo(m[start - 1], m[start]) < 0); }
         if (end < m.length) {
-            SlUtils.assert(Record.compareTo(m[end - 1], m[end]) < 0);
+            LvUtils.assert(Record.compareTo(m[end - 1], m[end]) < 0);
         }
 
         this.initLabelWidthIfNeeded(target);
@@ -83,8 +83,8 @@ export class RecordRendererService {
                  start: number,
                  end: number,
                  target: HTMLElement) {
-        SlUtils.assert(target.children.length === m.length);
-        SlUtils.assert(start <= end);
+        LvUtils.assert(target.children.length === m.length);
+        LvUtils.assert(start <= end);
 
         this.initLabelWidthIfNeeded(target);
 
@@ -184,17 +184,17 @@ export class RecordRendererService {
                         let idx = 0;
 
                         for (let sp of splits) {
-                            SlUtils.assert(sp.start <= sp.end && sp.end <= r.length);
+                            LvUtils.assert(sp.start <= sp.end && sp.end <= r.length);
 
                             if (sp.start > idx) {
                                 nextRanges.push(r.substring(idx, sp.start));
                                 hasStr = true;
                             } else {
-                                SlUtils.assert(idx === sp.start);
+                                LvUtils.assert(idx === sp.start);
                             }
 
                             let len = this.setStrLenAttribute(sp.e);
-                            SlUtils.assert(len === sp.end - sp.start, 'Source text length is not equals the rendered text length');
+                            LvUtils.assert(len === sp.end - sp.start, 'Source text length is not equals the rendered text length');
 
                             nextRanges.push(sp.e);
                             idx = sp.end;
@@ -239,9 +239,8 @@ export class RecordRendererService {
 
 
         let log = this.viewConfig.logById[r.logId];
-        SlUtils.assert(log != null, 'Unexpected logId: ' + r.logId);
-        SlUtils.assert(log.fields.length === r.fieldsOffsetEnd.length, 'Unexpected field count in record');
-
+        LvUtils.assert(log != null, 'Unexpected logId: ' + r.logId);
+        LvUtils.assert(log.fields.length === r.fieldsOffsetEnd.length, 'Unexpected field count in record');
         let s = r.s;
 
         if (r.fieldsOffsetEnd.findIndex(idx => idx >= 0) < 0) {
@@ -283,7 +282,7 @@ export class RecordRendererService {
             moreDiv.className = 'has-more lv-virtual';
             moreDiv.innerText =
                 '...the log record is too big (' +
-                SlUtils.renderFileSize(r.end - r.start) +
+                LvUtils.renderFileSize(r.end - r.start) +
                 '), only begin of the record is shown ...';
             e.appendChild(moreDiv);
         }
@@ -385,7 +384,7 @@ export class RecordRendererService {
     }
 
     highlight(e: HTMLElement, start: number, end: number, cls: string) {
-        SlUtils.assert(start <= end);
+        LvUtils.assert(start <= end);
         if (start === end) { return; }
 
         let nodeStart: number = 0;
@@ -448,7 +447,7 @@ export class RecordRendererService {
                     if ((<SlElement>node).highlightNode) {
                         let val = node.firstChild.nodeValue;
 
-                        SlUtils.assert(val.length === nodeLen);
+                        LvUtils.assert(val.length === nodeLen);
 
                         if (start > nodeStart) {
                             let headLen = start - nodeStart;
@@ -508,7 +507,7 @@ export class RecordRendererService {
     }
 
     expand(e: HTMLElement, start: number, end: number) {
-        SlUtils.assert(start <= end);
+        LvUtils.assert(start <= end);
 
         let nodeStart: number = 0;
 

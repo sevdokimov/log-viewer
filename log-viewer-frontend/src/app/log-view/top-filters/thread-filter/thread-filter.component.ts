@@ -1,7 +1,7 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 
 @Component({
     selector: 'lv-thread-filter',
@@ -93,11 +93,11 @@ export class LvThreadFilterComponent extends FilterWithDropdown {
                 return;
             }
 
-            SlUtils.delete(state.thread.includes, thread);
-            SlUtils.delete(state.thread.excludes, thread);
+            LvUtils.delete(state.thread.includes, thread);
+            LvUtils.delete(state.thread.excludes, thread);
         });
         
-        SlUtils.delete(this.excludes, thread);
+        LvUtils.delete(this.excludes, thread);
     }
 
     addThreadName(show: boolean) {
@@ -112,20 +112,20 @@ export class LvThreadFilterComponent extends FilterWithDropdown {
             }
 
             if (show) {
-                SlUtils.delete(state.thread.excludes, thread);
+                LvUtils.delete(state.thread.excludes, thread);
 
                 if (!state.thread.includes) {
                     state.thread.includes = [thread];
                 } else {
-                    SlUtils.addIfNotExist(state.thread.includes, thread);
+                    LvUtils.addIfNotExist(state.thread.includes, thread);
                 }
             } else {
-                SlUtils.delete(state.thread.includes, thread);
+                LvUtils.delete(state.thread.includes, thread);
 
                 if (!state.thread.excludes) {
                     state.thread.excludes = [thread];
                 } else {
-                    SlUtils.addIfNotExist(state.thread.excludes, thread);
+                    LvUtils.addIfNotExist(state.thread.excludes, thread);
                 }
             }
 

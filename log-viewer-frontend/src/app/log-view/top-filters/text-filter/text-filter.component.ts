@@ -1,7 +1,7 @@
 import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {FilterPanelStateService, FilterState, TextFilter} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {SearchPattern, SearchUtils} from '@app/log-view/search';
 
 @Component({
@@ -64,10 +64,10 @@ export class LvTextFilterComponent extends FilterWithDropdown {
 
         this.includeExclude = f.exclude ? 'exclude' : 'include';
 
-        this.titleName = SlUtils.trimText(this.name, 50);
+        this.titleName = LvUtils.trimText(this.name, 50);
 
         if (!this.titleName) {
-            this.titleText = SlUtils.trimText(this.pattern.s, 40);
+            this.titleText = LvUtils.trimText(this.pattern.s, 40);
             
             if (!this.titleText) {
                 this.titleText = '<empty>';
@@ -118,7 +118,7 @@ export class LvTextFilterComponent extends FilterWithDropdown {
     removeFilter() {
         this.filterPanelStateService.updateFilterState(state => {
             let f = this.findFilter(state);
-            SlUtils.delete(state.textFilters, f);
+            LvUtils.delete(state.textFilters, f);
         });
     }
 

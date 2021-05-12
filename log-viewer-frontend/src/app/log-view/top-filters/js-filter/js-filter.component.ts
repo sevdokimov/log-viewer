@@ -2,7 +2,7 @@ import {Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {FilterPanelStateService, FilterState, JsFilter} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {ViewConfigService} from '@app/log-view/view-config.service';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {AceEditorDirective} from '@app/utils/ace-editor.directive';
 
 @Component({
@@ -80,7 +80,7 @@ export class LvJsFilterComponent extends FilterWithDropdown {
         this.name = f.name || '';
         this.originalName = this.name;
 
-        this.titleName = SlUtils.trimText(this.name, 50);
+        this.titleName = LvUtils.trimText(this.name, 50);
 
         this.script = f.script || '';
         this.originalScript = this.script;
@@ -88,7 +88,7 @@ export class LvJsFilterComponent extends FilterWithDropdown {
         if (!this.titleName) {
             let s = this.script.replace(/^(\s+|\/\/.+\n|\/\*[^*]*\*\/)*function(?:\s+[a-zA-Z0-9_$]+)?\([^)]*\)\s*\{\s*return\b/, '');
             s = s.replace(/}(\s+|\/\/.+\n|\/\*[^*]*\*\/)*$/, '');
-            this.titleScript = SlUtils.trimText(s, 40);
+            this.titleScript = LvUtils.trimText(s, 40);
         }
 
         this.enabled = !f.disabled;
@@ -120,7 +120,7 @@ export class LvJsFilterComponent extends FilterWithDropdown {
     removeFilter() {
         this.filterPanelStateService.updateFilterState(state => {
             let f = this.findFilter(state);
-            SlUtils.delete(state.jsFilters, f);
+            LvUtils.delete(state.jsFilters, f);
         });
     }
 

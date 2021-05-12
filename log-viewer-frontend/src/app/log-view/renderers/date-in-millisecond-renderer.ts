@@ -1,5 +1,5 @@
 import {Highlight, TextRenderer} from '@app/log-view/renderers/renderer';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {SlStyle} from '@app/log-view/renderers/style';
 
 export class DateInMillisecondRenderer implements TextRenderer {
@@ -35,8 +35,8 @@ export class DateInMillisecondRenderer implements TextRenderer {
             let e = document.createElement('SPAN');
             e.textContent = matcher[0];
             e.className = 'text-date-in-milliseconds';
-            e.title = SlUtils.formatDate(date);
-            SlUtils.applyStyle(e, this.style);
+            e.title = LvUtils.formatDate(date);
+            LvUtils.applyStyle(e, this.style);
 
             res.push({start: matcher.index, end: DateInMillisecondRenderer.regex.lastIndex, e});
         }

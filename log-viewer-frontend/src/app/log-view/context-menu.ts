@@ -1,5 +1,5 @@
 import {Record} from './record';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {LogFile} from '@app/log-view/log-file';
 import {Injectable} from '@angular/core';
 import {FilterPanelStateService} from '@app/log-view/filter-panel-state.service';
@@ -30,14 +30,14 @@ export class ContextMenuHandler {
     createItem(record: Record, logs: LogFile[]): Item {
         let res: Item = {record};
 
-        let thread = SlUtils.fieldValueByType(record, logs, 'thread');
+        let thread = LvUtils.fieldValueByType(record, logs, 'thread');
         if (thread) {
             res.thread = thread;
             
             let matchResult = thread.match(/^(.+)\b(\d+)$/);
             if (matchResult) {
                 res.threadGroup = matchResult[1] + '*';
-                res.threadGroupHtml = SlUtils.escapeHtml(matchResult[1]) + '<strong>*</strong>';
+                res.threadGroupHtml = LvUtils.escapeHtml(matchResult[1]) + '<strong>*</strong>';
             }
         }
 
@@ -45,7 +45,7 @@ export class ContextMenuHandler {
 
         if (selectedText) {
             res.selectedText = selectedText;
-            res.selectedTextVisible = SlUtils.trimText(res.selectedText, 30);
+            res.selectedTextVisible = LvUtils.trimText(res.selectedText, 30);
         }
 
         return res;
@@ -117,7 +117,7 @@ export class ContextMenuHandler {
             }
         });
 
-        SlUtils.highlight('.search-bar lv-date-interval .interval-title');
+        LvUtils.highlight('.search-bar lv-date-interval .interval-title');
     }
 
     excludeThread(thread: string) {
@@ -130,7 +130,7 @@ export class ContextMenuHandler {
                 state.thread.excludes = [];
             }
 
-            SlUtils.addIfNotExist(state.thread.excludes, thread);
+            LvUtils.addIfNotExist(state.thread.excludes, thread);
         });
 
         ContextMenuHandler.highlightThreadFilter();
@@ -145,7 +145,7 @@ export class ContextMenuHandler {
     }
 
     private static highlightThreadFilter() {
-        SlUtils.highlight('.search-bar lv-thread-filter .top-panel-dropdown > span');
+        LvUtils.highlight('.search-bar lv-thread-filter .top-panel-dropdown > span');
     }
 
     filterByText(text: string, exclude: boolean) {
@@ -166,7 +166,7 @@ export class ContextMenuHandler {
             });
         });
 
-        SlUtils.highlight('.search-bar lv-text-filter .top-panel-dropdown[filter-id="' + id + '"]');
+        LvUtils.highlight('.search-bar lv-text-filter .top-panel-dropdown[filter-id="' + id + '"]');
     }
 }
 

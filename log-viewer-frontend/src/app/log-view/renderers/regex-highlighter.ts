@@ -1,5 +1,5 @@
 import {Highlight, TextRenderer} from '@app/log-view/renderers/renderer';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {SlStyle} from '@app/log-view/renderers/style';
 
 export class RegexHighlighter implements TextRenderer {
@@ -11,7 +11,7 @@ export class RegexHighlighter implements TextRenderer {
     constructor(private cfg: {regex: string, style: SlStyle }) {
         this.regex = new RegExp(cfg.regex, 'g');
 
-        SlUtils.assert(cfg.style != null);
+        LvUtils.assert(cfg.style != null);
         this.style = cfg.style;
     }
 
@@ -28,7 +28,7 @@ export class RegexHighlighter implements TextRenderer {
 
             let e = document.createElement('SPAN');
             e.textContent = matcher[0];
-            SlUtils.applyStyle(e, this.style);
+            LvUtils.applyStyle(e, this.style);
 
             res.push({start: matcher.index, end: this.regex.lastIndex, e});
         }

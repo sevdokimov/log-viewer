@@ -1,6 +1,6 @@
 import {Injectable, OnDestroy, RendererFactory2} from '@angular/core';
 import {BackendEvent} from './backend-events';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {ConnectionService} from '@app/log-view/connection.service';
 import {WebSocketConnection} from '@app/log-view/web-socket-connection';
 import {WebsocketEmulatorConnection} from '@app/log-view/websocket-emulator-connection';
@@ -55,8 +55,8 @@ export class CommunicationService implements OnDestroy {
     }
 
     startup(handler: BackendEventHandlerHolder) {
-        SlUtils.assert(!this.disconnected);
-        SlUtils.assert(!this.connection && !this.handler);
+        LvUtils.assert(!this.disconnected);
+        LvUtils.assert(!this.connection && !this.handler);
 
         let webSocketPath = (<any>window).webSocketPath;
         if (webSocketPath) {

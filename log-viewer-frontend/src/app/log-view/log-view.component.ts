@@ -14,7 +14,7 @@ import {Record} from './record';
 import {ViewConfigService} from './view-config.service';
 import {SearchPattern, SearchUtils} from './search';
 import {Predicate, SubstringPredicate} from './predicates';
-import {SlUtils} from '../utils/utils';
+import {LvUtils} from '../utils/utils';
 import {Md5} from 'ts-md5/dist/md5';
 import {RecordRendererService} from './record-renderer.service';
 import {ViewStateService} from './view-state.service';
@@ -302,7 +302,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 this.commService.send(
                     new Command('initPermalink', {
                         recordCount: this.visibleRecordCount() * 2,
-                        linkHash: SlUtils.lastParam(params.state),
+                        linkHash: LvUtils.lastParam(params.state),
                     })
                 );
             } else {
@@ -310,7 +310,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                     new Command('init', {
                         logList: LogPathUtils.extractLogList(params),
                         savedFiltersName: this.selectedFilterStateName,
-                        filterStateHash: SlUtils.lastParam(params.filters),
+                        filterStateHash: LvUtils.lastParam(params.filters),
                     })
                 );
             }
@@ -434,7 +434,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         let children: HTMLCollection = this.records.nativeElement.children;
 
-        SlUtils.assert(children.length > 0);
+        LvUtils.assert(children.length > 0);
 
         let firstRecordIdx = 0;
         let shiftView = this.shiftView;
@@ -475,7 +475,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             );
 
         let l = window.location;
-        let link = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString({state: linkHash});
+        let link = l.protocol + '//' + l.host + l.pathname + '?' + LvUtils.buildQueryString({state: linkHash});
 
         console.info('Permalink to current view has been copied: ' + link);
 
@@ -1141,11 +1141,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     private clearRecords() {
         this.m.length = 0;
-        SlUtils.clearElement(this.records.nativeElement);
+        LvUtils.clearElement(this.records.nativeElement);
     }
 
     private deleteRecords(idx: number, count: number) {
-        SlUtils.assert(idx >= 0 && idx + count <= this.m.length);
+        LvUtils.assert(idx >= 0 && idx + count <= this.m.length);
         this.m.splice(idx, count);
 
         let parentDiv = <HTMLDivElement>this.records.nativeElement;
@@ -1153,7 +1153,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             parentDiv.removeChild(parentDiv.childNodes[idx]);
         }
 
-        SlUtils.assert(
+        LvUtils.assert(
             this.m.length === this.records.nativeElement.childElementCount
         );
     }
@@ -1162,7 +1162,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (idx == null) {
             idx = this.m.length;
         } else {
-            SlUtils.assert(idx >= 0 && idx <= this.m.length, 'Invalid index: ' + idx);
+            LvUtils.assert(idx >= 0 && idx <= this.m.length, 'Invalid index: ' + idx);
         }
 
         this.m.splice(idx, 0, ...m);
@@ -1173,7 +1173,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             this.records.nativeElement
         );
 
-        SlUtils.assert(
+        LvUtils.assert(
             this.m.length === this.records.nativeElement.childElementCount
         );
     }
@@ -1300,7 +1300,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         SearchUtils.doSimpleSearch(data, this.searchPattern);
 
         let nextOccurrenceIdx = event.foundIdx;
-        SlUtils.assert(data[nextOccurrenceIdx].searchRes.length > 0);
+        LvUtils.assert(data[nextOccurrenceIdx].searchRes.length > 0);
 
         if (!event.hasSkippedLine) {
             if (req.d < 0) { // is backward search
@@ -1362,7 +1362,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.vs.selectedLine = event.selectedLine;
 
-        SlUtils.assert(this.m.length === 0);
+        LvUtils.assert(this.m.length === 0);
         this.addRecords(m);
 
         this.hasRecordAfter = event.data.hasNextLine;
@@ -1450,7 +1450,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     @BackendEventHandler()
     private onSetViewState(event: EventSetViewState) {
-        SlUtils.assert(this.state === State.STATE_LOADING);
+        LvUtils.assert(this.state === State.STATE_LOADING);
 
         this.logs = event.logs;
 
@@ -1491,7 +1491,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     addNewLog(event: OpenEvent) {
         if (this.logs?.find(l => (!l.node || l.node === this.viewConfig.localhostName) && l.path === event.path)) {
-            this.toastr.info('"' + SlUtils.extractName(event.path) + '" is already present on the view');
+            this.toastr.info('"' + LvUtils.extractName(event.path) + '" is already present on the view');
             this.modalWindow = null;
             return;
         }
@@ -1501,7 +1501,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         LogPathUtils.addParam(params, 'f', event.path);
 
         let l = window.location;
-        window.location.href = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString(params);
+        window.location.href = l.protocol + '//' + l.host + l.pathname + '?' + LvUtils.buildQueryString(params);
     }
 }
 

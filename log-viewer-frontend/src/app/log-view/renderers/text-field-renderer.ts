@@ -1,5 +1,5 @@
 import {FieldRenderer, RenderContext} from './renderer';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {SlStyle} from './style';
 import {Record} from '@app/log-view/record';
 
@@ -16,7 +16,7 @@ export class TextFieldRenderer implements FieldRenderer {
     append(e: HTMLElement, s: string, record: Record, rendererCtx: RenderContext) {
         if (this.style) {
             let span = document.createElement('SPAN');
-            SlUtils.applyStyle(span, this.style);
+            LvUtils.applyStyle(span, this.style);
             rendererCtx.textRenderer(span, this.textType, s);
             e.appendChild(span);
         } else {

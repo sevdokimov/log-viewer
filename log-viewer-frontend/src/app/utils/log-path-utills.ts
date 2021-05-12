@@ -1,5 +1,5 @@
 import {Params} from '@angular/router';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 
 export class LogPathUtils {
 
@@ -23,7 +23,7 @@ export class LogPathUtils {
         } else if (typeof v === 'string') {
             params[name] = [v, value];
         } else {
-            SlUtils.assert(Array.isArray(v));
+            LvUtils.assert(Array.isArray(v));
             v.push(value);
         }
     }

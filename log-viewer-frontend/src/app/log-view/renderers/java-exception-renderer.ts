@@ -1,6 +1,6 @@
 import {Highlight, Text2HtmlConverter, TextRenderer} from './renderer';
 import {SlElement} from '@app/utils/sl-element';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 
 const exceptionMessageClass = 'exception-message';
 const exceptionFileNameClass = 'ex-stacktrace-source';
@@ -235,7 +235,7 @@ export class JavaExceptionRenderer implements TextRenderer {
                                         bigExpander: boolean) {
         if (start === end) { return; }
 
-        SlUtils.assert(start < end);
+        LvUtils.assert(start < end);
 
         let collWrapper = document.createElement('DIV');
         collWrapper.className = 'coll-wrapper collapsed';
@@ -319,7 +319,7 @@ export class JavaExceptionRenderer implements TextRenderer {
             let packageName = m[JavaExceptionRenderer.EX_I_PACKAGE];
 
             if (packageName) {
-                SlUtils.assert(packageName.endsWith('.'));
+                LvUtils.assert(packageName.endsWith('.'));
 
                 let packageSpan = document.createElement('SPAN');
                 packageSpan.innerText = packageName.substring(0, packageName.length - 1);

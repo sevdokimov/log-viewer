@@ -1,5 +1,5 @@
 import {Highlight, TextRenderer} from '@app/log-view/renderers/renderer';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {SlStyle} from '@app/log-view/renderers/style';
 
 export class MillisecondRenderer implements TextRenderer {
@@ -30,8 +30,8 @@ export class MillisecondRenderer implements TextRenderer {
             let e = document.createElement('SPAN');
             e.textContent = matcher[0];
             e.className = 'text-milliseconds';
-            e.title = SlUtils.renderTimePeriod(+matcher[1]);
-            SlUtils.applyStyle(e, this.style);
+            e.title = LvUtils.renderTimePeriod(+matcher[1]);
+            LvUtils.applyStyle(e, this.style);
 
             res.push({start: matcher.index, end: MillisecondRenderer.regex.lastIndex, e});
         }

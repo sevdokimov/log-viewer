@@ -1,7 +1,7 @@
 import {ConnectionService} from '@app/log-view/connection.service';
 import {HttpClient} from '@angular/common/http';
 import {BackendEvent} from '@app/log-view/backend-events';
-import {SlUtils} from '@app/utils/utils';
+import {LvUtils} from '@app/utils/utils';
 import {Renderer2, RendererFactory2} from '@angular/core';
 
 export class WebsocketEmulatorConnection implements ConnectionService {
@@ -50,7 +50,7 @@ export class WebsocketEmulatorConnection implements ConnectionService {
         let msg: ToBackendMessage = {event, messageNumber};
 
         if (this.backendMessageCounter === 1) {
-            SlUtils.assert(this.toBackendQueue == null);
+            LvUtils.assert(this.toBackendQueue == null);
             // This is the first message to backend, next message should be queued before receiving the response for
             // the first message
             this.toBackendQueue = [];
