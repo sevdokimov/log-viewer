@@ -53,7 +53,7 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]")).click();
 
-        List<WebElement> fieldLabels = driver.findElementsByCssSelector("sl-event-details .field .field-label");
+        List<WebElement> fieldLabels = driver.findElementsByCssSelector("lv-event-details .field .field-label");
 
         assertEquals(Arrays.asList("date", "thread", "level", "logger", "msg"),
                 fieldLabels.stream().map(WebElement::getText).collect(Collectors.toList()));

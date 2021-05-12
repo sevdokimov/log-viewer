@@ -17,7 +17,7 @@ import {SlUtils} from '@app/utils/utils';
 import {RecordRendererService} from '@app/log-view/record-renderer.service';
 
 @Component({
-    selector: 'sl-event-details',
+    selector: 'lv-event-details',
     templateUrl: './event-details.template.html',
     styleUrls: ['./event-details.style.scss']
 })

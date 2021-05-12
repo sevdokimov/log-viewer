@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '
 import {LogFile, RestStatus} from './log-file';
 
 @Component({
-    selector: 'sl-log-list-panel',
+    selector: 'lv-log-list-panel',
     templateUrl: './log-list-panel.template.html',
     styleUrls: ['./log-list-panel.style.scss']
 })

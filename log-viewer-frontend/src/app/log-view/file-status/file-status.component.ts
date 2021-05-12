@@ -3,7 +3,7 @@ import {RestStatus} from '@app/log-view/log-file';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'sl-file-status',
+    selector: 'lv-file-status',
     templateUrl: './file-status.template.html',
     styleUrls: ['./file-status.style.scss']
 })

@@ -4,10 +4,10 @@ import 'brace/theme/monokai';
 import 'brace/mode/javascript';
 
 @Directive({
-    selector: '[behAceEditor]'
+    selector: '[lvAceEditor]'
 })
 export class AceEditorDirective implements AfterViewInit, OnDestroy {
-    @Output('textChanged') textChanged = new EventEmitter();
+    @Output() textChanged = new EventEmitter();
     _options: any = {};
     _readOnly: boolean = false;
     _theme: string = 'monokai';
@@ -79,7 +79,7 @@ export class AceEditorDirective implements AfterViewInit, OnDestroy {
         if (text == null) { text = ''; }
 
         if (this._autoUpdateContent === true) {
-            if (text === this.oldText) return;
+            if (text === this.oldText) { return; }
 
             this.editor.setValue(text);
             this.editor.clearSelection();

@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {OpenEvent} from '@app/log-navigator/log-navigator.component';
 
 @Component({
-    selector: 'sl-main-page',
+    selector: 'lv-main-page',
     templateUrl: './main-page.template.html',
     styleUrls: ['./main-page.style.scss'],
 })

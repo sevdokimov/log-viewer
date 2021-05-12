@@ -26,7 +26,7 @@ export class CommunicationService implements OnDestroy {
             this.connection.close();
 
             if (this.handler) {
-                this.handler.disconnected(disconnectMessage)
+                this.handler.disconnected(disconnectMessage);
             }
         }
     }
@@ -37,10 +37,10 @@ export class CommunicationService implements OnDestroy {
             return;
         }
 
-        let handler = this.handler[event.name]
+        let handler = this.handler[event.name];
         if (typeof handler === 'function') {
             if (Reflect.getMetadata(EVENT_NAME_META_KEY, this.handler, event.name)) {
-                handler.apply(this.handler, [event])
+                handler.apply(this.handler, [event]);
                 return;
             }
         }

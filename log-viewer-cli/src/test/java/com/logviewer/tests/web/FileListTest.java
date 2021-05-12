@@ -46,7 +46,7 @@ public class FileListTest extends AbstractWebTestCase {
 
         fileStatDropdown.click();
 
-        assert driver.findElementsByCssSelector("sl-log-list-panel sl-file-status .file-not-found").size() == 2;
+        assert driver.findElementsByCssSelector("lv-log-list-panel lv-file-status .file-not-found").size() == 2;
     }
 
     @Test
@@ -58,7 +58,7 @@ public class FileListTest extends AbstractWebTestCase {
         WebElement fileStatDropdown = driver.findElementById("file-stat-dropdown");
         fileStatDropdown.click();
 
-        WebElement status = Iterables.getOnlyElement(driver.findElementsByCssSelector("sl-log-list-panel sl-file-status"));
+        WebElement status = Iterables.getOnlyElement(driver.findElementsByCssSelector("lv-log-list-panel lv-file-status"));
         assertThat(status.getText(), is("IO Error"));
 
         status.findElement(By.cssSelector(".fa-wrench")).click(); // Show Details icon

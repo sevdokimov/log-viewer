@@ -46,7 +46,7 @@
                 <i class="fas fa-caret-down"></i>
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-                <sl-log-list-panel [logs]="logs" [statuses]="vs.statuses" (addLogClicked)="showOpenLogDialog()"></sl-log-list-panel>
+                <lv-log-list-panel [logs]="logs" [statuses]="vs.statuses" (addLogClicked)="showOpenLogDialog()"></lv-log-list-panel>
             </div>
         </div>
 
@@ -197,7 +197,7 @@
                             {{l.path}}
                         </td>
                         <td>
-                            <sl-file-status [status]="vs.statuses[l.id]" [showErrorMessages]="true"></sl-file-status>
+                            <lv-file-status [status]="vs.statuses[l.id]" [showErrorMessages]="true"></lv-file-status>
                         </td>
                     </tr>
                 </table>
@@ -285,7 +285,7 @@
             <button class="btn btn-link" (click)="modalWindow = null">Close</button>
         </div>
 
-        <sl-event-details [record]="recordWithDetails"></sl-event-details>
+        <lv-event-details [record]="recordWithDetails"></lv-event-details>
     </div>
 </div>
 
@@ -297,7 +297,7 @@
             <button class="btn btn-link" (click)="modalWindow = null">Close</button>
         </div>
 
-        <sl-navigator (openFile)="addNewLog($event)"></sl-navigator>
+        <lv-navigator (openFile)="addNewLog($event)"></lv-navigator>
     </div>
 </div>
 

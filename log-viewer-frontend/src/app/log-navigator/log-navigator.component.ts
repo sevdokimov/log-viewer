@@ -5,7 +5,7 @@ import {HttpClient} from '@angular/common/http';
 import {SlUtils} from '@app/utils/utils';
 
 @Component({
-    selector: 'sl-navigator',
+    selector: 'lv-navigator',
     templateUrl: './log-navigator.template.html',
     styleUrls: ['./log-navigator.style.scss'],
 })

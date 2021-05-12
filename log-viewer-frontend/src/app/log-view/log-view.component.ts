@@ -47,7 +47,7 @@ import {LogPathUtils} from '@app/utils/log-path-utills';
 import {OpenEvent} from '@app/log-navigator/log-navigator.component';
 
 @Component({
-    selector: 'sl-log-view',
+    selector: 'lv-log-view',
     templateUrl: './log-view.template.html',
     styleUrls: ['./log-view.style.scss'],
     providers: [

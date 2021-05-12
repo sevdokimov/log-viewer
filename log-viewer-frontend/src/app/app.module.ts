@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
-import {AppRoot} from './app-root';
-import {GlobalNavigation} from './global-nav/global-nav.component';
+import {AppRootComponent} from './app-root.component';
 import {RouterModule, Routes} from '@angular/router';
 import {LogNavigatorComponent} from './log-navigator/log-navigator.component';
 import {LogViewComponent} from './log-view/log-view.component';
@@ -79,9 +78,8 @@ export const appRoutes: Routes = [
     ],
     declarations: [
         // root
-        AppRoot,
+        AppRootComponent,
 
-        GlobalNavigation,
         LogNavigatorComponent,
         LogViewComponent,
         LogListPanelComponent,
@@ -106,7 +104,7 @@ export const appRoutes: Routes = [
 
     exports: [SlDurationPipe, SlSizePipe],
 
-    bootstrap: [AppRoot],
+    bootstrap: [AppRootComponent],
 })
 export class AppModule {
 }

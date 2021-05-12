@@ -4,7 +4,7 @@
     </div>
     <div>
         <span class="key">file:</span> {{log.path}}
-        <sl-file-status [status]="vs.statuses[log.id]" [showErrorMessages]="false"></sl-file-status>
+        <lv-file-status [status]="vs.statuses[log.id]" [showErrorMessages]="false"></lv-file-status>
     </div>
     <div>
         <span class="key" title="Date of the log event">timestamp:</span>&nbsp;<span *ngIf="timestamp" class="timestamp">{{timestamp}}</span>
