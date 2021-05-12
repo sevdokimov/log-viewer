@@ -154,7 +154,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
 
             LogProcess recordLoader = log.loadRecords(filter, maxRecordToLoad, start, !backward, hash, Long.MAX_VALUE, new LogDataListener() {
                 @Override
-                public void onData(RecordList data) {
+                public void onData(@NonNull RecordList data) {
                     assert recordComparator.compare(data.get(0), lastReturnedRecord) < 0;
                     assert recordComparator.compare(data.get(data.size() - 1), lastReturnedRecord) < 0;
 
@@ -180,13 +180,13 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
                 }
 
                 @Override
-                public void onFinish(Status status, boolean eof) {
+                public void onFinish(@NonNull Status status, boolean eof) {
                     synchronized (SearchTask.this) {
                         if (finished)
                             return;
 
                         if (finishedLoaders.add(log.getId())) {
-                            if (status != null && status.getError() != null) {
+                            if (status.getError() != null) {
                                 statuses.put(log.getId(), status);
                             }
 
@@ -231,7 +231,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
     }
 
     public class SearchResponse extends LoadNextResponse {
-        private boolean hasSkippedLine;
+        private final boolean hasSkippedLine;
 
         SearchResponse(List<Pair<Record, Throwable>> data, Map<String, Status> statuses) {
             super(data, statuses, data == null);

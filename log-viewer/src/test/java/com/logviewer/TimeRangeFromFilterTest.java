@@ -16,6 +16,7 @@ import com.logviewer.web.session.Status;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 
 import javax.annotation.Nonnull;
 import java.text.ParseException;
@@ -178,7 +179,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         private final CountDownLatch finishWaiter = new CountDownLatch(1);
 
         @Override
-        public void onData(RecordList data) {
+        public void onData(@NonNull RecordList data) {
             for (Pair<Record, Throwable> pair : data) {
                 if (pair.getSecond() != null) {
                     throw Utils.propagate(pair.getSecond());
@@ -190,7 +191,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         }
 
         @Override
-        public void onFinish(Status status, boolean eof) {
+        public void onFinish(@NonNull Status status, boolean eof) {
             if (status.getError() != null)
                 throw Utils.propagate(status.getError());
 

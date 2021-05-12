@@ -129,7 +129,7 @@ public class FileWatcherService implements DisposableBean {
         if (watcherThread != null) {
             watcherThread.interrupt();
             try {
-                watcherThread.join(1, Thread.MIN_PRIORITY);
+                watcherThread.join(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeInterruptedException(e);
             }
