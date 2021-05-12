@@ -229,24 +229,16 @@ public class LogSessionTest extends LogSessionTestBase {
         TestPredicate.clear();
         lock = TestPredicate.lock("150101 10:00:05 a");
 
-        session.loadNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, hashes, 2);
-
-        adapter.check(EventNextDataLoaded.class, res -> {
-            System.out.println(res.data.records.toString());
-        });
-        TestPredicate.unlock(lock);
-        lock = TestPredicate.lock("150101 10:00:05 a");
-
-        session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 4, new SearchPattern("10:00:04 b"), hashes, 2, 8, true);
+        session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 5, new SearchPattern("150101 10:00:03 a"), hashes, 2, 8, true);
         adapter.check(EventSearchResponse.class, stateVersion(2),
-                searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b"),
+                searchResult(false, "150101 10:00:02 xxx a", "150101 10:00:03 a"),
                 res -> assertTrue(res.hasNextLine),
-                res -> assertEquals(3, res.foundIdx));
+                res -> assertEquals(1, res.foundIdx));
 
         TestPredicate.unlock(lock);
 
         adapter.check(EventNextDataLoaded.class, resp -> {
-            TestUtils.check(resp.data.records, "150101 10:00:05 a", "150101 10:00:06 a");
+            TestUtils.check(resp.data.records, "150101 10:00:03 a", "150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a");
             assertFalse(resp.data.hasNextLine);
         });
     }
