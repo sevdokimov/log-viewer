@@ -6,6 +6,7 @@ import com.logviewer.domain.Permalink;
 import com.logviewer.filters.CompositeRecordPredicate;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.filters.SubstringPredicate;
+import com.logviewer.utils.LvTimer;
 import com.logviewer.utils.Utils;
 import com.logviewer.utils.Wrappers;
 import com.logviewer.web.dto.LogList;
@@ -21,6 +22,7 @@ import com.typesafe.config.ConfigResolveOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
@@ -49,6 +51,8 @@ public class LogSession {
     @Autowired
     private LvFilterStorage filterStorage;
     @Autowired
+    private LvTimer lvTimer;
+    @Autowired
     private LvPermalinkStorage permalinkStorage;
     @Autowired(required = false)
     private List<LvFilterPanelStateProvider> filterSetProviders = Collections.emptyList();
@@ -67,10 +71,22 @@ public class LogSession {
 
     private static volatile Config defaultConfig;
 
+    @Value("${log-viewer.wait-for-data-timeout:100}")
+    private int waitForDataTimeoutMS = 100;
+    
     public LogSession(SessionAdapter sessionAdapter) {
         this.sender = sessionAdapter;
     }
 
+    public int getWaitForDataTimeoutMS() {
+        return waitForDataTimeoutMS;
+    }
+    
+    public void setWaitForDataTimeoutMS(int waitForDataTimeoutMS) {
+        this.waitForDataTimeoutMS = waitForDataTimeoutMS;
+    }
+    
+    
     public LogView[] getLogs() {
         return logs;
     }
@@ -303,11 +319,8 @@ public class LogSession {
 
     @Remote
     public synchronized void loadNext(Position start, boolean backward, int recordCount, Map<String, String> hashes, long stateVersion) {
-        if (this.stateVersion > stateVersion)
+        if (!checkStateVersion(stateVersion))
             return;
-
-        if (this.stateVersion < stateVersion)
-            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion=" + stateVersion);
 
         for (SessionTask<?> task : executions) {
             if (task instanceof LoadRecordTask) {
@@ -334,29 +347,60 @@ public class LogSession {
 
     @Remote
     public synchronized void searchNext(Position start, boolean backward, int recordCount, SearchPattern pattern,
-                             @NonNull Map<String, String> hashes, long stateVersion, long requestId) {
-        if (this.stateVersion > stateVersion)
+        @NonNull Map<String, String> hashes, long stateVersion, long requestId, boolean loadNext) {
+        if (!checkStateVersion(stateVersion))
             return;
 
-        if (this.stateVersion < stateVersion)
-            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion=" + stateVersion);
+        SearchTask searchTask = new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter);
 
-        CompletableFuture<SearchTask.SearchResponse> execution = execute(new SearchTask(sender, logs, start, recordCount, backward, pattern, hashes, filter));
-
-        execution.whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
+        execute(searchTask).whenComplete(new LogExecutionHandler<SearchTask.SearchResponse>() {
             @Override
-            protected void handle(SearchTask.SearchResponse res) {
-                sender.send(new EventSearchResponse(res.getStatuses(), stateVersion, res, requestId));
-
-                if (res.getData() != null) { // if found
-                    int foundIdx = backward ? 0 : res.getData().size() - 1;
-                    Record found = res.getData().get(foundIdx).getFirst();
-                    assert pattern.matcher().test(found.getMessage());
-
-                    loadNext(new Position(found, backward), backward, recordCount, hashes, stateVersion);
+            protected void handle(SearchTask.SearchResponse searchRes) {
+                if (searchRes.getData() == null) {
+                    sender.send(new EventSearchResponse(searchRes, stateVersion, requestId));
+                    return;
                 }
+
+                int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
+                Record found = searchRes.getData().get(foundIdx).getFirst();
+                assert pattern.matcher().test(found.getMessage());
+
+                EventSearchResponse searchResponse = new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx);
+
+                if (!loadNext) {
+                    sender.send(searchResponse);
+                    return;
+                }
+
+                SendEventTask sendEventTask = new SendEventTask(searchResponse);
+                lvTimer.schedule(sendEventTask, waitForDataTimeoutMS);
+
+                LoadRecordTask loadRecordTask = new LoadRecordTask(sender, logs, recordCount, filter,
+                        new Position(found, backward), backward, hashes);
+
+                execute(loadRecordTask).whenComplete(new LogExecutionHandler<LoadNextResponse>() {
+                    @Override
+                    protected void handle(LoadNextResponse loadRes) {
+                        sendEventTask.cancel();
+
+                        if (sendEventTask.isSent) {
+                            sender.send(new EventNextDataLoaded(loadRes.getStatuses(), stateVersion, loadRes, start, backward));
+                        } else {
+                            sender.send(new EventSearchResponse(searchRes, loadRes, stateVersion, requestId, backward));
+                        }
+                    }
+                });
             }
         });
+    }
+
+    private boolean checkStateVersion(long stateVersion) {
+        if (this.stateVersion < stateVersion) {
+            throw new IllegalStateException("backend_stateVersion=" + this.stateVersion + ", but UI_stateVersion="
+                + stateVersion);
+        }
+
+        return this.stateVersion == stateVersion;
     }
 
     private void cancelExecutions(Predicate<SessionTask<?>> filter) {
@@ -500,5 +544,39 @@ public class LogSession {
         LogSession res = new LogSession(sender);
         ctx.getAutowireCapableBeanFactory().autowireBeanProperties(res, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
         return res;
+    }
+
+    private class SendEventTask extends TimerTask {
+
+        private final EventSearchResponse eventSearchResponse;
+        private boolean isSent;
+        private boolean isCanceled;
+
+        public SendEventTask(EventSearchResponse eventSearchResponse) {
+            this.eventSearchResponse = eventSearchResponse;
+        }
+
+        @Override
+        public void run() {
+            synchronized (LogSession.this) {
+                try {
+                    if (isCanceled || !checkStateVersion(eventSearchResponse.stateVersion))
+                        return;
+
+                    sender.send(eventSearchResponse);
+                } catch (RuntimeException e) {
+                    LOG.error("Failed to send message", e);
+                }
+
+                isSent = true;
+            }
+        }
+
+        @Override
+        public boolean cancel() {
+            boolean res = super.cancel();
+            isCanceled = true;
+            return res;
+        }
     }
 }

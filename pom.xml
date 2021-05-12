@@ -14,11 +14,18 @@
 
     <modules>
         <module>log-viewer</module>
+        <module>log-viewer-frontend</module>
         <module>log-viewer-cli</module>
         <module>log-viewer-spring-boot</module>
     </modules>
 
     <profiles>
+        <profile>
+            <id>build-frontend</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
         <profile>
             <id>demo-projects</id>
             <modules>
@@ -100,7 +107,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:sevdokimov/log-viewer.git</connection>
-      <tag>HEAD</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <repositories>
