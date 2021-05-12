@@ -299,11 +299,9 @@
   background: white;
 }
 
-.io-error {
-  color: red;
+.internal-error-stacktrace {
   white-space: pre;
   font-size: 11px;
-  padding: 20px;
 }
 
 .favorite-icon {
@@ -373,4 +371,11 @@
   line-height: 1;
 
   border-radius: 10px;
+}
+
+.disconnect-dialog {
+  white-space: pre;
+
+  padding: 10px;
+  background: white;
 }

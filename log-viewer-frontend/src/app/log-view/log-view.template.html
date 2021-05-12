@@ -132,7 +132,6 @@
     <div *ngIf="state === 1" class="loading-placeholder">
         <span><img src="assets/progress.gif"> Loading...</span>
     </div>
-    <div *ngIf="state === 3" class="io-error">{{backendError}}</div>
 
     <div id="heightLimiter">
         <div #logView id="logView">
@@ -240,11 +239,12 @@
 <div *ngIf="modalWindow === 'disconnected'" class="sl-overlay">
     <div class="modal-background sl-overlay"></div>
 
-    <div class="sl-dialog sl-dialog-small">
-        <div style="display: table; width: 100%; height: 100%; text-align: center;">
-            <div style="display: table-cell; vertical-align: middle; color: red;">
-                {{disconnectMessage}}
-            </div> 
+    <div class="sl-stretchable-dialog">
+        <div>
+            <div class="disconnect-dialog">
+                <div [innerHTML]="disconnectMessage"></div>
+                <div *ngIf="backendErrorStacktrace" class="internal-error-stacktrace">{{backendErrorStacktrace}}</div>
+            </div>
         </div>
     </div>
 </div>

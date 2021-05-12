@@ -29,7 +29,7 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
 
         openLog("1-7.log");
 
-        WebElement errorElement = driver.findElement(By.className("io-error"));
+        WebElement errorElement = driver.findElement(By.className("internal-error-stacktrace"));
         assert errorElement.getText().contains("java.lang.RuntimeException: Problem!!!");
     }
 

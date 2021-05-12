@@ -49,7 +49,7 @@ export class UiConfigValidator {
 
     static validateTextHighlighter(name: string, h: TextHighlighterConfig): string {
         if (h.priority && typeof h.priority !== 'number') {
-            return 'Invalid configuration: "text-highlighters.' + name + '.priority" mast be a number';
+            return 'Invalid configuration:<br>"<b>text-highlighters.' + name + '.priority</b>" must be a number';
         }
     }
 }

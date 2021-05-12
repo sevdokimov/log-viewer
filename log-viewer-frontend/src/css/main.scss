@@ -108,6 +108,32 @@ body {
   height: 100%;
 }
 
+.sl-stretchable-dialog {
+  position: relative;
+
+  top: 50%;
+  transform: translate(0, -50%);
+
+  z-index: 3001;
+
+  padding: 20px 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  > div:first-child {
+    max-height: 80vh;
+    overflow-y: auto;
+
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+}
+
 .sl-dialog {
   position: relative;
 

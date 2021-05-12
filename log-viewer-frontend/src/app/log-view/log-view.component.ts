@@ -75,7 +75,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     logs: LogFile[];
 
-    backendError: string;
+    backendErrorStacktrace: string;
     disconnectMessage: string;
 
     state: State = State.STATE_LOADING;
@@ -133,13 +133,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         public contextMenuHandler: ContextMenuHandler,
     ) {
         this.filterPanelStateService.currentRecords = this.m;
-    }
-
-    private fail(error: string) {
-        console.error(error);
-        this.state = State.STATE_DISCONNECTED;
-        this.backendError = error;
-        this.commService.close();
     }
 
     private static parseFilterState(stateJson: string): FilterState {
@@ -698,7 +691,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         );
 
         setTimeout(() => {
-            if (this.searchRequest === req) {
+            if (this.searchRequest === req && this.state === State.STATE_OPENED) {
                 this.modalWindow = 'findProgress';
                 this.changeDetectorRef.detectChanges();
             }
@@ -1180,13 +1173,15 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     @BackendEventHandler()
     private onBackendError(event: BackendErrorEvent) {
-        this.fail(event.stacktrace);
+        console.error(event.stacktrace);
+        this.backendErrorStacktrace = event.stacktrace;
+        this.commService.close('<h5 class="text-danger">Internal error</h5>');
     }
 
     disconnected(disconnectMessage?: string) {
         this.modalWindow = 'disconnected';
         this.state = State.STATE_DISCONNECTED;
-        this.disconnectMessage = disconnectMessage || 'Disconnected';
+        this.disconnectMessage = disconnectMessage || '<br><h3 class="text-danger">&nbsp;Disconnected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3><br>';
     }
 
     @BackendEventHandler()
@@ -1458,7 +1453,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         let error = UiConfigValidator.validateUiConfig(uiConfig);
         if (error != null) {
-            this.fail(error);
+            console.error(error);
+            this.commService.close(error);
             return;
         }
 
