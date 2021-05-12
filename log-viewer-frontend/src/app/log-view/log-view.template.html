@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div dropdown class="dropdown top-panel-dropdown file-list-block">
+        <div *ngIf="logs" dropdown class="dropdown top-panel-dropdown file-list-block">
             <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
                 <span *ngIf="vs.filesValidCount < logs.length">
                     <span id="successFileCount" class="has-problems-files" title="Successfully opened files">{{vs.filesValidCount}}</span>
@@ -59,7 +59,7 @@
 
                 <a href="javascript:void(0)" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to the current position</a>
                 
-                <a href="javascript:void(0)" *ngIf="fwService.editable && logs.length === 1" class="dropdown-item"
+                <a href="javascript:void(0)" *ngIf="fwService.editable && logs?.length === 1" class="dropdown-item"
                    (click)="addToFavorites()">
                     <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
                     {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
@@ -169,24 +169,31 @@
         </div>
     </div>
 
-    <div *ngIf="state === 0 && !hasRecordAfter && !hasRecordBefore && m.length === 0" class="empty-log-message-container">
-        <div class="empty-log-message">
-                <span *ngIf="vs.filesErrorCount === 0">
-                    <span *ngIf="vs.filesValidCount === 0" class="no-record-msg">
-                        Log file does not exist
-                    </span>
-                    <span *ngIf="vs.filesValidCount > 0">
-                        <span *ngIf="vs.size === 0" class="no-record-msg">Log is empty</span>
-                        <span *ngIf="vs.size > 0" class="no-record-msg">All records filtered</span>
-                    </span>
-                </span>
-            <span *ngIf="vs.filesErrorCount > 0">
-                    <span *ngIf="vs.filesValidCount > 0" class="no-record-msg">No record to display</span>
-                    <span *ngIf="vs.filesValidCount === 0" class="no-record-msg" style="color: #a22;">Failed to read log</span>
-             </span>
+    <div *ngIf="logs && state === 0 && !hasRecordAfter && !hasRecordBefore && m.length === 0" class="empty-log-message-container">
+        <div *ngIf="logs.length === 0" class="empty-log-message-container">
+            <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
+                Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>
+            </div>
         </div>
 
-        <div class="file-list">
+        <div *ngIf="logs.length > 0" class="empty-log-message">
+            <span *ngIf="vs.filesErrorCount === 0">
+                <span *ngIf="vs.filesValidCount === 0" class="no-record-msg">
+                    Log file does not exist
+                </span>
+                <span *ngIf="vs.filesValidCount > 0">
+                    <span *ngIf="vs.size === 0" class="no-record-msg">Log is empty</span>
+                    <span *ngIf="vs.size > 0" class="no-record-msg">All records filtered</span>
+                </span>
+            </span>
+            <span *ngIf="vs.filesErrorCount > 0">
+                <span *ngIf="vs.filesValidCount > 0" class="no-record-msg">No record to display</span>
+                <span *ngIf="vs.filesValidCount === 0" class="no-record-msg"
+                      style="color: #a22;">Failed to read log</span>
+            </span>
+        </div>
+
+        <div *ngIf="logs.length > 0" class="file-list">
             <div>
                 <table cellpadding="0" cellspacing="0">
                     <tr *ngFor="let l of logs">
@@ -202,12 +209,6 @@
                     </tr>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <div *ngIf="state === 4" class="empty-log-message-container">
-        <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
-            Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>
         </div>
     </div>
 </div>

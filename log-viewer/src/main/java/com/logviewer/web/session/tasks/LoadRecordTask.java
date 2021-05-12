@@ -63,6 +63,11 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
             logs = Stream.of(this.logs).filter(l -> hashes.get(l.getId()) != null).toArray(LogView[]::new);
         }
 
+        if (logs.length == 0) {
+            consumer.accept(new LoadNextResponse(Collections.emptyList(), statuses, true), null);
+            return;
+        }
+        
         for (LogView log : logs) {
             String hash = hashes == null ? null : hashes.get(log.getId());
 

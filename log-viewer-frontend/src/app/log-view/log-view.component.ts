@@ -73,12 +73,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent;
 
-    logs: LogFile[] = [];
+    logs: LogFile[];
 
     backendError: string;
     disconnectMessage: string;
 
-    state: State = State.STATE_INIT;
+    state: State = State.STATE_LOADING;
     stateVersion: number = 0;
 
     readonly m: Record[] = [];
@@ -748,7 +748,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     addToFavorites() {
         this.inFavorites = !this.inFavorites;
 
-        if (this.logs.length === 1) {
+        if (this.logs?.length === 1) {
             this.fwService.setFavorites(this.logs[0].path, this.inFavorites); // todo!
         }
     }
@@ -956,34 +956,36 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private requestNextRecords() {
-        let offset: Position;
-        if (this.m.length === 0) {
-            if (this.logs.length === 1) {
-                offset = {logId: this.logs[0].id, time: 0, o: 0};
+        if (this.logs?.length > 0) {
+            let offset: Position;
+            if (this.m.length === 0) {
+                if (this.logs.length === 1) {
+                    offset = {logId: this.logs[0].id, time: 0, o: 0};
+                } else {
+                    offset = {logId: '', time: 0, o: 0};
+                }
             } else {
-                offset = {logId: '', time: 0, o: 0};
+                offset = Position.recordEnd(this.m[this.m.length - 1]);
             }
-        } else {
-            offset = Position.recordEnd(this.m[this.m.length - 1]);
-        }
 
-        let recordsToLoad = Math.ceil(
-            (this.logPane.nativeElement.clientHeight * 2 -
-                this.getLogViewHeight() +
-                this.shiftView) /
-            LogViewComponent.lineHeight
-        );
-
-        if (recordsToLoad > 0) {
-            this.commService.send(
-                new Command('loadNext', {
-                    start: offset,
-                    backward: false,
-                    recordCount: recordsToLoad,
-                    hashes: this.vs.hashes,
-                    stateVersion: this.stateVersion,
-                })
+            let recordsToLoad = Math.ceil(
+                (this.logPane.nativeElement.clientHeight * 2 -
+                    this.getLogViewHeight() +
+                    this.shiftView) /
+                LogViewComponent.lineHeight
             );
+
+            if (recordsToLoad > 0) {
+                this.commService.send(
+                    new Command('loadNext', {
+                        start: offset,
+                        backward: false,
+                        recordCount: recordsToLoad,
+                        hashes: this.vs.hashes,
+                        stateVersion: this.stateVersion,
+                    })
+                );
+            }
         }
     }
 
@@ -1044,7 +1046,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.hasRecordAfter = isScrollToBegin;
         this.clearRecords();
 
-        this.state = State.STATE_INIT;
+        this.state = State.STATE_LOADING;
         this.stateVersion++;
 
         if (this.searchRequest != null) {
@@ -1182,11 +1184,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     disconnected(disconnectMessage?: string) {
-        if (this.state !== State.STATE_NO_LOGS) {
-            this.modalWindow = 'disconnected';
-            this.state = State.STATE_DISCONNECTED;
-            this.disconnectMessage = disconnectMessage || 'Disconnected';
-        }
+        this.modalWindow = 'disconnected';
+        this.state = State.STATE_DISCONNECTED;
+        this.disconnectMessage = disconnectMessage || 'Disconnected';
     }
 
     @BackendEventHandler()
@@ -1450,7 +1450,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     @BackendEventHandler()
     private onSetViewState(event: EventSetViewState) {
-        SlUtils.assert(this.state === State.STATE_INIT);
+        SlUtils.assert(this.state === State.STATE_LOADING);
 
         this.logs = event.logs;
 
@@ -1465,13 +1465,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.viewConfig.setRendererCfg(event.logs, uiConfig, event.localhostName);
         this.inFavorites = event.inFavorites;
         this.fwService.editable = event.favEditable;
-
-        if (this.logs.length === 0) {
-            this.state = State.STATE_NO_LOGS;
-            this.stateVersion++;
-            this.commService.close();
-            return;
-        }
 
         for (const [filterName, stateJson] of Object.entries(event.globalSavedFilters)) {
             let filterState = LogViewComponent.parseFilterState(stateJson);
@@ -1497,7 +1490,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     addNewLog(event: OpenEvent) {
-        if (this.logs.find(l => (!l.node || l.node === this.viewConfig.localhostName) && l.path === event.path)) {
+        if (this.logs?.find(l => (!l.node || l.node === this.viewConfig.localhostName) && l.path === event.path)) {
             this.toastr.info('"' + SlUtils.extractName(event.path) + '" is already present on the view');
             this.modalWindow = null;
             return;
@@ -1508,9 +1501,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         LogPathUtils.addParam(params, 'f', event.path);
 
         let l = window.location;
-        let link = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString(params);
-        
-        window.location.href = link;
+        window.location.href = l.protocol + '//' + l.host + l.pathname + '?' + SlUtils.buildQueryString(params);
     }
 }
 
