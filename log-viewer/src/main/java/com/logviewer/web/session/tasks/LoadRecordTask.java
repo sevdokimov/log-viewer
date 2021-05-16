@@ -142,12 +142,16 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
                 Record oldLastRecord = data.size() == recordCount ? data.get(recordCount - 1).getFirst() : null;
 
-                for (Pair<Record, Throwable> newRecord : newRecords) { // Ignore records without time on log merging
-                    if (logs.length < 2 || newRecord.getFirst().hasTime())
-                        data.add(newRecord);
-                }
+                if (logs.length > 1) {
+                    for (Pair<Record, Throwable> newRecord : newRecords) {
+                        if (newRecord.getFirst().hasTime()) // Ignore records without time on log merging
+                            data.add(newRecord);
+                    }
 
-                data.sort(comparator);
+                    data.sort(comparator);
+                } else {
+                    data.addAll(newRecords);
+                }
 
                 if (data.size() > recordCount) {
                     eof = false;

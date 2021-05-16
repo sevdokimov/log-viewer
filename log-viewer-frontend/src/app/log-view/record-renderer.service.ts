@@ -28,11 +28,6 @@ export class RecordRendererService {
             (m.length - (end - start));
         }
 
-        if (start > 0) { LvUtils.assert(Record.compareTo(m[start - 1], m[start]) < 0); }
-        if (end < m.length) {
-            LvUtils.assert(Record.compareTo(m[end - 1], m[end]) < 0);
-        }
-
         this.initLabelWidthIfNeeded(target);
 
         let before = target.children.length === start ? null : target.children.item(start);

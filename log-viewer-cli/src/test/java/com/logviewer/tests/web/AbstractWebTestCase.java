@@ -322,7 +322,7 @@ public abstract class AbstractWebTestCase implements LogPage {
     }
 
     protected WebElement checkLastRecord(String text) {
-        return driver.findElement(By.xpath("//div[@id='records']/div[@class='record'][last()]/div[@class='rec-text'][text()='" + text + "']"));
+        return driver.findElement(By.xpath("//div[@id='records']/div[@class='record'][last()]/div[@class='rec-text'][normalize-space(.)='" + text + "']"));
     }
 
     protected String getSelectedText() {

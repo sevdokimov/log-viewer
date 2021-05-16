@@ -1252,7 +1252,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
             if (m.length > 0) {
                 if (this.m.length > 0 &&
-                    Record.compareTo(this.m[this.m.length - 1], m[0]) === 0) {
+                    Record.equals(this.m[this.m.length - 1], m[0])) {
                     this.m.pop();
                     let parentDiv = <HTMLDivElement>this.records.nativeElement;
                     parentDiv.removeChild(parentDiv.childNodes[this.m.length]);

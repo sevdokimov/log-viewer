@@ -163,7 +163,9 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
                             return;
 
                         records.addAll(data);
-                        records.sort(recordComparator);
+
+                        if (logs.length > 1)
+                            records.sort(recordComparator);
 
                         if (records.size() > recordCount) {
                             records.subList(0, records.size() - recordCount).clear();

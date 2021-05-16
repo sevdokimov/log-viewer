@@ -30,13 +30,7 @@ export class Record {
         );
     }
 
-    static compareTo(a: Record, b: Record) {
-        let res = a.time - b.time;
-        if (res !== 0) { return res; }
-
-        res = a.logId.localeCompare(b.logId);
-        if (res !== 0) { return res; }
-
-        return a.start - b.start;
+    static equals(a: Record, b: Record) {
+        return a.logId === b.logId && a.start === b.start;
     }
 }
