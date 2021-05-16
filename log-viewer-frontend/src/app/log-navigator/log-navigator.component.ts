@@ -223,8 +223,8 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
                 return;
             }
 
-            let orderedFiles = this.visibleDirItems.map(fs => fs.item.name).sort();
-            idx = LvUtils.binarySearch(orderedFiles, this.selectedPath.substring(this.currentDir.length + 1));
+            let orderedFiles = this.visibleDirItems.map(fs => fs.item.name.toLowerCase()).sort();
+            idx = LvUtils.binarySearch(orderedFiles, this.selectedPath.substring(this.currentDir.length + 1).toLowerCase());
             if (idx >= 0) {
                 this.selectedPath = this.visibleDirItems[idx].item.path;
                 return;
@@ -264,7 +264,7 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
 
     select(evt: MouseEvent, path: string) {
         this.selectedPath = path;
-        this.searchField.nativeElement.focus();
+        this.searchField.nativeElement.focus({preventScroll: true});
     }
 
     private openItem(fsItem: FsItem, inNewWindow: boolean) {
