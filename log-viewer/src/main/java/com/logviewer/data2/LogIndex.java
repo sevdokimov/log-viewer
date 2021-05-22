@@ -23,7 +23,7 @@ public class LogIndex {
 //        return record == null ? 0 : record.getSizeBytes();
 //    }
 
-    public synchronized Record findRecordBound(long time, boolean lastBound, Snapshot buffer) throws IOException, LogCrashedException {
+    public synchronized Record findRecordBound(long time, boolean lastBound, Snapshot buffer) throws IOException {
         FindFirstProcessor firstRecord;
         FindFirstProcessor lastRecord;
 

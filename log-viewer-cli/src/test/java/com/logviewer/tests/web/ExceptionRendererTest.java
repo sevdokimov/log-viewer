@@ -49,14 +49,14 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     }
 
     @Test // If exception is at end of the log exception ends with '\n'
-    public void exceptionWithLineEnd() throws InterruptedException {
+    public void exceptionWithLineEnd() {
         openLog("rendering/execption-with-line-end.log");
 
         driver.findElement(By.className("exception-class"));
     }
 
     @Test
-    public void strangeLines() throws InterruptedException, IOException {
+    public void strangeLines() throws IOException {
         String logPath = openLog("rendering/strange-exception-line.log");
 
         int lines = Files.readAllLines(Paths.get(logPath)).size();
@@ -65,7 +65,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     }
 
     @Test
-    public void exceptions() throws InterruptedException {
+    public void exceptions() {
         openLog("rendering/exceptions.log");
 
         List<WebElement> exceptions = driver.findElementsByClassName("ex-wrapper");

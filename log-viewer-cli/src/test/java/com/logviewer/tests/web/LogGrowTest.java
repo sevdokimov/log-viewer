@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 public class LogGrowTest extends AbstractWebTestCase {
 
     @Test
-    public void logCrashedOnPageUp() throws InterruptedException, IOException {
+    public void logCrashedOnPageUp() throws IOException {
         Path tmpLog = tmpDir.resolve("test.log");
         Files.write(tmpLog, IntStream.rangeClosed(1, 20).mapToObj(String::valueOf).collect(Collectors.joining("\n")).getBytes());
 

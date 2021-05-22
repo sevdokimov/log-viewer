@@ -1,7 +1,6 @@
 package com.logviewer;
 
 import com.logviewer.data2.Log;
-import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.Record;
 import com.logviewer.data2.Snapshot;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
@@ -16,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class LoadingLogTest extends AbstractLogTest {
 
     @Test
-    public void testFormatModification() throws IOException, LogCrashedException {
+    public void testFormatModification() throws IOException {
         LogbackLogFormat format = new LogbackLogFormat("%d{ddMMyy HH:mm:ss} %m");
 
         String logPath = getTestLog("multilog/search.log");

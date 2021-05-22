@@ -1,7 +1,6 @@
 package com.logviewer;
 
 import com.logviewer.data2.FieldTypes;
-import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.Record;
 import com.logviewer.formats.RegexLogFormat;
@@ -21,7 +20,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class DateTest extends AbstractLogTest {
 
-    private static LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+    private final static LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
             "\\[(\\d{4}-\\d\\d-\\d\\d_\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)] \\[(.+?)\\] ([A-Z]+) +((?:[\\w\\$]+\\.)*[\\w\\$]+) - (.*)",
             true,
             "yyyy-MM-dd_HH:mm:ss.SSS", "date",
@@ -29,7 +28,7 @@ public class DateTest extends AbstractLogTest {
             new RegexField("cls", 4), new RegexField("msg", 5));
 
     @Test
-    public void logWithTime() throws ParseException, IOException, LogCrashedException {
+    public void logWithTime() throws ParseException, IOException {
         List<Record> records = loadLog("date/log-with-time.log", logFormat);
 
         assertEquals(3, records.size());

@@ -7,7 +7,6 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.FieldTypes;
-import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.Record;
 import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
@@ -215,7 +214,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     }
 
     @Test
-    public void testReadLog() throws IOException, LogCrashedException {
+    public void testReadLog() throws IOException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
 
         Record[] recs = loadLog("default-parser/log.log", FORMAT).toArray(new Record[0]);

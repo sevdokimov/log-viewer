@@ -143,7 +143,7 @@ public abstract class AbstractLogTest {
         return url.getFile();
     }
 
-    public List<Record> loadLog(String path, LogFormat logFormat) throws IOException, LogCrashedException {
+    public List<Record> loadLog(String path, LogFormat logFormat) throws IOException {
         String file = getTestLog(path);
 
         Log log = getLogService().openLog(file, logFormat);

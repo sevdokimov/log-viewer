@@ -6,7 +6,6 @@ import com.logviewer.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -45,7 +44,7 @@ public abstract class AbstractConnection implements AutoCloseable {
         return !closed && socket.isOpen();
     }
 
-    protected abstract void handleMessage(Object message) throws InvocationTargetException, IllegalAccessException;
+    protected abstract void handleMessage(Object message);
 
     protected synchronized void sendMessage(Message message) {
         if (closed)

@@ -31,7 +31,7 @@ public class Utf8ReadTest extends AbstractLogTest {
 
 
     @Test
-    public void readNonLatinText() throws IOException, LogCrashedException {
+    public void readNonLatinText() throws IOException {
         List<Record> records = loadLog("utf8.log", LOG4J_DEFAULT);
 
         check(records);

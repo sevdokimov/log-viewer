@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement;
 public class DetectFormatTest extends AbstractWebTestCase {
 
     @Test
-    public void detectFormat() throws InterruptedException {
+    public void detectFormat() {
         openLog("single-line.log");
 
         driver.findElement(By.xpath("//span[text()='INFO']"));

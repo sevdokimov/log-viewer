@@ -1,7 +1,10 @@
 package com.logviewer.formats;
 
 import com.logviewer.AbstractLogTest;
-import com.logviewer.data2.*;
+import com.logviewer.data2.Log;
+import com.logviewer.data2.LogFormat;
+import com.logviewer.data2.Record;
+import com.logviewer.data2.Snapshot;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,7 +33,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
     }
 
     @Test
-    public void appendTailDisabled() throws IOException, LogCrashedException {
+    public void appendTailDisabled() throws IOException {
         LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
                 "(?<date>\\d+) (?<msg>.+)", true,
                 RegexLogFormat.field("date", null),
@@ -57,7 +60,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
     }
 
     @Test
-    public void appendTail() throws IOException, LogCrashedException {
+    public void appendTail() throws IOException {
         LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
                 "(?<date>\\d+) (?<msg>.+)", false,
                 RegexLogFormat.field("date", null),

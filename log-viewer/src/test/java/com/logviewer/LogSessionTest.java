@@ -1,6 +1,5 @@
 package com.logviewer;
 
-import com.logviewer.data2.LogCrashedException;
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.TestPredicate;
@@ -146,7 +145,7 @@ public class LogSessionTest extends LogSessionTestBase {
     }
 
     @Test
-    public void testSearch() throws InterruptedException, IOException, LogCrashedException {
+    public void testSearch() throws InterruptedException, IOException {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
@@ -244,7 +243,7 @@ public class LogSessionTest extends LogSessionTestBase {
     }
 
     @Test
-    public void test2tailLopader() throws InterruptedException, IOException, LogCrashedException {
+    public void test2tailLopader() throws InterruptedException, IOException {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 

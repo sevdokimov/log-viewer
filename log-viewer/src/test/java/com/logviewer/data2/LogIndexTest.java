@@ -5,7 +5,6 @@ import com.logviewer.TestUtils;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import static org.junit.Assert.assertNull;
 public class LogIndexTest extends AbstractLogTest {
 
     @Test
-    public void noTimedRecord() throws IOException, LogCrashedException, URISyntaxException {
+    public void noTimedRecord() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time.log", MULTIFILE_LOG_FORMAT)) {
             LogIndex index = new LogIndex();
             assertNull(index.findRecordBound(0, false, snapshot));
@@ -32,7 +31,7 @@ public class LogIndexTest extends AbstractLogTest {
     }
 
     @Test
-    public void search1() throws IOException, LogCrashedException, URISyntaxException {
+    public void search1() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time-2.log", MULTIFILE_LOG_FORMAT)) {
             LogIndex index = new LogIndex();
             
@@ -60,7 +59,7 @@ public class LogIndexTest extends AbstractLogTest {
     }
 
     @Test
-    public void searchLong() throws IOException, LogCrashedException {
+    public void searchLong() throws IOException {
         Path tempFile = createTempFile();
 
         List<String> content = new ArrayList<>();
@@ -96,7 +95,7 @@ public class LogIndexTest extends AbstractLogTest {
     }
 
     @Test
-    public void textBeforeStart() throws IOException, LogCrashedException {
+    public void textBeforeStart() throws IOException {
         Path tempFile = createTempFile();
 
         Files.write(tempFile, Arrays.asList("1111111zzzZZZzzzR", "150101 10:00:01 a", "150101 10:00:03 b", "150101 10:00:03 c", "150101 10:00:03 d", "150101 10:00:05 e"));
@@ -112,7 +111,7 @@ public class LogIndexTest extends AbstractLogTest {
     }
 
     @Test
-    public void iterateFromTime() throws IOException, LogCrashedException, URISyntaxException {
+    public void iterateFromTime() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time-2.log", MULTIFILE_LOG_FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -128,7 +127,7 @@ public class LogIndexTest extends AbstractLogTest {
     }
 
     @Test
-    public void iterateFromTimeBack() throws IOException, LogCrashedException, URISyntaxException {
+    public void iterateFromTimeBack() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time-2.log", MULTIFILE_LOG_FORMAT)) {
             List<Record> res = new ArrayList<>();
 

@@ -282,7 +282,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processRecordsBack(long position, boolean fromPrevLine, Predicate<Record> consumer) throws IOException, LogCrashedException {
+        public boolean processRecordsBack(long position, boolean fromPrevLine, Predicate<Record> consumer) throws IOException {
             if (position < 0)
                 throw new IllegalArgumentException();
 
@@ -378,7 +378,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException, LogCrashedException {
+        public boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException {
             if (position < 0)
                 throw new IllegalArgumentException();
 
@@ -539,7 +539,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException, LogCrashedException {
+        public boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException {
             if (error != null)
                 throw error;
 
@@ -554,7 +554,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTime(long time, Predicate<Record> consumer) throws IOException, LogCrashedException {
+        public boolean processFromTime(long time, Predicate<Record> consumer) throws IOException {
             if (error != null)
                 throw error;
 

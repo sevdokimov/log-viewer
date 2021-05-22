@@ -5,7 +5,6 @@ import com.logviewer.AbstractLogTest;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class LogIterationBackwardTest extends AbstractLogTest {
 
     @Test
-    public void testEmpty() throws URISyntaxException, IOException, LogCrashedException {
+    public void testEmpty() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/empty.log", LogIterationForwardTest.FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -31,7 +30,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testNewLineOnly() throws URISyntaxException, IOException, LogCrashedException {
+    public void testNewLineOnly() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/new-line-only.log", LogService.DEFAULT_FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -58,7 +57,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testTest1NoAppend() throws URISyntaxException, IOException, LogCrashedException {
+    public void testTest1NoAppend() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
             List<Record> res = new ArrayList<>();
 
@@ -78,7 +77,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testTest1() throws URISyntaxException, IOException, LogCrashedException {
+    public void testTest1() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", LogIterationForwardTest.FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -98,7 +97,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testSingleLine() throws URISyntaxException, IOException, LogCrashedException {
+    public void testSingleLine() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line.log", LogIterationForwardTest.FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -116,7 +115,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testSingleLineTail() throws URISyntaxException, IOException, LogCrashedException {
+    public void testSingleLineTail() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", LogIterationForwardTest.FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -132,7 +131,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testSingleLineTailNoAppend() throws URISyntaxException, IOException, LogCrashedException {
+    public void testSingleLineTailNoAppend() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -156,7 +155,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void noFirstRecordNoAppend() throws URISyntaxException, IOException, LogCrashedException {
+    public void noFirstRecordNoAppend() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -172,7 +171,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void noLastRecord() throws URISyntaxException, IOException, LogCrashedException {
+    public void noLastRecord() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", LogIterationForwardTest.FORMAT)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 

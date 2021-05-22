@@ -1,6 +1,5 @@
 package com.logviewer.perfomance;
 
-import ch.qos.logback.core.spi.ScanException;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.data2.*;
 import com.logviewer.filters.JsPredicate;
@@ -36,13 +35,13 @@ public class PerformanceTest extends AbstractLogTest {
 
     @Test
     @Ignore
-    public void testJs() throws InterruptedException, IOException, LogCrashedException, ScanException {
+    public void testJs() throws IOException {
         doPredicateTest(new JsPredicate("level == 'ERROR' || level == 'WARN'"));
     }
 
     @Test
     @Ignore
-    public void testRead() throws InterruptedException, IOException, LogCrashedException, ScanException {
+    public void testRead() throws IOException {
         Log log = createLog();
 
         System.out.println("Warmup");
@@ -80,13 +79,13 @@ public class PerformanceTest extends AbstractLogTest {
         System.out.println("Lines: " + lineCounter[0]);
     }
 
-    private Log createLog() throws ScanException {
+    private Log createLog() {
         String canonicalPath = "/home/sevdokimov/logs/dashboard.log";
 
         return getLogService().openLog(canonicalPath, FORMAT_LOGBACK);
     }
 
-    private void doPredicateTest(RecordPredicate predicate) throws InterruptedException, IOException, LogCrashedException, ScanException {
+    private void doPredicateTest(RecordPredicate predicate) throws IOException {
         Log log = createLog();
         LvPredicateChecker filterContext = new LvPredicateChecker(log);
 

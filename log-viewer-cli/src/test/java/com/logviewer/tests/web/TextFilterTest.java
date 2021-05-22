@@ -317,7 +317,7 @@ public class TextFilterTest extends AbstractWebTestCase {
     }
 
     @Test
-    public void selectionFoldedElement() throws IOException, InterruptedException {
+    public void selectionFoldedElement() throws IOException {
         ctx.getBean(TestFormatRecognizer.class).setFormat(new LogbackLogFormat("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %level %logger %msg%n"));
 
         String logPath = openLog("rendering/strange-exception-line.log");

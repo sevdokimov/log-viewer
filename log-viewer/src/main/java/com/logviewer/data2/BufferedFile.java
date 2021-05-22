@@ -16,7 +16,7 @@ public class BufferedFile {
 
     private static final int ARRAY_LENGTH = WINDOW_SIZE * 2;
 
-    private byte[] array = new byte[ARRAY_LENGTH];
+    private final byte[] array = new byte[ARRAY_LENGTH];
 
     private final ByteBuffer buf = ByteBuffer.wrap(array);
 

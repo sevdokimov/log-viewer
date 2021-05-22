@@ -2,7 +2,10 @@ package com.logviewer.filters;
 
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
-import com.logviewer.data2.*;
+import com.logviewer.data2.Log;
+import com.logviewer.data2.LvPredicateChecker;
+import com.logviewer.data2.Record;
+import com.logviewer.data2.Snapshot;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
 import org.junit.Assert;
@@ -22,7 +25,7 @@ public class JsPredicateTest extends AbstractLogTest {
     private Record record;
 
     @Before
-    public void before() throws IOException, LogCrashedException {
+    public void before() throws IOException {
         Log log = getLogService().openLog(getTestLog("multilog/search.log"), TestUtils.MULTIFILE_LOG_FORMAT);
         ctx = new LvPredicateChecker(log);
 

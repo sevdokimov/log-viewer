@@ -134,7 +134,7 @@ public class LocalFileRecordLoader implements LogProcess {
         this.timeLimit = limit;
     }
 
-    private boolean searchFromPosition(Snapshot snapshot, Predicate<Record> predicate) throws IOException, LogCrashedException {
+    private boolean searchFromPosition(Snapshot snapshot, Predicate<Record> predicate) throws IOException {
         Long startTimeFromFilters = PredicateUtils.extractTimeLimit(filter, backward);
 
         int idCmp = start.getLogId().compareTo(snapshot.getLog().getId());

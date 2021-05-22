@@ -1,5 +1,6 @@
 package com.logviewer.data2;
 
+import com.logviewer.AbstractLogTest;
 import org.junit.After;
 import org.junit.Test;
 
@@ -8,13 +9,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
-public class BufferedFileTest {
+public class BufferedFileTest extends AbstractLogTest {
 
     private SeekableByteChannel channel;
 
@@ -71,8 +73,11 @@ public class BufferedFileTest {
     }
 
     @Test
-    public void testF() throws IOException, URISyntaxException {
-        BufferedFile file = bufferedFile("/testdata/buffered-file/a__bc_edf_.log");
+    public void testF() throws IOException {
+        Path tmpFile = createTempFile();
+        Files.write(tmpFile, "a\r\nbc\nedf\n".getBytes(StandardCharsets.UTF_8));
+
+        BufferedFile file = bufferedFile(tmpFile);
 
         BufferedFile.Line line = new BufferedFile.Line();
 
@@ -144,8 +149,11 @@ public class BufferedFileTest {
     }
 
     @Test
-    public void testRN3() throws IOException, URISyntaxException {
-        BufferedFile file = bufferedFile("/testdata/buffered-file/rn3.log");
+    public void testRN3() throws IOException {
+        Path tmpFile = createTempFile();
+        Files.write(tmpFile, "\r\n\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+        
+        BufferedFile file = bufferedFile(tmpFile);
         test3LineSeparators(file, 2);
 
         BufferedFile.Line line = new BufferedFile.Line();
@@ -165,6 +173,12 @@ public class BufferedFileTest {
     private BufferedFile bufferedFile(String name) throws URISyntaxException, IOException {
         Path path = Paths.get(getClass().getResource(name).toURI());
 
+        assert channel == null || !channel.isOpen();
+        channel = Files.newByteChannel(path);
+        return new BufferedFile(channel, Files.size(path));
+    }
+
+    private BufferedFile bufferedFile(Path path) throws IOException {
         assert channel == null || !channel.isOpen();
         channel = Files.newByteChannel(path);
         return new BufferedFile(channel, Files.size(path));

@@ -11,24 +11,24 @@ public interface Snapshot extends AutoCloseable {
 
     long getLastModification();
 
-    default boolean processRecords(long position, Predicate<Record> consumer) throws IOException, LogCrashedException {
+    default boolean processRecords(long position, Predicate<Record> consumer) throws IOException {
         return processRecords(position, false, consumer);
     }
 
-    boolean processRecordsBack(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException, LogCrashedException;
+    boolean processRecordsBack(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException;
 
-    boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException, LogCrashedException;
+    boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException;
 
-    boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException, LogCrashedException;
+    boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException;
 
-    boolean processFromTime(long time, Predicate<Record> consumer) throws IOException, LogCrashedException;
+    boolean processFromTime(long time, Predicate<Record> consumer) throws IOException;
 
     @Nullable
     Exception getError();
 
     Log getLog();
 
-    boolean isValidHash(@NonNull String hash) throws LogCrashedException;
+    boolean isValidHash(@NonNull String hash);
 
     String getHash();
 

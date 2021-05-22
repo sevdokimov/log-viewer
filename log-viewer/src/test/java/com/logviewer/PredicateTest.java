@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class PredicateTest extends AbstractLogTest {
 
-    private static LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+    private final static LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
             "\\[([A-Z]+)\\] (.+)? (\\d+)", true,
             new RegexField("level", 1, FieldTypes.LEVEL_LOGBACK), new RegexField("msg", 2), new RegexField("index", 3));
 
@@ -33,7 +33,7 @@ public class PredicateTest extends AbstractLogTest {
     private List<Record> records;
 
     @Before
-    public void loadLog() throws IOException, LogCrashedException {
+    public void loadLog() throws IOException {
         String logFile = getTestClassLog();
 
         Log log = getLogService().openLog(logFile, logFormat);
@@ -57,7 +57,7 @@ public class PredicateTest extends AbstractLogTest {
     }
 
     @Test
-    public void filterField() throws InterruptedException, IOException, LogCrashedException {
+    public void filterField() {
         assertRecordEquals(records, new FieldArgPredicate("level", "ERROR"), "4", "5");
         assertRecordEquals(records, new FieldArgPredicate("level", "error", FieldArgPredicate.Operator.IEQUALS), "4", "5");
         assertRecordEquals(records, new FieldArgPredicate("msg", "w", FieldArgPredicate.Operator.CONTAINS), "1");

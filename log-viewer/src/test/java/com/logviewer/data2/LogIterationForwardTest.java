@@ -8,7 +8,6 @@ import com.logviewer.formats.RegexLogFormat.RegexField;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
             new RegexField("level", 1), new RegexField("body", 2));
 
     @Test
-    public void testEmpty() throws URISyntaxException, IOException, LogCrashedException {
+    public void testEmpty() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/empty.log", FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -41,7 +40,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testNewLineOnly() throws URISyntaxException, IOException, LogCrashedException {
+    public void testNewLineOnly() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/new-line-only.log", LogService.DEFAULT_FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -68,7 +67,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testSingleLine() throws URISyntaxException, IOException, LogCrashedException {
+    public void testSingleLine() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line.log", FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -92,7 +91,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void test1() throws URISyntaxException, IOException, LogCrashedException {
+    public void test1() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", FORMAT)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -113,7 +112,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testSingleLineTail() throws URISyntaxException, IOException, LogCrashedException {
+    public void testSingleLineTail() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", FORMAT)) {
             List<Record> res = new ArrayList<>();
 
@@ -143,7 +142,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     }
 
     @Test
-    public void testNoFirstRecord() throws URISyntaxException, IOException, LogCrashedException {
+    public void testNoFirstRecord() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", FORMAT)) {
             List<Record> res = new ArrayList<>();
 

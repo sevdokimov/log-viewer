@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,7 +84,7 @@ public class LogViewerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String relativePath = getRelativePath(req);
 
         if (!relativePath.startsWith("rest/")) {
@@ -109,7 +108,7 @@ public class LogViewerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String relativePath = getRelativePath(req);
 
         if (relativePath.equals("")) {
