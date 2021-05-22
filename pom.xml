@@ -114,15 +114,15 @@
         <repository>
             <id>log-viewer</id>
             <name>Log-viewer repository</name>
-            <url>https://dl.bintray.com/sevdokimov/log-viewer</url>
+            <url>https://sevdokimov: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@maven.pkg.github.com/sevdokimov/log-viewer</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>log-viewer</id>
-            <name>Log-viewer repository</name>
-            <url>https://api.bintray.com/maven/sevdokimov/log-viewer/com.logviewer/;publish=1</url>
+            <id>github</id>
+            <name>GitHub log-viewer repository</name>
+            <url>https://maven.pkg.github.com/sevdokimov/log-viewer</url>
         </repository>
     </distributionManagement>
 
