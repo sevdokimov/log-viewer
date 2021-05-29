@@ -1,6 +1,7 @@
 package com.logviewer.logLibs;
 
 import com.logviewer.data2.LogFormat;
+import org.springframework.lang.Nullable;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class LoggerLibSupport {
             new LoggerLibSupport("log4j",
                     "org.apache.logging.log4j.core.LoggerContext",
                     "com.logviewer.logLibs.log4j.Log4jConfigImporter",
-                    "com.logviewer.logLibs.log4j.Log4jLogFormat")
+                    null)
     };
 
     private final String name;
@@ -32,7 +33,7 @@ public class LoggerLibSupport {
     private final String logFormatClassName;
     private Class<LogFormat> logFormatClass;
 
-    public LoggerLibSupport(String name, String libClassToTest, String configImporterClassName, String logFormatClassName) {
+    public LoggerLibSupport(String name, String libClassToTest, String configImporterClassName, @Nullable String logFormatClassName) {
         this.name = name;
         this.libClassToTest = libClassToTest;
         this.configImporterClassName = configImporterClassName;
@@ -45,6 +46,9 @@ public class LoggerLibSupport {
 
     public Stream<Class<? extends LogFormat>> getFormatClasses() {
         if (logFormatClass == null) {
+            if (logFormatClassName == null)
+                return Stream.empty();
+            
             try {
                 logFormatClass = (Class<LogFormat>) getClass().getClassLoader().loadClass(logFormatClassName);
             } catch (ClassNotFoundException e) {
