@@ -32,6 +32,10 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
 
         checkLine("[2020-01-01 18:11:00,000][WARN   ]    ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}][%level] %m%n");
 
+        checkLine("[2020-Jan-01 18:11:00.000][WARN] ddddd", "[%d{yyyy-MMM-dd HH:mm:ss.SSS}][%level] %m%n");
+        checkLine("[2020-Dec-01_18:11:00.000][WARN] ddddd", "[%d{yyyy-MMM-dd_HH:mm:ss.SSS}][%level] %m%n");
+        checkLine("[2020 Jan 01 18:11:00.000][WARN] ddddd", "[%d{yyyy MMM dd HH:mm:ss.SSS}][%level] %m%n");
+
         checkLine("[2017-11-23T14:33:24,328][INFO ][o.e.c.m.MetaDataMappingService] [G1WVvSO] [behavox_tes] create_mapping", "[%d{yyyy-MM-dd HH:mm:ss.SSS}][%level]%m%n");
 
         checkLine("[2020-01-01 18:11:00,000]   [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
@@ -48,6 +52,8 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[2020-01-01 18:11:00,000][my-thread][WARN] ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t][%level] %m%n");
         checkLine("[2020-01-01 18:11:00,000][my-thread][WARN][zzzz] ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}][%t][%level]%m%n");
         checkLine("[2020-01-01 18:11:00,000] [my-thread] [WARN] ddddd", "[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t] [%level] %m%n");
+
+        checkLine("[2020-Sep-01 18:11:00,000] [my-thread] [WARN] ddddd", "[%d{yyyy-MMM-dd HH:mm:ss,SSS}] [%t] [%level] %m%n");
 
         checkLine("[2020-01-01 18:11:00,000] my-thread [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("2020-01-01 18:11:00,000 [my-thread]     [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
@@ -78,6 +84,8 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[  WARN] [2020-01-01 18:11:00,000] mmm", "[%level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] %m%n");
         checkLine("[  WARN][2020-01-01 18:11:00,000] mmm", "[%level][%d{yyyy-MM-dd HH:mm:ss.SSS}] %m%n");
         checkLine("WARN   2020-01-01 18:11:00,000 mmm", "%level %d{yyyy-MM-dd HH:mm:ss.SSS} %m%n");
+
+        checkLine("WARN 2020-Nov-01 18:11:00,000 mmm", "%level %d{yyyy-MMM-dd HH:mm:ss,SSS} %m%n");
 
         checkLine("WARN 2020-01-01 18:11:00,000mmm", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("WARN 2020-01-01 18:11:00,000:mmm", LvDefaultFormatDetector.UNKNOWN_FORMAT);
@@ -162,6 +170,11 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("INFO 31 Dec 2020 23:59:59.000 ddddd", "%level %d{dd MMM yyyy HH:mm:ss.SSS} %m%n");
         checkLine("INFO 31 Dec 2020 23:59:59 ddddd", "%level %d{dd MMM yyyy HH:mm:ss} %m%n");
         checkLine("INFO 01 Dec 2018 00:00:00 ddddd", "%level %d{dd MMM yyyy HH:mm:ss} %m%n");
+        checkLine("INFO 2018 Dec 01 00:00:00 ddddd", "%level %d{yyyy MMM dd HH:mm:ss} %m%n");
+        checkLine("INFO 2018-Dec-01 00:00:00 ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss} %m%n");
+        checkLine("INFO 2018-Dec-01 00:00:00.000 ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss.SSS} %m%n");
+        checkLine("INFO 2018-Dec-01 00:00:00,999 ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss,SSS} %m%n");
+        checkLine("INFO 2018-Oct-31 23:59:59,999 ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss,SSS} %m%n");
     }
 
     private Log4jLogFormat detect(String resourceName) {

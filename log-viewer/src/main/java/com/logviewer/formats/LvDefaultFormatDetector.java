@@ -25,13 +25,15 @@ public class LvDefaultFormatDetector {
 
     static final String UNKNOWN_FORMAT = "???";
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
 
-    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])(?:[0-5]\\d)(?:[0-5]\\d)([,.]?\\d\\d\\d)?\\b");
+    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d([,.]?\\d\\d\\d)?\\b");
 
-    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)(?:([,.])\\d\\d\\d)?\\b");
+    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:([,.])\\d\\d\\d)?\\b");
 
-    private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)\\b");
+    private static final Pattern DATE_LONG_2 = Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?<msSep>[,.])\\d\\d\\d)?\\b");
+
+    private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\b");
 
     private static final Pattern LEVEL = Pattern.compile("\\b(?:ERROR|WARN|INFO|DEBUG|TRACE|SEVERE|WARNING|CONFIG|FINE|FINER|FINEST|FATAL)\\b");
 
@@ -227,11 +229,24 @@ public class LvDefaultFormatDetector {
                 if (matcher.find()) {
                     dateField = matcher.group(1) == null ? "%d{dd MMM yyyy HH:mm:ss}" : "%d{dd MMM yyyy HH:mm:ss" + matcher.group(1) + "SSS}";
                 } else {
-                    if (TIME_WITHOUT_DATE.matcher(line).find() || LEVEL.matcher(line).find()) {
-                        return UNKNOWN_FORMAT;
-                    }
+                    matcher = DATE_LONG_2.matcher(line); // 2020-Jul-21 15:04:01
+                    if (matcher.find()) {
+                        String dateSep = matcher.group("dateSep");
+                        String dtSep = matcher.group("dtSep");
+                        String msSep = matcher.group("msSep");
 
-                    return null;
+                        String pattern = "yyyy" + dateSep + "MMM" + dateSep + "dd" + dtSep + "HH:mm:ss";
+                        if (msSep != null)
+                            pattern += msSep + "SSS";
+
+                        dateField = "%d{" + pattern + "}";
+                    } else {
+                        if (TIME_WITHOUT_DATE.matcher(line).find() || LEVEL.matcher(line).find()) {
+                            return UNKNOWN_FORMAT;
+                        }
+
+                        return null;
+                    }
                 }
             }
         }
