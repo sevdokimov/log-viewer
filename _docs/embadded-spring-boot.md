@@ -11,7 +11,7 @@ The library is `com.logviewer:log-viewer-spring-boot:0.1.6` in https://maven.pkg
 <repositories>
     <repository>
         <id>log-viewer</id>
-        <url>https://sevdokimov:ghp_egEAkjyUKEkMCiGhTo1apItbsBtyix4b3&amp;#114;OK@maven.pkg.github.com/sevdokimov/log-viewer</url>
+        <url>https://sevdokimov:ghp_egEAkjyUKEkMCiGhTo1apItbsBtyix4b3&#114;OK@maven.pkg.github.com/sevdokimov/log-viewer</url>
     </repository>
 </repositories>
 
