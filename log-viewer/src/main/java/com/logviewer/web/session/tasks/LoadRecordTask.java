@@ -1,8 +1,8 @@
 package com.logviewer.web.session.tasks;
 
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.LogView;
 import com.logviewer.data2.Position;
-import com.logviewer.data2.Record;
 import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
-    static final Comparator<Pair<Record, Throwable>> PAIR_COMPARATOR = Comparator.comparing(Pair::getFirst);
+    static final Comparator<Pair<LogRecord, Throwable>> PAIR_COMPARATOR = Comparator.comparing(Pair::getFirst);
 
     protected final int recordCount;
 
@@ -30,12 +30,12 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
     @Nullable
     protected final Map<String, String> hashes;
 
-    protected final Comparator<Pair<Record, Throwable>> comparator;
+    protected final Comparator<Pair<LogRecord, Throwable>> comparator;
 
     protected final Map<LogView, LogProcess> loaders = new IdentityHashMap<>();
 
     protected final Map<String, Status> statuses = new HashMap<>();
-    protected final List<Pair<Record, Throwable>> data = new ArrayList<>();
+    protected final List<Pair<LogRecord, Throwable>> data = new ArrayList<>();
     protected boolean eof = true;
     protected boolean finished;
 
@@ -108,7 +108,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
         loaders.values().forEach(LogProcess::cancel);
     }
 
-    protected long getTimeLimit(Record lastRecord, LogView log) {
+    protected long getTimeLimit(LogRecord lastRecord, LogView log) {
         if (backward) {
             if (log.getId().compareTo(lastRecord.getLogId()) > 0)
                 return lastRecord.getTime() - 1;
@@ -140,10 +140,10 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
                     return;
                 assert !statuses.containsKey(log.getId());
 
-                Record oldLastRecord = data.size() == recordCount ? data.get(recordCount - 1).getFirst() : null;
+                LogRecord oldLastRecord = data.size() == recordCount ? data.get(recordCount - 1).getFirst() : null;
 
                 if (logs.length > 1) {
-                    for (Pair<Record, Throwable> newRecord : newRecords) {
+                    for (Pair<LogRecord, Throwable> newRecord : newRecords) {
                         if (newRecord.getFirst().hasTime()) // Ignore records without time on log merging
                             data.add(newRecord);
                     }
@@ -161,7 +161,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
                 }
 
                 if (data.size() == recordCount) {
-                    Record lastRecord = data.get(recordCount - 1).getFirst();
+                    LogRecord lastRecord = data.get(recordCount - 1).getFirst();
                     loaders.forEach((l, loader) -> {
                         if (oldLastRecord == null || getTimeLimit(oldLastRecord, l) != getTimeLimit(lastRecord, l))
                             loader.setTimeLimit(getTimeLimit(lastRecord, l));

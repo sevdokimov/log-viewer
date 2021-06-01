@@ -41,7 +41,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
 
         assertTrue(reader.parseRecord(new BufferedFile.Line(s)));
 
-        Record record = reader.buildRecord();
+        LogRecord record = reader.buildRecord();
 
         assertEquals("localhost-startStop-1", fieldValue(format, record, "thread"));
     }
@@ -56,7 +56,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "2016-12-02_16:05:11.333 ");
         buildFailed(format, "2016-12-02_16:05:11.333  ");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333   ");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333   ");
         assertEquals("   ", fieldValue(format, record, "f"));
 
         record = buildRecord(format, "2016-12-02_16:05:11.333      ");
@@ -73,7 +73,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "2016-12-02_16:05:11.333");
         buildFailed(format, "2016-12-02_16:05:11.333...,,");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333...,,,");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333...,,,");
         assertEquals("...", fieldValue(format, record, "f1"));
         assertEquals(",,,", fieldValue(format, record, "f2"));
 
@@ -96,7 +96,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "2016-12-02_16:05:11.333.....==");
         buildFailed(format, "2016-12-02_16:05:11.333=,=");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333.....=_____=");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333.....=_____=");
         assertEquals(".....", fieldValue(format, record, "f1"));
         assertEquals("_____", fieldValue(format, record, "f2"));
 
@@ -119,7 +119,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "2016-12-02_16:05:11.333.....2016-12-022016-12-02");
         buildFailed(format, "2016-12-02_16:05:11.3332016-12-02,2016-12-02");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333.....2016-12-02_____2016-12-02");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333.....2016-12-02_____2016-12-02");
         assertEquals(".....", fieldValue(format, record, "f1"));
         assertEquals("_____", fieldValue(format, record, "f2"));
 
@@ -137,7 +137,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
 
         buildFailed(format, "2016-12-02_16:05:11.333");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333 ");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 ");
         assertEquals("", fieldValue(format, record, "msg"));
     }
 
@@ -150,7 +150,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
 
         buildFailed(format, "2016-12-02_16:05:11.333com.google.App");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333 com.google.App");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 com.google.App");
         assertEquals("com.google.App", fieldValue(format, record, "logger"));
 
         record = buildRecord(format, "2016-12-02_16:05:11.333     com.google.App");
@@ -170,7 +170,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
 
         buildFailed(format, "2016-12-02_16:05:11.333 --");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333 999 tt555");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 999 tt555");
         assertEquals("999", fieldValue(format, record, "f0"));
         assertEquals("tt", fieldValue(format, record, "thread"));
         assertEquals("555", fieldValue(format, record, "f"));
@@ -185,7 +185,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
                 new LvLayoutClassNode()
                 );
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333 com.behavox.App");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 com.behavox.App");
         assertEquals("", fieldValue(format, record, "msg"));
         assertEquals("com.behavox.App", fieldValue(format, record, "logger"));
     }
@@ -202,7 +202,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "2016-12-02_16:05:11.333");
         buildFailed(format, "2016-12-02_16:05:11.333 ...");
 
-        Record record = buildRecord(format, "2016-12-02_16:05:11.333 mmmm com.google.MyApp");
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 mmmm com.google.MyApp");
         assertEquals("mmmm", fieldValue(format, record, "msg"));
         assertEquals("com.google.MyApp", fieldValue(format, record, "logger"));
     }
@@ -217,7 +217,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         buildFailed(format, "INFO");
         buildFailed(format, "INFO.");
 
-        Record record = buildRecord(format, "INFO ");
+        LogRecord record = buildRecord(format, "INFO ");
         assertEquals("INFO", fieldValue(format, record, "f"));
 
         record = buildRecord(format, "INFO      ");
@@ -229,7 +229,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         assertFalse(reader.parseRecord(new BufferedFile.Line(s)));
     }
 
-    private static Record buildRecord(DefaultFieldSet format, String s) {
+    private static LogRecord buildRecord(DefaultFieldSet format, String s) {
         LogReader reader = format.createReader();
 
         assertTrue(reader.parseRecord(new BufferedFile.Line(s)));
@@ -257,7 +257,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         assertFalse(reader.hasParsedRecord());
 
         assertTrue(reader.parseRecord(new BufferedFile.Line("2016-12-02_16:05:11.333___Main")));
-        Record record = reader.buildRecord();
+        LogRecord record = reader.buildRecord();
 
         assertEquals("Main", fieldValue(format, record, "logger"));
     }
@@ -279,7 +279,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         boolean b = reader.parseRecord(line, 4, s.length(), 10000, 1000100);
         assertTrue(b);
 
-        Record record = reader.buildRecord();
+        LogRecord record = reader.buildRecord();
 
         assertEquals(s, record.getMessage());
         assertEquals("2016-12-02_16:05:11.333", fieldValue(format, record, "date"));
@@ -291,7 +291,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         assertEquals("2016-12-02_16:05:11.333", new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").format(new Date(record.getTime())));
     }
 
-    private String fieldValue(DefaultFieldSet format, Record record, String fieldName) {
+    private String fieldValue(DefaultFieldSet format, LogRecord record, String fieldName) {
         int fieldIdx = -1;
 
         LogFormat.FieldDescriptor[] fields = format.getFields();

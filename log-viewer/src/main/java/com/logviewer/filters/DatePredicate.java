@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 
 public class DatePredicate implements RecordPredicate {
 
@@ -18,7 +18,7 @@ public class DatePredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         if (!record.hasTime())
             return true;
 

@@ -3,7 +3,7 @@ package com.logviewer;
 import com.google.common.base.Throwables;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.web.dto.RestRecord;
 import org.junit.Assert;
@@ -34,7 +34,7 @@ public class TestUtils {
 
     public static final long WAIT_TIMEOUT = Integer.getInteger("test-wait-timeout", 5) * 1000;
 
-    public static void assertEquals(Record r1, Record r2) {
+    public static void assertEquals(LogRecord r1, LogRecord r2) {
         Assert.assertEquals(r1.getMessage(), r2.getMessage());
         Assert.assertEquals(r1.getStart(), r2.getStart());
         Assert.assertEquals(r1.getEnd(), r2.getEnd());
@@ -48,7 +48,7 @@ public class TestUtils {
         }
     }
 
-    public static void assertEquals(List<Record> list1, List<Record> list2) {
+    public static void assertEquals(List<LogRecord> list1, List<LogRecord> list2) {
         Assert.assertEquals(list1.size(), list2.size());
 
         for (int i = 0; i < list1.size(); i++) {
@@ -56,7 +56,7 @@ public class TestUtils {
         }
     }
 
-    public static void assertUnparsed(Record record, String content) {
+    public static void assertUnparsed(LogRecord record, String content) {
         Assert.assertEquals(content, record.getMessage());
 
         for (int i = 0; i < record.getFieldsCount(); i++) {
@@ -66,8 +66,8 @@ public class TestUtils {
         }
     }
 
-    public static void check(List<Record> res, String ... expected) {
-        Assert.assertEquals(Arrays.asList(expected), res.stream().map(Record::getMessage).collect(Collectors.toList()));
+    public static void check(List<LogRecord> res, String ... expected) {
+        Assert.assertEquals(Arrays.asList(expected), res.stream().map(LogRecord::getMessage).collect(Collectors.toList()));
     }
 
     public static void check(Collection<RestRecord> res, String ... expected) {

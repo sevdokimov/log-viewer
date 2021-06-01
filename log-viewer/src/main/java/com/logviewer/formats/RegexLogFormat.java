@@ -3,7 +3,7 @@ package com.logviewer.formats;
 import com.logviewer.data2.DefaultFieldDesciptor;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -270,7 +270,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         }
 
         @Override
-        public Record buildRecord() {
+        public LogRecord buildRecord() {
             if (s == null)
                 throw new IllegalStateException();
 
@@ -287,7 +287,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                 }
             }
 
-            Record res = new Record(s, time, start, end, hasMore, fields.clone());
+            LogRecord res = new LogRecord(s, time, start, end, hasMore, fields.clone());
 
             s = null;
 

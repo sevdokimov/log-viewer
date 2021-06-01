@@ -1,8 +1,8 @@
 package com.logviewer.web.session.tasks;
 
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.LogView;
 import com.logviewer.data2.Position;
-import com.logviewer.data2.Record;
 import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
@@ -69,7 +69,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
                                 if (searchResult.isFound()) {
                                     for (Map.Entry<LogView, LogProcess> entry : searchers.entrySet()) {
                                         if (entry.getKey() != log) {
-                                            Pair<Record, Throwable> pair = searchResult.getData().get(searchResult.getData().size() - 1);
+                                            Pair<LogRecord, Throwable> pair = searchResult.getData().get(searchResult.getData().size() - 1);
                                             long time = pair.getFirst().getTime();
                                             entry.getValue().setTimeLimit(LogProcess.makeTimeLimitNonStrict(backward, time));
                                         }
@@ -87,9 +87,9 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
 
     private void processSearchResults(Map<String, SearchResult> resultPerLog, Map<String, Status> statuses,
                                       BiConsumer<SearchResponse, Throwable> consumer) {
-        Comparator<Pair<Record, Throwable>> recordComparator = backward ? PAIR_COMPARATOR.reversed() : PAIR_COMPARATOR;
+        Comparator<Pair<LogRecord, Throwable>> recordComparator = backward ? PAIR_COMPARATOR.reversed() : PAIR_COMPARATOR;
 
-        Optional<Pair<Record, Throwable>> firstOccurrence = resultPerLog.values().stream()
+        Optional<Pair<LogRecord, Throwable>> firstOccurrence = resultPerLog.values().stream()
                 .filter(SearchResult::isFound)
                 .map(r -> r.getData().get(r.getData().size() - 1))
                 .min(recordComparator);
@@ -102,9 +102,9 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
             return;
         }
 
-        Pair<Record, Throwable> o = firstOccurrence.get();
+        Pair<LogRecord, Throwable> o = firstOccurrence.get();
 
-        List<Pair<Record, Throwable>> records = resultPerLog.values().stream()
+        List<Pair<LogRecord, Throwable>> records = resultPerLog.values().stream()
                 .filter(r -> r.getStatus().getError() == null)
                 .flatMap(r -> r.getData().stream())
                 .filter(p -> recordComparator.compare(o, p) >= 0)
@@ -131,7 +131,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
             if (!r.isHasSkippedLine() || r.getData().isEmpty())
                 continue;
 
-            Pair<Record, Throwable> lastReturnedRecord = r.getData().get(0);
+            Pair<LogRecord, Throwable> lastReturnedRecord = r.getData().get(0);
 
             Position start;
             int maxRecordToLoad;
@@ -235,7 +235,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
     public class SearchResponse extends LoadNextResponse {
         private final boolean hasSkippedLine;
 
-        SearchResponse(List<Pair<Record, Throwable>> data, Map<String, Status> statuses) {
+        SearchResponse(List<Pair<LogRecord, Throwable>> data, Map<String, Status> statuses) {
             super(data, statuses, data == null);
 
             if (backward && data != null)

@@ -91,7 +91,7 @@ public class PerformanceTest extends AbstractLogTest {
 
         System.out.println("Warmup");
 
-        Record[] rrr = new Record[1];
+        LogRecord[] rrr = new LogRecord[1];
 
         try (Snapshot snapshot = log.createSnapshot()) {
             snapshot.processRecords(0, r -> {

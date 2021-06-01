@@ -2,7 +2,7 @@ package com.logviewer;
 
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.formats.RegexLogFormat.RegexField;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class DateTest extends AbstractLogTest {
 
     @Test
     public void logWithTime() throws ParseException, IOException {
-        List<Record> records = loadLog("date/log-with-time.log", logFormat);
+        List<LogRecord> records = loadLog("date/log-with-time.log", logFormat);
 
         assertEquals(3, records.size());
         assertEquals("2018-04-08_23:54:00.330", records.get(0).getFieldText(logFormat.getFieldIndexByName("date")));

@@ -16,7 +16,7 @@ public abstract class LogReader {
 
     public abstract void clear();
 
-    public abstract Record buildRecord();
+    public abstract LogRecord buildRecord();
 
 
 }

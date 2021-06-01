@@ -29,7 +29,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     @Test
     public void testEmpty() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/empty.log", FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(0, res::add);
             assert res.isEmpty();
@@ -42,7 +42,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     @Test
     public void testNewLineOnly() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/new-line-only.log", LogService.DEFAULT_FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(0, false, res::add);
             assert res.size() == 2;
@@ -50,7 +50,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
 
             res.clear();
             assert log.processRecords(0, true, res::add);
-            Record record = Iterables.getOnlyElement(res);
+            LogRecord record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
             assertEquals(0, record.getFieldsCount());
 
@@ -69,10 +69,10 @@ public class LogIterationForwardTest extends AbstractLogTest {
     @Test
     public void testSingleLine() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line.log", FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(0, res::add);
-            Record rec = Iterables.getOnlyElement(res);
+            LogRecord rec = Iterables.getOnlyElement(res);
 
             assertEquals("[DEBUG] l1", rec.getMessage());
             assertEquals(0, rec.getStart());
@@ -95,7 +95,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", FORMAT)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(allContent.indexOf("l3"), res::add);
 
@@ -114,10 +114,10 @@ public class LogIterationForwardTest extends AbstractLogTest {
     @Test
     public void testSingleLineTail() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(0, res::add);
-            Record rec = Iterables.getOnlyElement(res);
+            LogRecord rec = Iterables.getOnlyElement(res);
 
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -144,7 +144,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
     @Test
     public void testNoFirstRecord() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecords(0, res::add);
 
@@ -152,7 +152,7 @@ public class LogIterationForwardTest extends AbstractLogTest {
             assertEquals("[DEBUG] l1\nl2", res.get(1).getMessage());
             assertEquals("[DEBUG] zzz", res.get(2).getMessage());
 
-            List<Record> res2 = new ArrayList<>();
+            List<LogRecord> res2 = new ArrayList<>();
             assert log.processRecords(5, res2::add);
             TestUtils.assertEquals(res2, res);
 

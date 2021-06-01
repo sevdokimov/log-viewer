@@ -13,17 +13,17 @@ import java.util.Collection;
 /**
  * todo make externalizable and optimize
  */
-public class RecordList extends ArrayList<Pair<Record, Throwable>> implements Externalizable {
+public class RecordList extends ArrayList<Pair<LogRecord, Throwable>> implements Externalizable {
 
     public RecordList() {
 
     }
 
-    public RecordList(@NonNull Pair<Record, Throwable> restRecord) {
+    public RecordList(@NonNull Pair<LogRecord, Throwable> restRecord) {
         add(restRecord);
     }
 
-    public RecordList(Collection<Pair<Record, Throwable>> queue) {
+    public RecordList(Collection<Pair<LogRecord, Throwable>> queue) {
         super(queue);
     }
 
@@ -31,7 +31,7 @@ public class RecordList extends ArrayList<Pair<Record, Throwable>> implements Ex
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(size());
 
-        for (Pair<Record, Throwable> pair : this) {
+        for (Pair<LogRecord, Throwable> pair : this) {
             pair.getFirst().writeExternal(out);
             out.writeObject(pair.getSecond());
         }
@@ -42,7 +42,7 @@ public class RecordList extends ArrayList<Pair<Record, Throwable>> implements Ex
         int size = in.readInt();
 
         for (int i = 0; i < size; i++) {
-            Record record = new Record();
+            LogRecord record = new LogRecord();
             record.readExternal(in);
             Throwable t = (Throwable) in.readObject();
 

@@ -328,7 +328,7 @@ public class DefaultFieldSet {
         }
 
         @Override
-        public Record buildRecord() {
+        public LogRecord buildRecord() {
             if (s == null)
                 throw new IllegalStateException();
 
@@ -338,7 +338,7 @@ public class DefaultFieldSet {
                 time = dateExtractor.getAsLong();
             }
 
-            Record res = new Record(s, time, start, end, hasMore, fieldOffset.clone());
+            LogRecord res = new LogRecord(s, time, start, end, hasMore, fieldOffset.clone());
 
             s = null;
 

@@ -11,17 +11,17 @@ public interface Snapshot extends AutoCloseable {
 
     long getLastModification();
 
-    default boolean processRecords(long position, Predicate<Record> consumer) throws IOException {
+    default boolean processRecords(long position, Predicate<LogRecord> consumer) throws IOException {
         return processRecords(position, false, consumer);
     }
 
-    boolean processRecordsBack(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException;
+    boolean processRecordsBack(long position, boolean fromNextLine, Predicate<LogRecord> consumer) throws IOException;
 
-    boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException;
+    boolean processRecords(long position, boolean fromNextLine, Predicate<LogRecord> consumer) throws IOException;
 
-    boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException;
+    boolean processFromTimeBack(long time, Predicate<LogRecord> consumer) throws IOException;
 
-    boolean processFromTime(long time, Predicate<Record> consumer) throws IOException;
+    boolean processFromTime(long time, Predicate<LogRecord> consumer) throws IOException;
 
     @Nullable
     Exception getError();

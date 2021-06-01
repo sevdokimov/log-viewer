@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 
 import java.util.regex.Pattern;
 
@@ -19,7 +19,7 @@ public class ExceptionOnlyPredicate implements RecordPredicate {
             , Pattern.MULTILINE);
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         if (!record.getMessage().contains("\tat "))
             return false;
 

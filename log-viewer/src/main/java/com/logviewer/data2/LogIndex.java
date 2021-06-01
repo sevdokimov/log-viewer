@@ -19,11 +19,11 @@ public class LogIndex {
 //            .maximumWeight(700 * 1024)
 //            .build();
 
-//    private static int recordSize(@Nullable Record record) {
+//    private static int recordSize(@Nullable LogRecord record) {
 //        return record == null ? 0 : record.getSizeBytes();
 //    }
 
-    public synchronized Record findRecordBound(long time, boolean lastBound, Snapshot buffer) throws IOException {
+    public synchronized LogRecord findRecordBound(long time, boolean lastBound, Snapshot buffer) throws IOException {
         FindFirstProcessor firstRecord;
         FindFirstProcessor lastRecord;
 
@@ -94,8 +94,8 @@ public class LogIndex {
                 return null;
         }
 
-        Record low = firstRecord.result;
-        Record high = lastRecord.result;
+        LogRecord low = firstRecord.result;
+        LogRecord high = lastRecord.result;
 
         while (high.getStart() - low.getEnd() > 8 * 1024) {
             long mid = (low.getEnd() + high.getStart()) >>> 1;
@@ -148,7 +148,7 @@ public class LogIndex {
             }
         }
 
-        Record[] res = new Record[1];
+        LogRecord[] res = new LogRecord[1];
 
         if (lastBound) {
             buffer.processRecordsBack(high.getStart(), true, r -> {
@@ -179,13 +179,13 @@ public class LogIndex {
 //    private static int req = 0;
 //    private static int search = 0;
 
-    private static class FindFirstProcessor implements Predicate<Record> {
+    private static class FindFirstProcessor implements Predicate<LogRecord> {
 
-        private Record firstRecordWithoutTime;
-        private Record result;
+        private LogRecord firstRecordWithoutTime;
+        private LogRecord result;
 
         @Override
-        public boolean test(Record t) {
+        public boolean test(LogRecord t) {
             if (result != null)
                 throw new IllegalStateException();
 

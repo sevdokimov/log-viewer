@@ -4,7 +4,7 @@ import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.BufferedFile;
 import com.logviewer.data2.LogReader;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LocationInfo;
@@ -57,7 +57,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
     @Test
     public void testHbaseLog() {
         String s = "2020-06-13 00:02:48,475 WARN  [HBase-Metrics2-1] impl.MetricsConfig: Cannot locate configuration: tried hadoop-metrics2-phoenix.properties,hadoop-metrics2.properties";
-        Record read = read(new Log4jLogFormat("%d{ISO8601} %-5p [%t] %c{2}: %m%n"), s);
+        LogRecord read = read(new Log4jLogFormat("%d{ISO8601} %-5p [%t] %c{2}: %m%n"), s);
         checkFields(read, "2020-06-13 00:02:48,475", "WARN", "HBase-Metrics2-1", "impl.MetricsConfig",
                 "Cannot locate configuration: tried hadoop-metrics2-phoenix.properties,hadoop-metrics2.properties");
     }
@@ -80,7 +80,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         notMatch("%p %X %m%n", "ERROR xxx dffsdsf");
 
 //        read(new Log4jLogFormat("%p %X{aaa} %m%n"), "ERROR  dffsdsf");  todo bug!
-        Record record = read(new Log4jLogFormat("%p %X{aaa} %m%n"), "ERROR xxx dffsdsf");
+        LogRecord record = read(new Log4jLogFormat("%p %X{aaa} %m%n"), "ERROR xxx dffsdsf");
         checkFields(record, "ERROR", "xxx", "dffsdsf");
     }
 
@@ -162,7 +162,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 
         Log4jLogFormat format = new Log4jLogFormat(pattern);
 
-        Record record = read(format, str);
+        LogRecord record = read(format, str);
         checkFields(record, fields);
     }
 
@@ -182,7 +182,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 
         Log4jLogFormat format = new Log4jLogFormat(pattern);
 
-        Record record = read(format, str);
+        LogRecord record = read(format, str);
         checkFields(record, fields);
     }
 

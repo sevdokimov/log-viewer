@@ -30,7 +30,7 @@ public class PredicateTest extends AbstractLogTest {
 
     private LogFilterContext filterContext;
 
-    private List<Record> records;
+    private List<LogRecord> records;
 
     @Before
     public void loadLog() throws IOException {
@@ -49,7 +49,7 @@ public class PredicateTest extends AbstractLogTest {
         }
     }
 
-    private void assertRecordEquals(List<Record> records, RecordPredicate predicate, String ... res) {
+    private void assertRecordEquals(List<LogRecord> records, RecordPredicate predicate, String ... res) {
         assertEquals(Arrays.asList(res), records.stream()
                 .filter(r -> predicate.test(r, filterContext))
                 .map(r -> filterContext.getFieldValue(r, "index"))

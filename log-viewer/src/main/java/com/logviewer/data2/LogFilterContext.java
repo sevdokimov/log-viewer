@@ -11,7 +11,7 @@ public interface LogFilterContext {
     int findFieldIndexByName(@NonNull String fieldName);
 
     @Nullable
-    String getFieldValue(@NonNull Record record, @NonNull String fieldName);
+    String getFieldValue(@NonNull LogRecord record, @NonNull String fieldName);
 
     @NonNull
     LogFormat.FieldDescriptor[] getFields();

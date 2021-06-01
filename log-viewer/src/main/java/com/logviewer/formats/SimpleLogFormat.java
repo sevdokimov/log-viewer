@@ -2,7 +2,7 @@ package com.logviewer.formats;
 
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.Nullable;
 
@@ -90,11 +90,11 @@ public class SimpleLogFormat implements LogFormat {
         }
 
         @Override
-        public Record buildRecord() {
+        public LogRecord buildRecord() {
             if (s == null)
                 throw new IllegalStateException();
 
-            Record res = new Record(s, 0, start, end, hasMore, Utils.EMPTY_INT_ARRAY);
+            LogRecord res = new LogRecord(s, 0, start, end, hasMore, Utils.EMPTY_INT_ARRAY);
 
             s = null;
 

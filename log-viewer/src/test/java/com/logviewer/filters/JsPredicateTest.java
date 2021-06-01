@@ -3,8 +3,8 @@ package com.logviewer.filters;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.Log;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.LvPredicateChecker;
-import com.logviewer.data2.Record;
 import com.logviewer.data2.Snapshot;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
@@ -22,14 +22,14 @@ import java.util.List;
 public class JsPredicateTest extends AbstractLogTest {
 
     private LvPredicateChecker ctx;
-    private Record record;
+    private LogRecord record;
 
     @Before
     public void before() throws IOException {
         Log log = getLogService().openLog(getTestLog("multilog/search.log"), TestUtils.MULTIFILE_LOG_FORMAT);
         ctx = new LvPredicateChecker(log);
 
-        List<Record> list = new ArrayList<>();
+        List<LogRecord> list = new ArrayList<>();
         try (Snapshot snapshot = log.createSnapshot()) {
             snapshot.processRecords(0, list::add);
         }

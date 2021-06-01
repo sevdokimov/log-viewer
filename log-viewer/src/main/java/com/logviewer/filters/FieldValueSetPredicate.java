@@ -3,7 +3,7 @@ package com.logviewer.filters;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class FieldValueSetPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         if (fieldType == null || values == null)
             return false;
 

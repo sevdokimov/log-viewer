@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.springframework.lang.NonNull;
 
@@ -18,7 +18,7 @@ public class SubstringPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         Predicate<String> matcher = this.matcher;
 
         if (matcher == null) {

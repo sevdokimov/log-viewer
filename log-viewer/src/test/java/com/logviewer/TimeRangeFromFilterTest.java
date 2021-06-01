@@ -171,8 +171,8 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
     private static class ResultListener implements LogDataListener {
 
-        private final List<Record> records = new ArrayList<>();
-        private final LinkedList<Record> reversedRecords = new LinkedList<>();
+        private final List<LogRecord> records = new ArrayList<>();
+        private final LinkedList<LogRecord> reversedRecords = new LinkedList<>();
 
         private boolean eof;
 
@@ -180,7 +180,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         @Override
         public void onData(@NonNull RecordList data) {
-            for (Pair<Record, Throwable> pair : data) {
+            for (Pair<LogRecord, Throwable> pair : data) {
                 if (pair.getSecond() != null) {
                     throw Utils.propagate(pair.getSecond());
                 }

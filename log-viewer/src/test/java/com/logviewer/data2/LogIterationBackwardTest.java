@@ -17,7 +17,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testEmpty() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/empty.log", LogIterationForwardTest.FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(0, false, res::add);
 
@@ -32,10 +32,10 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testNewLineOnly() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/new-line-only.log", LogService.DEFAULT_FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(0, false, res::add);
-            Record record = Iterables.getOnlyElement(res);
+            LogRecord record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
             assertEquals(0, record.getFieldsCount());
 
@@ -59,7 +59,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testTest1NoAppend() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -79,7 +79,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testTest1() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/test1.log", LogIterationForwardTest.FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
@@ -99,7 +99,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testSingleLine() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line.log", LogIterationForwardTest.FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(0, false, res::add);
             check(res, "[DEBUG] l1");
@@ -117,7 +117,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
     @Test
     public void testSingleLineTail() throws IOException {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", LogIterationForwardTest.FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(0, true, res::add);
             assert res.size() == 0;
@@ -135,7 +135,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
         try (Snapshot log = log("/testdata/log-iteration/single-line-tail.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(log.getSize(), false, res::add);
             check(res, "l2\nl3\nl4", "[DEBUG] l1");
@@ -159,7 +159,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", LogIterationForwardTest.FORMAT_NO_APPEND)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(allContent.indexOf("not-a-record2"), false, res::add);
             check(res, "not-a-record\nnot-a-record2");
@@ -175,7 +175,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
         try (Snapshot log = log("/testdata/log-iteration/no-first-record.log", LogIterationForwardTest.FORMAT)) {
             String allContent = new String(Files.readAllBytes(log.getLog().getFile()));
 
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             assert log.processRecordsBack(allContent.indexOf("not-a-record2"), false, res::add);
             check(res, "not-a-record\nnot-a-record2");

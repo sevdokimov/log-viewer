@@ -32,7 +32,7 @@ public class Utf8ReadTest extends AbstractLogTest {
 
     @Test
     public void readNonLatinText() throws IOException {
-        List<Record> records = loadLog("utf8.log", LOG4J_DEFAULT);
+        List<LogRecord> records = loadLog("utf8.log", LOG4J_DEFAULT);
 
         check(records);
 
@@ -40,15 +40,15 @@ public class Utf8ReadTest extends AbstractLogTest {
 
         check(loadLog("utf8.log", FORMAT_REGEX));
 
-        List<Record> recordsIco = loadLog("utf8.log", LOG4J_ICO8859);
+        List<LogRecord> recordsIco = loadLog("utf8.log", LOG4J_ICO8859);
 
         for (int i = 0, recordsIcoSize = recordsIco.size(); i < recordsIcoSize; i++) {
-            Record record = recordsIco.get(i);
+            LogRecord record = recordsIco.get(i);
             assert record.getFieldText(1).length() > records.get(i).getFieldText(1).length();
         }
     }
 
-    private void check(List<Record> records) {
+    private void check(List<LogRecord> records) {
         assertThat(records.stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()), is(
                 Arrays.asList("текст 1", "текст 2\nыыы", "текст\nтекст 3")
         ));

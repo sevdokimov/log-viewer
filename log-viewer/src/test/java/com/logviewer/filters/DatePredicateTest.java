@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.LvPredicateChecker;
-import com.logviewer.data2.Record;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -32,7 +32,7 @@ public class DatePredicateTest {
 
     private void check(DatePredicate predicate, Date recordDate, boolean expected) {
         String message = "aaa";
-        Record record = new Record(message, recordDate.getTime(), 0, message.length(), false, new int[0]);
+        LogRecord record = new LogRecord(message, recordDate.getTime(), 0, message.length(), false, new int[0]);
 
         assert predicate.test(record, Mockito.mock(LvPredicateChecker.class)) == expected;
     }

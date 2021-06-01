@@ -2,7 +2,7 @@ package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import org.mozilla.javascript.*;
 import org.springframework.lang.Nullable;
 
@@ -43,7 +43,7 @@ public class JsPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         JsContext jsContext = ctx.getProperty(KEY, name -> {
             Context cx = Context.enter();
             return new JsContext(cx);
@@ -99,14 +99,14 @@ public class JsPredicate implements RecordPredicate {
 
         protected Scriptable parent;
 
-        private Record record;
+        private LogRecord record;
         private LogFilterContext ctx;
 
         private JsRecordObject(Scriptable parent) {
             this.parent = parent;
         }
 
-        public void init(Record record, LogFilterContext ctx) {
+        public void init(LogRecord record, LogFilterContext ctx) {
             this.record = record;
             this.ctx = ctx;
         }

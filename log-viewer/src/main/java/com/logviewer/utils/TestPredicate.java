@@ -1,7 +1,7 @@
 package com.logviewer.utils;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.filters.RecordPredicate;
 import org.springframework.lang.NonNull;
 
@@ -13,13 +13,13 @@ public class TestPredicate implements RecordPredicate {
 
     public static final long WAIT_TIMEOUT = Integer.getInteger("test-wait-timeout", 5) * 1000;
 
-    private static final Map<Object, Predicate<Record>> lockMap = new LinkedHashMap<>();
+    private static final Map<Object, Predicate<LogRecord>> lockMap = new LinkedHashMap<>();
 
-    private static final List<Record> passed = new ArrayList<>();
+    private static final List<LogRecord> passed = new ArrayList<>();
 
-    private static final Set<Record> waited = new HashSet<>();
+    private static final Set<LogRecord> waited = new HashSet<>();
 
-    public static void handle(Record record) {
+    public static void handle(LogRecord record) {
         try {
             synchronized (TestPredicate.class) {
                 boolean added = false;
@@ -50,7 +50,7 @@ public class TestPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         handle(record);
         return true;
     }
@@ -59,13 +59,13 @@ public class TestPredicate implements RecordPredicate {
         return wasProcessed(r -> r.getMessage().equals(record));
     }
 
-    public static boolean wasProcessed(Predicate<Record> p) {
+    public static boolean wasProcessed(Predicate<LogRecord> p) {
         synchronized (passed) {
             return passed.stream().anyMatch(p);
         }
     }
 
-    public static List<Record> getPassed() {
+    public static List<LogRecord> getPassed() {
         synchronized (passed) {
             return new ArrayList<>(passed);
         }
@@ -75,7 +75,7 @@ public class TestPredicate implements RecordPredicate {
         waitForRecord(r -> r.getMessage().equals(record));
     }
 
-    public static void waitForRecord(Predicate<Record> p) throws InterruptedException {
+    public static void waitForRecord(Predicate<LogRecord> p) throws InterruptedException {
         long startTime = System.currentTimeMillis();
 
         synchronized (passed) {
@@ -99,7 +99,7 @@ public class TestPredicate implements RecordPredicate {
         return lock(record -> record.getMessage().equals(line));
     }
 
-    public static synchronized Object lock(Predicate<Record> p) {
+    public static synchronized Object lock(Predicate<LogRecord> p) {
         Object key = new Object();
         lockMap.put(key, p);
         return key;
@@ -118,7 +118,7 @@ public class TestPredicate implements RecordPredicate {
         waitForLocked(record -> record.getMessage().equals(line));
     }
 
-    public static synchronized void waitForLocked(Predicate<Record> predicate) throws InterruptedException {
+    public static synchronized void waitForLocked(Predicate<LogRecord> predicate) throws InterruptedException {
         long startTime = System.currentTimeMillis();
 
         while (true) {

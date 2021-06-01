@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import org.springframework.lang.NonNull;
 
 import java.util.Objects;
@@ -54,10 +54,10 @@ public class FieldArgPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         String fieldValue;
 
-        if (Record.WHOLE_LINE.equals(fieldName)) {
+        if (LogRecord.WHOLE_LINE.equals(fieldName)) {
             fieldValue = record.getMessage();
         } else {
             fieldValue = ctx.getFieldValue(record, fieldName);

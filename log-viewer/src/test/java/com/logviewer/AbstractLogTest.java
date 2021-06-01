@@ -143,12 +143,12 @@ public abstract class AbstractLogTest {
         return url.getFile();
     }
 
-    public List<Record> loadLog(String path, LogFormat logFormat) throws IOException {
+    public List<LogRecord> loadLog(String path, LogFormat logFormat) throws IOException {
         String file = getTestLog(path);
 
         Log log = getLogService().openLog(file, logFormat);
 
-        List<Record> records = new ArrayList<>();
+        List<LogRecord> records = new ArrayList<>();
         try (Snapshot snapshot = log.createSnapshot()) {
             snapshot.processRecords(0, record -> {
                 records.add(record);
@@ -199,7 +199,7 @@ public abstract class AbstractLogTest {
         test.doTest(local, remote);
     }
 
-    protected String fieldValue(LogFormat format, Record record, String fieldName) {
+    protected String fieldValue(LogFormat format, LogRecord record, String fieldName) {
         int fieldIdx = -1;
 
         LogFormat.FieldDescriptor[] fields = format.getFields();
@@ -214,7 +214,7 @@ public abstract class AbstractLogTest {
         return record.getFieldText(fieldIdx);
     }
 
-    protected Record read(@NonNull LogFormat logFormat, @NonNull String s) {
+    protected LogRecord read(@NonNull LogFormat logFormat, @NonNull String s) {
         LogReader reader = logFormat.createReader();
         boolean isSuccess = reader.parseRecord(new BufferedFile.Line(s));
         assert isSuccess : "Failed to parse: " + s;
@@ -222,7 +222,7 @@ public abstract class AbstractLogTest {
         return reader.buildRecord();
     }
 
-    protected void checkFields(Record record, String ... expectedFields) {
+    protected void checkFields(LogRecord record, String ... expectedFields) {
         assertEquals(expectedFields.length, record.getFieldsCount());
 
         for (int i = 0; i < expectedFields.length; i++) {

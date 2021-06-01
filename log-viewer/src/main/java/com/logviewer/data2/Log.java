@@ -121,14 +121,14 @@ public class Log implements LogView {
         return true;
     }
 
-    private Record createUnparsedRecord(BufferedFile buf, long start, long end) throws IOException {
+    private LogRecord createUnparsedRecord(BufferedFile buf, long start, long end) throws IOException {
         long readLength = Math.min(end - start, ParserConfig.MAX_LINE_LENGTH);
 
         ByteBuffer b = buf.read(start, readLength);
 
         String text = Utils.toString(b, encoding);
 
-        return Record.createUnparsedRecord(text, 0, start, end, readLength < end - start, format).setLogId(id);
+        return LogRecord.createUnparsedRecord(text, 0, start, end, readLength < end - start, format).setLogId(id);
     }
 
     public Snapshot createSnapshot() {
@@ -282,7 +282,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processRecordsBack(long position, boolean fromPrevLine, Predicate<Record> consumer) throws IOException {
+        public boolean processRecordsBack(long position, boolean fromPrevLine, Predicate<LogRecord> consumer) throws IOException {
             if (position < 0)
                 throw new IllegalArgumentException();
 
@@ -378,7 +378,7 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processRecords(long position, boolean fromNextLine, Predicate<Record> consumer) throws IOException {
+        public boolean processRecords(long position, boolean fromNextLine, Predicate<LogRecord> consumer) throws IOException {
             if (position < 0)
                 throw new IllegalArgumentException();
 
@@ -539,11 +539,11 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTimeBack(long time, Predicate<Record> consumer) throws IOException {
+        public boolean processFromTimeBack(long time, Predicate<LogRecord> consumer) throws IOException {
             if (error != null)
                 throw error;
 
-            Record record = logIndex.findRecordBound(time, true, this);
+            LogRecord record = logIndex.findRecordBound(time, true, this);
             if (record == null)
                 return true;
 
@@ -554,11 +554,11 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTime(long time, Predicate<Record> consumer) throws IOException {
+        public boolean processFromTime(long time, Predicate<LogRecord> consumer) throws IOException {
             if (error != null)
                 throw error;
 
-            Record record = logIndex.findRecordBound(time, false, this);
+            LogRecord record = logIndex.findRecordBound(time, false, this);
             if (record == null)
                 return true;
 

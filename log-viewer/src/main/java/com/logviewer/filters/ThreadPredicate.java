@@ -3,7 +3,7 @@ package com.logviewer.filters;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.utils.RegexUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -84,7 +84,7 @@ public class ThreadPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         LogFormat.FieldDescriptor[] fields = ctx.getFields();
         for (int i = 0; i < fields.length; i++) {
             LogFormat.FieldDescriptor field = fields[i];

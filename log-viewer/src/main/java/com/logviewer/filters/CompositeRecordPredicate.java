@@ -1,7 +1,7 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.LogFilterContext;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import org.springframework.lang.Nullable;
 
 import java.util.*;
@@ -42,7 +42,7 @@ public class CompositeRecordPredicate implements RecordPredicate {
     }
 
     @Override
-    public boolean test(Record record, LogFilterContext ctx) {
+    public boolean test(LogRecord record, LogFilterContext ctx) {
         if (isAnd) {
             for (RecordPredicate predicate : predicates) {
                 if (!predicate.test(record, ctx))

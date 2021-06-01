@@ -101,7 +101,7 @@ public class LocalFileRecordLoader implements LogProcess {
         state = 1;
     }
 
-    private boolean timeOk(Record record) {
+    private boolean timeOk(LogRecord record) {
         long timeLimit = this.timeLimit;
         if (timeLimit <= 0)
             return true;
@@ -134,7 +134,7 @@ public class LocalFileRecordLoader implements LogProcess {
         this.timeLimit = limit;
     }
 
-    private boolean searchFromPosition(Snapshot snapshot, Predicate<Record> predicate) throws IOException {
+    private boolean searchFromPosition(Snapshot snapshot, Predicate<LogRecord> predicate) throws IOException {
         Long startTimeFromFilters = PredicateUtils.extractTimeLimit(filter, backward);
 
         int idCmp = start.getLogId().compareTo(snapshot.getLog().getId());
@@ -207,7 +207,7 @@ public class LocalFileRecordLoader implements LogProcess {
         }
     }
 
-    private class MyRecordPredicate implements Predicate<Record> {
+    private class MyRecordPredicate implements Predicate<LogRecord> {
 
         private final LvPredicateChecker predicateChecker;
         private long readSize;
@@ -220,7 +220,7 @@ public class LocalFileRecordLoader implements LogProcess {
         }
 
         @Override
-        public boolean test(Record record) {
+        public boolean test(LogRecord record) {
             if (timeLimitFomFilter != null && record.hasTime()) {
                 if (backward ? record.getTime() < timeLimitFomFilter : record.getTime() > timeLimitFomFilter) {
                     stoppedByFilterTimeLimit = true;
@@ -231,7 +231,7 @@ public class LocalFileRecordLoader implements LogProcess {
             if (!timeOk(record))
                 return false;
 
-            Pair<Record, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
+            Pair<LogRecord, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
 
             if (restRecord != null) {
                 recordCount++;

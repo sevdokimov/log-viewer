@@ -113,7 +113,7 @@ public class LogIndexTest extends AbstractLogTest {
     @Test
     public void iterateFromTime() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time-2.log", MULTIFILE_LOG_FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             boolean f = snapshot.processFromTime(date(0, 2), res::add);
             assert f;
@@ -129,7 +129,7 @@ public class LogIndexTest extends AbstractLogTest {
     @Test
     public void iterateFromTimeBack() throws IOException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time-2.log", MULTIFILE_LOG_FORMAT)) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             boolean f = snapshot.processFromTimeBack(date(0, 3), res::add);
             assert f;
@@ -142,7 +142,7 @@ public class LogIndexTest extends AbstractLogTest {
         }
     }
 
-    private void check(long expectedPos, Record record) {
+    private void check(long expectedPos, LogRecord record) {
         assertEquals(expectedPos, record.getStart());
     }
 

@@ -67,7 +67,7 @@ public class LocalFileRecordSearcher implements LogProcess {
                     if (hash != null && !snapshot.isValidHash(hash))
                         throw new LogCrashedException();
 
-                    Queue<Pair<Record, Throwable>> queue = new ArrayDeque<>(recordCount);
+                    Queue<Pair<LogRecord, Throwable>> queue = new ArrayDeque<>(recordCount);
                     boolean[] hasSkippedLined = new boolean[1];
                     boolean[] found = new boolean[1];
 
@@ -77,7 +77,7 @@ public class LocalFileRecordSearcher implements LogProcess {
 
                     LvPredicateChecker predicateChecker = new LvPredicateChecker(snapshot.getLog());
 
-                    Predicate<Record> predicate = record -> {
+                    Predicate<LogRecord> predicate = record -> {
                         if (timeLimitFomFilter != null && record.hasTime()) {
                             if (backward ? record.getTime() < timeLimitFomFilter : record.getTime() > timeLimitFomFilter)
                                 return false;
@@ -86,7 +86,7 @@ public class LocalFileRecordSearcher implements LogProcess {
                         if (!timeOk(record))
                             return false;
 
-                        Pair<Record, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
+                        Pair<LogRecord, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
 
                         if (restRecord != null) {
                             if (queue.size() == recordCount) {
@@ -143,7 +143,7 @@ public class LocalFileRecordSearcher implements LogProcess {
         state = 1;
     }
 
-    private boolean timeOk(Record record) {
+    private boolean timeOk(LogRecord record) {
         long timeLimit = this.timeLimit;
         if (timeLimit <= 0)
             return true;

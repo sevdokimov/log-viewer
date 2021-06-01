@@ -362,7 +362,7 @@ public class LogSession {
                 }
 
                 int foundIdx = backward ? 0 : searchRes.getData().size() - 1;
-                Record found = searchRes.getData().get(foundIdx).getFirst();
+                LogRecord found = searchRes.getData().get(foundIdx).getFirst();
                 assert pattern.matcher().test(found.getMessage());
 
                 EventSearchResponse searchResponse = new EventSearchResponse(searchRes, stateVersion, requestId, foundIdx);

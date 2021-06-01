@@ -4,7 +4,7 @@ import com.logviewer.data2.*;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ThreadPredicateTest {
 
@@ -42,7 +42,7 @@ public class ThreadPredicateTest {
     }
 
     private void check(ThreadPredicate p, String thread, boolean expected) {
-        Record record = new Record(thread, System.currentTimeMillis(), 0, thread.length(), false, new int[]{0, thread.length()});
+        LogRecord record = new LogRecord(thread, System.currentTimeMillis(), 0, thread.length(), false, new int[]{0, thread.length()});
 
         LogFormat.FieldDescriptor[] fields = new LogFormat.FieldDescriptor[]{new DefaultFieldDesciptor("t", FieldTypes.THREAD)};
         LogFilterContext context = Mockito.mock(LogFilterContext.class);

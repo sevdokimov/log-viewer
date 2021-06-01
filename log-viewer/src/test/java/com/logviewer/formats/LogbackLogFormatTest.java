@@ -8,7 +8,7 @@ import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         LogFormat logFormat = new LogbackLogFormat(null, pattern);
 
-        Record record = read(logFormat, logRecord);
+        LogRecord record = read(logFormat, logRecord);
         checkFields(record, fields);
     }
 
@@ -149,7 +149,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void relativeTimestamp() {
         LogFormat format = new LogbackLogFormat("%logger %relative %msg%n");
 
-        Record record = read(format, "com.google.App  10 rrr");
+        LogRecord record = read(format, "com.google.App  10 rrr");
 
         assertEquals("com.google.App", fieldValue(format, record, "logger"));
         assertEquals("rrr", fieldValue(format, record, "msg"));
@@ -160,7 +160,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void relativeTimestampSearch() {
         LogFormat format = new LogbackLogFormat("%thread%relative %msg%n");
 
-        Record record = read(format, "my-thread 10 rrr");
+        LogRecord record = read(format, "my-thread 10 rrr");
 
         assertEquals("my-thread", fieldValue(format, record, "thread"));
         assertEquals("rrr", fieldValue(format, record, "msg"));
@@ -217,7 +217,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void testReadLog() throws IOException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
 
-        Record[] recs = loadLog("default-parser/log.log", FORMAT).toArray(new Record[0]);
+        LogRecord[] recs = loadLog("default-parser/log.log", FORMAT).toArray(new LogRecord[0]);
 
         assertEquals("2016-12-02_16:40:47.990", dateFormat.format(new Date(recs[0].getTime())));
         assertEquals("DEBUG", fieldValue(FORMAT, recs[0], "level"));
@@ -237,7 +237,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %msg%n");
         assertFalse(logFormat.hasFullDate());
 
-        Record record = read(logFormat, "10:40:11 aaa");
+        LogRecord record = read(logFormat, "10:40:11 aaa");
 
         assertTrue(record.getTime() <= 0);
     }
@@ -245,7 +245,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     @Test
     public void testwEx() {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %msg%n%wEx");
-        Record record = read(logFormat, "10:40:11 aaa");
+        LogRecord record = read(logFormat, "10:40:11 aaa");
 
         assertTrue(record.getTime() <= 0);
     }
@@ -254,10 +254,10 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void testProcessId() {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %processId %msg%wEx");
 
-        Record record1 = read(logFormat, "10:40:11 1 aaa");
+        LogRecord record1 = read(logFormat, "10:40:11 1 aaa");
         assertEquals("1", record1.getFieldText(1));
 
-        Record record2 = read(logFormat, "10:40:11 1111 aaa");
+        LogRecord record2 = read(logFormat, "10:40:11 1111 aaa");
         assertEquals("1111", record2.getFieldText(1));
     }
 

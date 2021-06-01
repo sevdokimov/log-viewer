@@ -4,7 +4,7 @@ import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.BufferedFile;
 import com.logviewer.data2.LogReader;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.logLibs.nginx.NginxLogFormat;
 import org.junit.Test;
 import org.springframework.lang.NonNull;
@@ -106,7 +106,7 @@ public class NginxLogFormatTest extends AbstractLogTest {
     private void check(@NonNull String pattern, String event, String ... fields) {
         NginxLogFormat format = new NginxLogFormat(pattern);
 
-        Record record = read(format, event);
+        LogRecord record = read(format, event);
         checkFields(record, fields);
     }
 

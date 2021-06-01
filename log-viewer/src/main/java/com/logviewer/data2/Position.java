@@ -18,11 +18,11 @@ public class Position implements Comparable<Position>, Serializable {
         this.o = o;
     }
 
-    public Position(Record record) {
+    public Position(LogRecord record) {
         this(record, true);
     }
 
-    public Position(Record record, boolean atStart) {
+    public Position(LogRecord record, boolean atStart) {
         this(record.getLogId(), record.getTime(), atStart ? record.getStart() : record.getEnd());
     }
 

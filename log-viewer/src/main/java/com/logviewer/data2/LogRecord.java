@@ -9,7 +9,7 @@ import java.io.ObjectOutput;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Record implements Comparable<Record>, Externalizable {
+public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     /**
      * The name of generic field that contains whole record text.
@@ -32,11 +32,11 @@ public class Record implements Comparable<Record>, Externalizable {
     /**
      * Used by deserializer only.
      */
-    public Record() {
+    public LogRecord() {
 
     }
 
-    public Record(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
+    public LogRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
         this.message = message;
         this.time = time;
 
@@ -51,7 +51,7 @@ public class Record implements Comparable<Record>, Externalizable {
         return logId;
     }
 
-    public Record setLogId(String logId) {
+    public LogRecord setLogId(String logId) {
         this.logId = logId;
         return this;
     }
@@ -107,7 +107,7 @@ public class Record implements Comparable<Record>, Externalizable {
     }
 
     @Override
-    public int compareTo(Record o) {
+    public int compareTo(LogRecord o) {
         int res = Long.compare(time, o.time);
         if (res != 0)
             return res;
@@ -151,17 +151,17 @@ public class Record implements Comparable<Record>, Externalizable {
     }
 
     @NonNull
-    public static Record createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull LogFormat logFormat) {
+    public static LogRecord createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull LogFormat logFormat) {
         int[] fieldOffsets = new int[logFormat.getFields().length * 2];
         Arrays.fill(fieldOffsets, -1);
-        return new Record(message, time, start, end, hasMore, fieldOffsets);
+        return new LogRecord(message, time, start, end, hasMore, fieldOffsets);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Record record = (Record) o;
+        LogRecord record = (LogRecord) o;
         return time == record.time && start == record.start && end == record.end && hasMore == record.hasMore && logId.equals(record.logId) && message.equals(record.message) && Arrays.equals(fieldPositions, record.fieldPositions);
     }
 

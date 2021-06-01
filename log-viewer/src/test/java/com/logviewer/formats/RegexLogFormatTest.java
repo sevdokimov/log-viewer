@@ -3,7 +3,7 @@ package com.logviewer.formats;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.data2.Log;
 import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.Snapshot;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
                 RegexLogFormat.field("msg", null)
                 );
 
-        Record record = read(logFormat, "111 message text");
+        LogRecord record = read(logFormat, "111 message text");
 
         assertEquals("111", record.getFieldText(logFormat.getFieldIndexByName("date")));
         assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
@@ -44,7 +44,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
         Log log = getLogService().openLog(logPath, logFormat);
 
         try (Snapshot snapshot = log.createSnapshot()) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             snapshot.processRecords(0, res::add);
 
@@ -54,7 +54,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
                     "222 bbb",
                     "b_ b_ b_"
                     ),
-                    res.stream().map(Record::getMessage).collect(Collectors.toList()));
+                    res.stream().map(LogRecord::getMessage).collect(Collectors.toList()));
         }
 
     }
@@ -71,7 +71,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
         Log log = getLogService().openLog(logPath, logFormat);
 
         try (Snapshot snapshot = log.createSnapshot()) {
-            List<Record> res = new ArrayList<>();
+            List<LogRecord> res = new ArrayList<>();
 
             snapshot.processRecords(0, res::add);
 
@@ -79,7 +79,7 @@ public class RegexLogFormatTest extends AbstractLogTest {
                     "111 aaa\na_ a_ a_\na__ a__ a__",
                     "222 bbb\nb_ b_ b_"
                     ),
-                    res.stream().map(Record::getMessage).collect(Collectors.toList()));
+                    res.stream().map(LogRecord::getMessage).collect(Collectors.toList()));
         }
 
     }

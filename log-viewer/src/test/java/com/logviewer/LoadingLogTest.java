@@ -1,7 +1,7 @@
 package com.logviewer;
 
 import com.logviewer.data2.Log;
-import com.logviewer.data2.Record;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.Snapshot;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import org.junit.Test;
@@ -27,7 +27,7 @@ public class LoadingLogTest extends AbstractLogTest {
         assertEquals("%d{ddMMyy HH:mm:ss} %m", ((LogbackLogFormat)log.getFormat()).getPattern());
 
         try (Snapshot snapshot = log.createSnapshot()) {
-            List<Record> list = new ArrayList<>();
+            List<LogRecord> list = new ArrayList<>();
             snapshot.processRecords(1, list::add);
 
             assertEquals("150101 10:00:01 zzz a", list.get(0).getMessage());

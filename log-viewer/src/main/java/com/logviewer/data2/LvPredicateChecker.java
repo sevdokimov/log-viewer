@@ -36,7 +36,7 @@ public class LvPredicateChecker implements LogFilterContext, AutoCloseable {
 
     @Nullable
     @Override
-    public String getFieldValue(@NonNull Record record, @NonNull String fieldName) {
+    public String getFieldValue(@NonNull LogRecord record, @NonNull String fieldName) {
         assert logId.equals(record.getLogId());
 
         int fieldIndex = findFieldIndexByName(fieldName);
@@ -59,7 +59,7 @@ public class LvPredicateChecker implements LogFilterContext, AutoCloseable {
         return (T)context.computeIfAbsent(name, factory);
     }
 
-    public Pair<Record, Throwable> applyFilter(@NonNull Record record, @Nullable RecordPredicate filter) {
+    public Pair<LogRecord, Throwable> applyFilter(@NonNull LogRecord record, @Nullable RecordPredicate filter) {
         try {
             if (filter != null && !filter.test(record, this))
                 return null;
