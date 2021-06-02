@@ -21,12 +21,6 @@
 
     <profiles>
         <profile>
-            <id>build-frontend</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
-        <profile>
             <id>demo-projects</id>
             <modules>
                 <module>demo/log-generator</module>
