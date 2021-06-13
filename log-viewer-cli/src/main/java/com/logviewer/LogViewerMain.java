@@ -51,6 +51,8 @@ public class LogViewerMain {
 
     @Value("${log-viewer.server.port:8111}")
     private int port;
+    @Value("${log-viewer.context-path:/}")
+    private String contextPath;
     @Value("${log-viewer.server.interface:}")
     private String serverInterface;
     @Value("${log-viewer.server.enabled:true}")
@@ -89,7 +91,7 @@ public class LogViewerMain {
 
             WebAppContext webAppCtx = new WebAppContext();
 
-            webAppCtx.setContextPath("/");
+            webAppCtx.setContextPath(contextPath);
 
             String webXmlStr = LogViewerMain.class.getClassLoader().getResource("log-viewer-web/WEB-INF/web.xml").toString();
             URL webAppUrl = new URL(webXmlStr.substring(0, webXmlStr.length() - "WEB-INF/web.xml".length()));
@@ -116,7 +118,9 @@ public class LogViewerMain {
 
             server = srv;
 
-            LOG.info("Web interface started: http://localhost:{} ({}ms)", port, ManagementFactory.getRuntimeMXBean().getUptime());
+            LOG.info("Web interface started: http://localhost:{}{} ({}ms)", port,
+                    contextPath.equals("/") ? "" : contextPath,
+                    ManagementFactory.getRuntimeMXBean().getUptime());
 
             return true;
         }
