@@ -1,19 +1,38 @@
 package com.logviewer.filters;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.logviewer.data2.LogFilterContext;
 import com.logviewer.data2.LogRecord;
+import com.logviewer.utils.GsonNanosecondsAdapter;
+import com.logviewer.utils.LvDateUtils;
+
+import java.util.Date;
 
 public class DatePredicate implements RecordPredicate {
 
-    private long date;
+    /**
+     * Date in milliseconds.
+     */
+    private Long date;
+
+    /**
+     * Date in nanoseconds.
+     */
+    @JsonAdapter(GsonNanosecondsAdapter.class)
+    private Long timestamp;
+
     private boolean greater;
 
     public DatePredicate() {
 
     }
 
-    public DatePredicate(long date, boolean greater) {
-        this.date = date;
+    public DatePredicate(Date date, boolean greater) {
+        this(LvDateUtils.toNanos(date.getTime()), greater);
+    }
+
+    public DatePredicate(long timestamp, boolean greater) {
+        this.timestamp = timestamp;
         this.greater = greater;
     }
 
@@ -22,22 +41,27 @@ public class DatePredicate implements RecordPredicate {
         if (!record.hasTime())
             return true;
 
-        if (date == 0)
+        long ts = getDate();
+
+        if (ts == 0)
             return true;
 
         if (greater) {
-            return record.getTime() >= date;
+            return record.getTime() >= ts;
         } else {
-            return record.getTime() <= date;
+            return record.getTime() <= ts;
         }
     }
 
     public long getDate() {
-        return date;
+        if (timestamp != null)
+            return timestamp;
+
+        return date == null ? 0 : LvDateUtils.toNanos(date);
     }
 
-    public DatePredicate setDate(long date) {
-        this.date = date;
+    public DatePredicate setDate(long timestamp) {
+        this.timestamp = timestamp;
         return this;
     }
 

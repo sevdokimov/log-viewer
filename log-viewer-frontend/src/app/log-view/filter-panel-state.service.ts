@@ -267,8 +267,8 @@ export interface FilterState {
     textFilters?: TextFilter[];
 
     date?: {
-        startDate?: number;
-        endDate?: number;
+        startDate?: string;
+        endDate?: string;
     };
 
     thread?: {includes?: string[], excludes?: string[]};

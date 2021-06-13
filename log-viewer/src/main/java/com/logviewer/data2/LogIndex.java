@@ -1,6 +1,11 @@
 package com.logviewer.data2;
 
+import com.logviewer.utils.LvDateUtils;
+import com.logviewer.utils.Utils;
+import org.springframework.lang.NonNull;
+
 import java.io.IOException;
+import java.util.Date;
 import java.util.function.Predicate;
 
 public class LogIndex {
@@ -23,7 +28,12 @@ public class LogIndex {
 //        return record == null ? 0 : record.getSizeBytes();
 //    }
 
+    public LogRecord findRecordBound(@NonNull Date time, boolean lastBound, Snapshot buffer) throws IOException, LogCrashedException {
+        return findRecordBound(LvDateUtils.toNanos(time), lastBound, buffer);
+    }
+
     public synchronized LogRecord findRecordBound(long time, boolean lastBound, Snapshot buffer) throws IOException {
+        Utils.assertValidTimestamp(time);
         FindFirstProcessor firstRecord;
         FindFirstProcessor lastRecord;
 

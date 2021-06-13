@@ -11,6 +11,7 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
+import com.logviewer.utils.LvDateUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,17 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         assertEquals(FieldTypes.DATE, dateField.type());
     }
 
+    @Test
+    public void testParseRecordWithTimezone() throws Exception {
+        LogbackLogFormat format = new LogbackLogFormat("%date{yyyy-MM-dd HH:mm:ss Z} %m%n");
 
+        LogRecord record = read(format, "2011-10-13 18:33:45 +0000 mmm");
+        checkFields(record, "2011-10-13 18:33:45 +0000", "mmm");
+
+        Date expectedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse("2011-10-13 18:33:45 +0000");
+
+        assertEquals(LvDateUtils.toNanos(expectedDate), record.getTime());
+    }
 
     @Test
     public void ttt() {
@@ -103,12 +114,18 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         // Date
         checkPattern("%date{q}%n",event, "2001-02-21 11:22:03,000"); // Invalid pattern
-        checkPattern("%date{yyyy-MM}%n",event, "2001-02");
+        checkPattern("%date{yyyy-MM-dd}%n",event, "2001-02-21");
+        checkPattern("%date{yyyy-MMM}%n",event, "2001-Feb");
+        checkPattern("%date{yyyyMMddHHmmss}%n",event, "20010221112203");
         checkPattern("%date%n",event, "2001-02-21 11:22:03,000");
         checkPattern("%F%n",event, "NativeMethodAccessorImpl.java");
 
         checkPattern("[%date{yyyy-MM-dd_HH:mm:ss.SSS}] [%thread] %-5level %logger{35} - %X{pipelineId}%X{contentId}%msg%n", event,
                 "2001-02-21_11:22:03.000", "localhost-startStop-1-EventThread", "INFO", "c.l.formats.LogbackLogFormatTest",
+                "Authentication failed 100");
+
+        checkPattern("%date{yyyy-MM-dd HH:mm:ss.SSSSSS} [%level] from %logger in %thread - %message%n%xException", event,
+                "2001-02-21 11:22:03.000000", "INFO", "com.logviewer.formats.LogbackLogFormatTest", "localhost-startStop-1-EventThread",
                 "Authentication failed 100");
 
         checkPattern("%date{yyyy-MM-dd HH:mm:ss ZZZZ} [%level] from %logger in %thread - %message%n%xException", event,
@@ -219,14 +236,14 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         LogRecord[] recs = loadLog("default-parser/log.log", FORMAT).toArray(new LogRecord[0]);
 
-        assertEquals("2016-12-02_16:40:47.990", dateFormat.format(new Date(recs[0].getTime())));
+        assertEquals("2016-12-02_16:40:47.990", dateFormat.format(new Date(recs[0].getTimeMillis())));
         assertEquals("DEBUG", fieldValue(FORMAT, recs[0], "level"));
         assertEquals("http-bio-8088-exec-1", fieldValue(FORMAT, recs[0], "thread"));
 
-        assertEquals("2016-12-02_16:45:26.321", dateFormat.format(new Date(recs[1].getTime())));
+        assertEquals("2016-12-02_16:45:26.321", dateFormat.format(new Date(recs[1].getTimeMillis())));
         assertEquals("o.a.commons.dbcp2.BasicDataSource", fieldValue(FORMAT, recs[1], "logger"));
 
-        assertEquals("2016-12-02_16:51:35.342", dateFormat.format(new Date(recs[2].getTime())));
+        assertEquals("2016-12-02_16:51:35.342", dateFormat.format(new Date(recs[2].getTimeMillis())));
         assertEquals("localhost-startStop-1", fieldValue(FORMAT, recs[2], "thread"));
         assertEquals("com.behavox.core.PluginManager", fieldValue(FORMAT, recs[2], "logger"));
         assertEquals("Plugins search time: 197 ms\n", fieldValue(FORMAT, recs[2], "msg"));

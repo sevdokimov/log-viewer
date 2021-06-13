@@ -7,10 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.logviewer.TestUtils.MULTIFILE_LOG_FORMAT;
 import static com.logviewer.TestUtils.date;
@@ -20,13 +17,12 @@ import static org.junit.Assert.assertNull;
 public class LogIndexTest extends AbstractLogTest {
 
     @Test
-    public void noTimedRecord() throws IOException {
+    public void noTimedRecord() throws IOException, LogCrashedException {
         try (Snapshot snapshot = log("/testdata/date/log-with-time.log", MULTIFILE_LOG_FORMAT)) {
             LogIndex index = new LogIndex();
             assertNull(index.findRecordBound(0, false, snapshot));
-            assertNull(index.findRecordBound(snapshot.getSize(), false, snapshot));
-            assertNull(index.findRecordBound(snapshot.getSize() + 100, false, snapshot));
-            assertNull(index.findRecordBound(5, false, snapshot));
+            assertNull(index.findRecordBound(new Date(119, 1, 1), false, snapshot));
+            assertNull(index.findRecordBound(new Date(117, 1, 1), false, snapshot));
         }
     }
 

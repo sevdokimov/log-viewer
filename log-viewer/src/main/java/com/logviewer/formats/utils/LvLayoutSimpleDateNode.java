@@ -6,16 +6,18 @@ import org.springframework.lang.Nullable;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
 import java.util.TimeZone;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
     private final String format;
 
-    private transient SimpleDateFormat dateFormat;
+    private transient BiFunction<String, ParsePosition, Supplier<Instant>> formatter;
 
-    private transient ParsePosition parsePosition;
+    protected transient Supplier<Instant> timestamp;
 
     public LvLayoutSimpleDateNode(@NonNull String format) {
         this(format, null);
@@ -24,6 +26,7 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
     public LvLayoutSimpleDateNode(@NonNull String format, @Nullable TimeZone zone) {
         super(zone);
         this.format = format;
+        FastDateTimeParser.createFormatter(format, null); // validation
     }
 
     public String getFormat() {
@@ -32,25 +35,25 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
     @Override
     public int parse(String s, int offset, int end) {
-        if (dateFormat == null) {
-            dateFormat = new SimpleDateFormat(format);
-            if (zone != null)
-                dateFormat.setTimeZone(zone);
+        ParsePosition position = new ParsePosition(offset);
 
-            parsePosition = new ParsePosition(0);
-        }
+        if (formatter == null)
+            formatter = FastDateTimeParser.createFormatter(format, zone);
 
-        parsePosition.setIndex(offset);
-
-        Date date = dateFormat.parse(s, parsePosition);
-        if (date == null) {
+        timestamp = formatter.apply(s, position);
+        if (timestamp == null || position.getIndex() > end) {
             currentDate = -1;
             return PARSE_FAILED;
         }
 
-        currentDate = date.getTime();
+        return position.getIndex();
+    }
 
-        return parsePosition.getIndex();
+    @Override
+    public long getCurrentDate() {
+        Instant instant = timestamp.get();
+
+        return LvDateUtils.toNanos(instant);
     }
 
     @Override

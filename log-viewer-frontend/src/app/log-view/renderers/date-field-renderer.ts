@@ -16,8 +16,8 @@ export class DateFieldRenderer implements FieldRenderer {
         LvUtils.applyStyle(span, this.style);
         span.textContent = s;
 
-        if (record.time && record.time > 0) {
-            span.title = LvUtils.formatDate(record.time);
+        if (record.time) {
+            span.title = LvUtils.formatDate(Record.nano2milliseconds(record.time));
         }
 
         e.appendChild(span);

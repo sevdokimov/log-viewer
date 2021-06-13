@@ -139,11 +139,21 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (!stateJson) { return null; }
 
         try {
-            let filterState = JSON.parse(stateJson);
+            let filterState: FilterState = JSON.parse(stateJson);
 
             if (typeof filterState !== 'object') {
                 console.error('Filter panel state is not an object');
                 return null;
+            }
+
+            if (filterState.date) {
+                // fix filter states saved by old versions
+                if (typeof filterState.date.startDate === 'number') {
+                    filterState.date.startDate = LvUtils.milliseconds2nano(filterState.date.startDate);
+                }
+                if (typeof filterState.date.endDate === 'number') {
+                    filterState.date.endDate = LvUtils.milliseconds2nano(filterState.date.endDate);
+                }
             }
 
             return filterState;
@@ -953,9 +963,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             let offset: Position;
             if (this.m.length === 0) {
                 if (this.logs.length === 1) {
-                    offset = {logId: this.logs[0].id, time: 0, o: 0};
+                    offset = {logId: this.logs[0].id, time: null, o: 0};
                 } else {
-                    offset = {logId: '', time: 0, o: 0};
+                    offset = {logId: '', time: null, o: 0};
                 }
             } else {
                 offset = Position.recordEnd(this.m[this.m.length - 1]);

@@ -14,17 +14,17 @@ public class LvDateUtilsTest {
         checkFormat("yyyy-MM-dd HH:mm:ss.SSS", true);
         checkFormat("yyyy-MM-dd HH:mm:ss", true);
         checkFormat("yyyy-MM-dd HH:mm", true);
-        checkFormat("yyyy-MM-dd", true);
+        checkFormat("yyyy-MM-dd", false);
         
         checkFormat("yyyy-MM-dd HH:mm:ss.SSS Z", true);
         checkFormat("yyyy-MM-dd HH:mm:ss Z", true);
         checkFormat("yyyy-MM-dd HH:mm Z", true);
-        checkFormat("yyyy-MM-dd Z", true);
+        checkFormat("yyyy-MM-dd Z", false);
 
         checkFormat("yyyy-MM-dd HH:mm:ss.SSS z", true);
         checkFormat("yyyy-MM-dd HH:mm:ss z", true);
         checkFormat("yyyy-MM-dd HH:mm z", true);
-        checkFormat("yyyy-MM-dd z", true);
+        checkFormat("yyyy-MM-dd z", false);
 
         checkFormat("yyyy-MM-dd hh:mm a", true);
         checkFormat("yyyy-MM-dd hh:mm", false);

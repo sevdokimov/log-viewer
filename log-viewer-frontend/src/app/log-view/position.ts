@@ -1,7 +1,7 @@
 import {Record} from './record';
 
 export class Position {
-    constructor(public logId: string, public time: number, public o: number) {
+    constructor(public logId: string, public time: string, public o: number) {
     }
 
     // equals(p: Position): boolean {

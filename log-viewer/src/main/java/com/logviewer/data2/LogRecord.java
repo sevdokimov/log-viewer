@@ -1,5 +1,6 @@
 package com.logviewer.data2;
 
+import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 
 import java.io.Externalizable;
@@ -7,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
-import java.util.Objects;
 
 public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
@@ -20,7 +20,10 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     private String message;
 
-    private long time;
+    /**
+     * Timestamp in NANOseconds.
+     */
+    private long timeNanos;
 
     private int[] fieldPositions;
 
@@ -36,9 +39,11 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     }
 
-    public LogRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
+    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
+        Utils.assertValidTimestamp(timeNanos);
+
         this.message = message;
-        this.time = time;
+        this.timeNanos = timeNanos;
 
         this.start = start;
         this.end = end;
@@ -69,11 +74,15 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     }
 
     public long getTime() {
-        return time;
+        return timeNanos;
+    }
+
+    public long getTimeMillis() {
+        return timeNanos / 1000_000;
     }
 
     public boolean hasTime() {
-        return time > 0;
+        return timeNanos > 0;
     }
 
     public String getMessage() {
@@ -108,7 +117,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     @Override
     public int compareTo(LogRecord o) {
-        int res = Long.compare(time, o.time);
+        int res = Long.compare(timeNanos, o.timeNanos);
         if (res != 0)
             return res;
 
@@ -123,7 +132,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(logId);
         out.writeObject(message); // Don't use writeUTF(), it has limit to string length!!!
-        out.writeLong(time);
+        out.writeLong(timeNanos);
         out.writeLong(start);
         out.writeLong(end);
         out.writeBoolean(hasMore);
@@ -138,7 +147,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         logId = in.readUTF();
         message = (String) in.readObject();
-        time = in.readLong();
+        timeNanos = in.readLong();
         start = in.readLong();
         end = in.readLong();
         hasMore = in.readBoolean();
@@ -162,11 +171,13 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LogRecord record = (LogRecord) o;
-        return time == record.time && start == record.start && end == record.end && hasMore == record.hasMore && logId.equals(record.logId) && message.equals(record.message) && Arrays.equals(fieldPositions, record.fieldPositions);
+        return timeNanos == record.timeNanos && start == record.start && end == record.end && hasMore == record.hasMore
+                && logId.equals(record.logId) && message.equals(record.message)
+                && Arrays.equals(fieldPositions, record.fieldPositions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message);
+        return message.hashCode();
     }
 }

@@ -1,5 +1,6 @@
 package com.logviewer.utils;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.logviewer.web.session.tasks.SearchPattern;
 
 import java.util.Arrays;
@@ -174,7 +175,9 @@ public class FilterPanelState {
     }
 
     public static class DateFilter {
+        @JsonAdapter(GsonNanosecondsAdapter.class)
         private Long startDate;
+        @JsonAdapter(GsonNanosecondsAdapter.class)
         private Long endDate;
     }
 }

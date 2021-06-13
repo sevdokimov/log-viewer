@@ -22,7 +22,7 @@ export interface NotPredicate extends Predicate {
 }
 
 export interface DatePredicate extends Predicate {
-    date: number;
+    timestamp: string;
     greater: boolean;
 }
 

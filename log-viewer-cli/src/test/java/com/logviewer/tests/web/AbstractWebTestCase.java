@@ -433,7 +433,7 @@ public abstract class AbstractWebTestCase implements LogPage {
     public static long date(@NonNull String date) {
         for (DateFormat format : FORMATS) {
             try {
-                return format.parse(date).getTime();
+                return format.parse(date).getTime() * 1000_000;
             } catch (ParseException ignored) {
 
             }

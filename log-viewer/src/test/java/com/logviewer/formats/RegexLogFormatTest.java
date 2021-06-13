@@ -1,17 +1,14 @@
 package com.logviewer.formats;
 
 import com.logviewer.AbstractLogTest;
-import com.logviewer.data2.Log;
-import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.LogRecord;
-import com.logviewer.data2.Snapshot;
+import com.logviewer.data2.*;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -29,6 +26,66 @@ public class RegexLogFormatTest extends AbstractLogTest {
         LogRecord record = read(logFormat, "111 message text");
 
         assertEquals("111", record.getFieldText(logFormat.getFieldIndexByName("date")));
+        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+    }
+
+    @Test
+    public void testDateUTC() throws ParseException {
+        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+                "(?<date>[^ ]+) (?<msg>.+)", true,
+                "yyyy-MM-dd:HH:mm:ssZ", "date",
+                RegexLogFormat.field("date", FieldTypes.DATE),
+                RegexLogFormat.field("msg", null)
+        );
+
+        LogRecord record = read(logFormat, "2020-02-02:01:01:01+0000 message text");
+
+        assertEquals("2020-02-02:01:01:01+0000", record.getFieldText(logFormat.getFieldIndexByName("date")));
+        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        assertEquals(simpleDateFormat.parse("2020-02-02 01:01:01").getTime(), record.getTimeMillis());
+    }
+
+    @Test
+    public void testDate() {
+        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+                "(?<date>[^ ]+) (?<msg>.+)", true,
+                "yyyy-MM-dd:HH:mm:ss", "date",
+                RegexLogFormat.field("date", FieldTypes.DATE),
+                RegexLogFormat.field("msg", null)
+                );
+
+        LogRecord record = read(logFormat, "2020-02-02:01:01:01 message text");
+
+        assertEquals("2020-02-02:01:01:01", record.getFieldText(logFormat.getFieldIndexByName("date")));
+        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+
+        assertEquals(new Date(120, Calendar.FEBRUARY, 2, 1, 1, 1).getTime(), record.getTimeMillis());
+    }
+
+    @Test
+    public void testDateInOptionalField() {
+        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+                "(?<level>\\w+) (?<date>\\d[^ ]+)? (?<msg>.+)", true,
+                "yyyy-MM-dd:HH:mm:ss", "date",
+                RegexLogFormat.field("level", FieldTypes.LEVEL),
+                RegexLogFormat.field("date", FieldTypes.DATE),
+                RegexLogFormat.field("msg", null)
+                );
+
+        LogRecord record = read(logFormat, "DEBUG 2020-02-02:01:01:01 message text");
+
+        assertEquals("2020-02-02:01:01:01", record.getFieldText(logFormat.getFieldIndexByName("date")));
+        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals(new Date(120, Calendar.FEBRUARY, 2, 1, 1, 1).getTime(), record.getTimeMillis());
+
+        record = read(logFormat, "DEBUG  message text");
+
+        assert record.getTime() <= 0;
+        assertEquals("DEBUG", record.getFieldText(0));
         assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
     }
 

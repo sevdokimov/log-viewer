@@ -1,8 +1,11 @@
 package com.logviewer.filters;
 
 import com.logviewer.data2.*;
+import com.logviewer.utils.LvDateUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,7 +45,7 @@ public class ThreadPredicateTest {
     }
 
     private void check(ThreadPredicate p, String thread, boolean expected) {
-        LogRecord record = new LogRecord(thread, System.currentTimeMillis(), 0, thread.length(), false, new int[]{0, thread.length()});
+        LogRecord record = new LogRecord(thread, LvDateUtils.toNanos(new Date()), 0, thread.length(), false, new int[]{0, thread.length()});
 
         LogFormat.FieldDescriptor[] fields = new LogFormat.FieldDescriptor[]{new DefaultFieldDesciptor("t", FieldTypes.THREAD)};
         LogFilterContext context = Mockito.mock(LogFilterContext.class);

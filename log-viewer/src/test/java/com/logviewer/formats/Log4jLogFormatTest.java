@@ -6,6 +6,7 @@ import com.logviewer.data2.BufferedFile;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
+import com.logviewer.utils.LvDateUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
@@ -21,11 +22,13 @@ import org.apache.logging.log4j.spi.MutableThreadContextStack;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class Log4jLogFormatTest extends AbstractLogTest {
 
@@ -48,7 +51,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 .setContextStack(ThreadContext.EMPTY_STACK)
                 .build();
 
-        check("%p %NDC %m%n", event, "ERROR", "", "The log message");
+        check("%p %NDC %m%n", event, true, "ERROR", "", "The log message");
 
         read(new Log4jLogFormat("%p %NDC %m%n"), "ERROR [] dffsdsf");
         notMatch("%p %NDC %m%n", "ERROR  dffsdsf");
@@ -74,7 +77,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 .setContextStack(ThreadContext.EMPTY_STACK)
                 .build();
 
-        check("%p %NDC %m%n", event, "ERROR", "", "The log message");
+        check("%p %NDC %m%n", event, true, "ERROR", "", "The log message");
 
         read(new Log4jLogFormat("%p %X %m%n"), "ERROR {} dffsdsf");
         notMatch("%p %X %m%n", "ERROR xxx dffsdsf");
@@ -85,7 +88,19 @@ public class Log4jLogFormatTest extends AbstractLogTest {
     }
 
     @Test
-    public void testLog4j() {
+    public void testParseRecordWithTimezone() throws Exception {
+        Log4jLogFormat format = new Log4jLogFormat("%d{yyyy-MM-dd HH:mm:ss Z} %m%n");
+
+        LogRecord record = read(format, "2011-10-13 18:33:45 +0000 mmm");
+        checkFields(record, "2011-10-13 18:33:45 +0000", "mmm");
+
+        Date expectedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse("2011-10-13 18:33:45 +0000");
+
+        assertEquals(LvDateUtils.toNanos(expectedDate), record.getTime());
+    }
+
+    @Test
+    public void testLog4j() throws Exception {
         Throwable throwable = new Throwable();
 
         MutableInstant instant = new MutableInstant();
@@ -105,27 +120,49 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 .build();
 
         // "2011-11-13 18:33:45"
-        check("%levelzzz{www}%n", event, "ERROR");
-        check("%levelzzz%n", event, "ERROR");
-        check("%levelzzz{}%n", event, "ERROR");
-        check("%%l%level%n", event, "ERROR");
+        check("%levelzzz{www}%n", event, true, "ERROR");
+        check("%levelzzz%n", event, true, "ERROR");
+        check("%levelzzz{}%n", event, true, "ERROR");
+        check("%%l%level%n", event, true, "ERROR");
 
-        check1("%-5p [%t]: %m%n", event, "ERROR", "thread-pool-11", "The log message");
+        check1("%-5p [%t]: %m%n", event, true, "ERROR", "thread-pool-11", "The log message");
         check1("[%d{ISO8601}][%-5p][%t][%c{1}] %m%n", event, "~2011-10-13.18:33:45,000", "ERROR", "thread-pool-11", "Gson", "The log message");
-        check1("%d{ABSOLUTE} %m%n", event, "18:33:45,000", "The log message");
+        check1("%d{ABSOLUTE} %m%n", event, true, "18:33:45,000", "The log message");
 
-        check("%d{yyyyMMdd HHmm}{EST} %m%n", event, "20111013 0933", "The log message");
-        check("%d{yyyyMMdd HHmm}{UTC} %m%n", event, "20111013 1433", "The log message");
+        check1("%d{yyyyMMddHHmmss} %m%n", event, "20111013183345", "The log message");
+        check1("%d{yyyyMMddHHmmssSSS} %m%n", event, "20111013183345000", "The log message");
+
+        check1("%d{yyyyMMddHHmmss.SSS} %m%n", event, "20111013183345.000", "The log message");
+        check1("%d{yyyyMMddHHmmss.SSSS} %m%n", event, "20111013183345.0000", "The log message");
+        check1("%d{yyyyMMddHHmmss.SSSSS} %m%n", event, "20111013183345.00000", "The log message");
+        check1("%d{yyyyMMddHHmmss.SSSSSS} %m%n", event, "20111013183345.000000", "The log message");
+        check1("%d{yyyyMMddHHmmss.SSSSSSSSS} %m%n", event, "20111013183345.000000000", "The log message");
+
+        TestUtils.withTimeZone("UTC", () -> {
+            check1("%d{yyyyMMddHHmmssSSS z} %m%n", event, "20111013143345000 UTC", "The log message");
+            check1("%d{yyyyMMddHHmmssSSS zz} %m%n", event, "20111013143345000 UTC", "The log message");
+            check1("%d{yyyyMMddHHmmssSSS zzz} %m%n", event, "20111013143345000 UTC", "The log message");
+            check1("%d{yyyyMMddHHmmssSSS zzzz} %m%n", event, "20111013143345000 Coordinated Universal Time", "The log message");
+
+            check1("%d{yyyyMMddHHmmssSSS Z} %m%n", event, "20111013143345000 +0000", "The log message");
+
+//            check1("%d{yyyyMMddHHmmssSSS ZZZ} %m%n", event, "20111013143345000 +00:00", "The log message"); todo
+//            check1("%d{yyyyMMddHHmmssSSS ZZZZ} %m%n", event, "20111013143345000 +00:00", "The log message");
+//            check1("%d{yyyyMMddHHmmssSSS ZZZZZ} %m%n", event, "20111013143345000 +00:00", "The log message");
+        });
+
+        check("%d{yyyyMMdd HHmmss}{EST} %m%n", event, "20111013 093345", "The log message");
+        check("%d{yyyyMMdd HHmmss}{UTC} %m%n", event, "20111013 143345", "The log message");
         check1("%d{DATE} %m%n", event, "13 Oct 2011 18:33:45,000", "The log message");
-        check1("%d{HH:mm:ss,SSS} %5p [%t] - %m%n", event, "18:33:45,000", "ERROR", "thread-pool-11", "The log message");
+        check1("%d{HH:mm:ss,SSS} %5p [%t] - %m%n", event, true, "18:33:45,000", "ERROR", "thread-pool-11", "The log message");
         check1("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", event, "2011-10-13 18:33:45", "ERROR", "Gson", "~\\d+", "The log message");
 
         check1("[%d{dd-MM-yyyy HH:mm:ss}][%-5p][%t][%c{1}] %m%n", event, "13-10-2011 18:33:45", "ERROR", "thread-pool-11", "Gson", "The log message");
         check1("[%d{dd-MMM-yyyy HH:mm:ss}][%-5p][%t][%c{1}] %m%n", event, "13-Oct-2011 18:33:45", "ERROR", "thread-pool-11", "Gson", "The log message");
 
-        check1("[%p] %m%n", event, "ERROR", "The log message");
-        check1("[%p] %d %m%n", event, "ERROR", "2011-10-13 18:33:45,000", "The log message");
-        check1("[%30.30t] %-30.30c{1} %-5p %m%n", event, "thread-pool-11", "Gson", "ERROR", "The log message");
+        check1("[%p] %m%n", event, true, "ERROR", "The log message");
+        check1("[%p] %d %m%n", event, true, "ERROR", "2011-10-13 18:33:45,000", "The log message");
+        check1("[%30.30t] %-30.30c{1} %-5p %m%n", event, true, "thread-pool-11", "Gson", "ERROR", "The log message");
       //  check("%d [%-15.15t] %-5p %-30.30c{1} - %m%n", event, "2011-10-13 18:33:45,000", "thread-pool-11", "Gson", "ERROR", "The log message");  todo bug!
         check1("%d{ISO8601} [%-5p][%t][%30c] - [%X] %m%n", event, "~2011-10-13.18:33:45,000", "ERROR", "thread-pool-11",
                 "com.google.gson.Gson", "", "The log message");
@@ -134,7 +171,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                         "%sequenceNumber %threadId %thread %threadPriority %fqcn %endOfBatch " +
                         "{%NDC} {%MDC} " +
                         "%uuid %% %exception%m%n",
-                event,
+                event, true,
                 "2011-10-13", "com.google.gson.Gson", "com.logviewer.formats.Log4jLogFormatTest",
                 "Log4jLogFormatTest.java",
                 "~com\\.logviewer\\.formats\\.Log4jLogFormatTest\\.testLog4j\\(Log4jLogFormatTest\\.java:\\d+\\)",
@@ -153,21 +190,23 @@ public class Log4jLogFormatTest extends AbstractLogTest {
     }
 
     private void check(String pattern, LogEvent event, String ... fields) {
+        check(pattern, event, false, fields);
+    }
+
+    private void check(String pattern, LogEvent event, boolean noTimestamp, String ... fields) {
         PatternLayout layout = PatternLayout.newBuilder().withPattern(pattern).build();
 
         String str = layout.getEventSerializer().toSerializable(event);
 
-        if (str.endsWith("\n"))
-            str = str.substring(0, str.length() - 1);
-
-        Log4jLogFormat format = new Log4jLogFormat(pattern);
-
-        LogRecord record = read(format, str);
-        checkFields(record, fields);
+        checkParsing(event, str, pattern, noTimestamp, fields);
     }
 
     private void check1(String pattern, LogEvent event, String ... fields) {
-        check(pattern, event, fields);
+        check1(pattern, event, false, fields);
+    }
+
+    private void check1(String pattern, LogEvent event, boolean noTimestamp, String ... fields) {
+        check(pattern, event, noTimestamp, fields);
 
         org.apache.log4j.PatternLayout patternLayout1 = new org.apache.log4j.PatternLayout(pattern);
 
@@ -177,6 +216,10 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 org.apache.log4j.Level.toLevel(event.getLevel().name()), event.getMessage(), event.getThreadName(), null,
                 "ndc", new LocationInfo("Log4jLogFormatTest.java", "Log4jLogFormatTest", "testLog4j", "35"), null));
 
+        checkParsing(event, str, pattern, noTimestamp, fields);
+    }
+
+    private void checkParsing(LogEvent event, String str, String pattern, boolean noTimestamp, String[] fields) {
         if (str.endsWith("\n"))
             str = str.substring(0, str.length() - 1);
 
@@ -184,6 +227,12 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(format, str);
         checkFields(record, fields);
+
+        if (!noTimestamp)
+            assertTrue(record.hasTime());
+
+        if (record.hasTime())
+            assertEquals(event.getTimeMillis(), TimeUnit.NANOSECONDS.toMillis(record.getTime()));
     }
 
     private void notMatch(String pattern, String line) {

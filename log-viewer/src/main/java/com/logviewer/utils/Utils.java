@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 public class Utils {
 
+    public static final long MAX_TIME_MILLIS = 3000000000000L; // 2065-Jan-24
+
     private static final Pattern SLASHES = Pattern.compile("/{2,}");
 
     private static final Pattern NUMBER = Pattern.compile("\\d+");
@@ -298,5 +300,13 @@ public class Utils {
         StringWriter stringWriter = new StringWriter();
         throwable.printStackTrace(new PrintWriter(stringWriter));
         return stringWriter.toString();
+    }
+
+    public static void assertValidTimestamp(long nano) {
+        if (nano <= 0)
+            return;
+
+        if (nano < MAX_TIME_MILLIS)
+            throw new IllegalArgumentException("Time must be specified in nanoseconds, but looks like it is milliseconds: " + nano);
     }
 }

@@ -539,11 +539,13 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTimeBack(long time, Predicate<LogRecord> consumer) throws IOException {
+        public boolean processFromTimeBack(long timestampNanos, Predicate<LogRecord> consumer) throws IOException {
             if (error != null)
                 throw error;
 
-            LogRecord record = logIndex.findRecordBound(time, true, this);
+            Utils.assertValidTimestamp(timestampNanos);
+
+            LogRecord record = logIndex.findRecordBound(timestampNanos, true, this);
             if (record == null)
                 return true;
 
@@ -554,11 +556,13 @@ public class Log implements LogView {
         }
 
         @Override
-        public boolean processFromTime(long time, Predicate<LogRecord> consumer) throws IOException {
+        public boolean processFromTime(long timestampNanos, Predicate<LogRecord> consumer) throws IOException {
             if (error != null)
                 throw error;
 
-            LogRecord record = logIndex.findRecordBound(time, false, this);
+            Utils.assertValidTimestamp(timestampNanos);
+
+            LogRecord record = logIndex.findRecordBound(timestampNanos, false, this);
             if (record == null)
                 return true;
 

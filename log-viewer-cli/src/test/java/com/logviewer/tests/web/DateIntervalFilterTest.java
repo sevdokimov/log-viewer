@@ -12,6 +12,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 public class DateIntervalFilterTest extends AbstractWebTestCase {
 
@@ -192,6 +193,19 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         assert getRecord().size() == 3;
         assertThat(dateFilterHeader(), is("2012-01-01 00:41 - 2012-01-01 00:43"));
+    }
+
+    @Test
+    public void addFilterFromContextMenuWithNano() {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("%d{yyyy-MM-dd HH:mm:ss.SSSSSS} %m"));
+
+        openLog("microseconds.log");
+
+        new Actions(driver).contextClick(recordByText("2012-01-01 00:00:00.000001 bbb")).perform();
+
+        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'newer')]")).click();
+
+        assertEquals(3, getRecord().size());
     }
 
     @Test

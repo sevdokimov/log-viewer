@@ -13,9 +13,9 @@ import java.util.Date;
 @SuppressWarnings("ConstantConditions")
 public class PredicateUtilsTest {
 
-    private static final long A = new Date(111, Calendar.JANUARY, 1).getTime();
-    private static final long B = new Date(111, Calendar.JANUARY, 2).getTime();
-    private static final long C = new Date(111, Calendar.JANUARY, 3).getTime();
+    private static final long A = LvDateUtils.toNanos(new Date(111, Calendar.JANUARY, 1));
+    private static final long B = LvDateUtils.toNanos(new Date(111, Calendar.JANUARY, 2));
+    private static final long C = LvDateUtils.toNanos(new Date(111, Calendar.JANUARY, 3));
 
     @Test
     public void testSimple1() {

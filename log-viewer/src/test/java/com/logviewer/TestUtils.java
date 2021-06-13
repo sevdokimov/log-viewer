@@ -5,6 +5,7 @@ import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.RegexLogFormat;
+import com.logviewer.utils.LvDateUtils;
 import com.logviewer.web.dto.RestRecord;
 import org.junit.Assert;
 import org.springframework.lang.NonNull;
@@ -124,7 +125,7 @@ public class TestUtils {
     }
 
     public static long date(int mm, int ss) {
-        return new Date(115, 0, 1, 10, mm, ss).getTime();
+        return LvDateUtils.toNanos(new Date(115, 0, 1, 10, mm, ss));
     }
 
     public static <T> void assertEqualsUnorder(@NonNull  Collection<T> c, T ... objects) {
@@ -145,6 +146,17 @@ public class TestUtils {
                 return (T) t;
 
             throw Throwables.propagate(t);
+        }
+    }
+
+    public static void withTimeZone(String tz, ExceptionalRunnable runnable) throws Exception {
+        TimeZone saved = TimeZone.getDefault();
+
+        TimeZone.setDefault(TimeZone.getTimeZone(tz));
+        try {
+            runnable.run();
+        } finally {
+            TimeZone.setDefault(saved);
         }
     }
 

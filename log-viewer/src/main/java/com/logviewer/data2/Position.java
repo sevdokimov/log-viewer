@@ -1,5 +1,10 @@
 package com.logviewer.data2;
 
+import com.google.gson.annotations.JsonAdapter;
+import com.logviewer.utils.GsonNanosecondsAdapter;
+import com.logviewer.utils.LvDateUtils;
+import com.logviewer.utils.Utils;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
@@ -8,11 +13,18 @@ public class Position implements Comparable<Position>, Serializable {
 
     private final String logId;
 
-    private final long time;
+    @JsonAdapter(GsonNanosecondsAdapter.class)
+    private final Long time;
 
     private final long o;
 
+    public Position(String logId, Date date, long o) {
+        this(logId, LvDateUtils.toNanos(date), o);
+    }
+
     public Position(String logId, long time, long o) {
+        Utils.assertValidTimestamp(time);
+        
         this.logId = logId;
         this.time = time;
         this.o = o;
@@ -45,7 +57,7 @@ public class Position implements Comparable<Position>, Serializable {
 
         Position position = (Position) o;
 
-        if (time != position.time) return false;
+        if (time.longValue() != position.time.longValue()) return false;
         if (this.o != position.o) return false;
         return logId.equals(position.logId);
     }

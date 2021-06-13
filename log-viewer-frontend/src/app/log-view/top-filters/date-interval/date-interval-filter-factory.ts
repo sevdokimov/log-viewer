@@ -4,10 +4,10 @@ import {DatePredicate, Predicate} from '@app/log-view/predicates';
 export class DateIntervalFilterFactory implements FilterFactory {
     addFilters(res: Predicate[], state: FilterState): void {
         if (state.date?.startDate) {
-            res.push(<DatePredicate>{type: 'DatePredicate', date: state.date.startDate, greater: true});
+            res.push(<DatePredicate>{type: 'DatePredicate', timestamp: state.date.startDate, greater: true});
         }
         if (state.date?.endDate) {
-            res.push(<DatePredicate>{type: 'DatePredicate', date: state.date.endDate, greater: false});
+            res.push(<DatePredicate>{type: 'DatePredicate', timestamp: state.date.endDate, greater: false});
         }
     }
 

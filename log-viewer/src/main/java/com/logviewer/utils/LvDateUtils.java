@@ -1,11 +1,18 @@
 package com.logviewer.utils;
 
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class LvDateUtils {
 
@@ -31,7 +38,7 @@ public class LvDateUtils {
             firstExistField++;
         }
 
-        if (firstExistField == DATE_FIELDS.length)
+        if (firstExistField > 3) // 3 - hours, minimum valid date is "yyyy-MM-dd HH"
             return false;
 
         for (int i = firstExistField; i < DATE_FIELDS.length; i++) {
@@ -62,6 +69,30 @@ public class LvDateUtils {
         }
     }
 
+    public static long toNanos(@NonNull Date date) {
+        return toNanos(date.getTime());
+    }
 
+    public static long toNanos(@NonNull Instant instant) {
+        return instant.getEpochSecond() * 1000_000_000L + instant.getNano();
+    }
 
+    public static long toNanos(long millisecond) {
+        if (millisecond <= 0)
+            return millisecond;
+
+        if (millisecond > Utils.MAX_TIME_MILLIS)
+            throw new IllegalArgumentException("Not a milliseconds: " + millisecond);
+
+        return millisecond * 1_000_000;
+    }
+
+    public static Instant toInstant(TemporalAccessor accessor, @Nullable TimeZone zone) {
+        if (!accessor.isSupported(ChronoField.INSTANT_SECONDS)) {
+            LocalDateTime localDateTime = LocalDateTime.from(accessor);
+            return localDateTime.atZone(zone == null ? ZoneId.systemDefault() : zone.toZoneId()).toInstant();
+        } else {
+            return Instant.from(accessor);
+        }
+    }
 }

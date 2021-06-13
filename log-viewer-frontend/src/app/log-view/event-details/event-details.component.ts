@@ -45,7 +45,7 @@ export class EventDetailsComponent implements OnChanges, AfterViewInit {
 
             this.log = this.viewConfig.logById[r.logId];
 
-            this.timestamp = r.time ? LvUtils.formatDate(r.time) : null;
+            this.timestamp = r.time ? LvUtils.formatDate(Record.nano2milliseconds(r.time)) : null;
 
             this.fields = [];
 

@@ -1,6 +1,8 @@
 package com.logviewer.web.dto;
 
+import com.google.gson.annotations.JsonAdapter;
 import com.logviewer.data2.LogRecord;
+import com.logviewer.utils.GsonNanosecondsAdapter;
 import com.logviewer.utils.Pair;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
@@ -19,7 +21,8 @@ public class RestRecord {
 
     private final boolean hasMore;
 
-    private final long time;
+    @JsonAdapter(GsonNanosecondsAdapter.class)
+    private final Long time;
 
     private final int[] fieldsOffsetStart;
     private final int[] fieldsOffsetEnd;

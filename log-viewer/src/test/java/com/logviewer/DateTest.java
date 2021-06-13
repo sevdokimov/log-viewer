@@ -33,6 +33,6 @@ public class DateTest extends AbstractLogTest {
 
         assertEquals(3, records.size());
         assertEquals("2018-04-08_23:54:00.330", records.get(0).getFieldText(logFormat.getFieldIndexByName("date")));
-        assertEquals(new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").parse("2018-04-08_23:54:00.330").getTime(), records.get(0).getTime());
+        assertEquals(new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").parse("2018-04-08_23:54:00.330").getTime(), records.get(0).getTimeMillis());
     }
 }

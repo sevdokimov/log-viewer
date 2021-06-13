@@ -1,8 +1,10 @@
 package com.logviewer.formats.utils;
 
+import com.logviewer.utils.LvDateUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.text.ParsePosition;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -19,37 +21,35 @@ import java.util.regex.Pattern;
  */
 public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
-    private static final Pattern SUPPORTED_PATTERN = Pattern.compile("yyyy([-/])MM\\1dd(?:'T'|[_T ])HH:mm:ss(?<milliiseconds>[,.]SSS)?(?<timezone>XX?)?");
+    private static final Pattern SUPPORTED_PATTERN = Pattern.compile("yyyy([-/])MM\\1dd(?:'T'|[_T ])HH:mm:ss(?<milliseconds>[,.]SSS(?:SSSSSS|SSS|S)?)?(?<timezone>z+|Z+|X+)?");
 
-    private final boolean hasMilliseconds;
+    private static final int[] MILLI_TO_NANO = {1000_000, 100_000, 10_000, 1000, 100, 10, 1};
 
-    private final int timezone;
+    private final int milliseconds;
+
+    private final boolean hasTimezone;
 
     private transient Calendar calendar;
 
     private transient String currentTimezoneStr;
 
     public LvLayoutLog4jISO8601Date(boolean hasMilliseconds) {
-        this(hasMilliseconds, 0, null);
+        this(hasMilliseconds ? 3 : 0, false, null);
     }
 
-    public LvLayoutLog4jISO8601Date(boolean hasMilliseconds, int timezone) {
-        this(hasMilliseconds, timezone, null);
+    public LvLayoutLog4jISO8601Date(int milliseconds, boolean hasTimezone) {
+        this(milliseconds, hasTimezone, null);
     }
 
-    public LvLayoutLog4jISO8601Date(boolean hasMilliseconds, int timezone, TimeZone zone) {
+    public LvLayoutLog4jISO8601Date(int milliseconds, boolean hasTimezone, TimeZone zone) {
         super(zone);
-        this.hasMilliseconds = hasMilliseconds;
-
-        if (timezone != 0 && timezone != 3 && timezone != 5)
-            throw new IllegalArgumentException();
-
-        this.timezone = timezone;
+        this.milliseconds = milliseconds;
+        this.hasTimezone = hasTimezone;
     }
 
     @Override
     public int parse(String s, int offset, int end) {
-        int expectedLength = (hasMilliseconds ? 23 : 19);
+        int expectedLength = 19 + (milliseconds == 0 ? 0 : milliseconds + 1);
 
         if (end - offset < expectedLength) {
             return PARSE_FAILED;
@@ -108,29 +108,32 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
         offset += 2;
 
-        int sss;
-        if (hasMilliseconds) {
+        int nano;
+        if (milliseconds > 0) {
             a = s.charAt(offset++);
             if (a != ',' && a != '.')
                 return PARSE_FAILED;
 
-            sss = readInt(s, offset, offset + 3);
-            if (sss < 0 || sss > 999)
+            nano = readInt(s, offset, offset + milliseconds);
+            if (nano < 0)
                 return PARSE_FAILED;
 
-            offset += 3;
+            nano *= MILLI_TO_NANO[milliseconds - 3];
+
+            offset += milliseconds;
         } else {
-            sss = 0;
+            nano = 0;
         }
 
         if (calendar == null) {
             calendar = Calendar.getInstance();
+            calendar.set(Calendar.MILLISECOND, 0);
 
             if (zone != null)
                 calendar.setTimeZone(zone);
         }
 
-        if (timezone > 0) {
+        if (hasTimezone) {
             offset = parseAndSetTimezone(s, offset, calendar);
             if (offset < 0)
                 return PARSE_FAILED;
@@ -142,59 +145,28 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
         calendar.set(Calendar.HOUR_OF_DAY, hh);
         calendar.set(Calendar.MINUTE, min);
         calendar.set(Calendar.SECOND, sec);
-        calendar.set(Calendar.MILLISECOND, sss);
 
-        this.currentDate = calendar.getTimeInMillis();
+        this.currentDate = LvDateUtils.toNanos(calendar.getTimeInMillis()) + nano;
 
         return offset;
     }
 
     private int parseAndSetTimezone(String s, int offset, Calendar calendar) {
         if (currentTimezoneStr != null && s.startsWith(currentTimezoneStr, offset)) {
-            return offset + timezone;
+            return offset + currentTimezoneStr.length();
         }
 
         if (offset >= s.length())
             return -1;
 
-        char sign = s.charAt(offset);
-
-        if (sign == 'Z') {
-            currentTimezoneStr = "Z";
-            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-            return offset + 1;
-        }
-
-        if (sign != '-' && sign != '+')
+        ParsePosition position = new ParsePosition(offset);
+        TimeZone res = FastDateTimeParser.parseTimezone(s, position);
+        if (res == null)
             return -1;
 
-        if (offset + timezone > s.length())
-            return -1;
-
-        char first = s.charAt(offset + 1);
-        char second = s.charAt(offset + 2);
-        if (first == '0') {
-            if (second < '0' || second > '9')
-                return -1;
-        } else if (first == '1') {
-            if (second < '0' || second > '2')
-                return -1;
-        } else {
-            return -1;
-        }
-
-        if (timezone == 5) {
-            char third = s.charAt(offset + 3);
-            if (third != '0' && third != '3')
-                return -1;
-            if (s.charAt(offset + 4) != '0')
-                return -1;
-        }
-
-        currentTimezoneStr = s.substring(offset, offset + timezone);
-        calendar.setTimeZone(TimeZone.getTimeZone("GMT" + currentTimezoneStr));
-
-        return offset + timezone;
+        calendar.setTimeZone(res);
+        currentTimezoneStr = s.substring(offset, position.getIndex());
+        return position.getIndex();
     }
 
     private static int readInt(String s, int offset, int end) {
@@ -223,18 +195,12 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
         if (!matcher.matches())
             return null;
 
-        String timezoneStr = matcher.group("timezone");
-
-        int timezone = 0;
-        if (timezoneStr != null) {
-            timezone = timezoneStr.length() == 1 ? 3 : 5;
-        }
-
-        return new LvLayoutLog4jISO8601Date(matcher.group("milliiseconds") != null, timezone);
+        String ms = matcher.group("milliseconds");
+        return new LvLayoutLog4jISO8601Date(ms == null ? 0 : ms.length() - 1, matcher.group("timezone") != null);
     }
 
     @Override
     public LvLayoutDateNode clone() {
-        return new LvLayoutLog4jISO8601Date(hasMilliseconds, timezone, zone);
+        return new LvLayoutLog4jISO8601Date(milliseconds, hasTimezone, zone);
     }
 }

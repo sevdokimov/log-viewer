@@ -4,6 +4,8 @@ import {NGX_MAT_DATE_FORMATS, NgxMatDateFormats} from '@angular-material-compone
 import {Moment} from 'moment/moment';
 import * as moment from 'moment';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
+import {Record} from '@app/log-view/record';
+import {LvUtils} from '@app/utils/utils';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -51,18 +53,21 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
     }
 
     protected loadComponentState(state: FilterState) {
-        this.startDate = state.date?.startDate ? moment(state.date.startDate) : null;
-        this.endDate = state.date?.endDate ? moment(state.date.endDate) : null;
+        let startDateMilli = LvUtils.nano2milliseconds(state.date.startDate);
+        let endDateMilli = LvUtils.nano2milliseconds(state.date.endDate);
+
+        this.startDate = state.date?.startDate ? moment(startDateMilli) : null;
+        this.endDate = state.date?.endDate ? moment(endDateMilli) : null;
 
         if (!this.startDate && !this.endDate) {
             this.title = 'Empty timestamp filter';
         } else if (this.startDate && this.endDate) {
-            this.title = LvDateIntervalComponent.niceFormat(state.date.startDate) + ' - ' + LvDateIntervalComponent.niceFormat(state.date.endDate);
+            this.title = LvDateIntervalComponent.niceFormat(startDateMilli) + ' - ' + LvDateIntervalComponent.niceFormat(endDateMilli);
         } else {
             if (this.endDate) {
-                this.title = 'Till ' + LvDateIntervalComponent.niceFormat(state.date.endDate);
+                this.title = 'Till ' + LvDateIntervalComponent.niceFormat(endDateMilli);
             } else {
-                this.title = 'Since ' + LvDateIntervalComponent.niceFormat(state.date.startDate);
+                this.title = 'Since ' + LvDateIntervalComponent.niceFormat(startDateMilli);
             }
         }
     }
@@ -88,8 +93,8 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
 
         this.filterPanelStateService.updateFilterState(state => {
             state.date = {
-                startDate: this.startDate ? this.startDate.toDate().getTime() : undefined,
-                endDate: this.endDate ? this.endDate.toDate().getTime() : undefined,
+                startDate: this.startDate ? LvUtils.milliseconds2nano(this.startDate.toDate().getTime()) : undefined,
+                endDate: this.endDate ? LvUtils.milliseconds2nano(this.endDate.toDate().getTime()) : undefined,
             };
         });
 
@@ -112,7 +117,7 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
         if (this.filterPanelStateService.currentRecords) {
             for (let record of this.filterPanelStateService.currentRecords) {
                 if (record.time) {
-                    this.defaultDate = moment(record.time);
+                    this.defaultDate = moment(Record.nano2milliseconds(record.time));
                     break;
                 }
             }

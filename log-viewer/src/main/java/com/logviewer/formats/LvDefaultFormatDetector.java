@@ -1,6 +1,7 @@
 package com.logviewer.formats;
 
 import com.logviewer.data2.LogFormat;
+import com.logviewer.formats.utils.FastDateTimeParser;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.nginx.NginxLogFormat;
 import com.logviewer.utils.Pair;
@@ -25,13 +26,20 @@ public class LvDefaultFormatDetector {
 
     static final String UNKNOWN_FORMAT = "???";
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])[ _T](?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?<millis>[,.]\\d\\d\\d)?(?<timezone>Z|[-+](?:0\\d|1[0-2])(?:[03]0)?)?\\b");
+    private static final String TZ_PATTERN = "(?:(?<tzSeparator> )?(?<timezone>Z|(?:GMT)?[-+](?:0\\d|1[0-2])(?::?[03]0)?|"
+            + String.join("|", FastDateTimeParser.ALL_ZONES.keySet()) + "))?";
 
-    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d([,.]?\\d\\d\\d)?\\b");
+    private static final String MS_PATTERN = "(?:(?<msSeparator>[,.])?(?<ms>\\d{3}(\\d{6}|\\d{3}|\\d)?))?"; // valid milliseconds is "SSS", "SSSS", "SSSSSS", "SSSSSSSSS"
 
-    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:([,.])\\d\\d\\d)?\\b");
+    private static final String MS_TZ = MS_PATTERN + TZ_PATTERN;
 
-    private static final Pattern DATE_LONG_2 = Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:(?<msSep>[,.])\\d\\d\\d)?\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
+
+    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b");
+
+    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
+
+    private static final Pattern DATE_LONG_2 = Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
 
     private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\b");
 
@@ -173,6 +181,31 @@ public class LvDefaultFormatDetector {
         return null;
     }
 
+    private static void appendMsIfPresent(StringBuilder sb, Matcher matcher) {
+        String ms = matcher.group("ms");
+        if (ms == null)
+            return;
+
+        String msSeparator = matcher.group("msSeparator");
+        if (msSeparator != null)
+            sb.append(msSeparator);
+
+        for (int i = 0; i < ms.length(); i++) {
+            sb.append('S');
+        }
+    }
+
+    private static void appendTimeZoneIfPresent(StringBuilder sb, Matcher matcher) {
+        if (matcher.group("timezone") == null)
+            return;
+
+        String separator = matcher.group("tzSeparator");
+        if (separator != null)
+            sb.append(separator);
+
+        sb.append('z');
+    }
+
     static String detectLog4jFormatOfLine(String line) {
         String dateField;
         TextRange datePos;
@@ -182,20 +215,15 @@ public class LvDefaultFormatDetector {
             StringBuilder sb = new StringBuilder();
             String dateSeparator = matcher.group(1);
             
-            sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd HH:mm:ss");
-            if (matcher.group("millis") != null)
-                sb.append(".SSS");
+            sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd");
 
-            String timeZone = matcher.group("timezone");
-            if (timeZone != null) {
-                sb.append('X');
+            String timeSeparator = matcher.group("timeSep");
+            if (timeSeparator.equals("T"))
+                timeSeparator = "'T'";
+            sb.append(timeSeparator).append("HH:mm:ss");
 
-                if (timeZone.equals("Z") || timeZone.length() == 5) {
-                    sb.append('X');
-                } else {
-                    assert timeZone.length() == 3;
-                }
-            }
+            appendMsIfPresent(sb, matcher);
+            appendTimeZoneIfPresent(sb, matcher);
 
             sb.append('}');
 
@@ -213,13 +241,8 @@ public class LvDefaultFormatDetector {
                 }
                 sb.append("HHmmss");
 
-                separator = matcher.group(2);
-                if (separator != null) {
-                    if (separator.length() > 3)
-                        sb.append(separator.charAt(0));
-                    
-                    sb.append("SSS");
-                }
+                appendMsIfPresent(sb, matcher);
+                appendTimeZoneIfPresent(sb, matcher);
 
                 sb.append('}');
 
@@ -227,19 +250,29 @@ public class LvDefaultFormatDetector {
             } else {
                 matcher = DATE_LONG.matcher(line); // 2020 Jul 21 15:04:01
                 if (matcher.find()) {
-                    dateField = matcher.group(1) == null ? "%d{dd MMM yyyy HH:mm:ss}" : "%d{dd MMM yyyy HH:mm:ss" + matcher.group(1) + "SSS}";
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("%d{dd MMM yyyy HH:mm:ss");
+
+                    appendMsIfPresent(sb, matcher);
+                    appendTimeZoneIfPresent(sb, matcher);
+
+                    sb.append('}');
+                    dateField = sb.toString();
                 } else {
                     matcher = DATE_LONG_2.matcher(line); // 2020-Jul-21 15:04:01
                     if (matcher.find()) {
                         String dateSep = matcher.group("dateSep");
                         String dtSep = matcher.group("dtSep");
-                        String msSep = matcher.group("msSep");
 
-                        String pattern = "yyyy" + dateSep + "MMM" + dateSep + "dd" + dtSep + "HH:mm:ss";
-                        if (msSep != null)
-                            pattern += msSep + "SSS";
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{yyyy").append(dateSep).append("MMM").append(dateSep).append("dd").append(dtSep).append("HH:mm:ss");
 
-                        dateField = "%d{" + pattern + "}";
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        dateField = sb.toString();
                     } else {
                         if (TIME_WITHOUT_DATE.matcher(line).find() || LEVEL.matcher(line).find()) {
                             return UNKNOWN_FORMAT;

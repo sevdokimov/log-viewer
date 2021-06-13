@@ -4,6 +4,8 @@ import com.logviewer.data2.DefaultFieldDesciptor;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.LogRecord;
+import com.logviewer.formats.utils.FastDateTimeParser;
+import com.logviewer.utils.LvDateUtils;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -11,9 +13,11 @@ import org.springframework.lang.Nullable;
 import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -91,10 +95,6 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         return res;
     }
 
-    private SimpleDateFormat createDateFormatter() {
-        return new SimpleDateFormat(datePattern);
-    }
-
     public void validate() throws IllegalArgumentException {
         int groupCount = getPattern().matcher("").groupCount();
 
@@ -127,7 +127,10 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (datePattern == null)
                 throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
 
-            createDateFormatter(); // validate date format
+            if (!LvDateUtils.isDateFormatFull(new SimpleDateFormat(datePattern)))
+                throw new IllegalArgumentException("Invalid date format. Format must include date and time");
+
+            FastDateTimeParser.createFormatter(datePattern, null);// validate date format
         }
         else {
             if (datePattern != null)
@@ -173,7 +176,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         private long end;
         private boolean hasMore;
 
-        private SimpleDateFormat dateFormat;
+        private BiFunction<String, ParsePosition, Supplier<Instant>> dateFormat;
 
         private final Charset charset = RegexLogFormat.this.charset == null ? Charset.defaultCharset() : RegexLogFormat.this.charset;
 
@@ -277,13 +280,15 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             long time = 0;
 
             if (dateFieldIdx != null) {
-                if (fields[dateFieldIdx] >= 0) {
+                if (fields[dateFieldIdx * 2] >= 0) {
                     if (dateFormat == null)
-                        dateFormat = createDateFormatter();
+                        dateFormat = FastDateTimeParser.createFormatter(datePattern, null);
 
-                    Date date = dateFormat.parse(s, new ParsePosition(fields[dateFieldIdx * 2]));
-                    if (date != null)
-                        time = date.getTime();
+                    Supplier<Instant> timestamp = dateFormat.apply(s, new ParsePosition(fields[dateFieldIdx * 2]));
+                    if (timestamp != null) {
+                        Instant instant = timestamp.get();
+                        time = LvDateUtils.toNanos(instant);
+                    }
                 }
             }
 

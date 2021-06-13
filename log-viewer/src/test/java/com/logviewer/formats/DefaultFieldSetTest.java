@@ -288,7 +288,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
         assertEquals("com.behavox.core.PluginManager", fieldValue(format, record, "logger"));
         assertEquals("Plugins search time: 175 ms", fieldValue(format, record, "msg"));
 
-        assertEquals("2016-12-02_16:05:11.333", new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").format(new Date(record.getTime())));
+        assertEquals("2016-12-02_16:05:11.333", new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").format(new Date(record.getTimeMillis())));
     }
 
     private String fieldValue(DefaultFieldSet format, LogRecord record, String fieldName) {

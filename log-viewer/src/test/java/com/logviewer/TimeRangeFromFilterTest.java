@@ -147,9 +147,9 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         return ctx.getBean(LogService.class).openLog(getTestLog("test-log.log"), TestUtils.MULTIFILE_LOG_FORMAT);
     }
 
-    private static long date(String date) {
+    private static Date date(String date) {
         try {
-            return new SimpleDateFormat("yyMMdd HH:mm:ss").parse(date).getTime();
+            return new SimpleDateFormat("yyMMdd HH:mm:ss").parse(date);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

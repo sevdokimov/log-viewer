@@ -278,4 +278,26 @@ export class LvUtils {
 
         return res;
     }
+
+    public static nano2milliseconds(nano: string): number {
+        if (!nano) {
+            return null;
+        }
+
+        LvUtils.assert(nano.length > 10);
+        return parseInt(nano.substr(0, nano.length - 6), 10);
+    }
+
+    public static milliseconds2nano(milli: number): string {
+        if (milli == null || milli <= 0) {
+            return null;
+        }
+
+        let res = milli.toString() + '000000';
+        while (res.length < 20) {
+            res = '0' + res;
+        }
+
+        return res;
+    }
 }
