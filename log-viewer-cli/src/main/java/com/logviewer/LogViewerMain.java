@@ -51,7 +51,7 @@ public class LogViewerMain {
 
     @Value("${log-viewer.server.port:8111}")
     private int port;
-    @Value("${log-viewer.context-path:/}")
+    @Value("${log-viewer.server.context-path:/}")
     private String contextPath;
     @Value("${log-viewer.server.interface:}")
     private String serverInterface;
