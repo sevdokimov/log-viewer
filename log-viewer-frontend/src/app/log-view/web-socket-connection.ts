@@ -36,7 +36,7 @@ export class WebSocketConnection implements ConnectionService {
             new_uri = 'ws:';
         }
 
-        return new_uri + '//' + loc.host + this.webSocketPath;
+        return new_uri + '//' + loc.host + loc.pathname + (loc.pathname.endsWith('/') ? '' : '/../') + this.webSocketPath;
     }
 
     startup(): void {
@@ -63,7 +63,9 @@ export class WebSocketConnection implements ConnectionService {
             if (this.ws === ws) {
                 let message = null;
                 if (ws.onmessage == null) {
-                    message = 'Failed to open websocket: ' + ws.url;
+                    message = 'Failed to open websocket: <a href="#">' + ws.url + '</a>\n'
+                        + 'Probably, you use a proxy that doesn\'t support HTTP 1.1,\nyou can switch LogViewer to ' +
+                        'no-websocket mode using "<b>log-viewer.use-web-socket=false</b>" property';
                 }
 
                 this.onError(message);

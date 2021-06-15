@@ -213,7 +213,10 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected static void openUrl(String path, @NonNull Map<String, List<String>> params) {
         StringBuilder sb = new StringBuilder();
-        sb.append("http://localhost:").append(TEST_PORT).append("/");
+        sb.append("http://localhost:").append(TEST_PORT).append("/ttt/test-path");
+
+        if (!path.startsWith("/"))
+            sb.append("/");
 
         sb.append(path);
 

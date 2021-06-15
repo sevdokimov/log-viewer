@@ -34,7 +34,7 @@ public class LogViewerServlet extends HttpServlet {
 
     private static final Map<String, String> MIME_TYPES_MAP = Utils.newMap("css", "text/css", "js", "application/javascript");
 
-    private volatile byte[] indexHtml;
+    private volatile String indexHtml;
 
     private final Map<String, ResourceCache> resourceCache = new ConcurrentHashMap<>();
 
@@ -112,7 +112,7 @@ public class LogViewerServlet extends HttpServlet {
         String relativePath = getRelativePath(req);
 
         if (relativePath.equals("")) {
-            processIndexHtml(req, resp);
+            processIndexHtml(resp, relativePath);
             return;
         }
 
@@ -148,7 +148,7 @@ public class LogViewerServlet extends HttpServlet {
         }
 
         if (cachableRes == null) {
-            processIndexHtml(req, resp);
+            processIndexHtml(resp, relativePath);
             return;
         }
 
@@ -265,50 +265,52 @@ public class LogViewerServlet extends HttpServlet {
         }
     }
 
-    private void processIndexHtml(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        byte[] htmlTextBytes = this.indexHtml;
-
-        if (htmlTextBytes == null) {
+    private void processIndexHtml(HttpServletResponse resp, String relativePath) throws IOException {
+        String indexHtml = this.indexHtml;
+        if (indexHtml == null) {
             URL indexHtmlUrl = getClass().getResource("/log-viewer-web/index.html");
             if (indexHtmlUrl == null) {
                 resp.sendError(500, "index.html not found");
                 return;
             }
 
-            String htmlText = Utils.toString(indexHtmlUrl, StandardCharsets.UTF_8);
-
-            htmlText = htmlText.replace("$PATH", req.getContextPath() + req.getServletPath() + '/');
-            htmlText = htmlText.replace("$WEB_SOCKET_PATH", getWebSocketPath());
-
-            htmlTextBytes = htmlText.getBytes(StandardCharsets.UTF_8);
+            try (InputStream stream = indexHtmlUrl.openStream()) {
+                indexHtml = StreamUtils.copyToString(stream, StandardCharsets.UTF_8);
+            }
 
             if (!indexHtmlUrl.getProtocol().equals("file"))
-                this.indexHtml = htmlTextBytes;
+                this.indexHtml = indexHtml;
         }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < relativePath.length(); i++) {
+            if (relativePath.charAt(i) == '/')
+                sb.append("../");
+        }
+
+        String rootPath = sb.length() == 0 ? "./" : sb.toString();
+
+        indexHtml = indexHtml.replace("$PATH", rootPath);
+
+        indexHtml = indexHtml.replace("$WEB_SOCKET_PATH", getWebSocketPath(rootPath));
 
         resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         resp.setContentType("text/html");
-        resp.getOutputStream().write(htmlTextBytes);
+        resp.getOutputStream().print(indexHtml);
     }
 
     @NonNull
-    private String getWebSocketPath() {
+    private String getWebSocketPath(String rootPath) {
         String webSocketPath = getServletConfig().getInitParameter("web-socket-path");
 
         if (webSocketPath == null || webSocketPath.isEmpty())
             return "";
 
-        StringBuilder sb = new StringBuilder(getServletContext().getContextPath());
-
-        if (!getServletContext().getContextPath().endsWith("/"))
-            sb.append('/');
-
         if (webSocketPath.startsWith("/"))
-            sb.append(webSocketPath, 1, webSocketPath.length());
-        else
-            sb.append(webSocketPath);
+            webSocketPath = webSocketPath.substring(1);
 
-        return sb.toString();
+        return rootPath + webSocketPath;
     }
 
     private static String detectMimeType(String fileName) {

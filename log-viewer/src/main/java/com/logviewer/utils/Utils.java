@@ -4,12 +4,10 @@ import com.google.gson.JsonParser;
 import com.logviewer.data2.LogFormat;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -151,12 +149,6 @@ public class Utils {
 
     public static String toString(ByteBuffer buffer, Charset charsets) {
         return new String(buffer.array(), buffer.position(), buffer.limit() - buffer.position(), charsets);
-    }
-
-    public static String toString(URL url, Charset charsets) throws IOException {
-        try (InputStream inputStream = url.openStream()) {
-            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-        }
     }
 
     public static boolean isSubdirectory(String directory, String child) {

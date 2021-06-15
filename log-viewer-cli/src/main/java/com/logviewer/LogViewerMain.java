@@ -106,12 +106,12 @@ public class LogViewerMain {
 
             ServletHolder lvServlet = webAppCtx.addServlet(LogViewerServlet.class, "/*");
             if (useWebSocket) {
-                lvServlet.setAsyncSupported(true);
-            } else {
                 ServerContainer websocketCtx = WebSocketServerContainerInitializer.configureContext(webAppCtx);
                 websocketCtx.addEndpoint(ServerEndpointConfig.Builder.create(LogViewerWebsocket.class, "/ws").build());
 
                 lvServlet.setInitParameter("web-socket-path", "ws");
+            } else {
+                lvServlet.setAsyncSupported(true);
             }
 
             srv.start();
