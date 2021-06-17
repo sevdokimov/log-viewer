@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.logviewer.TestUtils.assertUnparsed;
 import static org.junit.Assert.assertEquals;
@@ -21,6 +23,9 @@ public class LogIterationForwardTest extends AbstractLogTest {
     public static final LogFormat FORMAT = new RegexLogFormat(StandardCharsets.UTF_8,
             "\\[(DEBUG|INFO)\\] (.+)", false,
             new RegexField("level", 1), new RegexField("body", 2));
+
+    public static final LogFormat LINE_NUMBERS_NO_APPEND = new RegexLogFormat(StandardCharsets.UTF_8,
+            "(?<msg>\\d+)", true, new RegexField("msg"));
 
     public static final LogFormat FORMAT_NO_APPEND = new RegexLogFormat(StandardCharsets.UTF_8,
             "\\[(DEBUG|INFO)\\] (.+)", true,
@@ -108,6 +113,29 @@ public class LogIterationForwardTest extends AbstractLogTest {
             assert log.processRecords(allContent.indexOf("l3") + 2, true, res::add);
             assertEquals(2, res.size());
             assertEquals("[INFO] i1", res.get(0).getMessage());
+        }
+    }
+
+    @Test
+    public void startFromUnparsed() throws IOException {
+        try (Snapshot log = log("/testdata/log-iteration/test2.log", LINE_NUMBERS_NO_APPEND)) {
+            List<LogRecord> res = new ArrayList<>();
+
+            assert log.processRecords(10, false, res::add); // from first unparsed line
+            assertEquals(Arrays.asList("unparsed1\nunparsed2\nunparsed3", "1234567890"), res.stream().map(r -> r.getMessage()).collect(Collectors.toList()));
+            res.clear();
+
+            assert log.processRecords(20, false, res::add); // from first unparsed line
+            assertEquals(Arrays.asList("unparsed1\nunparsed2\nunparsed3", "1234567890"), res.stream().map(r -> r.getMessage()).collect(Collectors.toList()));
+            res.clear();
+
+            assert log.processRecords(39, false, res::add); // from first unparsed line
+            assertEquals(Arrays.asList("unparsed1\nunparsed2\nunparsed3", "1234567890"), res.stream().map(r -> r.getMessage()).collect(Collectors.toList()));
+            res.clear();
+
+            assert log.processRecords(39, true, res::add); // from first unparsed line
+            assertEquals(Arrays.asList("1234567890"), res.stream().map(r -> r.getMessage()).collect(Collectors.toList()));
+            res.clear();
         }
     }
 

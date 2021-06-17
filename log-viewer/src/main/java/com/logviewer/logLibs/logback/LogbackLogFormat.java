@@ -147,4 +147,8 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         }
     }
 
+    @Override
+    public String getHumanReadableString() {
+        return "logback: " + getPattern();
+    }
 }

@@ -11,6 +11,8 @@ export class FileStatusComponent {
 
     @ViewChild('stacktraceDialog', {static: true}) public stacktraceDialog: TemplateRef<any>;
 
+    @ViewChild('formatDialog', {static: true}) public formatDialog: TemplateRef<any>;
+
     @Input() status: RestStatus;
 
     @Input() showErrorMessages: boolean;
@@ -20,5 +22,9 @@ export class FileStatusComponent {
 
     showStacktrace() {
         this.modalService.open(this.stacktraceDialog, {size: 'xl'});
+    }
+
+    showFormatInfo() {
+        this.modalService.open(this.formatDialog, {size: 'xl'});
     }
 }

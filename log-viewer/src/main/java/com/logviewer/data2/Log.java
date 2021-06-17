@@ -7,6 +7,8 @@ import com.logviewer.web.session.*;
 import com.logviewer.web.session.tasks.SearchPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -67,29 +69,27 @@ public class Log implements LogView {
 
     private final ExecutorService executor;
 
-    private final LvTimer timer;
+    @Autowired
+    private LvTimer timer;
+    @Autowired
+    private FileWatcherService fileWatcherService;
+    @Autowired
+    private LvFileAccessManager accessManager;
+    @Value("${log-viewer.parser.max-unparsable-block-size:2097152}") // 2Mb
+    private long unparsableBlockMaxSize;
 
-    private final FileWatcherService fileWatcherService;
-
-    private final LvFileAccessManager accessManager;
-
-    private MultiListener<Consumer<FileAttributes>> changeListener = new MultiListener<>(this::createFileListener);
+    private final MultiListener<Consumer<FileAttributes>> changeListener = new MultiListener<>(this::createFileListener);
 
     private LogIndex logIndex;
 
-    public Log(@NonNull Path path, @NonNull LogFormat format, @NonNull ExecutorService executor,
-               @NonNull LvTimer timer,
-               @NonNull FileWatcherService fileWatcherService, @NonNull LvFileAccessManager accessManager) {
+    public Log(@NonNull Path path, @NonNull LogFormat format, @NonNull ExecutorService executor) {
         file = path;
         this.format = LvGsonUtils.copy(format);
         this.executor = executor;
-        this.timer = timer;
-        this.fileWatcherService = fileWatcherService;
 
         encoding = this.format.getCharset() == null ? Charset.defaultCharset() : this.format.getCharset();
 
         id = LOG_ID_GENERATOR.apply(path.toString());
-        this.accessManager = accessManager;
     }
 
     @Override
@@ -242,33 +242,48 @@ public class Log implements LogView {
             return buf;
         }
 
+        private void assertUnparsedBlockSize(long blockStart, long blockEnd) throws IncorrectFormatException {
+            assert blockStart <= blockEnd;
+
+            if (blockEnd - blockStart > unparsableBlockMaxSize)
+                throw new IncorrectFormatException(file.toString(), blockStart, blockEnd, format);
+        }
+
         private long findUnparsedEnd(BufferedFile buf, LogReader tmpReader, long lastLineEnd) throws IOException {
+            long position = lastLineEnd;
+
             BufferedFile.Line line = new BufferedFile.Line();
 
             while (true) {
-                if (!buf.loadNextLine(line, lastLineEnd))
+                if (!buf.loadNextLine(line, position))
                     break;
 
                 if (tmpReader.parseRecord(line))
                     break;
 
-                lastLineEnd = line.getEnd();
+                position = line.getEnd();
+
+                assertUnparsedBlockSize(lastLineEnd, position);
             }
 
-            return lastLineEnd;
+            return position;
         }
 
         private long findParsedBefore(BufferedFile buf, LogReader reader, BufferedFile.Line line, long lastLineStart) throws IOException {
+            long position = lastLineStart;
+
             while (true) {
-                if (!buf.loadPrevLine(line, lastLineStart)) {
+                if (!buf.loadPrevLine(line, position)) {
                     reader.clear();
-                    return lastLineStart;
+                    return position;
                 }
 
                 if (reader.parseRecord(line))
-                    return lastLineStart;
+                    return position;
 
-                lastLineStart = line.getStart();
+                position = line.getStart();
+
+                assertUnparsedBlockSize(position, lastLineStart);
             }
         }
 
@@ -410,71 +425,65 @@ public class Log implements LogView {
             long selectedLineEnd = line.getEnd();
 
             if (!reader.parseRecord(line)) {
-                mmm:
-                while (true) {
-                    long prevLineStart = line.getStart();
+                long unparsedBlockStart = findParsedBefore(buf, reader, line, line.getStart());
 
-                    if (!buf.loadPrevLine(line)) {
-                        long firstCharIndex = line.getStart();
-                        long p = selectedLineEnd;
+                if (reader.hasParsedRecord()) {
+                    long parsedLineEnd = line.getEnd();
 
-                        while (true) {
-                            if (!buf.loadNextLine(line, p)) {
-                                // Log has no parsed lines
-                                return consumer.test(createUnparsedRecord(buf, firstCharIndex, p));
-                            }
+                    long p = selectedLineEnd;
 
-                            if (reader.parseRecord(line)) {
-                                if (!consumer.test(createUnparsedRecord(buf, firstCharIndex, p))) {
-                                    return false;
-                                }
+                    long unparsedEnd;
 
-                                break mmm;
-                            }
-
-                            p = line.getEnd();
+                    while (true) {
+                        if (!buf.loadNextLine(line, p)) {
+                            unparsedEnd = p;
+                            break;
                         }
+
+                        if (forwardReader.parseRecord(line)) {
+                            unparsedEnd = p;
+                            break;
+                        }
+
+                        p = line.getEnd();
                     }
 
-                    if (reader.parseRecord(line)) {
-                        long parsedLineEnd = line.getEnd();
+                    if (reader.canAppendTail()) {
+                        appendTail(buf, reader, parsedLineEnd, unparsedEnd);
 
-                        long p = selectedLineEnd;
+                        if (!consumer.test(reader.buildRecord().setLogId(id)))
+                            return false;
+                    } else {
+                        if (!consumer.test(createUnparsedRecord(buf, unparsedBlockStart, unparsedEnd)))
+                            return false;
+                    }
 
-                        long unparsedEnd;
+                    if (!forwardReader.hasParsedRecord()) {
+                        return true; // End of file.
+                    }
 
-                        while (true) {
-                            if (!buf.loadNextLine(line, p)) {
-                                unparsedEnd = p;
-                                break;
-                            }
+                    LogReader tmp = reader;
+                    reader = forwardReader;
+                    forwardReader = tmp;
+                } else {
+                    long p = selectedLineEnd;
 
-                            if (forwardReader.parseRecord(line)) {
-                                unparsedEnd = p;
-                                break;
-                            }
-
-                            p = line.getEnd();
+                    while (true) {
+                        if (!buf.loadNextLine(line, p)) {
+                            // Log has no parsed lines
+                            return consumer.test(createUnparsedRecord(buf, unparsedBlockStart, p));
                         }
 
-                        if (reader.canAppendTail()) {
-                            appendTail(buf, reader, parsedLineEnd, unparsedEnd);
-
-                            if (!consumer.test(reader.buildRecord().setLogId(id)))
+                        if (reader.parseRecord(line)) {
+                            if (!consumer.test(createUnparsedRecord(buf, unparsedBlockStart, p)))
                                 return false;
-                        } else {
-                            if (!consumer.test(createUnparsedRecord(buf, prevLineStart, unparsedEnd)))
-                                return false;
+
+                            break;
                         }
 
-                        if (!forwardReader.hasParsedRecord()) {
-                            return true; // End of file.
-                        }
+                        p = line.getEnd();
 
-                        LogReader tmp = reader;
-                        reader = forwardReader;
-                        forwardReader = tmp;
-                        break;
+                        assertUnparsedBlockSize(unparsedBlockStart, p);
                     }
                 }
             }

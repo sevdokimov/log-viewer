@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -36,6 +38,8 @@ public class LogService implements InitializingBean, DisposableBean {
 
     private ExecutorService executor;
 
+    @Autowired
+    private ApplicationContext applicationContext;
     @Autowired
     private FileWatcherService fileWatcherService;
     @Autowired
@@ -204,7 +208,9 @@ public class LogService implements InitializingBean, DisposableBean {
         LogFormat finalFormat = format == null ? DEFAULT_FORMAT : LvGsonUtils.copy(format);
 
         return logs.computeIfAbsent(Pair.of(path, Utils.getFormatHash(finalFormat)), p -> {
-            return new Log(p.getFirst(), finalFormat, executor, timer, fileWatcherService, accessManager);
+            Log res = new Log(p.getFirst(), finalFormat, executor);
+            applicationContext.getAutowireCapableBeanFactory().autowireBeanProperties(res, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+            return res;
         });
     }
 

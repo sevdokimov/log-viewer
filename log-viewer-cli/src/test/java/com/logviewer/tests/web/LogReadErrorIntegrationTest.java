@@ -1,6 +1,8 @@
 package com.logviewer.tests.web;
 
+import com.google.common.collect.Iterables;
 import com.logviewer.TestUtils;
+import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.utils.Utils;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.logviewer.data2.UnparsableFileErrorTest.LOG_VIEWER_PARSER_MAX_UNPARSABLE_BLOCK_SIZE;
 import static org.junit.Assert.assertEquals;
 
 public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
@@ -124,6 +127,22 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         assert !driver.findElementById("records").isDisplayed();
 
         driver.findElement(By.cssSelector(".file-not-found"));
+    }
+
+    @Test
+    public void incorrectFormat() {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}] %m"));
+
+        System.setProperty(LOG_VIEWER_PARSER_MAX_UNPARSABLE_BLOCK_SIZE, "150");
+
+        try {
+            openLog("search.log");
+
+            WebElement error = Iterables.getOnlyElement(driver.findElements(By.cssSelector(".file-list .file-error")));
+            assertEquals("Incorrect log format", error.getText());
+        } finally {
+            System.clearProperty(LOG_VIEWER_PARSER_MAX_UNPARSABLE_BLOCK_SIZE);
+        }
     }
 
     @Test

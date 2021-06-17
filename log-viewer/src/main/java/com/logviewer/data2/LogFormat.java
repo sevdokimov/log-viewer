@@ -36,6 +36,8 @@ public interface LogFormat {
 
     void validate() throws IllegalArgumentException;
 
+    String getHumanReadableString();
+
     interface FieldDescriptor {
         FieldDescriptor[] EMPTY_ARRAY = new FieldDescriptor[0];
 

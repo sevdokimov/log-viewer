@@ -19,6 +19,7 @@ export interface RestStatus {
     errorType: ErrorType;
     errorMessage: string;
     detailedErrorMessage: string;
+    metainfo: any;
 }
 
 export enum ErrorType {
@@ -28,6 +29,7 @@ export enum ErrorType {
     CONNECTION_PROBLEM = 'ConnectionProblem', //
     IO_EXCEPTION = 'IOException', //
     NoDateField = 'NoDateField', //
+    INCORRECT_FORMAT = 'IncorrectFormatException',
 
     LOG_CRASHED_EXCEPTION = 'LogCrashedException',
     INTERNAL_ERROR = 'internal_error',

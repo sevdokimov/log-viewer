@@ -1,6 +1,7 @@
 package com.logviewer.web.dto;
 
 import com.logviewer.data2.DirectoryNotVisibleException;
+import com.logviewer.data2.IncorrectFormatException;
 import com.logviewer.data2.LogCrashedException;
 import com.logviewer.utils.Utils;
 import com.logviewer.web.session.LogSession;
@@ -13,6 +14,8 @@ import java.net.ConnectException;
 import java.nio.channels.UnresolvedAddressException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.NoSuchFileException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RestStatus {
 
@@ -24,6 +27,8 @@ public class RestStatus {
     private String errorType;
     private String errorMessage;
     private String detailedErrorMessage;
+
+    private Map<String, Object> metainfo;
 
     private String hash;
 
@@ -56,6 +61,16 @@ public class RestStatus {
             }
             else if (exception == LogSession.NO_DATE_EXCEPTION) {
                 errorType = "NoDateField";
+            }
+            else if (exception instanceof IncorrectFormatException) {
+                errorType = "IncorrectFormatException";
+
+                IncorrectFormatException e = (IncorrectFormatException) exception;
+
+                metainfo = new HashMap<>();
+                metainfo.put("start", e.getBlockStart());
+                metainfo.put("end", e.getBlockStart());
+                metainfo.put("format", e.getFormat());
             }
             else if (exception instanceof IOException) {
                 errorType = "IOException";

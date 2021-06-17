@@ -28,6 +28,11 @@
     <span *ngSwitchCase="'internal_error'" class="file-error">
         Internal error <span (click)="showStacktrace()" class="fas fa-wrench toolIcon" title="Show details"></span>
     </span>
+    <span *ngSwitchCase="'IncorrectFormatException'" class="file-error"
+          title="File content cannot be parsed using the specified log format: {{status.metainfo.format}}">
+        Incorrect log format
+        <span (click)="showFormatInfo()" class="fas fa-wrench toolIcon" title="Show details"></span>
+    </span>
 </span>
 
 <ng-template #stacktraceDialog let-stacktraceDialog>
@@ -41,5 +46,17 @@
         <div class="stacktrace-panel">
             {{status.detailedErrorMessage}}
         </div>
+    </div>
+</ng-template>
+
+<ng-template #formatDialog let-formatDialog>
+    <div class="modal-header">
+        <h4 class="modal-title">Error details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="formatDialog.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        File content cannot be parsed using the specified log format:<br><string>{{status.metainfo.format}}</string>
     </div>
 </ng-template>

@@ -60,6 +60,11 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
         public void validate() throws IllegalArgumentException {
 
         }
+
+        @Override
+        public String getHumanReadableString() {
+            return "Invalid log";
+        }
     }
 
     @Configuration

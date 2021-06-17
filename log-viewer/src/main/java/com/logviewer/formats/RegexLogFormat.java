@@ -138,6 +138,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         }
     }
 
+    @Override
+    public String getHumanReadableString() {
+        return "regexp: " + regex;
+    }
+
     public String getDatePattern() {
         return datePattern;
     }

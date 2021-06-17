@@ -113,4 +113,9 @@ public class NginxLogFormat extends AbstractPatternLogFormat {
                 throw new IllegalArgumentException("Unexpected field: $" + name);
         }
     }
+
+    @Override
+    public String getHumanReadableString() {
+        return "nginx: " + getPattern();
+    }
 }

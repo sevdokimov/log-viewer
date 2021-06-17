@@ -296,4 +296,9 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
                 return null;
         }
     }
+
+    @Override
+    public String getHumanReadableString() {
+        return "log4j: " + getPattern();
+    }
 }
