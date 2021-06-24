@@ -49,6 +49,10 @@ public class LvDefaultFormatDetector {
 
     private static final Pattern THREAD_ITEM = Pattern.compile(" *(\\[[^\\[\\]\n]+]) *");
 
+    private static final Pattern SPRING_PATTERN = Pattern.compile("\\b20[012]\\d-(?:1[12]|0\\d)-(?:[012]\\d|3[10]) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d\\d\\d +" + LEVEL.pattern() + " +\\d{2,7} --- \\[.+\\] +(?:\\w+\\.)*\\w+ +: .+");
+
+    private static final String SPRING_LOG4J_PATTERN = "%d{yyyy-MM-dd HH:mm:ss.SSS} %p %processId --- [%t] %logger : %m%n";
+
     private static int readBuffer(@NonNull Path path, byte[] data) {
         int length = 0;
 
@@ -207,6 +211,9 @@ public class LvDefaultFormatDetector {
     }
 
     static String detectLog4jFormatOfLine(String line) {
+        if (SPRING_PATTERN.matcher(line).matches())
+            return SPRING_LOG4J_PATTERN;
+
         String dateField;
         TextRange datePos;
 

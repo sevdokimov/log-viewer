@@ -17,6 +17,12 @@ import static org.junit.Assert.assertNull;
 public class LvDefaultFormatDetectorTest extends AbstractLogTest {
 
     @Test
+    public void testSpringPattern() {
+        checkLine("2021-06-24 10:29:22.662  INFO 5571 --- [pool-1-thread-5] com.logviewer.demo.LogGeneratorService   : msg", "%d{yyyy-MM-dd HH:mm:ss.SSS} %p %processId --- [%t] %logger : %m%n");
+        checkLine("2021-06-24 10:29:25.416 ERROR 5571 --- [pool-1-thread-2] com.logviewer.demo.LogGeneratorService   : Failed to execute method", "%d{yyyy-MM-dd HH:mm:ss.SSS} %p %processId --- [%t] %logger : %m%n");
+    }
+
+    @Test
     public void testDateLevel() {
         checkLine("2020-01-01 18:11:00,000 WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss,SSS} %level %m%n");
         checkLine("2020-01-01 18:11:00.000      WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS} %level %m%n");
