@@ -95,11 +95,7 @@ public class RestRecord {
 
         List<RestRecord> res = new ArrayList<>(pairs.size());
 
-        LogRecord prev = null;
         for (Pair<LogRecord, Throwable> pair : pairs) {
-            assert prev == null || prev.compareTo(pair.getFirst()) < 0;
-            prev = pair.getFirst();
-
             res.add(new RestRecord(pair));
         }
 

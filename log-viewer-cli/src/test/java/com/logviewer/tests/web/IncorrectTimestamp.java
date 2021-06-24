@@ -1,5 +1,7 @@
 package com.logviewer.tests.web;
 
+import com.logviewer.logLibs.log4j.Log4jLogFormat;
+import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -14,6 +16,8 @@ public class IncorrectTimestamp extends AbstractWebTestCase {
 
     @Test
     public void testIncorrectTimestamp() {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(new Log4jLogFormat("[%d{yyyy.MM.dd HH:mm}][%t] %m"));
+
         openLog("incorrect-timestamp.log");
         setHeight(5);
         driver.navigate().refresh();
