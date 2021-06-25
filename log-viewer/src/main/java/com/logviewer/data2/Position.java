@@ -8,6 +8,7 @@ import com.logviewer.utils.Utils;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class Position implements Comparable<Position>, Serializable {
 
@@ -57,7 +58,7 @@ public class Position implements Comparable<Position>, Serializable {
 
         Position position = (Position) o;
 
-        if (time.longValue() != position.time.longValue()) return false;
+        if (!Objects.equals(time, position.time)) return false;
         if (this.o != position.o) return false;
         return logId.equals(position.logId);
     }
