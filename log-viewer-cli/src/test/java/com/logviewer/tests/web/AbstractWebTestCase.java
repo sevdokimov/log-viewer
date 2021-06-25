@@ -2,6 +2,7 @@ package com.logviewer.tests.web;
 
 import com.google.common.base.Throwables;
 import com.logviewer.LogViewerMain;
+import com.logviewer.TestUtils;
 import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.FavoriteLogService;
@@ -13,6 +14,7 @@ import com.logviewer.tests.pages.LogPage;
 import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.TestListener;
 import com.logviewer.utils.Utils;
+import org.eclipse.jetty.server.Server;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,7 +26,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.lang.NonNull;
 
@@ -35,8 +36,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.ConnectException;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -70,9 +69,8 @@ public abstract class AbstractWebTestCase implements LogPage {
     protected static Path dataDir;
     protected static Path tmpDir;
 
-    protected static LogService testLogService;
-
-    protected static ConfigurableApplicationContext ctx;
+    protected static AnnotationConfigApplicationContext ctx;
+    private static Server server;
 
     @Autowired
     protected FavoriteLogService favoriteLogService;
@@ -95,44 +93,62 @@ public abstract class AbstractWebTestCase implements LogPage {
         }
     }
 
+    private static void clearContext() throws Exception {
+        if (server != null) {
+            server.stop();
+            ctx.close();
+            server = null;
+            ctx = null;
+        }
+    }
+
+    private static void initContext() throws Exception {
+        assert AbstractWebTestCase.ctx == null;
+        assert server == null;
+
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.register(LvTestConfig.class, LogViewerServerConfig.class);
+        ctx.refresh();
+        LogContextHolder.setInstance(ctx);
+        AbstractWebTestCase.ctx = ctx;
+
+        server = new LogViewerMain().startup();
+    }
+
     @BeforeClass
-    public static void beforeClass() throws Exception {
-        if (ctx == null) {
-            ctx = new AnnotationConfigApplicationContext(LvTestConfig.class, LogViewerServerConfig.class);
-
-            testLogService = ctx.getBean(LogService.class);
-
-            LogContextHolder.setInstance(ctx);
+    public static void initSpring() throws Exception {
+        if (server == null) {
+            initContext();
         }
 
         InmemoryFavoritesService favoritesService = ctx.getBean(InmemoryFavoritesService.class);
         favoritesService.setEditable(true);
         favoritesService.clear();
-
-        startJettyIfNeed();
-
-        String driverFactoryClassName = System.getProperty("web.driver", "com.logviewer.tests.utils.ChromeDriverFactory");
-
-        Class<?> driverFactoryClass = AbstractWebTestCase.class.getClassLoader().loadClass(driverFactoryClassName);
-        Supplier<RemoteWebDriver> driverFactory = (Supplier<RemoteWebDriver>) driverFactoryClass.newInstance();
-
-        driver = driverFactory.get();
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
     }
 
-    private static void startJettyIfNeed() throws Exception {
+    protected static void withNewServer(TestUtils.ExceptionalRunnable run) throws Exception {
+        clearContext();
+
         try {
-            Socket s = new Socket("localhost", TEST_PORT);
-            s.close();
+            initContext();
 
-            return;
-        } catch (ConnectException ignored) {
-            // Jetty is not started
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            run.run();
+        } finally {
+            clearContext();
         }
+    }
 
-        new LogViewerMain().startup();
+    @BeforeClass
+    public static void initDriver() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        if (driver == null) {
+            String driverFactoryClassName = System.getProperty("web.driver", "com.logviewer.tests.utils.ChromeDriverFactory");
+
+            Class<?> driverFactoryClass = AbstractWebTestCase.class.getClassLoader().loadClass(driverFactoryClassName);
+            Supplier<RemoteWebDriver> driverFactory = (Supplier<RemoteWebDriver>) driverFactoryClass.newInstance();
+
+            driver = driverFactory.get();
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        }
     }
 
     @Before
@@ -213,7 +229,7 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected static void openUrl(String path, @NonNull Map<String, List<String>> params) {
         StringBuilder sb = new StringBuilder();
-        sb.append("http://localhost:").append(TEST_PORT).append("/ttt/test-path");
+        sb.append("http://localhost:").append(TEST_PORT);
 
         if (!path.startsWith("/"))
             sb.append("/");
@@ -288,7 +304,7 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     @Before
     public void before() {
-        testLogService.reset();
+        ctx.getBean(LogService.class).reset();
 
         ctx.getBean(LvFileAccessManagerImpl.class).allowAll();
 
@@ -297,8 +313,10 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     @AfterClass
     public static void done() {
-        if (driver != null)
+        if (driver != null) {
             driver.close();
+            driver = null;
+        }
     }
 
     protected String getClipboardText() {

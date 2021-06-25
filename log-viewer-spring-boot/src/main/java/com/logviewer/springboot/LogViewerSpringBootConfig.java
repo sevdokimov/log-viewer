@@ -17,6 +17,10 @@ public class LogViewerSpringBootConfig {
 
     public static final String LOG_VIEWER_WEBSOCKET_PATH = "log-viewer.websocket.path";
 
+    public static final String DEFAULT_LOG_PATH = "/logs/*";
+
+    public static final String LOG_VIEWER_URL_MAPPING = "log-viewer.url-mapping";
+
     @Bean
     public ServletRegistrationBean logViewerServlet(Environment environment) {
         ServletRegistrationBean<LogViewerServlet> servlet = new ServletRegistrationBean<>();
@@ -24,7 +28,7 @@ public class LogViewerSpringBootConfig {
         servlet.setAsyncSupported(true);
         servlet.setServlet(new LogViewerServlet());
 
-        String logServletPath = environment.getProperty("log-viewer.url-mapping", "/logs/*");
+        String logServletPath = environment.getProperty(LOG_VIEWER_URL_MAPPING, DEFAULT_LOG_PATH);
         if (!logServletPath.endsWith("*")) {
             if (!logServletPath.endsWith("/"))
                 logServletPath += "/";

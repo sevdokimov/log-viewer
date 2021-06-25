@@ -26,10 +26,10 @@ public class LogViewerServlet extends HttpServlet {
     public static final String SPRING_CONTEXT_PROPERTY = "org.springframework.web.context.WebApplicationContext.ROOT";
 
     private static final Pattern[] RESOURCE_PATTERNS = new Pattern[]{
-            Pattern.compile("fa-(?:brands|regular|solid)-\\d+(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
-            Pattern.compile("MaterialIcons-Regular(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
-            Pattern.compile("[\\w\\-]+(\\.[0-9a-f]{20})?\\.(?:png|gif)"),
-            Pattern.compile("(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{20})?\\.(?:css|js|js\\.map|css\\.map)"),
+            Pattern.compile("/fa-(?:brands|regular|solid)-\\d+(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
+            Pattern.compile("/MaterialIcons-Regular(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
+            Pattern.compile("/[\\w\\-]+(\\.[0-9a-f]{20})?\\.(?:png|gif)"),
+            Pattern.compile("/(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{20})?\\.(?:css|js|js\\.map|css\\.map)"),
     };
 
     private static final Map<String, String> MIME_TYPES_MAP = Utils.newMap("css", "text/css", "js", "application/javascript");
@@ -70,35 +70,35 @@ public class LogViewerServlet extends HttpServlet {
     }
 
     private String getRelativePath(HttpServletRequest req) {
-        String uri = req.getRequestURI().substring(req.getContextPath().length());
+        String servletMappingPath = req.getContextPath() + req.getServletPath();
 
-        String servletPath = req.getServletPath();
-        assert uri.startsWith(servletPath);
+        assert req.getRequestURI().startsWith(servletMappingPath) : "[req.getRequestURI()=" + req.getRequestURI()
+                + ", req.getContextPath()=" + req.getContextPath() + ", req.getServletPath()=" + req.getServletPath();
 
-        if (uri.equals(servletPath)) {
-            return "";
-        }
+        String uri = req.getRequestURI().substring(servletMappingPath.length());
+        assert uri.startsWith("/") || uri.isEmpty();
 
-        assert uri.startsWith(servletPath) && uri.startsWith("/", servletPath.length());
-        return uri.substring(servletPath.length() + 1);
+        return uri;
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String relativePath = getRelativePath(req);
 
-        if (!relativePath.startsWith("rest/")) {
+        String restPrefix = "/rest/";
+
+        if (!relativePath.startsWith(restPrefix)) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        int idx = relativePath.indexOf("/", "rest/".length());
+        int idx = relativePath.indexOf("/", restPrefix.length());
         if (idx < 0) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
 
-        AbstractRestRequestHandler handler = restHandlers.get(relativePath.substring("rest/".length(), idx));
+        AbstractRestRequestHandler handler = restHandlers.get(relativePath.substring(restPrefix.length(), idx));
         if (handler == null) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -111,19 +111,19 @@ public class LogViewerServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String relativePath = getRelativePath(req);
 
-        if (relativePath.equals("")) {
-            processIndexHtml(resp, relativePath);
+        if (relativePath.equals("") || relativePath.equals("/")) {
+            processIndexHtml(req, resp, relativePath);
             return;
         }
 
-        if (relativePath.startsWith("rest/")) {
-            int idx = relativePath.indexOf("/", "rest/".length());
+        if (relativePath.startsWith("/rest/")) {
+            int idx = relativePath.indexOf("/", "/rest/".length());
             if (idx < 0) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
 
-            AbstractRestRequestHandler handler = restHandlers.get(relativePath.substring("rest/".length(), idx));
+            AbstractRestRequestHandler handler = restHandlers.get(relativePath.substring("/rest/".length(), idx));
             if (handler == null) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -135,7 +135,7 @@ public class LogViewerServlet extends HttpServlet {
         }
 
         Boolean cachableRes = null;
-        if (relativePath.startsWith("assets/") || relativePath.startsWith("img/")) {
+        if (relativePath.startsWith("/assets/") || relativePath.startsWith("/img/")) {
             cachableRes = true;
         } else {
             for (Pattern resourcePattern : RESOURCE_PATTERNS) {
@@ -148,7 +148,7 @@ public class LogViewerServlet extends HttpServlet {
         }
 
         if (cachableRes == null) {
-            processIndexHtml(resp, relativePath);
+            processIndexHtml(req, resp, relativePath);
             return;
         }
 
@@ -265,7 +265,37 @@ public class LogViewerServlet extends HttpServlet {
         }
     }
 
-    private void processIndexHtml(HttpServletResponse resp, String relativePath) throws IOException {
+    private String calculateRootPath(HttpServletRequest req, String relativePath) {
+        if (relativePath.indexOf('/', 1) < 0)
+            return "./";
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 1; i < relativePath.length(); i++) {
+            if (relativePath.charAt(i) == '/')
+                sb.append("../");
+        }
+
+        return sb.toString();
+    }
+
+    private void processIndexHtml(HttpServletRequest req, HttpServletResponse resp, String relativePath) throws IOException {
+        if (relativePath.isEmpty()) {
+            String path = req.getContextPath() + req.getServletPath();
+
+            if (!path.isEmpty()) {
+                int slash = path.lastIndexOf('/');
+                assert slash >= 0 : path;
+
+                String target = "." + path.substring(slash) + "/";
+                if (req.getQueryString() != null)
+                    target += '?' + req.getQueryString();
+                    
+                resp.sendRedirect(target);
+                return;
+            }
+        }
+
         String indexHtml = this.indexHtml;
         if (indexHtml == null) {
             URL indexHtmlUrl = getClass().getResource("/log-viewer-web/index.html");
@@ -282,14 +312,8 @@ public class LogViewerServlet extends HttpServlet {
                 this.indexHtml = indexHtml;
         }
 
-        StringBuilder sb = new StringBuilder();
+        String rootPath = calculateRootPath(req, relativePath);
 
-        for (int i = 0; i < relativePath.length(); i++) {
-            if (relativePath.charAt(i) == '/')
-                sb.append("../");
-        }
-
-        String rootPath = sb.length() == 0 ? "./" : sb.toString();
 
         indexHtml = indexHtml.replace("$PATH", rootPath);
 

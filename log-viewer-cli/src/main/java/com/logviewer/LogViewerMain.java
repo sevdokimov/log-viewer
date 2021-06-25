@@ -53,6 +53,8 @@ public class LogViewerMain {
     private int port;
     @Value("${log-viewer.server.context-path:/}")
     private String contextPath;
+    @Value("${log-viewer.server.servlet-path:/*}")
+    private String servletPath;
     @Value("${log-viewer.server.interface:}")
     private String serverInterface;
     @Value("${log-viewer.server.enabled:true}")
@@ -62,9 +64,7 @@ public class LogViewerMain {
     @Value("${" + PROP_AUTHENTICATION_ENABLED + ":false}")
     private boolean authenticationEnabled;
 
-    private static Server server;
-
-    public boolean startup() throws Exception {
+    public Server startup() throws Exception {
         boolean closeAppContext = false;
 
         ApplicationContext appCtx = LogContextHolder.getInstance();
@@ -77,7 +77,9 @@ public class LogViewerMain {
         appCtx.getAutowireCapableBeanFactory().autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 
         if (!enabled)
-            return false;
+            return null;
+
+        boolean started = false;
 
         try {
             Server srv = new Server();
@@ -104,10 +106,11 @@ public class LogViewerMain {
 
             srv.setHandler(webAppCtx);
 
-            ServletHolder lvServlet = webAppCtx.addServlet(LogViewerServlet.class, "/*");
+            ServletHolder lvServlet = webAppCtx.addServlet(LogViewerServlet.class, servletPath);
             if (useWebSocket) {
                 ServerContainer websocketCtx = WebSocketServerContainerInitializer.configureContext(webAppCtx);
-                websocketCtx.addEndpoint(ServerEndpointConfig.Builder.create(LogViewerWebsocket.class, "/ws").build());
+                String wsPath = servletPath.replaceAll("/+\\**$", "") + "/ws";
+                websocketCtx.addEndpoint(ServerEndpointConfig.Builder.create(LogViewerWebsocket.class, wsPath).build());
 
                 lvServlet.setInitParameter("web-socket-path", "ws");
             } else {
@@ -116,16 +119,16 @@ public class LogViewerMain {
 
             srv.start();
 
-            server = srv;
+            started = true;
 
             LOG.info("Web interface started: http://localhost:{}{} ({}ms)", port,
                     contextPath.equals("/") ? "" : contextPath,
                     ManagementFactory.getRuntimeMXBean().getUptime());
 
-            return true;
+            return srv;
         }
         finally {
-            if (server == null) {
+            if (!started) {
                 if (closeAppContext) {
                     ((ConfigurableApplicationContext)appCtx).close();
                     LogContextHolder.setInstance(null);
@@ -235,7 +238,7 @@ public class LogViewerMain {
 
         LogViewerMain run = new LogViewerMain();
 
-        if (!run.startup()) {
+        if (run.startup() == null) {
             synchronized (LogViewerMain.class) {
                 LogViewerMain.class.wait(); // Jetty was not started. Sleep forever to avoid closing the process.
             }
