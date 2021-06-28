@@ -156,7 +156,7 @@ public class LogViewerServlet extends HttpServlet {
 
         try {
             cache = this.resourceCache.computeIfAbsent(relativePath, key -> {
-                URL resource = getClass().getResource("/log-viewer-web/" + key);
+                URL resource = getClass().getResource("/log-viewer-web" + key);
                 if (resource == null)
                     throw new IllegalArgumentException();
 
