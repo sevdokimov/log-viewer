@@ -19,6 +19,11 @@ import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
 
+    /**
+     *  Additional level names that are not used by Logback, but added to be compatible with other logging systems
+     */
+    private static final String[] ADDITIONAL_LEVEL_NAMES = {"WARNING"};
+
     protected static final int NODE_LITERAL = 0; // Node.LITERAL
     protected static final int NODE_SIMPLE_KEYWORD = 1; // Node.COMPOSITE_KEYWORD
     protected static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
@@ -130,7 +135,10 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                     case "le":
                     case "level":
                         return new LvLayoutFixedTextNode("level", FieldTypes.LEVEL_LOGBACK,
-                                Stream.of(Level.values()).map(Level::toString).toArray(String[]::new));
+                                Stream.concat(
+                                        Stream.of(Level.values()).map(Level::toString),
+                                        Stream.of(ADDITIONAL_LEVEL_NAMES)
+                                ).toArray(String[]::new));
 
                     case "nopex":
                     case "nopexception":
@@ -139,7 +147,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
 
                     default:
                         throw new IllegalArgumentException("log encoder pattern contains unsupported terms [pattern=\""
-                                + pattern + "\", term=" + n.toString() + "]");
+                                + pattern + "\", term=" + n + "]");
                 }
 
             default:

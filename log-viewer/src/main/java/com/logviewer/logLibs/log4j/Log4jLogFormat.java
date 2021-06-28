@@ -14,7 +14,10 @@ import java.util.regex.Pattern;
 
 public class Log4jLogFormat extends AbstractPatternLogFormat {
 
-    private static final String[] LEVELS = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"};
+    private static final String[] LEVELS = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL",
+            // Additional level names that are not used by Log4J, but added to be compatible with other logging systems
+            "WARNING"
+    };
 
     private static final Pattern LOCATION_PATTERN = Pattern.compile("" +
             "(?:\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*\\.)*\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*" +

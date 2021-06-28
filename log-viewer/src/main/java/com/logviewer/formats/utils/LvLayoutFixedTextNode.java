@@ -3,13 +3,18 @@ package com.logviewer.formats.utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 public class LvLayoutFixedTextNode extends LvLayoutCustomTypeNode implements LvLayoutNode {
 
     private final String[] values;
 
     public LvLayoutFixedTextNode(@NonNull String fieldName, @Nullable String fieldType, String ... values) {
         super(fieldName, fieldType);
-        this.values = values;
+
+        this.values = values.clone();
+        Arrays.sort(this.values, Comparator.comparingInt(s -> -s.length()));
     }
 
     @Override

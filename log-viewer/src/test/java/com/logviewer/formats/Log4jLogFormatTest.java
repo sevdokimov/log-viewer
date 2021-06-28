@@ -3,9 +3,11 @@ package com.logviewer.formats;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.BufferedFile;
+import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
+import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.utils.LvDateUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LocationInfo;
@@ -241,5 +243,12 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         LogReader reader = format.createReader();
         boolean isSuccess = reader.parseRecord(new BufferedFile.Line(line));
         assertFalse(isSuccess);
+    }
+
+    @Test
+    public void additionalLevelNames() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %level %msg%wEx");
+        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText(1));
+        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText(1));
     }
 }

@@ -278,4 +278,11 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         assertEquals("1111", record2.getFieldText(1));
     }
 
+    @Test
+    public void additionalLevelNames() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %level %msg%wEx");
+        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText(1));
+        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText(1));
+    }
+
 }
