@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.logviewer.demo</groupId>
 	<artifactId>spring-boot-2.3</artifactId>
-	<version>0.1.8-SNAPSHOT</version>
+	<version>0.1.8</version>
 	<name>spring-boot-2.3</name>
 	<description>Demo project for Spring Boot</description>
 

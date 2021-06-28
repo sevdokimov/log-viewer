@@ -6,7 +6,7 @@
     <artifactId>log-parent</artifactId>
     <packaging>pom</packaging>
 
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.8</version>
 
     <properties>
         <log4j.version>2.13.3</log4j.version>
