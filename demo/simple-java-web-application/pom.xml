@@ -6,7 +6,7 @@
 
     <groupId>com.logviewer.demo</groupId>
     <artifactId>simple-java-web-application</artifactId>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.9-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>simple-java-web-application Maven Webapp</name>
