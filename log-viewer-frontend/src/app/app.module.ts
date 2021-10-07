@@ -62,7 +62,7 @@ export const appRoutes: Routes = [
 
         AutosizeModule,
 
-        RouterModule.forRoot(appRoutes),
+        RouterModule.forRoot(appRoutes, { relativeLinkResolution: 'legacy' }),
 
         NgxMatDatetimePickerModule,
         NgxMatTimepickerModule,
