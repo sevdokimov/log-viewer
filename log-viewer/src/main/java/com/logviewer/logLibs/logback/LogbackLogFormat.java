@@ -5,6 +5,7 @@ import ch.qos.logback.core.pattern.parser.Node;
 import ch.qos.logback.core.pattern.parser.Parser;
 import ch.qos.logback.core.pattern.parser.SimpleKeywordNode;
 import ch.qos.logback.core.spi.ScanException;
+import ch.qos.logback.core.util.OptionHelper;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
@@ -27,9 +28,6 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     protected static final int NODE_LITERAL = 0; // Node.LITERAL
     protected static final int NODE_SIMPLE_KEYWORD = 1; // Node.COMPOSITE_KEYWORD
     protected static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
-
-    private static final Set<String> TEXT_FILEDS = new HashSet<>(Arrays.asList("ex", "exception", "throwable",
-            "xEx", "xException", "xThrowable", "wEx", "wex", "X", "mdc", "m", "msg", "message"));
 
     public LogbackLogFormat(@NonNull String pattern) {
         super(null, pattern);
@@ -68,13 +66,10 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                 return new LvLayoutTextNode((String) n.getValue());
             case NODE_COMPOSITE_KEYWORD:
                 throw new IllegalArgumentException("log encoder pattern contains unsupported terms [pattern=\""
-                        + pattern + "\", term=" + n.toString() + "]");
+                        + pattern + "\", term=" + n + "]");
             case NODE_SIMPLE_KEYWORD:
                 SimpleKeywordNode kn = (SimpleKeywordNode) n;
                 String keyword = (String) kn.getValue();
-
-                if (TEXT_FILEDS.contains(keyword))
-                    return LvLayoutStretchNode.messageNode();
 
                 switch (keyword) {
                     case "d":
@@ -145,6 +140,30 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                     case "n":
                         return null;
 
+                    case "X":
+                    case "mdc":
+                        if (!isNextLiteralOrEnd(kn))
+                            return LvLayoutStretchNode.messageNode();
+
+                        if (kn.getOptions() == null || kn.getOptions().isEmpty())
+                            return new LvLayoutStretchNode("mdc", FieldTypes.MDC, true, 0);
+
+                        String mdcPropertyName = getMdcPropertyName(kn.getOptions().get(0));
+                        return new LvLayoutStretchNode(mdcPropertyName, FieldTypes.MDC, true, 0);
+
+                    case "ex":
+                    case "exception":
+                    case "throwable":
+                    case "xEx":
+                    case "xException":
+                    case "xThrowable":
+                    case "wEx":
+                    case "wex":
+                    case "m":
+                    case "msg":
+                    case "message":
+                        return LvLayoutStretchNode.messageNode();
+
                     default:
                         throw new IllegalArgumentException("log encoder pattern contains unsupported terms [pattern=\""
                                 + pattern + "\", term=" + n + "]");
@@ -153,6 +172,16 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
             default:
                 throw new IllegalArgumentException("Unknown node type: " + n.getType() + ", pattern=" + pattern);
         }
+    }
+
+    private static String getMdcPropertyName(String s) {
+        String[] strings = OptionHelper.extractDefaultReplacement(s);
+        return strings[0];
+    }
+
+    private static boolean isNextLiteralOrEnd(SimpleKeywordNode kn) {
+        Node next = kn.getNext();
+        return next == null || next.getType() == NODE_LITERAL;
     }
 
     @Override

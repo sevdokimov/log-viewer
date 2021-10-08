@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
+import com.google.common.collect.ImmutableMap;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.FieldTypes;
@@ -27,6 +28,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("Convert2MethodRef")
 public class LogbackLogFormatTest extends AbstractLogTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogbackLogFormatTest.class);
@@ -104,11 +106,18 @@ public class LogbackLogFormatTest extends AbstractLogTest {
                 (ch.qos.logback.classic.Logger)LOG,
                 Level.INFO, "Authentication failed {}", null, new Object[]{100});
         event.setTimeStamp(date.getTime());
+        event.setMDCPropertyMap(ImmutableMap.of("aaa", "111", "bbb", "222", "ccc", "333"));
         event.setThreadName("localhost-startStop-1-EventThread");
 
         checkPattern("%-5level [%thread]: %message%n", event,
                 "INFO", "localhost-startStop-1-EventThread", "Authentication failed 100");
 
+        checkPattern("%-5level [%X] %message%n", event,
+                "INFO", "aaa=111, bbb=222, ccc=333", "Authentication failed 100");
+        checkPattern("%-5level %X{aaa} %message%n", event,
+                "INFO", "111", "Authentication failed 100");
+        checkPattern("%-5level %mdc{zzz:-FF} %message%n", event,
+                "INFO", "FF", "Authentication failed 100");
         checkPattern("%-5level [%thread]: %message%nopexception%nopex%n", event,
                 "INFO", "localhost-startStop-1-EventThread", "Authentication failed 100");
 
@@ -276,6 +285,36 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         LogRecord record2 = read(logFormat, "10:40:11 1111 aaa");
         assertEquals("1111", record2.getFieldText(1));
+    }
+
+    @Test
+    public void testMdcPropertyName() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %X{aaa} %msg%wEx");
+        LogFormat.FieldDescriptor[] fields = logFormat.getFields();
+
+        assertEquals(Arrays.asList("date", "aaa", "msg"), Stream.of(fields).map(f -> f.name()).collect(Collectors.toList()));
+
+        LogFormat.FieldDescriptor field = fields[1];
+        assertEquals(FieldTypes.MDC, field.type());
+    }
+
+    @Test
+    public void testMdcPropertyNameWithDefault() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %X{aaa:-} %msg%wEx");
+        LogFormat.FieldDescriptor[] fields = logFormat.getFields();
+
+        assertEquals(Arrays.asList("date", "aaa", "msg"), Stream.of(fields).map(f -> f.name()).collect(Collectors.toList()));
+
+        LogFormat.FieldDescriptor field = fields[1];
+        assertEquals(FieldTypes.MDC, field.type());
+    }
+
+    @Test
+    public void noMdcBeforeMessage() {
+        LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %X{aaa}%msg%wEx");
+        LogFormat.FieldDescriptor[] fields = logFormat.getFields();
+        assertEquals(2, fields.length); // Don't create MDC node before message node, the parser cannot parse that.
+        assertEquals("msg", fields[1].name());
     }
 
     @Test
