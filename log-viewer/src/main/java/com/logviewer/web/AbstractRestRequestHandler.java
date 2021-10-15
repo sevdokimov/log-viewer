@@ -101,8 +101,15 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
             String methodName = contextPath.substring(idx + 1);
 
             Method method = methods.get(methodName);
-            if (method.getAnnotation(Endpoint.class).method() != methodType)
-                throw new RestException(405);
+            if (method == null) {
+                sendResponse(resp, 400, "Method not found: " + getClass().getSimpleName() + '.' + methodName + "()");
+                return;
+            }
+
+            if (method.getAnnotation(Endpoint.class).method() != methodType) {
+                sendResponse(resp, 405, "Wrong method: " + methodType);
+                return;
+            }
 
             Object[] args;
 
@@ -147,17 +154,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
                     Throwable targetException = e.getTargetException();
 
                     if (targetException instanceof RestException) {
-                        resp.setContentType("text/plain");
-                        resp.setCharacterEncoding("UTF-8");
-                        resp.setStatus(((RestException) targetException).getCode());
-
-                        if (resp.isCommitted()) {
-                            throw new IllegalStateException("Response already committed");
-                        } else {
-                            resp.resetBuffer();
-                        }
-
-                        resp.getWriter().append(targetException.getMessage());
+                        sendResponse(resp, ((RestException) targetException).getCode(), targetException.getMessage());
                         return;
                     }
 
@@ -174,7 +171,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
                 if (method.getReturnType() == void.class) {
                     resp.getWriter().print("true");
-                } else if (JsonElement.class.isInstance(res)) {
+                } else if (res instanceof JsonElement) {
                     LvGsonUtils.GSON.toJson((JsonElement)res, resp.getWriter());
                 } else if (method.getReturnType().equals(Object.class)) {
                     LvGsonUtils.GSON.toJson(res, resp.getWriter());
@@ -182,16 +179,27 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
                     LvGsonUtils.GSON.toJson(res, method.getGenericReturnType(), resp.getWriter());
                 }
             } catch (Throwable t) {
-                resp.setContentType("text/plain");
-                resp.setCharacterEncoding("UTF-8");
+                log.error("Failed to process request " + req, t);
 
-                log.error("Failed to process request " + req.toString(), t);
-
-                resp.sendError(500, "Internal error: " + t.toString());
+                sendResponse(resp, 500, "Internal error: " + t);
             }
         } finally {
             request.remove();
         }
+    }
+
+    private void sendResponse(HttpServletResponse resp, int code, String message) throws IOException {
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setStatus(code);
+
+        if (resp.isCommitted()) {
+            throw new IllegalStateException("Response already committed");
+        } else {
+            resp.resetBuffer();
+        }
+
+        resp.getWriter().append(message);
     }
 
     @Override
