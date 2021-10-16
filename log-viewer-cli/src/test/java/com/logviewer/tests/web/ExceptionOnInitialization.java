@@ -31,6 +31,8 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
 
         WebElement errorElement = driver.findElement(By.className("internal-error-stacktrace"));
         assert errorElement.getText().contains("java.lang.RuntimeException: Problem!!!");
+
+        expectError();
     }
 
     public static class BrokenFormat implements LogFormat {

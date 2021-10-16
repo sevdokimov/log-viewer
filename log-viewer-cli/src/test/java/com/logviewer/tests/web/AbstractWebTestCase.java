@@ -15,6 +15,7 @@ import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.TestListener;
 import com.logviewer.utils.Utils;
 import org.eclipse.jetty.server.Server;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -23,6 +24,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -50,6 +52,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,6 +74,8 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected static AnnotationConfigApplicationContext ctx;
     private static Server server;
+
+    private boolean expectError;
 
     @Autowired
     protected FavoriteLogService favoriteLogService;
@@ -317,6 +322,20 @@ public abstract class AbstractWebTestCase implements LogPage {
             driver.close();
             driver = null;
         }
+    }
+
+    @After
+    public void checkBrowserErrors() {
+        if (!expectError) {
+            for (LogEntry entry : driver.manage().logs().get("browser").getAll()) {
+                if (entry.getLevel() == Level.SEVERE)
+                    throw new RuntimeException("Browser log contains an error: " + entry.getMessage());
+            }
+        }
+    }
+
+    protected void expectError() {
+        expectError = true;
     }
 
     protected String getClipboardText() {

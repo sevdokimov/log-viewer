@@ -15,4 +15,9 @@ public class MethodCall {
     public JsonObject getArgs() {
         return args;
     }
+
+    @Override
+    public String toString() {
+        return methodName + '(' + args + ')';
+    }
 }

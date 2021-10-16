@@ -79,7 +79,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     disconnectMessage: string;
 
     state: State = State.STATE_LOADING;
-    stateVersion: number = 0;
+    private stateVersion: number = 0;
+    private loadingNextBottom: Position;
+    private loadingNextTop: Position;
 
     readonly m: Record[] = [];
 
@@ -167,7 +169,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     onResize() {
         if (this.state !== State.STATE_OPENED) { return; }
 
-        this.tryGrow();
+        this.loadRecordsIfNeeded();
     }
 
     goToTailAfterBrokenLink() {
@@ -287,6 +289,106 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
     }
 
+    /**
+     * It's good to have some loaded records outside the view to avoid blinking when the user scrolls up/down.
+     */
+    private spareDataOutsizeViewBorder() {
+        return this.logPane.nativeElement.clientHeight;
+    }
+
+    private maxSpareDataOutsideViewBorder() {
+        return this.logPane.nativeElement.clientHeight * 2;
+    }
+
+    private loadRecordsIfNeededTop() {
+        if (!this.hasRecordBefore) {
+            if (this.shiftView < 0) {
+                this.shiftView = 0;
+                return;
+            }
+        }
+
+        if (this.shiftView > this.maxSpareDataOutsideViewBorder()) {
+            let pixelsToDelete = this.shiftView - this.maxSpareDataOutsideViewBorder();
+
+            let children: HTMLCollection = this.records.nativeElement.children;
+
+            let deletedPixels = 0;
+
+            let i = 0;
+            for (; i < children.length; i++) {
+                let elementHeight = children[i].clientHeight + 1; // +1 - border at the top of row
+                if (deletedPixels + elementHeight > pixelsToDelete) { break; }
+                deletedPixels += elementHeight;
+            }
+            if (i > 0) {
+                this.shiftView -= deletedPixels;
+                this.deleteRecords(0, i);
+                this.hasRecordBefore = true;
+            }
+            return;
+        }
+
+        if (this.hasRecordBefore && this.shiftView < this.spareDataOutsizeViewBorder()) {
+            let neededRecords = Math.ceil((this.spareDataOutsizeViewBorder() - this.shiftView) / LogViewComponent.lineHeight);
+            neededRecords = Math.max(neededRecords, Math.ceil(this.recordCountToLoad() / 3));
+
+            if (this.m.length > 0) {
+                let start = Position.recordStart(this.m[0]);
+                if (!Position.equals(start, this.loadingNextTop)) {
+                    this.commService.send(
+                        new Command('loadNext', {
+                            start,
+                            backward: true,
+                            recordCount: neededRecords,
+                            hashes: this.vs.hashes,
+                            stateVersion: this.stateVersion,
+                        })
+                    );
+                    this.loadingNextTop = start;
+                }
+            }
+        }
+    }
+
+    private loadRecordsIfNeededBottom() {
+        let spareDateBottom = this.getLogViewHeight() - this.shiftView - this.logPane.nativeElement.clientHeight;
+
+        if (spareDateBottom > this.maxSpareDataOutsideViewBorder()) {
+            let toDeletePixels = spareDateBottom - this.maxSpareDataOutsideViewBorder();
+
+            let children: HTMLCollection = this.records.nativeElement.children;
+
+            let i = 0;
+            while (i < children.length) {
+                let elementHeight = children[children.length - i - 1].clientHeight + 1; // +1 - border at the top of row
+
+                if (elementHeight > toDeletePixels) {
+                    break;
+                }
+
+                toDeletePixels -= elementHeight;
+                i++;
+            }
+
+            if (i > 0) {
+                this.deleteRecords(children.length - i, i);
+                this.hasRecordAfter = true;
+            }
+
+            return;
+        }
+
+        if (this.hasRecordAfter && spareDateBottom < this.spareDataOutsizeViewBorder()) {
+            this.requestNextRecords();
+        }
+    }
+
+    private loadRecordsIfNeeded() {
+        this.loadRecordsIfNeededTop();
+        this.loadRecordsIfNeededBottom();
+    }
+
     private getLogViewHeight(): number {
         return this.records.nativeElement.clientHeight - 1;
     }
@@ -295,9 +397,15 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         return Math.floor(this.logPane.nativeElement.clientHeight / LogViewComponent.lineHeight) * LogViewComponent.lineHeight;
     }
 
+    private incrementStateVersion() {
+        this.stateVersion++;
+        this.loadingNextTop = null;
+        this.loadingNextBottom = null;
+    }
+
     ngAfterViewChecked() {
         if (this.stateVersion === 0) {
-            this.stateVersion = 1;
+            this.incrementStateVersion();
 
             let params = this.route.snapshot.queryParams;
 
@@ -348,7 +456,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.doDown(LogViewComponent.lineHeight);
     }
 
-    doDown0(offset: number) {
+    doDown(offset: number) {
         let logViewHeight = this.getLogViewHeight();
         if (logViewHeight - this.shiftView < this.logPane.nativeElement.clientHeight - LogViewComponent.lineHeight + 1) {
             return;
@@ -363,12 +471,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             this.shiftView = logViewHeight - newVisibleHeight;
         }
 
-        this.tryGrow();
-    }
-
-    doDown(offset: number) {
-        this.doDown0(offset);
-        this.removeHead();
+        this.loadRecordsIfNeeded();
     }
 
     scrollBegin() {
@@ -379,10 +482,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
     }
 
+    private moveLastRecordToBottom() {
+        this.shiftView = this.getLogViewHeight() + LogViewComponent.lineHeight - this.getPageHeight();
+    }
+
     private scrollEnd() {
         if (!this.hasRecordAfter) {
-            this.shiftView = this.getLogViewHeight() + LogViewComponent.lineHeight - this.getPageHeight();
-            this.onViewMovedTop();
+            this.moveLastRecordToBottom();
+            this.loadRecordsIfNeeded();
         } else {
             this.cleanAndScrollToEdge();
         }
@@ -403,33 +510,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView -= offset;
 
-        if (this.shiftView < 0) {
-            if (!this.hasRecordBefore) {
-                this.shiftView = 0;
-                return;
-            }
-        }
-
-        if (this.shiftView < this.logPane.nativeElement.clientHeight) {
-            if (this.m.length > 0) {
-                if (this.hasRecordBefore) {
-                    let recordCount =
-                        Math.ceil((this.logPane.nativeElement.clientHeight - this.shiftView) / LogViewComponent.lineHeight) + 1;
-
-                    this.commService.send(
-                        new Command('loadNext', {
-                            start: Position.recordStart(this.m[0]),
-                            backward: true,
-                            recordCount,
-                            hashes: this.vs.hashes,
-                            stateVersion: this.stateVersion,
-                        })
-                    );
-
-                    this.removeTail();
-                }
-            }
-        }
+        this.loadRecordsIfNeeded();
     }
 
     copyPermalink() {
@@ -722,7 +803,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         let newShiftView = this.headHeight(offset) - Math.round(this.getPageHeight() / 3);
 
         if (newShiftView > this.shiftView) {
-            this.doDown0(newShiftView - this.shiftView);
+            this.doDown(newShiftView - this.shiftView);
         } else {
             this.doUp(this.shiftView - newShiftView);
         }
@@ -769,26 +850,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     private searchFlagsChanged() {
         this.checkQuickSearch();
         setTimeout(() => $('#filterInput').focus(), 1);
-    }
-
-    private onViewMovedTop() {
-        if (this.shiftView < 0) {
-            if (!this.hasRecordBefore) {
-                this.shiftView = 0;
-            } else {
-                if (this.m.length > 0) {
-                    this.commService.send(
-                        new Command('loadNext', {
-                            start: Position.recordStart(this.m[0]),
-                            backward: true,
-                            recordCount: this.recordCountToLoad(),
-                            hashes: this.vs.hashes,
-                            stateVersion: this.stateVersion,
-                        })
-                    );
-                }
-            }
-        }
     }
 
     private handleStatuses(event: StatusHolderEvent): boolean {
@@ -847,7 +908,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
 
         this.state = State.STATE_WAIT_FOR_NEW_FILTERS;
-        this.stateVersion++;
+        this.incrementStateVersion();
 
         let backwardOnly =
             !this.hasRecordAfter &&
@@ -950,95 +1011,37 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         return this.visibleRecordCount() + 1;
     }
 
-    private tryGrow() {
-        if (this.getLogViewHeight() - this.shiftView < this.logPane.nativeElement.clientHeight * 2) {
-            if (this.hasRecordAfter) {
-                this.requestNextRecords();
-            }
-        }
-    }
-
     private requestNextRecords() {
         if (this.logs?.length > 0) {
-            let offset: Position;
-            if (this.m.length === 0) {
-                if (this.logs.length === 1) {
-                    offset = {logId: this.logs[0].id, time: null, o: 0};
-                } else {
-                    offset = {logId: '', time: null, o: 0};
-                }
-            } else {
-                offset = Position.recordEnd(this.m[this.m.length - 1]);
-            }
-
-            let recordsToLoad = Math.ceil(
-                (this.logPane.nativeElement.clientHeight * 2 -
-                    this.getLogViewHeight() +
-                    this.shiftView) /
-                LogViewComponent.lineHeight
-            );
+            let spareDateBottom = this.getLogViewHeight() - this.shiftView - this.logPane.nativeElement.clientHeight;
+            let recordsToLoad = Math.ceil((this.spareDataOutsizeViewBorder() - spareDateBottom) / LogViewComponent.lineHeight);
 
             if (recordsToLoad > 0) {
-                this.commService.send(
-                    new Command('loadNext', {
-                        start: offset,
-                        backward: false,
-                        recordCount: recordsToLoad,
-                        hashes: this.vs.hashes,
-                        stateVersion: this.stateVersion,
-                    })
-                );
-            }
-        }
-    }
+                recordsToLoad = Math.max(recordsToLoad, Math.ceil(this.recordCountToLoad() / 3));
 
-    private removeHead() {
-        let toBeDelete = this.shiftView - this.logPane.nativeElement.clientHeight;
-        if (toBeDelete > 0) {
-            let children: HTMLCollection = this.records.nativeElement.children;
+                let offset: Position;
+                if (this.m.length === 0) {
+                    if (this.logs.length === 1) {
+                        offset = new Position(this.logs[0].id, null, 0);
+                    } else {
+                        offset = new Position('', null, 0);
+                    }
+                } else {
+                    offset = Position.recordEnd(this.m[this.m.length - 1]);
+                }
 
-            let deletedRecords = 0;
-            let deletedPixels = 0;
-
-            for (let i = 0; i < children.length; i++) {
-                let e = children[i];
-
-                let elementHeight = e.clientHeight + 1; // +1 - border at the top of row
-                if (deletedPixels + elementHeight > toBeDelete) { break; }
-                deletedPixels += elementHeight;
-                deletedRecords++;
-            }
-            if (deletedRecords > 0) {
-                this.shiftView -= deletedPixels;
-                this.deleteRecords(0, deletedRecords);
-                this.hasRecordBefore = true;
-            }
-        }
-    }
-
-    private removeTail() {
-        let toBeDelete =
-            this.getLogViewHeight() -
-            this.shiftView -
-            this.logPane.nativeElement.clientHeight * 2 -
-            LogViewComponent.lineHeight;
-
-        if (toBeDelete > 0) {
-            let children: HTMLCollection = this.records.nativeElement.children;
-
-            let deletedRecords = 0;
-            let deletedPixels = 0;
-
-            for (let i = children.length - 1; i >= 0; i--) {
-                let e = children[i];
-                let elementHeight = e.clientHeight + 1; // +1 - border at the top of row
-                if (deletedPixels + elementHeight > toBeDelete) { break; }
-                deletedPixels += elementHeight;
-                deletedRecords++;
-            }
-            if (deletedRecords > 0) {
-                this.deleteRecords(this.m.length - deletedRecords, deletedRecords);
-                this.hasRecordAfter = true;
+                if (!Position.equals(offset, this.loadingNextBottom)) {
+                    this.commService.send(
+                        new Command('loadNext', {
+                            start: offset,
+                            backward: false,
+                            recordCount: recordsToLoad,
+                            hashes: this.vs.hashes,
+                            stateVersion: this.stateVersion,
+                        })
+                    );
+                    this.loadingNextBottom = offset;
+                }
             }
         }
     }
@@ -1050,7 +1053,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.clearRecords();
 
         this.state = State.STATE_LOADING;
-        this.stateVersion++;
+        this.incrementStateVersion();
 
         if (this.searchRequest != null) {
             this.searchRequest = null;
@@ -1211,19 +1214,17 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.clearRecords();
         this.addRecords(m);
 
-        this.shiftView = 0;
-
         if (event.isScrollToBegin) {
             this.hasRecordBefore = false;
             this.hasRecordAfter = event.data.hasNextLine;
-
-            this.tryGrow();
+            this.shiftView = 0;
         } else {
             this.hasRecordAfter = false;
             this.hasRecordBefore = event.data.hasNextLine;
-
-            this.scrollEnd();
+            this.moveLastRecordToBottom();
         }
+
+        this.loadRecordsIfNeeded();
     }
 
     @BackendEventHandler()
@@ -1239,6 +1240,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
 
         if (event.backward) {
+            if (Position.equals(event.start, this.loadingNextTop)) {
+                this.loadingNextTop = null;
+            }
+
             if (this.m.length > 0 && !Record.containPosition(event.start, this.m[0])) {
                 return;
             }
@@ -1250,11 +1255,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 this.shiftView += this.headHeight(m.length);
             }
-
-            this.onViewMovedTop();
         } else {
-            if (this.m.length > 0 &&
-                !Record.containPosition(event.start, this.m[this.m.length - 1])) {
+            if (Position.equals(event.start, this.loadingNextBottom)) {
+                this.loadingNextBottom = null;
+            }
+
+            if (this.m.length > 0 && !Record.containPosition(event.start, this.m[this.m.length - 1])) {
                 return;
             }
 
@@ -1270,9 +1276,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 this.addRecords(m);
             }
-
-            this.tryGrow();
         }
+
+        this.loadRecordsIfNeeded();
     }
 
     @BackendEventHandler()
@@ -1379,7 +1385,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.state = State.STATE_OPENED;
 
-        this.tryGrow();
+        this.loadRecordsIfNeeded();
     }
 
     @BackendEventHandler()
@@ -1409,7 +1415,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView = Math.max(0, this.getLogViewHeight() + LogViewComponent.lineHeight - this.getPageHeight());
 
-        this.requestNextRecords();
+        this.loadRecordsIfNeeded();
     }
 
     @BackendEventHandler()
@@ -1440,8 +1446,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView = this.headHeight(top.length) - anchorOffset;
 
-        this.onViewMovedTop();
-        this.requestNextRecords();
+        this.loadRecordsIfNeeded();
     }
 
     @BackendEventHandler()

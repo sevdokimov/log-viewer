@@ -116,9 +116,11 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         openLog(tmpLog);
 
+        recordByText("100");
+
         setHeight(10);
 
-        recordByText("100");
+        recordByText("62");
 
         Files.delete(tmpLog);
 
