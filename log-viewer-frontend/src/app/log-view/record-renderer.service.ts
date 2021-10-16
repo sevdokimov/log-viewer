@@ -1,4 +1,4 @@
-import {Record} from './record';
+import {Field, Record} from './record';
 import {LvUtils} from '../utils/utils';
 import {Injectable} from '@angular/core';
 import {FieldDescr, ViewConfigService} from './view-config.service';
@@ -6,10 +6,14 @@ import {ViewStateService} from './view-state.service';
 import {SlElement} from '../utils/sl-element';
 import {RenderContext} from '@app/log-view/renderers/renderer';
 import * as $ from 'jquery';
+import {TextFieldRenderer} from '@app/log-view/renderers/text-field-renderer';
+import {Position} from '@app/log-view/position';
 
 @Injectable()
 export class RecordRendererService {
     private logLabelWidth: number;
+
+    private readonly defaultFieldRenderer = new TextFieldRenderer();
 
     constructor(private viewConfig: ViewConfigService,
                 private vs: ViewStateService) {
@@ -235,23 +239,23 @@ export class RecordRendererService {
 
         let log = this.viewConfig.logById[r.logId];
         LvUtils.assert(log != null, 'Unexpected logId: ' + r.logId);
-        LvUtils.assert(log.fields.length === r.fieldsOffsetEnd.length, 'Unexpected field count in record');
+
         let s = r.s;
 
-        if (r.fieldsOffsetEnd.findIndex(idx => idx >= 0) < 0) {
+        if (r.fields.length === 0) {
             // unparsable record
             this.textRenderer(e, 'text', s);
         } else {
-            let fieldsCopy = [...log.fields];
-            fieldsCopy.sort((a, b) => r.fieldsOffsetStart[a._index] - r.fieldsOffsetStart[b._index] );
+            let fieldsCopy = [...r.fields];
+            fieldsCopy.sort((a, b) => a.start - b.start);
 
             let i = 0;
 
             const rendererCtx: RenderContext = {textRenderer: this.textRenderer, compact: true};
 
             for (let field of fieldsCopy) {
-                let fieldStart = r.fieldsOffsetStart[field._index];
-                let fieldEnd = r.fieldsOffsetEnd[field._index];
+                let fieldStart = field.start;
+                let fieldEnd = field.end;
 
                 if (fieldStart === fieldEnd) { continue; }
 
@@ -263,7 +267,10 @@ export class RecordRendererService {
                     e.appendChild(document.createTextNode(s.substring(i, fieldStart)));
                 }
 
-                field._rendererInstance.append(e, s.substring(fieldStart, fieldEnd), r, rendererCtx);
+                let fieldDescr = log.fields.find(f => f.name === field.name);
+                let renderer = fieldDescr ? fieldDescr._rendererInstance : this.defaultFieldRenderer;
+
+                renderer.append(e, s.substring(fieldStart, fieldEnd), r, rendererCtx);
 
                 i = fieldEnd;
             }
@@ -286,7 +293,7 @@ export class RecordRendererService {
 
         let res: HTMLDivElement = <HTMLDivElement>document.createElement('DIV');
 
-        res.className = Record.containPosition(this.vs.selectedLine, r)
+        res.className = Position.containPosition(this.vs.selectedLine, r)
             ? 'record selected-line'
             : 'record';
 
@@ -309,21 +316,20 @@ export class RecordRendererService {
         return res;
     }
 
-    renderField(e: HTMLElement, record: Record, field: FieldDescr) {
-        let fieldStart = record.fieldsOffsetStart[field._index];
-        let fieldEnd = record.fieldsOffsetEnd[field._index];
-
-        if (fieldStart === fieldEnd) {
+    renderField(e: HTMLElement, record: Record, field: Field, fieldDescr: FieldDescr) {
+        if (field.start === field.end) {
             return;
         }
 
-        if (fieldStart > fieldEnd) {
+        if (field.start > field.end) {
             throw 'Invalid field positions: ' + JSON.stringify(record);
         }
 
         const rendererCtx: RenderContext = {textRenderer: this.textRenderer, compact: false};
 
-        field._rendererInstance.append(e, record.s.substring(fieldStart, fieldEnd), record, rendererCtx);
+        let renderer = fieldDescr ? fieldDescr._rendererInstance : this.defaultFieldRenderer;
+
+        renderer.append(e, record.s.substring(field.start, field.end), record, rendererCtx);
     }
 
     initLabelWidthIfNeeded(recordParent: HTMLElement) {

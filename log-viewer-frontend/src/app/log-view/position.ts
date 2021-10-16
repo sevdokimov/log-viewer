@@ -18,4 +18,14 @@ export class Position {
     static recordEnd(record: Record): Position {
         return new Position(record.logId, record.time, record.end);
     }
+
+    static containPosition(position: Position, record: Record): boolean {
+        if (!position) { return false; }
+
+        return (
+            position.logId === record.logId &&
+            position.time === record.time &&
+            (record.start <= position.o && position.o <= record.end)
+        );
+    }
 }

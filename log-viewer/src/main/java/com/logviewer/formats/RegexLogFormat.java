@@ -15,12 +15,15 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
 
 public class RegexLogFormat implements LogFormat, Cloneable {
 
@@ -33,6 +36,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
     private boolean dontAppendUnmatchedTextToLastField;
 
     private Integer dateFieldIdx;
+    private String dateFieldName;
     private String datePattern;
 
     private transient volatile Pattern pattern;
@@ -45,7 +49,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     public RegexLogFormat(@Nullable Charset charset, @NonNull String regex,
                           boolean dontAppendUnmatchedTextToLastField,
-                          @Nullable String datePattern, @Nullable String dateField,
+                          @Nullable String datePattern, @Nullable String dateFieldName,
                           RegexField... fields) {
         this.regex = regex;
         this.charset = charset;
@@ -56,16 +60,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         
         this.datePattern = datePattern;
 
-        if (dateField != null) {
-            for (int i = 0; i < fields.length; i++) {
-                if (fields[i].name().equals(dateField)) {
-                    this.dateFieldIdx = i;
-                    break;
-                }
-            }
+        if (dateFieldName != null) {
+            if (Stream.of(fields).noneMatch(f -> f.name().equals(dateFieldName)))
+                throw new IllegalArgumentException("Field not found: " + dateFieldName);
 
-            if (this.dateFieldIdx == null)
-                throw new IllegalArgumentException("Field not found: " + dateField);
+            this.dateFieldName = dateFieldName;
         }
 
         validate();
@@ -120,9 +119,15 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             }
         }
 
-        if (dateFieldIdx != null) {
-            if (dateFieldIdx >= fields.length)
-                throw new IllegalArgumentException("Invalid 'dateFieldIdx': " + dateFieldIdx + " >= " + fields.length);
+        if (dateFieldIdx != null || dateFieldName != null) {
+            if (dateFieldIdx != null) {
+                if (dateFieldIdx >= fields.length)
+                    throw new IllegalArgumentException("Invalid 'dateFieldIdx': " + dateFieldIdx + " >= " + fields.length);
+            }
+            if (dateFieldName != null) {
+                if (Stream.of(fields).noneMatch(f -> f.name().equals(dateFieldName)))
+                    throw new IllegalArgumentException("Invalid 'dateFieldName': no field with name \"" + dateFieldName + '"');
+            }
 
             if (datePattern == null)
                 throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
@@ -147,13 +152,6 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         return datePattern;
     }
 
-    public FieldDescriptor getDateField() {
-        if (dateFieldIdx == null)
-            return null;
-
-        return fields[dateFieldIdx];
-    }
-
     @Override
     public LogReader createReader() {
         return new RegexReader();
@@ -171,7 +169,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     @Override
     public boolean hasFullDate() {
-        return dateFieldIdx != null;
+        return dateFieldIdx != null || dateFieldName != null;
     }
 
     private class RegexReader extends LogReader {
@@ -186,6 +184,14 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         private final Charset charset = RegexLogFormat.this.charset == null ? Charset.defaultCharset() : RegexLogFormat.this.charset;
 
         private final int[] fields = new int[RegexLogFormat.this.fields.length * 2];
+
+        private final Map<String, Integer> fieldNames = new LinkedHashMap<>();
+
+        public RegexReader() {
+            for (int i = 0; i < RegexLogFormat.this.fields.length; i++) {
+                fieldNames.put(RegexLogFormat.this.fields[i].name(), i);
+            }
+        }
 
         @Override
         public boolean parseRecord(byte[] data, int offset, int length, long start, long end) {
@@ -284,6 +290,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
             long time = 0;
 
+            Integer dateFieldIdx = RegexLogFormat.this.dateFieldIdx;
+            if (dateFieldIdx == null && dateFieldName != null) {
+                dateFieldIdx = fieldNames.get(dateFieldName);
+            }
+
             if (dateFieldIdx != null) {
                 if (fields[dateFieldIdx * 2] >= 0) {
                     if (dateFormat == null)
@@ -297,7 +308,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                 }
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fields.clone());
+            LogRecord res = new LogRecord(s, time, start, end, hasMore, fields.clone(), fieldNames);
 
             s = null;
 

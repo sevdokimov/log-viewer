@@ -60,7 +60,7 @@ public class FieldArgPredicate implements RecordPredicate {
         if (LogRecord.WHOLE_LINE.equals(fieldName)) {
             fieldValue = record.getMessage();
         } else {
-            fieldValue = ctx.getFieldValue(record, fieldName);
+            fieldValue = record.getFieldText(fieldName);
         }
 
         return operator.test(fieldValue, value);

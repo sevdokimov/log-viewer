@@ -47,17 +47,17 @@ public class LogSessionTest extends LogSessionTestBase {
         session.scrollToEdge(3, 2, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(2), recordsSorted(),
-                field(session, "msg", "a 4", "b 4", "b 5"), hasNext());
+                field("msg", "a 4", "b 4", "b 5"), hasNext());
 
         session.scrollToEdge(6, 3, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(3), recordsSorted(),
-                field(session, "msg", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext());
+                field("msg", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext());
 
         session.scrollToEdge(100, 4, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(4), recordsSorted(),
-                field(session, "msg", "a 1", "a 2", "b 1", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(false));
+                field("msg", "a 1", "a 2", "b 1", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(false));
     }
 
     @Test

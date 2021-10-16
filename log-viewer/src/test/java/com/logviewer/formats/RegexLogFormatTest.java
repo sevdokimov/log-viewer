@@ -25,8 +25,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(logFormat, "111 message text");
 
-        assertEquals("111", record.getFieldText(logFormat.getFieldIndexByName("date")));
-        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals("111", record.getFieldText("date"));
+        assertEquals("message text", record.getFieldText("msg"));
     }
 
     @Test
@@ -40,8 +40,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(logFormat, "2020-02-02:01:01:01+0000 message text");
 
-        assertEquals("2020-02-02:01:01:01+0000", record.getFieldText(logFormat.getFieldIndexByName("date")));
-        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals("2020-02-02:01:01:01+0000", record.getFieldText("date"));
+        assertEquals("message text", record.getFieldText("msg"));
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -60,8 +60,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(logFormat, "2020-02-02:01:01:01 message text");
 
-        assertEquals("2020-02-02:01:01:01", record.getFieldText(logFormat.getFieldIndexByName("date")));
-        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals("2020-02-02:01:01:01", record.getFieldText("date"));
+        assertEquals("message text", record.getFieldText("msg"));
 
         assertEquals(new Date(120, Calendar.FEBRUARY, 2, 1, 1, 1).getTime(), record.getTimeMillis());
     }
@@ -78,15 +78,15 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(logFormat, "DEBUG 2020-02-02:01:01:01 message text");
 
-        assertEquals("2020-02-02:01:01:01", record.getFieldText(logFormat.getFieldIndexByName("date")));
-        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals("2020-02-02:01:01:01", record.getFieldText("date"));
+        assertEquals("message text", record.getFieldText("msg"));
         assertEquals(new Date(120, Calendar.FEBRUARY, 2, 1, 1, 1).getTime(), record.getTimeMillis());
 
         record = read(logFormat, "DEBUG  message text");
 
         assert record.getTime() <= 0;
-        assertEquals("DEBUG", record.getFieldText(0));
-        assertEquals("message text", record.getFieldText(logFormat.getFieldIndexByName("msg")));
+        assertEquals("DEBUG", record.getFieldText("level"));
+        assertEquals("message text", record.getFieldText("msg"));
     }
 
     @Test

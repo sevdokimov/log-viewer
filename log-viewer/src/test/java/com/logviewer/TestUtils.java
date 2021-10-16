@@ -41,11 +41,10 @@ public class TestUtils {
         Assert.assertEquals(r1.getEnd(), r2.getEnd());
         Assert.assertEquals(r1.hasMore(), r2.hasMore());
 
-        Assert.assertEquals(r1.getFieldsCount(), r2.getFieldsCount());
+        Assert.assertEquals(r1.getFieldNames(), r2.getFieldNames());
 
-        for (int i = 0; i < r1.getFieldsCount(); i++) {
-            Assert.assertEquals(r1.getFieldStart(i), r2.getFieldStart(i));
-            Assert.assertEquals(r1.getFieldEnd(i), r2.getFieldEnd(i));
+        for (String fieldName : r1.getFieldNames()) {
+            Assert.assertEquals(r1.getFieldOffset(fieldName), r2.getFieldOffset(fieldName));
         }
     }
 
@@ -60,11 +59,7 @@ public class TestUtils {
     public static void assertUnparsed(LogRecord record, String content) {
         Assert.assertEquals(content, record.getMessage());
 
-        for (int i = 0; i < record.getFieldsCount(); i++) {
-            Assert.assertNull(record.getFieldText(i));
-            Assert.assertEquals(-1, record.getFieldStart(i));
-            Assert.assertEquals(-1, record.getFieldEnd(i));
-        }
+        Assert.assertEquals(Collections.emptyList(), record.getFieldNames().stream().filter(fieldName -> record.getFieldText(fieldName) != null).collect(Collectors.toList()));
     }
 
     public static void check(List<LogRecord> res, String ... expected) {

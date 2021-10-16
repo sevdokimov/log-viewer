@@ -1,5 +1,6 @@
 package com.logviewer.data2;
 
+import com.logviewer.utils.TextRange;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 
@@ -7,7 +8,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Arrays;
+import java.util.*;
 
 public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
@@ -25,6 +26,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
      */
     private long timeNanos;
 
+    private Map<String, Integer> fieldNames;
     private int[] fieldPositions;
 
     private long start;
@@ -39,7 +41,14 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     }
 
-    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore, @NonNull int[] fieldPositions) {
+    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore) {
+        this(message, timeNanos, start, end, hasMore, Utils.EMPTY_INT_ARRAY, Collections.emptyMap());
+    }
+
+    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore,
+                     @NonNull int[] fieldPositions, @NonNull Map<String, Integer> fieldNames) {
+        assert fieldPositions.length == fieldNames.size() * 2;
+
         Utils.assertValidTimestamp(timeNanos);
 
         this.message = message;
@@ -50,6 +59,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         this.hasMore = hasMore;
 
         this.fieldPositions = fieldPositions;
+        this.fieldNames = fieldNames;
     }
 
     public String getLogId() {
@@ -89,7 +99,24 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         return message;
     }
 
-    public String getFieldText(int fieldIndex) {
+    public TextRange getFieldOffset(String fieldName) {
+        Integer fieldIndex = fieldNames.get(fieldName);
+        if (fieldIndex == null)
+            return null;
+
+        int i = fieldIndex * 2;
+
+        if (fieldPositions[i] == -1)
+            return null;
+
+        return new TextRange(fieldPositions[i], fieldPositions[i + 1]);
+    }
+
+    public String getFieldText(String fieldName) {
+        Integer fieldIndex = fieldNames.get(fieldName);
+        if (fieldIndex == null)
+            return null;
+        
         int i = fieldIndex * 2;
 
         if (fieldPositions[i] == -1)
@@ -98,16 +125,8 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         return message.substring(fieldPositions[i], fieldPositions[i + 1]);
     }
 
-    public int getFieldStart(int fieldIndex) {
-        return fieldPositions[fieldIndex * 2];
-    }
-
-    public int getFieldEnd(int fieldIndex) {
-        return fieldPositions[fieldIndex * 2 + 1];
-    }
-
-    public int getFieldsCount() {
-        return fieldPositions.length / 2;
+    public Set<String> getFieldNames() {
+        return fieldNames.keySet();
     }
 
     @Override
@@ -137,9 +156,16 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         out.writeLong(end);
         out.writeBoolean(hasMore);
 
-        out.writeShort(fieldPositions.length);
+        assert fieldNames.size() * 2 == fieldPositions.length;
+
+        out.writeShort(fieldNames.size());
+
         for (int fieldPosition : fieldPositions) {
             out.writeInt(fieldPosition);
+        }
+
+        for (String fieldName : fieldNames.keySet()) {
+            out.writeUTF(fieldName);
         }
     }
 
@@ -152,18 +178,22 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         end = in.readLong();
         hasMore = in.readBoolean();
 
-        int fieldPositionsSize = in.readUnsignedShort();
-        fieldPositions = new int[fieldPositionsSize];
-        for (int i = 0; i < fieldPositionsSize; i++) {
+        int fieldCount = in.readUnsignedShort();
+
+        fieldPositions = new int[fieldCount * 2];
+        for (int i = 0; i < fieldPositions.length; i++) {
             fieldPositions[i] = in.readInt();
+        }
+
+        fieldNames = new HashMap<>();
+        for (int i = 0; i < fieldCount; i++) {
+            fieldNames.put(in.readUTF(), i);
         }
     }
 
     @NonNull
-    public static LogRecord createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore, @NonNull LogFormat logFormat) {
-        int[] fieldOffsets = new int[logFormat.getFields().length * 2];
-        Arrays.fill(fieldOffsets, -1);
-        return new LogRecord(message, time, start, end, hasMore, fieldOffsets);
+    public static LogRecord createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore) {
+        return new LogRecord(message, time, start, end, hasMore);
     }
 
     @Override
@@ -173,7 +203,8 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         LogRecord record = (LogRecord) o;
         return timeNanos == record.timeNanos && start == record.start && end == record.end && hasMore == record.hasMore
                 && logId.equals(record.logId) && message.equals(record.message)
-                && Arrays.equals(fieldPositions, record.fieldPositions);
+                && Arrays.equals(fieldPositions, record.fieldPositions)
+                && fieldNames.keySet().equals(record.fieldNames.keySet());
     }
 
     @Override

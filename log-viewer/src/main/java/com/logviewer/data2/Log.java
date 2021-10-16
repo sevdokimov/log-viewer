@@ -128,7 +128,7 @@ public class Log implements LogView {
 
         String text = Utils.toString(b, encoding);
 
-        return LogRecord.createUnparsedRecord(text, 0, start, end, readLength < end - start, format).setLogId(id);
+        return LogRecord.createUnparsedRecord(text, 0, start, end, readLength < end - start).setLogId(id);
     }
 
     public Snapshot createSnapshot() {

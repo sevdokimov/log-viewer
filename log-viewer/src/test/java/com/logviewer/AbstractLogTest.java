@@ -199,21 +199,6 @@ public abstract class AbstractLogTest {
         test.doTest(local, remote);
     }
 
-    protected String fieldValue(LogFormat format, LogRecord record, String fieldName) {
-        int fieldIdx = -1;
-
-        LogFormat.FieldDescriptor[] fields = format.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            if (fields[i].name().equals(fieldName)) {
-                fieldIdx = i;
-                break;
-            }
-        }
-
-        assert fieldIdx >= 0 : fieldName;
-        return record.getFieldText(fieldIdx);
-    }
-
     protected LogRecord read(@NonNull LogFormat logFormat, @NonNull String s) {
         LogReader reader = logFormat.createReader();
         boolean isSuccess = reader.parseRecord(new BufferedFile.Line(s));
@@ -223,11 +208,13 @@ public abstract class AbstractLogTest {
     }
 
     protected void checkFields(LogRecord record, String ... expectedFields) {
-        assertEquals(expectedFields.length, record.getFieldsCount());
+        String[] fieldNames = record.getFieldNames().toArray(new String[0]);
+
+        assertEquals(expectedFields.length, fieldNames.length);
 
         for (int i = 0; i < expectedFields.length; i++) {
             String expected = expectedFields[i];
-            String actual = record.getFieldText(i);
+            String actual = record.getFieldText(fieldNames[i]);
 
             if (expected.startsWith("~")) {
                 assertTrue(actual, Pattern.compile(expected.substring(1)).matcher(actual).matches());

@@ -177,9 +177,9 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(format, "com.google.App  10 rrr");
 
-        assertEquals("com.google.App", fieldValue(format, record, "logger"));
-        assertEquals("rrr", fieldValue(format, record, "msg"));
-        assertEquals("10", fieldValue(format, record, "relativeTime"));
+        assertEquals("com.google.App", record.getFieldText("logger"));
+        assertEquals("rrr", record.getFieldText("msg"));
+        assertEquals("10", record.getFieldText("relativeTime"));
     }
 
     @Test
@@ -188,9 +188,9 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         LogRecord record = read(format, "my-thread 10 rrr");
 
-        assertEquals("my-thread", fieldValue(format, record, "thread"));
-        assertEquals("rrr", fieldValue(format, record, "msg"));
-        assertEquals("10", fieldValue(format, record, "relativeTime"));
+        assertEquals("my-thread", record.getFieldText("thread"));
+        assertEquals("rrr", record.getFieldText("msg"));
+        assertEquals("10", record.getFieldText("relativeTime"));
     }
 
     @Test
@@ -246,16 +246,16 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         LogRecord[] recs = loadLog("default-parser/log.log", FORMAT).toArray(new LogRecord[0]);
 
         assertEquals("2016-12-02_16:40:47.990", dateFormat.format(new Date(recs[0].getTimeMillis())));
-        assertEquals("DEBUG", fieldValue(FORMAT, recs[0], "level"));
-        assertEquals("http-bio-8088-exec-1", fieldValue(FORMAT, recs[0], "thread"));
+        assertEquals("DEBUG", recs[0].getFieldText("level"));
+        assertEquals("http-bio-8088-exec-1", recs[0].getFieldText("thread"));
 
         assertEquals("2016-12-02_16:45:26.321", dateFormat.format(new Date(recs[1].getTimeMillis())));
-        assertEquals("o.a.commons.dbcp2.BasicDataSource", fieldValue(FORMAT, recs[1], "logger"));
+        assertEquals("o.a.commons.dbcp2.BasicDataSource", recs[1].getFieldText("logger"));
 
         assertEquals("2016-12-02_16:51:35.342", dateFormat.format(new Date(recs[2].getTimeMillis())));
-        assertEquals("localhost-startStop-1", fieldValue(FORMAT, recs[2], "thread"));
-        assertEquals("com.behavox.core.PluginManager", fieldValue(FORMAT, recs[2], "logger"));
-        assertEquals("Plugins search time: 197 ms\n", fieldValue(FORMAT, recs[2], "msg"));
+        assertEquals("localhost-startStop-1", recs[2].getFieldText("thread"));
+        assertEquals("com.behavox.core.PluginManager", recs[2].getFieldText("logger"));
+        assertEquals("Plugins search time: 197 ms\n", recs[2].getFieldText("msg"));
     }
 
     @Test
@@ -281,10 +281,10 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %processId %msg%wEx");
 
         LogRecord record1 = read(logFormat, "10:40:11 1 aaa");
-        assertEquals("1", record1.getFieldText(1));
+        assertEquals("1", record1.getFieldText("pid"));
 
         LogRecord record2 = read(logFormat, "10:40:11 1111 aaa");
-        assertEquals("1111", record2.getFieldText(1));
+        assertEquals("1111", record2.getFieldText("pid"));
     }
 
     @Test
@@ -320,8 +320,8 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     @Test
     public void additionalLevelNames() {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %level %msg%wEx");
-        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText(1));
-        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText(1));
+        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText("level"));
+        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText("level"));
     }
 
 }

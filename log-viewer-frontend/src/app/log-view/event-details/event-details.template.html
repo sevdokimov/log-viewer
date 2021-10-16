@@ -20,9 +20,9 @@
 <h3>Fields</h3>
 
 <div (click)="fieldClick($event)">
-    <div *ngFor="let field of log.fields">
+    <div *ngFor="let field of fields">
         <div class="field">
-            <span class="field-label">{{field.name}} </span> <span #fieldVal class="field-value"></span>
+            <span class="field-label">{{field.fieldName}} </span> <span #fieldVal class="field-value"></span>
         </div>
     </div>
 </div>

@@ -73,6 +73,8 @@ public class ViewLogIntegrationTest extends AbstractWebTestCase implements LogPa
     public void initPosition() throws InterruptedException {
         ctx.getBean(TestFormatRecognizer.class).setFormat(TestUtils.MULTIFILE_LOG_FORMAT);
 
+        openLog("exeception-in-the-end.log");
+
         driver.manage().window().setSize(new Dimension(WINDOW_WIDTH, 300));
 
         openLog("exeception-in-the-end.log");

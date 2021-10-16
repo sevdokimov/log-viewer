@@ -133,15 +133,8 @@ public class JsPredicate implements RecordPredicate {
 
         @Override
         public Object get(String name, Scriptable start) {
-            LogFormat.FieldDescriptor[] fields = ctx.getFields();
-            for (int i = 0; i < fields.length; i++) {
-                LogFormat.FieldDescriptor field = fields[i];
-                if (field.name().equals(name)) {
-                    return record.getFieldText(i);
-                }
-            }
-
-            return NOT_FOUND;
+            String res = record.getFieldText(name);
+            return res == null ? NOT_FOUND : res;
         }
 
         @Override
@@ -149,7 +142,9 @@ public class JsPredicate implements RecordPredicate {
             if (index < 0 || index >= ctx.getFields().length)
                 return NOT_FOUND;
 
-            return record.getFieldText(index);
+            LogFormat.FieldDescriptor field = ctx.getFields()[index];
+
+            return record.getFieldText(field.name());
         }
 
         @Override

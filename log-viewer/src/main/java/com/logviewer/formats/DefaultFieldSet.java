@@ -6,10 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongSupplier;
 
@@ -23,6 +20,8 @@ public class DefaultFieldSet {
 
     private final LogFormat.FieldDescriptor[] fields;
     private final int[] fieldIndex;
+
+    private final Map<String, Integer> fieldNameIndexes = new LinkedHashMap<>();
 
     private final int dateNodeIndex;
 
@@ -61,6 +60,7 @@ public class DefaultFieldSet {
             }
 
             if (field != null) {
+                fieldNameIndexes.put(field.name(), fields.size());
                 fieldIndex[i] = fields.size();
                 fields.add(field);
             } else {
@@ -338,7 +338,7 @@ public class DefaultFieldSet {
                 time = dateExtractor.getAsLong();
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fieldOffset.clone());
+            LogRecord res = new LogRecord(s, time, start, end, hasMore, fieldOffset.clone(), fieldNameIndexes);
 
             s = null;
 

@@ -199,7 +199,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     setSelectedLine(idx: number) {
         if (this.vs.selectedLine != null) {
-            if (Record.containPosition(this.vs.selectedLine, this.m[idx])) { return; }
+            if (Position.containPosition(this.vs.selectedLine, this.m[idx])) { return; }
         }
 
         $('.record.selected-line', this.records.nativeElement).removeClass(
@@ -912,7 +912,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         let backwardOnly =
             !this.hasRecordAfter &&
-            !Record.containPosition(this.vs.selectedLine, this.m[mainRecordIdx]) &&
+            !Position.containPosition(this.vs.selectedLine, this.m[mainRecordIdx]) &&
             this.getLogViewHeight() - this.shiftView <
             this.logPane.nativeElement.clientHeight;
 
@@ -987,7 +987,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 lastPiraticallyVisible = i;
             }
 
-            if (Record.containPosition(this.vs.selectedLine, this.m[i])) { return i; }
+            if (Position.containPosition(this.vs.selectedLine, this.m[i])) { return i; }
 
             offset += eHeight;
         }
@@ -1244,7 +1244,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 this.loadingNextTop = null;
             }
 
-            if (this.m.length > 0 && !Record.containPosition(event.start, this.m[0])) {
+            if (this.m.length > 0 && !Position.containPosition(event.start, this.m[0])) {
                 return;
             }
 
@@ -1260,7 +1260,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 this.loadingNextBottom = null;
             }
 
-            if (this.m.length > 0 && !Record.containPosition(event.start, this.m[this.m.length - 1])) {
+            if (this.m.length > 0 && !Position.containPosition(event.start, this.m[this.m.length - 1])) {
                 return;
             }
 
@@ -1268,7 +1268,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
             if (m.length > 0) {
                 if (this.m.length > 0 &&
-                    Record.equals(this.m[this.m.length - 1], m[0])) {
+                    LogViewComponent.isStartEquals(this.m[this.m.length - 1], m[0])) {
                     this.m.pop();
                     let parentDiv = <HTMLDivElement>this.records.nativeElement;
                     parentDiv.removeChild(parentDiv.childNodes[this.m.length]);
@@ -1279,6 +1279,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
 
         this.loadRecordsIfNeeded();
+    }
+
+    private static isStartEquals(a: Record, b: Record): boolean {
+        return a.logId === b.logId && a.start === b.start;
     }
 
     @BackendEventHandler()
@@ -1315,13 +1319,13 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (!event.hasSkippedLine) {
             if (req.d < 0) { // is backward search
-                if (!Record.containPosition(req.start, this.m[0])) {
+                if (!Position.containPosition(req.start, this.m[0])) {
                     return;
                 }
 
                 this.addRecords(data, 0);
             } else {
-                if (!Record.containPosition(req.start, this.m[this.m.length - 1])) {
+                if (!Position.containPosition(req.start, this.m[this.m.length - 1])) {
                     return;
                 }
 

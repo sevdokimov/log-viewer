@@ -64,6 +64,8 @@ public class PerformanceTest extends AbstractLogTest {
 
         try (Snapshot snapshot = log.createSnapshot()) {
             snapshot.processRecords(0, r -> {
+                if (r.getFieldText("msg").length() > 10000000)
+                    throw new RuntimeException();
                 lineCounter[0]++;
                 return true;
             });

@@ -40,7 +40,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         ResultListener res = process(r -> log.loadRecords(filter, 100, null, true, null, 1000000, r));
 
-        assertEquals(Arrays.asList("555 3", "555 2", "555 1"), res.records.stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()));
+        assertEquals(Arrays.asList("555 3", "555 2", "555 1"), res.records.stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
         assert res.eof;
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
@@ -96,7 +96,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         assert !res.res.isFound();
         assertEquals(Arrays.asList("666 2", "666 3", "777 1", "777 2", "777 3", "888 1", "888 2", "888 3"),
-                TestPredicate.getPassed().stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()));
+                TestPredicate.getPassed().stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
 
         TestPredicate.clear();
 
@@ -107,7 +107,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         assert !res.res.isFound();
         assertEquals(Arrays.asList("666 1", "555 3", "555 2", "555 1"),
-                TestPredicate.getPassed().stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()));
+                TestPredicate.getPassed().stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
 
         TestPredicate.clear();
         res = new SearchConsumer();
@@ -117,7 +117,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         assert !res.res.isFound();
         assertEquals(Arrays.asList("666 3", "666 2", "666 1", "555 3", "555 2", "555 1"),
-                TestPredicate.getPassed().stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()));
+                TestPredicate.getPassed().stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
 
         TestPredicate.clear();
         res = new SearchConsumer();
@@ -127,7 +127,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
 
         assert !res.res.isFound();
         assertEquals(Arrays.asList("777 1", "777 2", "777 3", "888 1", "888 2", "888 3"),
-                TestPredicate.getPassed().stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()));
+                TestPredicate.getPassed().stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
     }
 
     private ResultListener process(Function<ResultListener, LogProcess> processFactory) throws InterruptedException {

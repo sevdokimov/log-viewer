@@ -218,15 +218,13 @@ export class LvUtils {
         setTimeout(() => e.classList.remove('highlighted-item'), 300);
     }
 
-    static fieldValue(record: Record, index: number): string {
-        let start = record.fieldsOffsetStart[index];
-        let end = record.fieldsOffsetEnd[index];
-
-        if (start == null || end == null || start < 0 && end < 0) {
+    static fieldValue(record: Record, name: string): string {
+        let f = record.fields.find(f => f.name === name);
+        if (!f) {
             return null;
         }
 
-        return record.s.substring(start, end);
+        return record.s.substring(f.start, f.end);
     }
 
     static fieldValueByType(record: Record, logs: LogFile[], type: string): string {
@@ -234,7 +232,7 @@ export class LvUtils {
             if (l.id === record.logId) {
                 for (let i = 0; i < l.fields.length; i++) {
                     if (l.fields[i].type === type) {
-                        return LvUtils.fieldValue(record, i);
+                        return LvUtils.fieldValue(record, l.fields[i].name);
                     }
                 }
 
@@ -284,7 +282,7 @@ export class LvUtils {
             return null;
         }
 
-        LvUtils.assert(nano.length > 10);
+        LvUtils.assert(nano.length > 9);
         return parseInt(nano.substr(0, nano.length - 6), 10);
     }
 

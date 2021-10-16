@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,13 +58,13 @@ public class LogIterationForwardTest extends AbstractLogTest {
             assert log.processRecords(0, true, res::add);
             LogRecord record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
-            assertEquals(0, record.getFieldsCount());
+            assertEquals(Collections.emptySet(), record.getFieldNames());
 
             res.clear();
             assert log.processRecords(1, false, res::add);
             record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
-            assertEquals(0, record.getFieldsCount());
+            assertEquals(Collections.emptySet(), record.getFieldNames());
 
             res.clear();
             assert log.processRecords(1, true, res::add);
@@ -84,8 +85,8 @@ public class LogIterationForwardTest extends AbstractLogTest {
             assertEquals(rec.getMessage().length(), rec.getEnd());
             assert !rec.hasMore();
 
-            assertEquals("DEBUG", rec.getFieldText(log.getLog().getFormat().getFieldIndexByName("level")));
-            assertEquals("l1", rec.getFieldText(log.getLog().getFormat().getFieldIndexByName("body")));
+            assertEquals("DEBUG", rec.getFieldText("level"));
+            assertEquals("l1", rec.getFieldText("body"));
 
             res.clear();
             assert log.processRecords(log.getSize(), res::add);

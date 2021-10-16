@@ -248,7 +248,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
     @Test
     public void additionalLevelNames() {
         LogFormat logFormat = new LogbackLogFormat("%d{HH:mm:ss} %level %msg%wEx");
-        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText(1));
-        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText(1));
+        assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText("level"));
+        assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText("level"));
     }
 }

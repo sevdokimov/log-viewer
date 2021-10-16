@@ -85,11 +85,9 @@ public class ThreadPredicate implements RecordPredicate {
 
     @Override
     public boolean test(LogRecord record, LogFilterContext ctx) {
-        LogFormat.FieldDescriptor[] fields = ctx.getFields();
-        for (int i = 0; i < fields.length; i++) {
-            LogFormat.FieldDescriptor field = fields[i];
+        for (LogFormat.FieldDescriptor field : ctx.getFields()) {
             if (FieldTypes.is(field.type(), FieldTypes.THREAD)) {
-                String fieldValue = record.getFieldText(i);
+                String fieldValue = record.getFieldText(field.name());
                 if (fieldValue == null || fieldValue.isEmpty())
                     continue;
 

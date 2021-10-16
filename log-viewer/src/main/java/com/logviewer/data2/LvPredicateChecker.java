@@ -29,20 +29,6 @@ public class LvPredicateChecker implements LogFilterContext, AutoCloseable {
         return logFormat;
     }
 
-    @Override
-    public int findFieldIndexByName(@NonNull String fieldName) {
-        return logFormat.getFieldIndexByName(fieldName);
-    }
-
-    @Nullable
-    @Override
-    public String getFieldValue(@NonNull LogRecord record, @NonNull String fieldName) {
-        assert logId.equals(record.getLogId());
-
-        int fieldIndex = findFieldIndexByName(fieldName);
-        return fieldIndex < 0 ? null : record.getFieldText(fieldIndex);
-    }
-
     @NonNull
     @Override
     public LogFormat.FieldDescriptor[] getFields() {

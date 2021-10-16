@@ -44,12 +44,12 @@ public class Utf8ReadTest extends AbstractLogTest {
 
         for (int i = 0, recordsIcoSize = recordsIco.size(); i < recordsIcoSize; i++) {
             LogRecord record = recordsIco.get(i);
-            assert record.getFieldText(1).length() > records.get(i).getFieldText(1).length();
+            assert record.getFieldText("msg").length() > records.get(i).getFieldText("msg").length();
         }
     }
 
     private void check(List<LogRecord> records) {
-        assertThat(records.stream().map(r -> r.getFieldText(1)).collect(Collectors.toList()), is(
+        assertThat(records.stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()), is(
                 Arrays.asList("текст 1", "текст 2\nыыы", "текст\nтекст 3")
         ));
     }

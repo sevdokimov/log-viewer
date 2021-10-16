@@ -4,6 +4,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.utils.GsonNanosecondsAdapter;
 import com.logviewer.utils.Pair;
+import com.logviewer.utils.TextRange;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -24,8 +25,7 @@ public class RestRecord {
     @JsonAdapter(GsonNanosecondsAdapter.class)
     private final Long time;
 
-    private final int[] fieldsOffsetStart;
-    private final int[] fieldsOffsetEnd;
+    private final List<RestField> fields;
 
     private final String filteringError;
 
@@ -45,12 +45,11 @@ public class RestRecord {
         end = record.getEnd();
         hasMore = record.hasMore();
 
-        fieldsOffsetStart = new int[record.getFieldsCount()];
-        fieldsOffsetEnd = new int[record.getFieldsCount()];
-
-        for (int i = 0; i < fieldsOffsetStart.length; i++) {
-            fieldsOffsetStart[i] = record.getFieldStart(i);
-            fieldsOffsetEnd[i] = record.getFieldEnd(i);
+        fields = new ArrayList<>();;
+        for (String fieldName : record.getFieldNames()) {
+            TextRange fieldOffset = record.getFieldOffset(fieldName);
+            if (fieldOffset != null)
+                this.fields.add(new RestField(fieldName, fieldOffset.getStart(), fieldOffset.getEnd()));
         }
 
         this.filteringError = filteringError;
@@ -62,22 +61,12 @@ public class RestRecord {
         return logId;
     }
 
-    public int[] getFieldsOffsetStart() {
-        return fieldsOffsetStart;
-    }
-
-    public int[] getFieldsOffsetEnd() {
-        return fieldsOffsetEnd;
-    }
-
-    public String fieldValue(int fieldIndex) {
-        if (fieldIndex < 0)
-            return null;
-        
-        if (fieldsOffsetStart[fieldIndex] == -1)
-            return null;
-        
-        return s.substring(fieldsOffsetStart[fieldIndex], fieldsOffsetEnd[fieldIndex]);
+    public String fieldValue(@NonNull String fieldName) {
+        return fields.stream()
+                .filter(f -> f.name.equals(fieldName))
+                .findFirst()
+                .map(f -> s.substring(f.start, f.end))
+                .orElse(null);
     }
 
     public String getText() {
@@ -100,5 +89,17 @@ public class RestRecord {
         }
 
         return res;
+    }
+
+    private static class RestField {
+        String name;
+        int start;
+        int end;
+
+        public RestField(String name, int start, int end) {
+            this.name = name;
+            this.start = start;
+            this.end = end;
+        }
     }
 }

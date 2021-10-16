@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.logviewer.TestUtils.check;
@@ -37,7 +38,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
             assert log.processRecordsBack(0, false, res::add);
             LogRecord record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
-            assertEquals(0, record.getFieldsCount());
+            assertEquals(Collections.emptySet(), record.getFieldNames());
 
             res.clear();
             assert log.processRecordsBack(0, true, res::add);
@@ -52,7 +53,7 @@ public class LogIterationBackwardTest extends AbstractLogTest {
             assert log.processRecordsBack(1, true, res::add);
             record = Iterables.getOnlyElement(res);
             assertEquals("", record.getMessage());
-            assertEquals(0, record.getFieldsCount());
+            assertEquals(Collections.emptySet(), record.getFieldNames());
         }
     }
 

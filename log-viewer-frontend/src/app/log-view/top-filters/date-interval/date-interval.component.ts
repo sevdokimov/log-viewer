@@ -4,7 +4,6 @@ import {NGX_MAT_DATE_FORMATS, NgxMatDateFormats} from '@angular-material-compone
 import {Moment} from 'moment/moment';
 import * as moment from 'moment';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
-import {Record} from '@app/log-view/record';
 import {LvUtils} from '@app/utils/utils';
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -117,7 +116,7 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
         if (this.filterPanelStateService.currentRecords) {
             for (let record of this.filterPanelStateService.currentRecords) {
                 if (record.time) {
-                    this.defaultDate = moment(Record.nano2milliseconds(record.time));
+                    this.defaultDate = moment(LvUtils.nano2milliseconds(record.time));
                     break;
                 }
             }

@@ -31,7 +31,7 @@ public class FieldValueSetPredicate implements RecordPredicate {
         for (int i = 0; i < fields.length; i++) {
             LogFormat.FieldDescriptor field = fields[i];
             if (FieldTypes.is(field.type(), fieldType)) {
-                String fieldValue = record.getFieldText(i);
+                String fieldValue = record.getFieldText(field.name());
 
                 if (fieldValue != null && values.contains(fieldValue))
                     return true;

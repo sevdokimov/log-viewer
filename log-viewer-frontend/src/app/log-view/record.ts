@@ -1,6 +1,4 @@
 import {Marker} from '../utils/marker';
-import {Position} from './position';
-import {LvUtils} from '@app/utils/utils';
 
 export class Record {
     logId: string;
@@ -14,33 +12,15 @@ export class Record {
 
     s: string;
 
-    fieldsOffsetStart: number[];
-    fieldsOffsetEnd: number[];
+    fields: Field[];
 
     filteringError: string;
 
     searchRes?: Marker[];
+}
 
-    static containPosition(position: Position, record: Record): boolean {
-        if (!position) { return false; }
-
-        return (
-            position.logId === record.logId &&
-            position.time === record.time &&
-            (record.start <= position.o && position.o <= record.end)
-        );
-    }
-
-    static equals(a: Record, b: Record) {
-        return a.logId === b.logId && a.start === b.start;
-    }
-
-    static nano2milliseconds(nanoTimestamp: string): number {
-        if (!nanoTimestamp) {
-            return null;
-        }
-
-        LvUtils.assert(nanoTimestamp.length > 9, nanoTimestamp);
-        return parseInt(nanoTimestamp.substr(0, nanoTimestamp.length - 6), 10);
-    }
+export interface Field {
+    name: string;
+    start: number;
+    end: number;
 }

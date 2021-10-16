@@ -9,7 +9,7 @@ import {
     SimpleChanges,
     ViewChildren
 } from '@angular/core';
-import {FieldDescr, ViewConfigService} from '../view-config.service';
+import {ViewConfigService} from '../view-config.service';
 import {Record} from '@app/log-view/record';
 import {LogFile} from '@app/log-view/log-file';
 import {ViewStateService} from '@app/log-view/view-state.service';
@@ -31,7 +31,7 @@ export class EventDetailsComponent implements OnChanges, AfterViewInit {
 
     timestamp: string;
 
-    fields: {field: FieldDescr, html: HTMLElement}[];
+    fields: {fieldName: string, html: HTMLElement}[];
 
     constructor(private changeDetectorRef: ChangeDetectorRef,
                 public vs: ViewStateService,
@@ -45,18 +45,22 @@ export class EventDetailsComponent implements OnChanges, AfterViewInit {
 
             this.log = this.viewConfig.logById[r.logId];
 
-            this.timestamp = r.time ? LvUtils.formatDate(Record.nano2milliseconds(r.time)) : null;
+            this.timestamp = r.time ? LvUtils.formatDate(LvUtils.nano2milliseconds(r.time)) : null;
 
             this.fields = [];
 
             if (this.log) {
-                for (let field of this.log.fields) {
+                let fieldsCopy = [...r.fields];
+                fieldsCopy.sort((a, b) => a.start - b.start);
+
+                for (let field of fieldsCopy) {
                     let e: HTMLElement = document.createElement('SPAN');
                     e.className = 'rec-text';
 
-                    this.recRenderer.renderField(e, r, field);
+                    let fieldDescr = this.log.fields.find(f => f.name === field.name);
+                    this.recRenderer.renderField(e, r, field, fieldDescr);
 
-                    this.fields.push({field, html: e});
+                    this.fields.push({fieldName: field.name, html: e});
                 }
             }
         }

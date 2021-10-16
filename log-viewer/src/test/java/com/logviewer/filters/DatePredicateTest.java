@@ -33,7 +33,7 @@ public class DatePredicateTest {
 
     private void check(DatePredicate predicate, Date recordDate, boolean expected) {
         String message = "aaa";
-        LogRecord record = new LogRecord(message, LvDateUtils.toNanos(recordDate), 0, message.length(), false, new int[0]);
+        LogRecord record = new LogRecord(message, LvDateUtils.toNanos(recordDate), 0, message.length(), false);
 
         assert predicate.test(record, Mockito.mock(LvPredicateChecker.class)) == expected;
     }

@@ -1,14 +1,12 @@
 package com.logviewer.utils;
 
 import com.logviewer.TestUtils;
-import com.logviewer.data2.LogView;
 import com.logviewer.web.dto.RestRecord;
 import com.logviewer.web.dto.RestStatus;
 import com.logviewer.web.dto.events.BackendEvent;
 import com.logviewer.web.dto.events.DataHolderEvent;
 import com.logviewer.web.dto.events.EventSearchResponse;
 import com.logviewer.web.dto.events.StatusHolderEvent;
-import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.SessionAdapter;
 import org.junit.Assert;
 import org.springframework.lang.NonNull;
@@ -21,7 +19,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertNull;
 
@@ -98,12 +95,9 @@ public class TestSessionAdapter implements SessionAdapter {
         };
     }
 
-    public static Consumer<DataHolderEvent> field(LogSession logSession, String filedName, String ... expectedValues) {
+    public static Consumer<DataHolderEvent> field(String filedName, String ... expectedValues) {
         return event -> {
-            List<String> actualValues = event.data.records.stream().map(r -> {
-                LogView log = Stream.of(logSession.getLogs()).filter(l -> l.getId().equals(r.getLogId())).findFirst().get();
-                return r.fieldValue(log.getFormat().getFieldIndexByName(filedName));
-            }).collect(Collectors.toList());
+            List<String> actualValues = event.data.records.stream().map(r -> r.fieldValue(filedName)).collect(Collectors.toList());
             Assert.assertEquals(Arrays.asList(expectedValues), actualValues);
         };
     }
