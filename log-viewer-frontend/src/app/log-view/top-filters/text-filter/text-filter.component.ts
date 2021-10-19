@@ -80,7 +80,7 @@ export class LvTextFilterComponent extends FilterWithDropdown {
     }
 
     private saveText(f: TextFilter) {
-        f.name = this.name?.trim();
+        f.name = LvUtils.empty2undefined(this.name?.trim());
         f.pattern = Object.assign({}, this.pattern);
         f.exclude = this.includeExclude === 'exclude';
     }

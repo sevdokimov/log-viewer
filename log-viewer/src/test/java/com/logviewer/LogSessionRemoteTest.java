@@ -42,7 +42,7 @@ public class LogSessionRemoteTest extends LogSessionTest {
 
         LogSession session = LogSession.fromContext(adapter,context);
 
-        session.init(LogList.of(super.getTestLog("multilog/server-a.log"), invalidUrl), null, null);
+        session.init(LogList.of(super.getTestLog("multilog/server-a.log"), invalidUrl));
         session.scrollToEdge(2, 2, null, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);

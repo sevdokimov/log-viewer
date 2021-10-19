@@ -4,6 +4,8 @@ import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.web.dto.LogList;
 import com.logviewer.web.session.tasks.SearchPattern;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.util.Map;
 
@@ -19,6 +21,8 @@ public class Permalink {
     private String savedFiltersName;
 
     private String filterState;
+
+    private String filterStateUrlParam;
 
     private Position offset;
 
@@ -71,6 +75,7 @@ public class Permalink {
         this.savedFiltersName = savedFiltersName;
     }
 
+    @NonNull
     public String getFilterState() {
         return filterState;
     }
@@ -117,5 +122,14 @@ public class Permalink {
 
     public void setFilterPanelFilters(RecordPredicate[] filterPanelFilters) {
         this.filterPanelFilters = filterPanelFilters;
+    }
+
+    @Nullable
+    public String getFilterStateUrlParam() {
+        return filterStateUrlParam;
+    }
+
+    public void setFilterStateUrlParam(String filterStateUrlParam) {
+        this.filterStateUrlParam = filterStateUrlParam;
     }
 }

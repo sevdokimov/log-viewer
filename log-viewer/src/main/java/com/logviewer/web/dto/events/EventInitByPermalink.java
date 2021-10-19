@@ -2,7 +2,6 @@ package com.logviewer.web.dto.events;
 
 import com.logviewer.data2.Position;
 import com.logviewer.domain.Permalink;
-import com.logviewer.web.dto.LogList;
 import com.logviewer.web.session.Status;
 import com.logviewer.web.session.tasks.LoadNextResponse;
 import com.logviewer.web.session.tasks.SearchPattern;
@@ -17,6 +16,8 @@ public class EventInitByPermalink extends DataHolderEvent {
     private final int shiftView;
     private final SearchPattern searchPattern;
     private final boolean hideUnmatched;
+    private final String savedFilterName;
+    private final String filterStateUrlParam;
 
     public EventInitByPermalink(Map<String, Status> statuses, long stateVersion, LoadNextResponse data, Permalink permalink) {
         super(statuses, stateVersion, data);
@@ -26,6 +27,8 @@ public class EventInitByPermalink extends DataHolderEvent {
         this.shiftView = permalink.getShiftView();
         this.searchPattern = permalink.getSearchPattern();
         this.hideUnmatched = permalink.isHideUnmatched();
+        this.savedFilterName = permalink.getSavedFiltersName();
+        this.filterStateUrlParam = permalink.getFilterStateUrlParam();
     }
 
     @Override

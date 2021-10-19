@@ -3,6 +3,7 @@ package com.logviewer.web.session;
 import com.logviewer.data2.LogView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
 import java.util.function.BiConsumer;
 
@@ -16,7 +17,7 @@ public abstract class SessionTask<T> {
 
     protected final LogView[] logs;
 
-    public SessionTask(SessionAdapter sender, LogView[] logs) {
+    public SessionTask(@NonNull SessionAdapter sender, @NonNull LogView[] logs) {
         this.sender = sender;
         this.logs = logs;
     }

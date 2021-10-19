@@ -94,7 +94,7 @@ export class LvUtils {
         }
     }
 
-    static lastParam(param: any) {
+    static lastParam(param: any): string {
         if (!param) { return null; }
 
         if (param instanceof Array) {
@@ -297,5 +297,9 @@ export class LvUtils {
         }
 
         return res;
+    }
+
+    public static empty2undefined(o: any): any {
+        return o ? o : undefined;
     }
 }

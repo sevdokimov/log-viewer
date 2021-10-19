@@ -32,6 +32,7 @@ import {
     EventSearchResponse,
     EventSetViewState,
     EventsLogChanged,
+    SetFilterStateEvent,
     StatusHolderEvent,
     UiConfig,
     UiConfigValidator
@@ -103,7 +104,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     searchHideUnmatched: boolean;
 
     savedFilterStates: { [key: string]: FilterState } = {};
-    selectedFilterStateName: string;
 
     effectiveFilters: Predicate[] = [];
 
@@ -135,34 +135,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         public contextMenuHandler: ContextMenuHandler,
     ) {
         this.filterPanelStateService.currentRecords = this.m;
-    }
-
-    private static parseFilterState(stateJson: string): FilterState {
-        if (!stateJson) { return null; }
-
-        try {
-            let filterState: FilterState = JSON.parse(stateJson);
-
-            if (typeof filterState !== 'object') {
-                console.error('Filter panel state is not an object');
-                return null;
-            }
-
-            if (filterState.date) {
-                // fix filter states saved by old versions
-                if (typeof filterState.date.startDate === 'number') {
-                    filterState.date.startDate = LvUtils.milliseconds2nano(filterState.date.startDate);
-                }
-                if (typeof filterState.date.endDate === 'number') {
-                    filterState.date.endDate = LvUtils.milliseconds2nano(filterState.date.endDate);
-                }
-            }
-
-            return filterState;
-        } catch (e) {
-            console.error('Failed to parse filter panel state', e);
-            return null;
-        }
     }
 
     @HostListener('window:resize', ['$event'])
@@ -417,13 +389,16 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                     })
                 );
             } else {
-                this.commService.send(
-                    new Command('init', {
-                        logList: LogPathUtils.extractLogList(params),
-                        savedFiltersName: this.selectedFilterStateName,
-                        filterStateHash: LvUtils.lastParam(params.filters),
-                    })
-                );
+                let filtersParam = LvUtils.lastParam(params.filters)
+                if (filtersParam) {
+                    if (filtersParam.match(/^[a-f0-9]+$/)) {
+                        this.commService.send(new Command('loadFilterStateByHash', {hash: filtersParam}));
+                    } else {
+                        this.filterPanelStateService.setFilterStateFromUrlValue(filtersParam);
+                    }
+                }
+
+                this.commService.send(new Command('init', {logList: LogPathUtils.extractLogList(params)}));
             }
         }
 
@@ -433,11 +408,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     ngOnInit() {
-        let params = this.route.snapshot;
-
         this.commService.startup(this);
-
-        this.selectedFilterStateName = params.queryParams.filterSetName || 'default';
     }
 
     ngOnDestroy(): void {
@@ -536,7 +507,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             searchPattern: this.searchPattern,
             hideUnmatched: this.searchHideUnmatched,
             savedFiltersName: param.filterSetName,
-            filterState: this.filterPanelStateService.stateStr,
+            filterState: JSON.stringify(this.filterPanelStateService.getFilterState()),
+            filterStateUrlParam: param.filters,
             offset: Position.recordStart(this.m[firstRecordIdx]),
             hashes: this.vs.hashes,
             selectedLine: this.vs.selectedLine,
@@ -864,26 +836,25 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private createParams(): Params {
-        return {
-            ...LogPathUtils.getListParamMap(this.route.snapshot.queryParams),
-            ...this.createFilterParam(),
-        };
-    }
+        let res = LogPathUtils.getListParamMap(this.route.snapshot.queryParams);
 
-    private createFilterParam(): {[key: string]: string} {
-        let res: {[key: string]: string} = {};
-
-        if (this.selectedFilterStateName !== 'default') {
-            res.filterSetName = this.selectedFilterStateName;
+        let savedFilterName = this.getSavedFilterName();
+        if (savedFilterName !== 'default') {
+            res.filterSetName = savedFilterName;
         }
 
-        let originalFilters = this.savedFilterStates[this.selectedFilterStateName];
+        let originalFilters = this.savedFilterStates[savedFilterName];
 
-        if (!this.filterPanelStateService.isStateEquals(originalFilters)) {
-            res.filters = this.filterPanelStateService.stateHash;
+        if (this.filterPanelStateService.urlParamValue && !this.filterPanelStateService.isStateEquals(originalFilters)) {
+            res.filters = this.filterPanelStateService.urlParamValue;
         }
 
         return res;
+    }
+
+    private getSavedFilterName(): string {
+        let savedFilterParam = LvUtils.lastParam(this.route.snapshot.queryParams.filterSetName)
+        return savedFilterParam || 'default';
     }
 
     private loadEffectiveFilters(): Predicate[] {
@@ -1384,7 +1355,13 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView = event.shiftView;
 
-        let queryParams = Object.assign(event.logListQueryParams, this.createFilterParam());
+        let queryParams = {...event.logListQueryParams};
+        if (event.savedFilterName)
+            queryParams.filterSetName = event.savedFilterName;
+
+        if (event.filterStateUrlParam)
+            queryParams.filters = event.filterStateUrlParam;
+
         this.router.navigate([], {queryParams});
 
         this.state = State.STATE_OPENED;
@@ -1463,6 +1440,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     @BackendEventHandler()
+    private onSetFilterState(event: SetFilterStateEvent) {
+        this.filterPanelStateService.setFilterState(this.filterPanelStateService.parseFilterState(event.filterState), event.urlParamValue);
+    }
+
+    @BackendEventHandler()
     private onSetViewState(event: EventSetViewState) {
         LvUtils.assert(this.state === State.STATE_LOADING);
 
@@ -1481,15 +1463,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.inFavorites = event.inFavorites;
         this.fwService.editable = event.favEditable;
 
-        for (const [filterName, stateJson] of Object.entries(event.globalSavedFilters)) {
-            let filterState = LogViewComponent.parseFilterState(stateJson);
-            if (filterState) {
-                this.savedFilterStates[filterName] = filterState;
-            }
-        }
+        this.setGlobalSavedFilters(event.globalSavedFilters)
 
-        let filterState = LogViewComponent.parseFilterState(event.filterState) || {};
-        this.filterPanelStateService.init(this.logs, filterState);
+        this.filterPanelStateService.init(this.logs);
 
         this.effectiveFilters = this.loadEffectiveFilters();
 
@@ -1497,6 +1473,20 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (!event.initByPermalink) {
             this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
+        }
+    }
+
+    private setGlobalSavedFilters(globalSavedFilters: { [p: string]: string }) {
+        for (const [filterName, stateJson] of Object.entries(globalSavedFilters)) {
+            let filterState = this.filterPanelStateService.parseFilterState(stateJson);
+            if (filterState) {
+                this.savedFilterStates[filterName] = filterState;
+            }
+        }
+
+        if (this.route.snapshot.queryParams.filters == null) {
+            let savedFilter = this.savedFilterStates[this.getSavedFilterName()]
+            this.filterPanelStateService.setFilterState(savedFilter, null);
         }
     }
 

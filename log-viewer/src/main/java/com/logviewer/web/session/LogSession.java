@@ -91,9 +91,7 @@ public class LogSession {
         return logs;
     }
 
-    private void initFilters(@NonNull LogList logFileList,
-                             @Nullable String filterStateName, @Nullable String filterState,
-                             boolean isInitByPermalink) {
+    private void initFilters(@NonNull LogList logFileList, boolean isInitByPermalink) {
         Set<LogPath> logPathsFinal = toPathSet(logFileList);
 
         Map<String, LogView> logsMap = Utils.safeGet(logService.openLogs(logPathsFinal));
@@ -118,11 +116,7 @@ public class LogSession {
             globalSavedFilters.putAll(filterSetProvider.getFilterSets());
         }
 
-        if (filterState == null && filterStateName != null) {
-            filterState = globalSavedFilters.get(filterStateName);
-        }
-
-        sender.send(new EventSetViewState(logs, createConfigProps(), favoriteLogService, globalSavedFilters, filterState, isInitByPermalink));
+        sender.send(new EventSetViewState(logs, createConfigProps(), favoriteLogService, globalSavedFilters, isInitByPermalink));
     }
 
     private Config createConfigProps() {
@@ -155,9 +149,11 @@ public class LogSession {
             return;
         }
 
+        sender.send(new SetFilterStateEvent(permalink.getFilterStateUrlParam(), permalink.getFilterState()));
+
         stateVersion = 1;
 
-        initFilters(permalink.getLogList(), permalink.getSavedFiltersName(), permalink.getFilterState(), true);
+        initFilters(permalink.getLogList(), true);
 
         if (logs.length == 0)
             return;
@@ -204,20 +200,20 @@ public class LogSession {
     }
 
     @Remote
-    public synchronized void init(@NonNull LogList logList,
-                                  @Nullable String savedFiltersName, @Nullable String filterStateHash) {
+    public synchronized void loadFilterStateByHash(@NonNull String hash) {
+        String filterState = filterStorage.loadFilterStateByHash(hash);
+        if (filterState != null)
+            sender.send(new SetFilterStateEvent(hash, filterState));
+    }
+
+    @Remote
+    public synchronized void init(@NonNull LogList logList) {
         if (stateVersion != 0)
             throw new IllegalStateException(String.valueOf(stateVersion));
 
         stateVersion = 1;
 
-        String filterState = null;
-
-        if (filterStateHash != null) {
-            filterState = filterStorage.loadFilterStateByHash(filterStateHash);
-        }
-
-        initFilters(logList, savedFiltersName, filterState, false);
+        initFilters(logList, false);
     }
 
     private boolean updateStateVersionAndFilters(long version, @Nullable RecordPredicate[] filter) {

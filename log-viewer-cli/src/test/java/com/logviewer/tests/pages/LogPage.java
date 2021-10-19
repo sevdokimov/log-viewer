@@ -10,6 +10,8 @@ public interface LogPage {
 
     By RECORDS = By.xpath("//div[@id='records']/div[@class='record']");
 
+    By ADD_FILTER_BUTTON = By.cssSelector(".add-filter-menu .add-filter-button");
+
     interface Menu {
         By ITEM_ADD_LOG = By.id("add-log-menu-item");
     }

@@ -37,7 +37,7 @@ public class CustomPathResolverTest extends LogSessionTestBase {
         ApplicationContext ctx = createContext(MyConfig.class);
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(LogList.of("abc", getTestLog("multilog/server-a.log")), "default", null);
+        session.init(LogList.of("abc", getTestLog("multilog/server-a.log")));
         session.scrollToEdge(3, 2, null, false);
 
         EventScrollToEdgeResponse init = adapter.waitForType(EventScrollToEdgeResponse.class);

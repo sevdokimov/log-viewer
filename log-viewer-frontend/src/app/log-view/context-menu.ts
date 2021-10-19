@@ -158,7 +158,6 @@ export class ContextMenuHandler {
 
             state.textFilters.push({
                 id,
-                name: '',
                 pattern: {
                     s: text,
                 },

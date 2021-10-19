@@ -39,7 +39,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
     protected boolean eof = true;
     protected boolean finished;
 
-    public LoadRecordTask(SessionAdapter sender, LogView[] logs, int recordCount, RecordPredicate filter,
+    public LoadRecordTask(@NonNull SessionAdapter sender, @NonNull LogView[] logs, int recordCount, RecordPredicate filter,
                           @Nullable Position start, boolean backward, @Nullable Map<String, String> hashes) {
         super(sender, logs);
 

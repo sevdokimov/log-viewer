@@ -13,6 +13,11 @@ export interface BackendErrorEvent extends BackendEvent {
     stacktrace: string;
 }
 
+export interface SetFilterStateEvent extends BackendEvent {
+    urlParamValue?: string;
+    filterState: string;
+}
+
 export interface EventSetViewState extends BackendEvent {
     logs: LogFile[];
 
@@ -22,7 +27,6 @@ export interface EventSetViewState extends BackendEvent {
     favEditable: boolean;
 
     globalSavedFilters: { [key: string]: string };
-    filterState?: string;
 
     localhostName: string;
 
@@ -109,6 +113,8 @@ export interface EventInitByPermalink extends DataHolderEvent {
     shiftView: number;
     searchPattern: SearchPattern;
     hideUnmatched: boolean;
+    savedFilterName: string;
+    filterStateUrlParam: string;
 }
 
 export interface FileAttributes {

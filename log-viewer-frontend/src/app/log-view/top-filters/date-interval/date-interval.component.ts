@@ -5,6 +5,7 @@ import {Moment} from 'moment/moment';
 import * as moment from 'moment';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {LvUtils} from '@app/utils/utils';
+import {formatDateAsNanosecondString} from "@app/log-view/top-filters/date-interval/date-interval-filter-factory";
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -52,11 +53,14 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
     }
 
     protected loadComponentState(state: FilterState) {
-        let startDateMilli = LvUtils.nano2milliseconds(state.date.startDate);
-        let endDateMilli = LvUtils.nano2milliseconds(state.date.endDate);
+        let startDateNano = formatDateAsNanosecondString(state.date?.startDate);
+        let endDateNano = formatDateAsNanosecondString(state.date?.endDate);
 
-        this.startDate = state.date?.startDate ? moment(startDateMilli) : null;
-        this.endDate = state.date?.endDate ? moment(endDateMilli) : null;
+        let startDateMilli = LvUtils.nano2milliseconds(startDateNano);
+        let endDateMilli = LvUtils.nano2milliseconds(endDateNano);
+
+        this.startDate = startDateMilli ? moment(startDateMilli) : null;
+        this.endDate = endDateMilli ? moment(endDateMilli) : null;
 
         if (!this.startDate && !this.endDate) {
             this.title = 'Empty timestamp filter';

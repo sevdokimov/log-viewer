@@ -19,14 +19,9 @@ export class FilterPanelStateService {
 
     private _state: FilterState = {};
 
-    private _stateStr: string;
-    get stateStr() {
-        return this._stateStr;
-    }
-
-    private _stateHash: string;
-    get stateHash() {
-        return this._stateHash;
+    private _urlParamValue: string;
+    get urlParamValue() {
+        return this._urlParamValue;
     }
 
     activeFilterEditors: {[key: string]: FilterFactory} = {};
@@ -72,12 +67,7 @@ export class FilterPanelStateService {
         return type;
     }
 
-    init(logs: LogFile[], filterState: FilterState) {
-        this._state = filterState;
-
-        this._stateStr = JSON.stringify(this._state);
-        this._stateHash = Md5.hashStr(this._stateStr).toString();
-
+    init(logs: LogFile[]) {
         let levelType = FilterPanelStateService.findCommonLevelType(logs);
 
         if (levelType === 'level/log4j') {
@@ -105,6 +95,21 @@ export class FilterPanelStateService {
         return this._state;
     }
 
+    setFilterStateFromUrlValue(urlParamValue: string) {
+        this.setFilterState(this.parseFilterState(urlParamValue), urlParamValue);
+    }
+
+    setFilterState(state: FilterState, urlParamValue: string) {
+        if (this.updating) {
+            throw 'Update already in progress';
+        }
+
+        this._state = JSON.parse(JSON.stringify(state ?? {}))
+        this._urlParamValue = urlParamValue;
+
+        this.filterChanges.emit(this._state);
+    }
+
     updateFilterState(transition: (state: FilterState) => void) {
         if (this.updating) {
             throw 'Update already in progress';
@@ -125,10 +130,9 @@ export class FilterPanelStateService {
             let newStateStr = JSON.stringify(this._state);
 
             if (newStateStr !== originalState) {
-                this._stateStr = newStateStr;
-                this._stateHash = Md5.hashStr(newStateStr).toString();
-                
-                this.http.post('rest/log-view/saveFilterState', [this._stateHash, newStateStr]).subscribe();
+                this._urlParamValue = Md5.hashStr(newStateStr).toString();
+
+                this.http.post('rest/log-view/saveFilterState', [this._urlParamValue, newStateStr]).subscribe();
 
                 this.filterChanges.emit(this._state);
             }
@@ -209,7 +213,6 @@ export class FilterPanelStateService {
 
             state.jsFilters.push({
                 id,
-                name: '',
                 script: 'function isVisibleEvent(text, fields) {\n' +
                     '    return text.length > 0 || fields.msg.includes(\'some substring\')\n' +
                     '}',
@@ -240,7 +243,6 @@ export class FilterPanelStateService {
 
             state.textFilters.push({
                 id,
-                name: '',
                 pattern: {s: ''},
             });
         });
@@ -248,6 +250,24 @@ export class FilterPanelStateService {
         setTimeout(() => $('lv-text-filter .closeable-filter[filter-id="' + id + '"] > span')[0]?.click(), 0);
 
         return false;
+    }
+
+    parseFilterState(filterStateJson: string): FilterState {
+        if (!filterStateJson) { return null; }
+
+        try {
+            let filterState: FilterState = JSON.parse(filterStateJson);
+
+            if (typeof filterState !== 'object') {
+                console.error('Filter panel state is not an object: ' + filterStateJson);
+                return null;
+            }
+
+            return filterState;
+        } catch (e) {
+            console.error('Failed to parse filter panel state', e);
+            return null;
+        }
     }
 }
 
@@ -277,7 +297,7 @@ export interface FilterState {
 export interface JsFilter {
     id: string;
 
-    name: string;
+    name?: string;
 
     script: string;
 
@@ -287,7 +307,7 @@ export interface JsFilter {
 export interface TextFilter {
     id: string;
 
-    name: string;
+    name?: string;
 
     pattern: SearchPattern;
     exclude?: boolean;

@@ -25,19 +25,16 @@ public class EventSetViewState extends BackendEvent {
 
     private final Map<String, String> globalSavedFilters;
 
-    private final String filterState;
-
     private final String localhostName = Utils.LOCAL_HOST_NAME;
     
     public EventSetViewState(LogView[] logs, Config uiConfig, FavoriteLogService favoriteLogService,
-                             Map<String, String> globalSavedFilters, String filterState,
+                             Map<String, String> globalSavedFilters,
                              boolean initByPermalink) {
         this.logs = Stream.of(logs).map(RestLog::new).collect(Collectors.toList());
 
         this.uiConfig = uiConfig.root().render(ConfigRenderOptions.concise());
         favEditable = favoriteLogService.isEditable();
         this.globalSavedFilters = globalSavedFilters;
-        this.filterState = filterState;
 
         this.initByPermalink = initByPermalink;
     }

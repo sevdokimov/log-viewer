@@ -1,13 +1,5 @@
 package com.logviewer;
 
-import static com.logviewer.utils.TestSessionAdapter.*;
-import static org.junit.Assert.*;
-
-import java.util.Map;
-
-import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-
 import com.logviewer.data2.Position;
 import com.logviewer.web.dto.LogList;
 import com.logviewer.web.dto.events.EventNextDataLoaded;
@@ -15,6 +7,14 @@ import com.logviewer.web.dto.events.EventScrollToEdgeResponse;
 import com.logviewer.web.dto.events.EventSearchResponse;
 import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.tasks.SearchPattern;
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+
+import java.util.Map;
+
+import static com.logviewer.utils.TestSessionAdapter.records;
+import static com.logviewer.utils.TestSessionAdapter.stateVersion;
+import static org.junit.Assert.*;
 
 public class FailedLogTest extends LogSessionTestBase {
 
@@ -24,7 +24,7 @@ public class FailedLogTest extends LogSessionTestBase {
 
         LogSession session = LogSession.fromContext(adapter, ctx);
 
-        session.init(LogList.of(getTestLog("log.log"), "/unexisting-log.log"), null, null);
+        session.init(LogList.of(getTestLog("log.log"), "/unexisting-log.log"));
         session.scrollToEdge(3, 2, null, false);
 
         EventScrollToEdgeResponse resp = adapter.waitForType(EventScrollToEdgeResponse.class);

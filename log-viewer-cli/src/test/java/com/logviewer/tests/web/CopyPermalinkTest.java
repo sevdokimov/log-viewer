@@ -67,6 +67,29 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void jsonFilterInUrl() {
+        ThreadFilterTest.setFormat();
+
+        String path = getDataFilePath("thread-filter-test.log");
+        openUrl("log",
+                "path", path,
+                "filters", "{\"date\":{\"endDate\":\"01325361900000000000\",\"startDate\":\"01325361660000000000\"},\"thread\":{\"includes\":[\"exec-*\"]},\"textFilters\":[{\"id\":\"3050352091\",\"pattern\":{\"s\":\"[exec-100] c\"},\"exclude\":true}],\"jsFilters\":[]}");
+
+        waitForRecordsLoading();
+
+        assertEquals("[2012.01.01 00:01][exec-1] b\n[2012.01.01 00:03][exec-100] d", getVisibleRecords());
+
+        String link = copyPermalink();
+        assert !link.contains("filters=");
+
+        driver.get(link);
+
+        waitForRecordsLoading();
+        assertEquals("[2012.01.01 00:01][exec-1] b\n[2012.01.01 00:03][exec-100] d", getVisibleRecords());
+        assert driver.getCurrentUrl().contains("filters=%7B%22");
+    }
+
+    @Test
     public void brokenLink() throws IOException {
         Path tmpLog = tmpDir.resolve("test.log");
         Files.write(tmpLog, IntStream.rangeClosed(1, 20).mapToObj(String::valueOf).collect(Collectors.joining("\n")).getBytes());

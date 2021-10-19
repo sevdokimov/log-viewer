@@ -60,7 +60,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
     }
 
     private void addFilterMenuClick() {
-        driver.findElement(By.cssSelector(".add-filter-menu .add-filter-button")).click();
+        driver.findElement(ADD_FILTER_BUTTON).click();
     }
 
 

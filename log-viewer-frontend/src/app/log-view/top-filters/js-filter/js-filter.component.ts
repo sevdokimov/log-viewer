@@ -95,7 +95,7 @@ export class LvJsFilterComponent extends FilterWithDropdown {
     }
 
     private saveText(f: JsFilter) {
-        f.name = this.name?.trim();
+        f.name = LvUtils.empty2undefined(this.name?.trim());
         f.script = this.script;
     }
 
