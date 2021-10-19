@@ -195,6 +195,10 @@ public abstract class AbstractWebTestCase implements LogPage {
         }
     }
 
+    protected void waitForRecordsLoading() {
+        driver.findElement(By.xpath("//div[@id='records']/div[@class='record']"));
+    }
+
     protected void waitFor(Callable<Boolean> condition) {
         long stopWaitTime = System.currentTimeMillis() + WAIT_FOR_TIMEOUT;
 

@@ -11,6 +11,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
     @Test
     public void unknownLog() {
         openLog("1-7.log");
+        waitForRecordsLoading();
 
         driver.findElement(By.tagName("lv-top-filter"));
 
@@ -27,6 +28,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
     public void addFilters() {
         ThreadFilterTest.setFormat();
         openLog("thread-filter-test.log");
+        waitForRecordsLoading();
 
         driver.findElement(By.tagName("lv-top-filter"));
 

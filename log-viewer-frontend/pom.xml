@@ -26,8 +26,8 @@
                         <version>1.6</version>
                         <configuration>
                             <workingDirectory>./</workingDirectory>
-                            <nodeVersion>v12.13.1</nodeVersion>
-                            <npmVersion>6.12.1</npmVersion>
+                            <nodeVersion>v16.11.1</nodeVersion>
+                            <npmVersion>7.24.2</npmVersion>
                             <installDirectory>target/npmWd</installDirectory>
                         </configuration>
                         <executions>
