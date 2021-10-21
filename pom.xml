@@ -2,14 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.logviewer</groupId>
+    <groupId>io.github.sevdokimov.logviewer</groupId>
     <artifactId>log-parent</artifactId>
     <packaging>pom</packaging>
+
+    <name>Log Viewer parent</name>
+    <description>A parent pom.xml for Log Viewer project</description>
+
+    <url>https://github.com/sevdokimov/log-viewer</url>
 
     <version>0.1.9-SNAPSHOT</version>
 
     <properties>
         <log4j.version>2.13.3</log4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
@@ -30,6 +36,32 @@
                 <module>demo/spring-boot-2.3</module>
                 <module>demo/spring-boot-2.3-log4j</module>
             </modules>
+        </profile>
+
+        <profile>
+            <id>sign</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
@@ -59,6 +91,19 @@
                 <executions>
                     <execution>
                         <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -102,23 +147,33 @@
 
     <scm>
         <connection>scm:git:git@github.com:sevdokimov/log-viewer.git</connection>
-        <tag>HEAD</tag>
+        <developerConnection>scm:git:git@github.com:sevdokimov/log-viewer.git</developerConnection>
+        <url>http://github.com/sevdokimov/log-viewer/tree/master</url>
     </scm>
 
-    <repositories>
-        <repository>
-            <id>log-viewer</id>
-            <name>Log-viewer repository</name>
-            <url>https://sevdokimov:ghp_egEAkjyUKEkMCiGhTo1apItbsBtyix4b3&#114;OK@maven.pkg.github.com/sevdokimov/log-viewer</url>
-        </repository>
-    </repositories>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Sergey Evdokimov</name>
+            <email>sergey.evdokimov85@gmail.com</email>
+            <organizationUrl>https://github.com/sevdokimov/log-viewer</organizationUrl>
+        </developer>
+    </developers>
 
     <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
-            <id>github</id>
-            <name>GitHub log-viewer repository</name>
-            <url>https://maven.pkg.github.com/sevdokimov/log-viewer</url>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
 </project>

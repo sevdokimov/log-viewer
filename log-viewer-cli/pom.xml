@@ -3,12 +3,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.logviewer</groupId>
+        <groupId>io.github.sevdokimov.logviewer</groupId>
         <artifactId>log-parent</artifactId>
         <version>0.1.9-SNAPSHOT</version>
     </parent>
 
     <artifactId>log-viewer-cli</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Log Viewer standalone</name>
+    <description>A module generating a standalone Log Viewer application</description>
+
+    <url>https://github.com/sevdokimov/log-viewer</url>
 
     <properties>
         <jetty.version>9.4.43.v20210629</jetty.version>
@@ -90,12 +96,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.logviewer</groupId>
+            <groupId>io.github.sevdokimov.logviewer</groupId>
             <artifactId>log-viewer</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.logviewer</groupId>
+            <groupId>io.github.sevdokimov.logviewer</groupId>
             <artifactId>log-viewer</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>

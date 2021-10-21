@@ -5,12 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.logviewer</groupId>
+        <groupId>io.github.sevdokimov.logviewer</groupId>
         <artifactId>log-parent</artifactId>
         <version>0.1.9-SNAPSHOT</version>
     </parent>
 
     <artifactId>log-viewer-frontend</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Log Viewer frontend</name>
+    <description>The frontend part of Log Viewer</description>
+
+    <url>https://github.com/sevdokimov/log-viewer</url>
 
     <profiles>
         <profile>
