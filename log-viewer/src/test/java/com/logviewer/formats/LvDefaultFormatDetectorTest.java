@@ -161,6 +161,24 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("2020-01-01 18:11:00.000 GMT WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
         checkLine("2020-01-01 18:11:00.000 UTC WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
         checkLine("2020-01-01 18:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        // test months
+        checkLine("2020-10-01 18:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-11-01 18:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-12-01 18:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-13-01 18:11:00.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        // test hours
+        checkLine("2020-01-01 00:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-01-01 23:11:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-01-01 24:11:00.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 24:11:00.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 30:11:00.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        // test minutes
+        checkLine("2020-01-01 18:59:00.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-01-01 18:60:00.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        // test seconds
+        checkLine("2020-01-01 18:00:59.000 MSK WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss.SSS z} %level %m%n");
+        checkLine("2020-01-01 18:00:60.000 MSK WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        // test timezone
         checkLine("2020-01-01 18:11:00.000!1200 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("2020-01-01 18:11:00.000+3 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("2020-01-01 18:11:00.000+300 WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);

@@ -8,12 +8,15 @@ import com.logviewer.formats.RegexLogFormat;
 import com.logviewer.utils.LvDateUtils;
 import com.logviewer.web.dto.RestRecord;
 import org.junit.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
@@ -153,6 +156,33 @@ public class TestUtils {
         } finally {
             TimeZone.setDefault(saved);
         }
+    }
+
+    public static <T> T injectDependencies(@Nonnull T target, Object ... servicesToInject) {
+        Set<Object> unusedCandidate = new HashSet<>(Arrays.asList(servicesToInject));
+
+        try {
+            for (Class c = target.getClass(); c != null; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(Autowired.class)) {
+                        for (int i = 0; i < servicesToInject.length; i++) {
+                            if (field.getType().isInstance(servicesToInject[i])) {
+                                field.setAccessible(true);
+                                field.set(target, servicesToInject[i]);
+                                unusedCandidate.remove(servicesToInject[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (unusedCandidate.size() > 0)
+            throw new IllegalArgumentException("Inject candidate was not used: " + unusedCandidate);
+
+        return target;
     }
 
     public interface ExceptionalRunnable {

@@ -85,6 +85,10 @@ public class LogService implements InitializingBean, DisposableBean {
         return executor;
     }
 
+    public LvFileAccessManager getAccessManager() {
+        return accessManager;
+    }
+
     @Nullable
     public LogFormat getFormatByPath(@NonNull Path path) {
         try {

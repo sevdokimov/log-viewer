@@ -33,9 +33,9 @@ public class LvDefaultFormatDetector {
 
     private static final String MS_TZ = MS_PATTERN + TZ_PATTERN;
 
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[12]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
+    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[012]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
 
-    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[12]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b");
+    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[012]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b");
 
     private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
 
@@ -49,7 +49,7 @@ public class LvDefaultFormatDetector {
 
     private static final Pattern THREAD_ITEM = Pattern.compile(" *(\\[[^\\[\\]\n]+]) *");
 
-    private static final Pattern SPRING_PATTERN = Pattern.compile("\\b20[012]\\d-(?:1[12]|0\\d)-(?:[012]\\d|3[10]) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d\\d\\d +" + LEVEL.pattern() + " +\\d{2,7} --- \\[.+\\] +(?:\\w+\\.)*\\w+ +: .+");
+    private static final Pattern SPRING_PATTERN = Pattern.compile("\\b20[012]\\d-(?:1[012]|0\\d)-(?:[012]\\d|3[10]) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d\\d\\d +" + LEVEL.pattern() + " +\\d{2,7} --- \\[.+\\] +(?:\\w+\\.)*\\w+ +: .+");
 
     private static final String SPRING_LOG4J_PATTERN = "%d{yyyy-MM-dd HH:mm:ss.SSS} %p %processId --- [%t] %logger : %m%n";
 
