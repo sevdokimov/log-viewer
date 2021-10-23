@@ -10,6 +10,8 @@ import org.openqa.selenium.interactions.Actions;
 
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
+
 public class AddLogTest extends AbstractWebTestCase implements LogPage {
 
     @Test
@@ -28,6 +30,10 @@ public class AddLogTest extends AbstractWebTestCase implements LogPage {
             driver.findElement(MENU).click();
 
             driver.findElement(Menu.ITEM_ADD_LOG).click();
+
+            String currentUrl = driver.getCurrentUrl();
+            ChooserPage.findDirectoryNameRef("multifile").click();
+            assertEquals(driver.getCurrentUrl(), currentUrl);
 
             new Actions(driver).doubleClick(ChooserPage.findFile("log-a.log")).perform();
 

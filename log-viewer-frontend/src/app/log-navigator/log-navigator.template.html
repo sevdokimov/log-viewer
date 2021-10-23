@@ -57,7 +57,7 @@
                 <span *ngIf="currentDirItems.length === 0" class="path-item">&nbsp;</span>
 
                 <span *ngFor="let path of currentDirItems; let idx = index" class="path-item">
-                    <a href="#" (click)="selectDir(constructPathFromPrefix(idx))">{{path}}</a>
+                    <a href="#" (click)="directoryNameClick(constructPathFromPrefix(idx))">{{path}}</a>
                     <span class="path-separator">
                         <span *ngIf="!path.endsWith('/')">/</span>
                     </span>

@@ -12,4 +12,8 @@ public interface ChooserPage {
         return AbstractWebTestCase.driver.findElement(By.xpath("//lv-navigator//table[contains(@class,'file-list')]//td[contains(@class, 'name')][normalize-space(.) = '" + name + "']"));
     }
 
+    static WebElement findDirectoryNameRef(String name) {
+        return AbstractWebTestCase.driver.findElement(By.xpath("//lv-navigator//span[contains(@class, 'path-item')]/a[normalize-space(.) = '" + name + "']"));
+    }
+
 }

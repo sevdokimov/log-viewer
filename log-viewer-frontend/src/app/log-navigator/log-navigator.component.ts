@@ -98,6 +98,11 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
         return LvUtils.normalizePath(this.currentDirItems.slice(0, idx + 1).join('/'));
     }
 
+    directoryNameClick(dir: string) {
+        this.selectDir(dir);
+        return false;
+    }
+
     selectDir(dir: string) {
         if (dir === this.currentDir) {
             return;
