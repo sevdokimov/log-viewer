@@ -119,6 +119,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     recordWithDetails: Record;
 
+    touch: Touch;
+
     constructor(
         private changeDetectorRef: ChangeDetectorRef,
         private http: HttpClient,
@@ -1507,6 +1509,45 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         let l = window.location;
         window.location.href = l.protocol + '//' + l.host + l.pathname + '?' + LvUtils.buildQueryString(params);
+    }
+
+    onTouchStart(event: TouchEvent) {
+        if (!this.touch)
+            this.touch = event.changedTouches[0];
+    }
+
+    onTouchMove(event: TouchEvent) {
+        if (this.touch) {
+            let newTouch = this.findCurrentTouch(event.changedTouches);
+            if (newTouch) {
+                let d = newTouch.clientY - this.touch.clientY;
+
+                if (d > 0) {
+                    this.doUp(d);
+                } else {
+                    this.doDown(-d);
+                }
+
+                this.touch = newTouch;
+                event.preventDefault();
+            }
+        }
+    }
+
+
+    onTouchEnd(event: TouchEvent) {
+        if (this.touch && this.findCurrentTouch(event.changedTouches) != null) {
+            this.touch = null;
+        }
+    }
+
+    private findCurrentTouch(touchList: TouchList): Touch {
+        for (let i = 0; i < touchList.length; i++) {
+            if (touchList[i].identifier === this.touch.identifier) {
+                return touchList[i];
+            }
+        }
+        return null;
     }
 }
 

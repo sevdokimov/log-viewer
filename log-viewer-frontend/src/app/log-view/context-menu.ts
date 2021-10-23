@@ -11,20 +11,20 @@ export class ContextMenuHandler {
     constructor(private filterPanelStateService: FilterPanelStateService) {
     }
 
-    isThreadMenuItemVisible(item: Item) {
-        return item.thread;
+    isThreadMenuItemVisible(item: Item): boolean {
+        return !!item.thread;
     }
 
-    isTextMenuItemVisible(item: Item) {
-        return item.selectedText;
+    isTextMenuItemVisible(item: Item): boolean {
+        return !!item.selectedText;
     }
 
-    isDateMenuItemVisible(item: Item) {
-        return item.record.time;
+    isDateMenuItemVisible(item: Item): boolean {
+        return !!item.record.time;
     }
 
-    hasThreadGroup(item: Item) {
-        return item.threadGroup;
+    hasThreadGroup(item: Item): boolean {
+        return !!item.threadGroup;
     }
 
     createItem(record: Record, logs: LogFile[]): Item {

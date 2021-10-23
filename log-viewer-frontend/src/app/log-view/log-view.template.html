@@ -51,7 +51,7 @@
         </div>
 
         <div class="dropdown" dropdown>
-            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu">
+            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu" alt="menu">
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
                 <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
 
@@ -102,21 +102,21 @@
             </div>
         </div>
 
-        <img *ngIf="!searchHideUnmatched"
+        <img *ngIf="!searchHideUnmatched" alt="prev"
              id="findPrevArrow" src="img/previousOccurrence.png" title="Previous Occurrence (Shift+F3)"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(-1)">
-        <img *ngIf="!searchHideUnmatched"
+        <img *ngIf="!searchHideUnmatched" alt="next"
              id="findNextArrow" src="img/nextOccurrence.png" title="Next Occurrence (F3)"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(1)">
 
         <span *ngIf="searchHideUnmatched" id="applySearchFilterBlock">
-            <img id="applySearchFilter" src="img/apply-search-filter.png" width="20" title="Apply filter (F3)"
+            <img id="applySearchFilter" src="img/apply-search-filter.png" alt="apply change" width="20" title="Apply filter (F3)"
                  class="toolIcon" [class.tooliconDisabled]="!appliedFilterOutdated()"
                  (click)="applySearchFilter()">
 
-            <img src="img/nextOccurrence.png" class="toolIcon" style="visibility: hidden;">
+            <img src="img/nextOccurrence.png" class="toolIcon" alt="next" style="visibility: hidden;">
         </span>
 
         <input id="hide-unmatched" type="checkbox"
@@ -128,22 +128,24 @@
     <lv-top-filter></lv-top-filter>
 </div>
 
-<div #logPane id="logPane" (wheel)="wheelRoll($event)" [class.state-opened]="state === 0">
+<div #logPane id="logPane" (wheel)="wheelRoll($event)" [class.state-opened]="state === 0"
+     (touchmove)="onTouchMove($event)" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)" (touchcancel)="onTouchEnd($event)">
+
     <div *ngIf="state === 1" class="loading-placeholder">
-        <span><img src="assets/progress.gif"> Loading...</span>
+        <span><img src="assets/progress.gif" alt="..."> Loading...</span>
     </div>
 
     <div id="heightLimiter" [style.display]="vs.filesValidCount === 0 ? 'none' : 'block'">
         <div #logView id="logView">
             <div #loadingProgressTop id="loading-progress-top">
-                <img src="img/loader13.gif">
+                <img src="img/loader13.gif" alt="loading...">
             </div>
 
             <div #records id="records" (click)="clickRecord($event)" (contextmenu)="contextMenu($event)"></div>
         </div>
 
         <div *ngIf="hasRecordAfter" id="loading-progress-bottom">
-            <img src="img/loader13.gif">
+            <img src="img/loader13.gif" alt="loading...">
         </div>
 
         <div *ngIf="!hasRecordAfter && (hasRecordBefore || m.length > 0)" class="log-end"> ---------------- end
@@ -194,7 +196,7 @@
 
         <div *ngIf="logs.length > 0" class="file-list">
             <div>
-                <table cellpadding="0" cellspacing="0">
+                <table>
                     <tr *ngFor="let l of logs">
                         <td>
                             {{l.node}}
@@ -218,7 +220,7 @@
     <div class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
-                <img src="assets/progress.gif"> search... <a href="javascript:void(0)" (click)="cancelSearch()">cancel</a>
+                <img src="assets/progress.gif" alt="..."> search... <a href="javascript:void(0)" (click)="cancelSearch()">cancel</a>
             </div>
         </div>
     </div>
@@ -230,7 +232,7 @@
     <div class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
-                <img src="assets/progress.gif"> applying filters ...
+                <img src="assets/progress.gif" alt="..."> applying filters ...
             </div>
         </div>
     </div>
@@ -317,11 +319,11 @@
         </ng-template>
     </context-menu>
 
-    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" let-item contextMenuItem
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
                  (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, false)">
         Hide events older than current
     </ng-template>
-    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" let-item contextMenuItem
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
                  (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, true)">
         Hide events newer than current
     </ng-template>
