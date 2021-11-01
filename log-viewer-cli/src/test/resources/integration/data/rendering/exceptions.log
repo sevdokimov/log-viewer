@@ -25,3 +25,13 @@ java.lang.NullPointerException: the exception 1
 	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:370)
 	... 118 more
 2017-09-25_12:38:55.686 [http-bio-8088-exec-5] ERROR c.b.u.r.h.DashboardExceptionHandler - Capturing exception with timestamp 1506343132686
+2017-09-25_13:38:55.686 [http-bio-8088-exec-5] ERROR c.b.u.r.h.DashboardExceptionHandler - Capturing exception with timestamp 1506343132686
+java.lang.NullPointerException
+not an exception
+java.lang.NullPointerException
+not an exception
+java.io.IOException: correct exception
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:111)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:370)
+
+2017-09-25_14:38:55.686 [http-bio-8088-exec-5] ERROR c.b.u.r.h.DashboardExceptionHandler - Capturing exception with timestamp 1506343132686

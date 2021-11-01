@@ -56,6 +56,14 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void exceptionInvalidMessage() {
+        openLog("rendering/execption-invalid-multiline-message.log");
+
+        checkRecordCount(1);
+        notExist(By.className("exception-class"));
+    }
+
+    @Test
     public void strangeLines() throws IOException {
         String logPath = openLog("rendering/strange-exception-line.log");
 
@@ -69,7 +77,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         openLog("rendering/exceptions.log");
 
         List<WebElement> exceptions = driver.findElementsByClassName("ex-wrapper");
-        assertEquals(4, exceptions.size());
+        assertEquals(5, exceptions.size());
 
         WebElement npe1 = exceptions.get(0);
         assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
@@ -90,6 +98,10 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         WebElement re4 = exceptions.get(3);
         assertEquals("java.lang.NullPointerException", re4.findElement(By.className("exception-class")).getText());
         assertEquals(2, re4.findElements(By.className("ex-stacktrace-line")).size());
+
+        WebElement re5 = exceptions.get(4);
+        assertEquals("java.io.IOException", re5.findElement(By.className("exception-class")).getText());
+        assertEquals(2, re5.findElements(By.className("ex-stacktrace-line")).size());
     }
 
     @Test

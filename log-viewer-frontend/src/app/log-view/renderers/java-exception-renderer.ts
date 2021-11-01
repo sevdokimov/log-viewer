@@ -87,12 +87,17 @@ export class JavaExceptionRenderer implements TextRenderer {
 
         let headerEnd = headerMatch.index + headerMatch[0].length;
 
-        this.rgxItemSearch.lastIndex = headerEnd;
-        let firstItem = this.rgxItemSearch.exec(s);
-        if (!firstItem) { return null; }
-        if (firstItem.index - headerEnd > MAX_MESSAGE_LENGTH) { return null; }
+        let hasMessage = headerMatch[2] != null;
 
-        if (headerMatch[2] != null) {
+        let firstItemRegex = hasMessage ? this.rgxItemSearch : this.rgxItem;
+
+        firstItemRegex.lastIndex = headerEnd;
+        let firstItem = firstItemRegex.exec(s);
+        if (!firstItem) { return null; }
+
+        if (hasMessage) { // exception has a message like "java.net.SocketException: a message"
+            if (firstItem.index - headerEnd > MAX_MESSAGE_LENGTH) { return null; }
+
             e.appendChild(document.createTextNode(': '));
 
             let exMessage = document.createElement('SPAN');
@@ -103,7 +108,7 @@ export class JavaExceptionRenderer implements TextRenderer {
 
         let traceItems = [firstItem];
 
-        let idx = this.rgxItemSearch.lastIndex;
+        let idx = firstItemRegex.lastIndex;
 
         while (idx < s.length) {
             this.rgxItem.lastIndex = idx;
