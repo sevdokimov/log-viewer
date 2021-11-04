@@ -1488,7 +1488,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (this.route.snapshot.queryParams.filters == null) {
             let savedFilter = this.savedFilterStates[this.getSavedFilterName()]
-            this.filterPanelStateService.setFilterState(savedFilter, null);
+            if (savedFilter) {
+                this.filterPanelStateService.setFilterState(savedFilter, null);
+            }
         }
     }
 
@@ -1533,7 +1535,6 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
         }
     }
-
 
     onTouchEnd(event: TouchEvent) {
         if (this.touch && this.findCurrentTouch(event.changedTouches) != null) {

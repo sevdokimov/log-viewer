@@ -21,7 +21,7 @@ public class FileWatcherService implements DisposableBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileWatcherService.class);
 
-    static final String THREAD_NAME = "file-watcher-thread";
+    static final String THREAD_NAME = "logviewer-file-watcher-thread";
 
     private Thread watcherThread;
 

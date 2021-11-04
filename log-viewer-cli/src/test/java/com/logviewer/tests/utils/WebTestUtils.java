@@ -1,9 +1,15 @@
 package com.logviewer.tests.utils;
 
+import com.google.common.io.Resources;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -32,4 +38,23 @@ public class WebTestUtils {
         return query_pairs;
     }
 
+    public static Path getDownloadDirectory() {
+        try {
+            URL sampleResourceUrl = Resources.getResource("integration/data/search.log");
+            assert sampleResourceUrl.getProtocol().equals("file");
+
+            Path samplePath = Paths.get(sampleResourceUrl.getFile());
+
+            Path classesDir = samplePath.getParent().getParent().getParent();
+
+            Path tempDirectory = classesDir.resolve("download-dir");
+
+            if (!Files.isDirectory(tempDirectory))
+                Files.createDirectory(tempDirectory);
+
+            return tempDirectory;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

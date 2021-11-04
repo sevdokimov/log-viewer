@@ -150,7 +150,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeUTF(logId);
-        out.writeObject(message); // Don't use writeUTF(), it has limit to string length!!!
+        out.writeObject(message); // Don't use writeUTF(), it has a limit on string length!!!
         out.writeLong(timeNanos);
         out.writeLong(start);
         out.writeLong(end);

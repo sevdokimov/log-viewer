@@ -10,6 +10,7 @@ import com.logviewer.data2.net.server.api.RemoteTask;
 import com.logviewer.data2.net.server.api.RemoteTaskContext;
 import com.logviewer.data2.net.server.api.RemoteTaskController;
 import com.logviewer.utils.LvGsonUtils;
+import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.Triple;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
@@ -17,6 +18,7 @@ import org.springframework.lang.NonNull;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -116,6 +118,49 @@ public class ConnectionTest extends LogSessionTestBase {
 
             // check no error when send message to closed task
             controller.alterTask((Consumer<TestRemoteTask> & Serializable) task -> task.setState(3));
+        });
+    }
+
+    @Test(timeout = 10000)
+    public void bufferOverflow() throws Exception {
+        taskTest((remoteNodeService, logServer) -> {
+            BlockingQueue<String> queue = new ArrayBlockingQueue<>(5);
+
+            RemoteTaskController<UnlimitedStringGenerationTask> task = remoteNodeService.startTask(NODE, new UnlimitedStringGenerationTask(), (s, e) -> {
+                if (s != null) {
+                    try {
+                        queue.put(s);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeInterruptedException(ex);
+                    }
+                }
+            });
+
+            try {
+                String s0 = queue.take();
+                assert s0.endsWith("_0") : s0;
+
+                String s1 = queue.take();
+                assert s1.endsWith("_1") : s1;
+
+                Thread.sleep(300);
+                assertEquals(5, queue.size());
+                long savedSent = UnlimitedStringGenerationTask.sendCount;
+
+                Thread.sleep(100);
+                assertEquals(5, queue.size());
+                assertEquals(savedSent, UnlimitedStringGenerationTask.sendCount);
+
+                for (int i = 2; i < 1000; i++) {
+                    String s = queue.take();
+                    assert s.endsWith("_" + i) : s1;
+                }
+
+                Thread.sleep(20);
+                assert UnlimitedStringGenerationTask.sendCount > savedSent;
+            } catch (InterruptedException e) {
+                task.cancel();
+            }
         });
     }
 
@@ -235,6 +280,36 @@ public class ConnectionTest extends LogSessionTestBase {
         @Override
         public void cancel() {
 
+        }
+    }
+
+    private static class UnlimitedStringGenerationTask implements RemoteTask<String> {
+
+        static long sendCount;
+
+        private Future<?> future;
+
+        @Override
+        public void start(RemoteTaskContext<String> ctx) {
+            sendCount = 0;
+
+            future = ctx.getLogService().getExecutor().submit(() -> {
+                try {
+                    while (true) {
+                        ctx.send(String.join("", Collections.nCopies(1200, "z")) + '_' + sendCount);
+                        sendCount++;
+                        if (Thread.currentThread().isInterrupted())
+                            throw new InterruptedException();
+                    }
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        }
+
+        @Override
+        public void cancel() {
+            future.cancel(true);
         }
     }
 

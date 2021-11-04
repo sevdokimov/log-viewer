@@ -184,9 +184,11 @@ public class OutcomeConnection extends AbstractConnection {
 
         @Override
         public void cancel() {
-            canceled = true;
+            if (!canceled) {
+                canceled = true;
 
-            sendMessage(new MessageTaskChangeEvent(taskId, null));
+                sendMessage(new MessageTaskChangeEvent(taskId, null));
+            }
         }
     }
 }

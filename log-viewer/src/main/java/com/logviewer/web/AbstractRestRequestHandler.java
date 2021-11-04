@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,33 +34,9 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
             if (getAnn == null)
                 continue;
 
-            if (getAnn.method() == FormSubmitEvent.MethodType.GET) {
-                assert method.getParameterCount() == 0 : method.getName();
-            }
-            else {
-                assert method.getParameterCount() <= 1 : method.getName();
-            }
-
             Method oldMethod = methods.put(method.getName(), method);
             assert oldMethod == null : method.getName();
         }
-    }
-
-    public final void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        FormSubmitEvent.MethodType methodType;
-
-        if (req.getMethod().equals("GET")) {
-            methodType = FormSubmitEvent.MethodType.GET;
-        }
-        else if (req.getMethod().equals("POST")) {
-            methodType = FormSubmitEvent.MethodType.POST;
-        }
-        else {
-            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            return;
-        }
-
-        process(req, resp, methodType);
     }
 
     @NonNull
@@ -90,7 +66,32 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
         return Integer.parseInt(s);
     }
 
-    private void process(HttpServletRequest req, HttpServletResponse resp, FormSubmitEvent.MethodType methodType) throws IOException {
+    private static void validateMethodType(HttpServletRequest req, FormSubmitEvent.MethodType[] method) {
+        try {
+            FormSubmitEvent.MethodType methodType = FormSubmitEvent.MethodType.valueOf(req.getMethod());
+
+            if (Arrays.asList(method).contains(methodType))
+                return;
+        } catch (IllegalArgumentException ignored) {
+
+        }
+
+        throw new RestException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Wrong method: " + req.getMethod());
+    }
+
+    private Object loadBody(Class<?> type, HttpServletRequest req) throws IOException {
+        String str = StreamUtils.copyToString(req.getInputStream(), StandardCharsets.UTF_8);
+
+        if (type == String.class)
+            return str;
+
+        if (str.isEmpty())
+            return null;
+        
+        return LvGsonUtils.GSON.fromJson(str, type);
+    }
+
+    public final void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         request.set(req);
 
         try {
@@ -106,43 +107,23 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
                 return;
             }
 
-            if (method.getAnnotation(Endpoint.class).method() != methodType) {
-                sendResponse(resp, 405, "Wrong method: " + methodType);
-                return;
-            }
+            validateMethodType(req, method.getAnnotation(Endpoint.class).method());
 
             Object[] args;
 
-            switch (methodType) {
-                case GET:
-                    args = Utils.EMPTY_OBJECTS;
-                    break;
-
-                case POST: {
-                    if (method.getParameterCount() == 0) {
-                        args = Utils.EMPTY_OBJECTS;
-                    }
-                    else if (method.getParameterCount() == 1) {
-                        Object arg;
-
-                        Class<?> paramType = method.getParameterTypes()[0];
-                        if (paramType == String.class) {
-                            arg = StreamUtils.copyToString(req.getInputStream(), StandardCharsets.UTF_8);
-                        }
-                        else {
-                            arg = LvGsonUtils.GSON.fromJson(new InputStreamReader(req.getInputStream(), StandardCharsets.UTF_8), paramType);
-                        }
-
-                        args = new Object[]{arg};
-                    }
-                    else {
-                        throw new RuntimeException();
-                    }
-                    break;
-                }
-
-                default:
-                    throw new RuntimeException();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            if (parameterTypes.length == 0) {
+                args = Utils.EMPTY_OBJECTS;
+            } else if (Arrays.equals(parameterTypes, new Class[]{HttpServletRequest.class, HttpServletResponse.class})) {
+                args = new Object[]{req, resp};
+            } else if (Arrays.equals(parameterTypes, new Class[]{HttpServletRequest.class})) {
+                args = new Object[]{req};
+            } else if (parameterTypes.length == 1) {
+                args = new Object[]{loadBody(parameterTypes[0], req)};
+            } else if (parameterTypes.length == 3 && parameterTypes[0] == HttpServletRequest.class && parameterTypes[1] == HttpServletResponse.class) {
+                args = new Object[]{req, resp, loadBody(parameterTypes[2], req)};
+            } else {
+                throw new RuntimeException("Invalid method signature");
             }
 
             try {
@@ -163,15 +144,13 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
                     throw Utils.propagate(e);
                 }
 
-                if (res instanceof AsyncContext)
+                if (res instanceof AsyncContext || method.getReturnType() == void.class)
                     return;
 
                 resp.setContentType("application/json");
                 resp.setCharacterEncoding("UTF-8");
 
-                if (method.getReturnType() == void.class) {
-                    resp.getWriter().print("true");
-                } else if (res instanceof JsonElement) {
+                if (res instanceof JsonElement) {
                     LvGsonUtils.GSON.toJson((JsonElement)res, resp.getWriter());
                 } else if (method.getReturnType().equals(Object.class)) {
                     LvGsonUtils.GSON.toJson(res, resp.getWriter());
@@ -189,15 +168,15 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
     }
 
     private void sendResponse(HttpServletResponse resp, int code, String message) throws IOException {
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setStatus(code);
-
         if (resp.isCommitted()) {
             throw new IllegalStateException("Response already committed");
         } else {
-            resp.resetBuffer();
+            resp.reset();
         }
+
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
+        resp.setStatus(code);
 
         resp.getWriter().append(message);
     }

@@ -6,7 +6,6 @@ import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.utils.FilterPanelState;
 import com.logviewer.web.session.tasks.SearchPattern;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -307,13 +306,13 @@ public class TextFilterTest extends AbstractWebTestCase {
         new Actions(driver).sendKeys(filter.findElement(TEXTAREA), "()").perform();
 
         waitFor(() -> filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty());
-        assertThat(filter.findElement(APPLY).getAttribute("disabled"), CoreMatchers.nullValue());
+        assertEnabled(APPLY);
 
         new Actions(driver).sendKeys(filter.findElement(TEXTAREA), "(").perform();
 
         assert !filter.findElement(By.cssSelector(".regexp-error")).getText().trim().isEmpty();
 
-        assertThat(filter.findElement(APPLY).getAttribute("disabled"), is("true"));
+        assertDisabled(APPLY);
     }
 
     @Test

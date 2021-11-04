@@ -14,6 +14,7 @@ public interface LogPage {
 
     interface Menu {
         By ITEM_ADD_LOG = By.id("add-log-menu-item");
+        By DOWNLOAD_LOG = By.id("download-menu-item");
     }
 
 }

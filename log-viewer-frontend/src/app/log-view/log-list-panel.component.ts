@@ -1,20 +1,22 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {LogFile, RestStatus} from './log-file';
+import {LogFile} from './log-file';
+import {ViewStateService} from "@app/log-view/view-state.service";
 
 @Component({
     selector: 'lv-log-list-panel',
     templateUrl: './log-list-panel.template.html',
-    styleUrls: ['./log-list-panel.style.scss']
+    styleUrls: ['./log-list-panel.style.scss', './log-table.scss']
 })
 export class LogListPanelComponent implements OnChanges {
     @Input()
     logs: LogFile[];
-    @Input()
-    statuses: { [key: string]: RestStatus } = {};
 
     @Output() addLogClicked = new EventEmitter();
 
     showNodeName: boolean;
+
+    constructor(public vs: ViewStateService) {
+    }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['logs']) {

@@ -89,6 +89,6 @@ public class LogPath implements Serializable {
         if (node == null)
             return file;
 
-        return node.toString() + '/' + file;
+        return node + ": " + file;
     }
 }

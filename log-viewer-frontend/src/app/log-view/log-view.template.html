@@ -46,7 +46,7 @@
                 <i class="fas fa-caret-down"></i>
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-                <lv-log-list-panel [logs]="logs" [statuses]="vs.statuses" (addLogClicked)="showOpenLogDialog()"></lv-log-list-panel>
+                <lv-log-list-panel [logs]="logs" (addLogClicked)="showOpenLogDialog()"></lv-log-list-panel>
             </div>
         </div>
 
@@ -63,6 +63,11 @@
                    (click)="addToFavorites()">
                     <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
                     {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
+                </a>
+
+                <a href="javascript:void(0)" *ngIf="logs?.length" id="download-menu-item" class="dropdown-item"
+                   (click)="modalWindow = 'download'">
+                    Download
                 </a>
             </div>
         </div>
@@ -238,10 +243,10 @@
     </div>
 </div>
 
-<div *ngIf="modalWindow === 'disconnected'" class="sl-overlay">
+<div *ngIf="modalWindow" [ngSwitch]="modalWindow" class="sl-overlay">
     <div class="modal-background sl-overlay"></div>
 
-    <div class="sl-stretchable-dialog">
+    <div *ngSwitchCase="'disconnected'" class="sl-stretchable-dialog">
         <div>
             <div class="disconnect-dialog">
                 <div [innerHTML]="disconnectMessage"></div>
@@ -249,27 +254,19 @@
             </div>
         </div>
     </div>
-</div>
 
-<div *ngIf="modalWindow === 'brokenLink'" class="sl-overlay">
-    <div class="modal-background sl-overlay"></div>
-
-    <div class="sl-dialog sl-dialog-small">
+    <div *ngSwitchCase="'brokenLink'" class="sl-dialog sl-dialog-small">
         <div style="padding: 10px 20px 0 20px;">
             <div style="display: table; width: 100%; height: 100%; text-align: center;">
                 <div style="display: table-cell; vertical-align: middle;">
                     Failed to restore position by permalink, may be log file has been rewritten.<br>
-                    <button id="brokenLinkGoTail" class="btn btn-default" (click)="goToTailAfterBrokenLink()">Open log tail</button>
+                    <button id="brokenLinkGoTail" class="btn btn-primary" (click)="goToTailAfterBrokenLink()">Open log tail</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div *ngIf="modalWindow === 'filter-error'" id="filter-error-modal" class="sl-overlay">
-    <div class="modal-background sl-overlay"></div>
-
-    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: auto;">
+    <div *ngSwitchCase="'filter-error'" id="filter-error-modal" class="sl-dialog sl-dialog-big p-2">
         <div class="d-flex justify-content-end">
             <button id="close-filtering-error-dialog" class="btn btn-link" (click)="modalWindow = null">Close</button>
         </div>
@@ -278,29 +275,31 @@
             Filter error: {{filterErrorText}}
         </div>
     </div>
-</div>
 
-<div *ngIf="modalWindow === 'event-details'" class="sl-overlay">
-    <div class="modal-background sl-overlay"></div>
-
-    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
+    <div *ngSwitchCase="'event-details'" class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
         <div class="d-flex justify-content-end">
             <button class="btn btn-link" (click)="modalWindow = null">Close</button>
         </div>
 
         <lv-event-details [record]="recordWithDetails"></lv-event-details>
     </div>
-</div>
 
-<div *ngIf="modalWindow === 'open-log'" class="sl-overlay">
-    <div class="modal-background sl-overlay"></div>
-
-    <div class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
+    <div *ngSwitchCase="'open-log'" class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
         <div class="d-flex justify-content-end">
             <button class="btn btn-link" (click)="modalWindow = null">Close</button>
         </div>
 
         <lv-navigator (openFile)="addNewLog($event)"></lv-navigator>
+    </div>
+
+    <div *ngSwitchCase="'download'" id="download-dialog" class="sl-dialog p-2">
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+        </div>
+
+        <lv-download-dialog [logs]="logs" [effectiveFilters]="effectiveFilters">
+
+        </lv-download-dialog>
     </div>
 </div>
 

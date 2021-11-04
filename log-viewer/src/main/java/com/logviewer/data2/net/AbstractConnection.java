@@ -2,18 +2,20 @@ package com.logviewer.data2.net;
 
 import com.logviewer.data2.net.server.Message;
 import com.logviewer.utils.MessageReader;
+import com.logviewer.utils.OpenByteArrayOutputStream;
+import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public abstract class AbstractConnection implements AutoCloseable {
+
+    private static final int OUTCOME_BUFFER_SIZE = 1024*1024;
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractConnection.class);
 
@@ -21,7 +23,7 @@ public abstract class AbstractConnection implements AutoCloseable {
 
     private final MessageReader messageReader = new MessageReader();
 
-    private List<Message> outcomeMsgQueue;
+    private OpenByteArrayOutputStream outcomeMsgQueue;
 
     protected boolean closed;
 
@@ -47,55 +49,39 @@ public abstract class AbstractConnection implements AutoCloseable {
     protected abstract void handleMessage(Object message);
 
     protected synchronized void sendMessage(Message message) {
-        if (closed)
-            return;
+        WriteCompletionHandler handler = new WriteCompletionHandler();
 
-        if (outcomeMsgQueue != null) {
-            outcomeMsgQueue.add(message);
-        }
-        else {
-            ByteBuffer byteBuffer = MessageReader.serializeMessages(Collections.singletonList(message));
+        try {
+            while (true) {
+                if (closed)
+                    return;
 
-            outcomeMsgQueue = new ArrayList<>();
-
-            socket.write(byteBuffer, byteBuffer, new CompletionHandler<Integer, ByteBuffer>() {
-                @Override
-                public void completed(Integer result, ByteBuffer attachment) {
-                    if (attachment.hasRemaining()) {
-                        socket.write(attachment, attachment, this);
-                        return;
-                    }
-
-                    synchronized (AbstractConnection.this) {
-                        if (closed)
-                            return;
-
+                if (outcomeMsgQueue != null) {
+                    if (outcomeMsgQueue.size() >= OUTCOME_BUFFER_SIZE) {
                         try {
-                            if (outcomeMsgQueue.isEmpty()) {
-                                outcomeMsgQueue = null;
-                            }
-                            else {
-                                ByteBuffer bb = MessageReader.serializeMessages(outcomeMsgQueue);
-                                outcomeMsgQueue.clear();
-                                socket.write(bb, bb, this);
-                            }
-                        } catch (Throwable e) {
-                            LOG.error("Failed to send message", e);
+                            wait();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeInterruptedException(e);
                         }
+                        continue;
                     }
+
+                    MessageReader.serializeMessages(outcomeMsgQueue, message);
+                    break;
                 }
 
-                @Override
-                public void failed(Throwable exc, ByteBuffer attachment) {
-                    synchronized (AbstractConnection.this) {
-                        if (closed)
-                            return;
+                OpenByteArrayOutputStream buff = new OpenByteArrayOutputStream();
+                MessageReader.serializeMessages(buff, message);
 
-                        LOG.error("Failed to send message", exc);
-                        close();
-                    }
-                }
-            });
+                outcomeMsgQueue = new OpenByteArrayOutputStream();
+
+                ByteBuffer byteBuffer = ByteBuffer.wrap(buff.getBuffer(), 0, buff.size());
+
+                socket.write(byteBuffer, byteBuffer, handler);
+                break;
+            }
+        } catch (IOException e) {
+            handler.failed(e, ByteBuffer.allocate(0));
         }
     }
 
@@ -142,4 +128,45 @@ public abstract class AbstractConnection implements AutoCloseable {
     }
 
 
+    private class WriteCompletionHandler implements java.nio.channels.CompletionHandler<Integer, ByteBuffer> {
+
+        @Override
+        public void completed(Integer result, ByteBuffer attachment) {
+            if (attachment.hasRemaining()) {
+                socket.write(attachment, attachment, this);
+                return;
+            }
+
+            synchronized (AbstractConnection.this) {
+                AbstractConnection.this.notifyAll();
+
+                if (closed)
+                    return;
+
+                try {
+                    if (outcomeMsgQueue.size() == 0) {
+                        outcomeMsgQueue = null;
+                    }
+                    else {
+                        ByteBuffer bb = ByteBuffer.wrap(outcomeMsgQueue.getBuffer(), 0, outcomeMsgQueue.size());
+                        outcomeMsgQueue = new OpenByteArrayOutputStream();
+                        socket.write(bb, bb, this);
+                    }
+                } catch (Throwable e) {
+                    LOG.error("Failed to send message", e);
+                }
+            }
+        }
+
+        @Override
+        public void failed(Throwable exc, ByteBuffer attachment) {
+            synchronized (AbstractConnection.this) {
+                if (closed)
+                    return;
+
+                LOG.error("Failed to send message", exc);
+                close();
+            }
+        }
+    }
 }

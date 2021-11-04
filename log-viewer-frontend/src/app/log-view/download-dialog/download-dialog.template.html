@@ -1,0 +1,48 @@
+<form ngNoForm (submit)="download()" action="rest/log-view/download" method="post">
+
+    <input name="filters" type="hidden" [value]="effectiveFiltersJson">
+
+    <div class="form-group">
+        <label for="fileName">File Name</label>
+        <input #fileNameElement class="form-control" id="fileName" name="fileName" [(ngModel)]="fileName">
+    </div>
+
+    <div class="file-list">
+        <table class="log-table">
+            <tr *ngFor="let l of logsSorted; let idx = index">
+                <td>
+                    <input name="cb-{{l.id}}" type="checkbox" [disabled]="!isValid(l)"
+                           [(ngModel)]="downloadFlag[l.id]" (ngModelChange)="synchronizeSelectedLogsCount()">
+                </td>
+
+                <td>
+                    <span *ngIf="showNodeName" [class.connection-problem]="vs.statuses[l.id]?.errorType === 'ConnectionProblem'">{{l.node}}</span>
+                </td>
+
+                <td class="path">
+                    <a href="log?path={{l.url}}">{{l.path}}</a>
+
+                    <input name="log" type="hidden" [value]="l.url" [disabled]="!downloadFlag[l.id]">
+                </td>
+
+                <td>
+                    <lv-file-status [status]="vs.statuses[l.id]" [showErrorMessages]="false"></lv-file-status>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="zip-selection">
+        <input type="checkbox" name="zip" [(ngModel)]="zip" id="zip" [disabled]="selectedLogsCount > 1">&nbsp;<label for="zip">compress to zip archive</label>
+    </div>
+
+    <div *ngIf="effectiveFilters.length > 0" class="filters-notification">
+        The filters will be applied to the downloaded log.
+    </div>
+
+    <div *ngIf="errorMsg != null" class="alert alert-danger download-error">
+        {{errorMsg}}
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="selectedLogsCount === 0 || !fileName">Download</button>
+</form>

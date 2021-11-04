@@ -1,0 +1,16 @@
+.log-table > tr:hover {
+  background-color: #e8ffff;
+}
+
+.log-table > tr > td {
+  padding: 2px 3px 2px 0;
+  white-space: nowrap;
+}
+
+.log-table > tr > td:nth-child(3) {
+  padding-left: 5px;
+}
+
+.connection-problem {
+  color: #922;
+}

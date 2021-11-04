@@ -1,7 +1,7 @@
 <table class="log-table">
     <tr *ngFor="let l of logs">
         <td>
-            <span *ngIf="showNodeName" [class.connection-problem]="statuses[l.id]?.errorType === 'ConnectionProblem'">{{l.node}}</span>
+            <span *ngIf="showNodeName" [class.connection-problem]="vs.statuses[l.id]?.errorType === 'ConnectionProblem'">{{l.node}}</span>
         </td>
 
         <td class="path">
@@ -9,7 +9,7 @@
         </td>
 
         <td>
-            <lv-file-status [status]="statuses[l.id]" [showErrorMessages]="false"></lv-file-status>
+            <lv-file-status [status]="vs.statuses[l.id]" [showErrorMessages]="false"></lv-file-status>
         </td>
     </tr>
 </table>

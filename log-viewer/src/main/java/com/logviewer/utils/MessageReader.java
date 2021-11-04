@@ -1,15 +1,16 @@
 package com.logviewer.utils;
 
+import com.logviewer.data2.net.server.Message;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 
 public class MessageReader {
 
-    private static final int MAX_MESSAGE_SIZE = 5*1024*1024;
+    public static final int MAX_MESSAGE_SIZE = 5*1024*1024;
 
     private final ByteBuffer countBuffer = ByteBuffer.allocate(4);
     private ByteBuffer buffer;
@@ -52,33 +53,23 @@ public class MessageReader {
         }
     }
 
-    public static ByteBuffer serializeMessages(Collection<?> messages) {
-        try {
-            OpenByteArrayOutputStream bOut = new OpenByteArrayOutputStream();
+    public static void serializeMessages(OpenByteArrayOutputStream bOut, Message message) throws IOException {
+        int start = bOut.size();
 
-            for (Object message : messages) {
-                int start = bOut.size();
+        bOut.write(0);
+        bOut.write(0);
+        bOut.write(0);
+        bOut.write(0);
 
-                bOut.write(0);
-                bOut.write(0);
-                bOut.write(0);
-                bOut.write(0);
-
-                try (ObjectOutputStream objOut = new ObjectOutputStream(bOut)) {
-                    objOut.writeObject(message);
-                }
-
-                int messageSize = bOut.size() - 4 - start;
-
-                if (messageSize > MAX_MESSAGE_SIZE)
-                    throw new IllegalArgumentException("Message too big: " + messageSize);
-
-                ByteBuffer.wrap(bOut.getBuffer(), 0, bOut.size()).putInt(start, messageSize);
-            }
-
-            return ByteBuffer.wrap(bOut.getBuffer(), 0, bOut.size());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        try (ObjectOutputStream objOut = new ObjectOutputStream(bOut)) {
+            objOut.writeObject(message);
         }
+
+        int messageSize = bOut.size() - 4 - start;
+
+        if (messageSize > MAX_MESSAGE_SIZE)
+            throw new IllegalArgumentException("Message too big: " + messageSize);
+
+        ByteBuffer.wrap(bOut.getBuffer(), 0, bOut.size()).putInt(start, messageSize);
     }
 }

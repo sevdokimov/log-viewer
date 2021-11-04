@@ -87,7 +87,7 @@ export class CommunicationService implements OnDestroy {
 }
 
 export class Command {
-    constructor(private methodName: string, private args?: {[key: string]: any}) {}
+    constructor(public methodName: string, public args?: {[key: string]: any}) {}
 }
 
 export interface BackendEventHandlerHolder {
@@ -95,7 +95,7 @@ export interface BackendEventHandlerHolder {
 }
 
 export function BackendEventHandler(eventName?: string): any {
-    return (target: Function, propertyName: string, descriptor: PropertyDescriptor) => {
+    return (target: Function, propertyName: string) => {
         Reflect.defineMetadata(EVENT_NAME_META_KEY, true, target, eventName || propertyName);
     };
 }

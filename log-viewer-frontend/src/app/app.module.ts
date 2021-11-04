@@ -37,6 +37,7 @@ import {LvTextFilterComponent} from '@app/log-view/top-filters/text-filter/text-
 import {AutosizeModule} from 'ngx-autosize';
 import {MainPageComponent} from '@app/main-page/main-page.component';
 import {SwitcherComponent} from '@app/switcher/switcher.component';
+import {DownloadDialogComponent} from "@app/log-view/download-dialog/download-dialog.component";
 
 export const appRoutes: Routes = [
     {
@@ -84,6 +85,7 @@ export const appRoutes: Routes = [
         LogViewComponent,
         LogListPanelComponent,
         EventDetailsComponent,
+        DownloadDialogComponent,
         FileStatusComponent,
         SwitcherComponent,
 

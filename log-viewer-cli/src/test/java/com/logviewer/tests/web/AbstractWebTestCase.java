@@ -57,6 +57,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public abstract class AbstractWebTestCase implements LogPage {
 
@@ -488,5 +489,23 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected static void setValue(@NonNull WebElement element, @NonNull String value) {
         driver.executeScript("arguments[0].value='" + value.replaceAll("['\\\\]", "\\\\$0").replace("\n", "\\n") + "';", element);
+    }
+
+    protected static WebElement assertDisabled(By element) {
+        return assertDisabled(driver.findElement(element));
+    }
+
+    protected static WebElement assertDisabled(WebElement element) {
+        assertEquals("true", element.getAttribute("disabled"));
+        return element;
+    }
+
+    protected static WebElement assertEnabled(WebElement element) {
+        assertNull(element.getAttribute("disabled"));
+        return element;
+    }
+
+    protected static WebElement assertEnabled(By element) {
+        return assertEnabled(driver.findElement(element));
     }
 }

@@ -1,0 +1,20 @@
+@import "src/css/variables";
+
+.file-list {
+  max-height: 300px;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+
+.filters-notification {
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+
+.zip-selection {
+  padding-bottom: 10px;
+}
+
+.download-error {
+  margin-bottom: 10px;
+}
