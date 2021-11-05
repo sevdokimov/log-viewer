@@ -144,15 +144,13 @@ public class LvDefaultFormatDetector {
             return range;
 
         int start = range.getStart();
-        while (true) {
+        do {
             if (start < 0)
                 return range;
 
             start--;
 
-            if (line.charAt(start) != ' ')
-                break;
-        }
+        } while (line.charAt(start) == ' ');
 
         if (line.charAt(start) != '[')
             return range;
@@ -210,10 +208,8 @@ public class LvDefaultFormatDetector {
         sb.append('z');
     }
 
-    static String detectLog4jFormatOfLine(String line) {
-        if (SPRING_PATTERN.matcher(line).matches())
-            return SPRING_LOG4J_PATTERN;
-
+    @Nullable
+    private static Pair<String, TextRange> findDate(@NonNull String line) {
         String dateField;
         TextRange datePos;
 
@@ -221,7 +217,7 @@ public class LvDefaultFormatDetector {
         if (matcher.find()) {
             StringBuilder sb = new StringBuilder();
             String dateSeparator = matcher.group(1);
-            
+
             sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd");
 
             String timeSeparator = matcher.group("timeSep");
@@ -281,10 +277,6 @@ public class LvDefaultFormatDetector {
 
                         dateField = sb.toString();
                     } else {
-                        if (TIME_WITHOUT_DATE.matcher(line).find() || LEVEL.matcher(line).find()) {
-                            return UNKNOWN_FORMAT;
-                        }
-
                         return null;
                     }
                 }
@@ -298,27 +290,35 @@ public class LvDefaultFormatDetector {
             datePos = new TextRange(datePos.getStart() - 1, datePos.getEnd() + 1);
         }
 
-        matcher = LEVEL.matcher(line);
+        return Pair.of(dateField, datePos);
+    }
+
+    static String detectLog4jFormatOfLine(@NonNull String line) {
+        if (SPRING_PATTERN.matcher(line).matches())
+            return SPRING_LOG4J_PATTERN;
+
+        Pair<String, TextRange> datePair = findDate(line);
+        if (datePair == null) {
+            if (TIME_WITHOUT_DATE.matcher(line).find() || LEVEL.matcher(line).find()) {
+                return UNKNOWN_FORMAT;
+            }
+
+            return null;
+        }
+
+        TextRange datePos = datePair.getSecond();
+        String datePattern = datePair.getFirst();
 
         if (datePos.getStart() > 0) {
             // expected format like "%p %d"
-            matcher.region(0, datePos.getStart());
-
-            if (!matcher.find())
+            Pair<String, TextRange> levelPair = findLevel(line, new TextRange(0, datePos.getStart()));
+            if (levelPair == null)
                 return UNKNOWN_FORMAT;
 
-            TextRange levelPos = new TextRange(matcher.start(), matcher.end());
-            String level = "%level";
-            TextRange ra = expandRange(line, levelPos);
-            if (!ra.equals(levelPos)) {
-                level = '[' + level + ']';
-                levelPos = ra;
-            }
-
-            if (levelPos.getStart() != 0)
+            if (levelPair.getSecond().getStart() != 0)
                 return UNKNOWN_FORMAT;
 
-            String separator = getSeparator(line, levelPos.getEnd(), datePos.getStart());
+            String separator = getSeparator(line, levelPair.getSecond().getEnd(), datePos.getStart());
             if (separator == null)
                 return UNKNOWN_FORMAT;
 
@@ -326,44 +326,13 @@ public class LvDefaultFormatDetector {
             if (messageSeparator == null)
                 return UNKNOWN_FORMAT;
 
-            return level + separator + dateField + messageSeparator + "%m%n";
+            return levelPair.getFirst() + separator + datePattern + messageSeparator + "%m%n";
         }
 
         // expected format "%d %p" or "%d [%t] %p"
-        matcher.region(datePos.getEnd(), line.length());
-
-        if (matcher.find()) {
-            TextRange levelPos = new TextRange(matcher.start(), matcher.end());
-            String level = "%level";
-            TextRange ra = expandRange(line, levelPos);
-            if (!ra.equals(levelPos)) {
-                level = '[' + level + ']';
-                levelPos = ra;
-            }
-
-            String messageSeparator = getMessageSeparator(line, levelPos.getEnd());
-            if (messageSeparator == null)
-                return UNKNOWN_FORMAT;
-
-            String separator = getSeparator(line, datePos.getEnd(), levelPos.getStart());
-            if (separator != null) {
-                return dateField + separator + level + messageSeparator + "%m%n";
-            }
-
-            matcher = THREAD_ITEM.matcher(line);
-            matcher.region(datePos.getEnd(), levelPos.getStart());
-            if (!matcher.matches())
-                return UNKNOWN_FORMAT;
-
-            String separator1 = getSeparator(line, datePos.getEnd(), matcher.start(1));
-            if (separator1 == null)
-                return UNKNOWN_FORMAT;
-            String separator2 = getSeparator(line, matcher.end(1), levelPos.getStart());
-            if (separator2 == null)
-                return UNKNOWN_FORMAT;
-
-            return dateField + separator1 + "[%t]" + separator2 + level + messageSeparator + "%m%n";
-        }
+        String dateThreadLevelFormat = formatDateThreadLevel(line, datePos, datePattern);
+        if (dateThreadLevelFormat != null)
+            return dateThreadLevelFormat;
 
         // Expected format "%d %msg%n" or "%d: %msg%n"
         String messageSeparator = getMessageSeparator(line, datePos.getEnd());
@@ -375,7 +344,56 @@ public class LvDefaultFormatDetector {
             }
         }
 
-        return dateField + messageSeparator + "%m%n";
+        return datePattern + messageSeparator + "%m%n";
+    }
+
+    /**
+     * Tries to detect format either "%d %p" or "%d [%t] %p"
+     */
+    private static String formatDateThreadLevel(String line, TextRange datePos, String datePattern) {
+        Pair<String, TextRange> levelPair = findLevel(line, new TextRange(datePos.getEnd(), line.length()));
+        if (levelPair == null)
+            return null;
+
+        TextRange levelPos = levelPair.getSecond();
+        
+        String messageSeparator = getMessageSeparator(line, levelPos.getEnd());
+        if (messageSeparator == null)
+            return null;
+
+        String separator = getSeparator(line, datePos.getEnd(), levelPos.getStart());
+        if (separator != null)
+            return datePattern + separator + levelPair.getFirst() + messageSeparator + "%m%n";
+
+        Matcher matcher = THREAD_ITEM.matcher(line);
+        matcher.region(datePos.getEnd(), levelPos.getStart());
+        if (!matcher.matches())
+            return null;
+
+        String separator1 = getSeparator(line, datePos.getEnd(), matcher.start(1));
+        if (separator1 == null)
+            return null;
+        String separator2 = getSeparator(line, matcher.end(1), levelPos.getStart());
+        if (separator2 == null)
+            return null;
+
+        return datePattern + separator1 + "[%t]" + separator2 + levelPair.getFirst() + messageSeparator + "%m%n";
+    }
+
+    private static Pair<String, TextRange> findLevel(@NonNull String line, @NonNull TextRange range) {
+        Matcher matcher = LEVEL.matcher(line);
+        matcher.region(range.getStart(), range.getEnd());
+
+        if (!matcher.find())
+            return null;
+
+        TextRange levelPos = new TextRange(matcher.start(), matcher.end());
+        String level = "%level";
+        TextRange ra = expandRange(line, levelPos);
+        if (!ra.equals(levelPos))
+            level = '[' + level + ']';
+
+        return Pair.of(level, ra);
     }
 
     /**

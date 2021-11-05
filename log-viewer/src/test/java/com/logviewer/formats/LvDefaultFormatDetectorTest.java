@@ -44,10 +44,11 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
 
         checkLine("[2017-11-23T14:33:24,328][INFO ][o.e.c.m.MetaDataMappingService] [G1WVvSO] [behavox_tes] create_mapping", "[%d{yyyy-MM-dd'T'HH:mm:ss,SSS}][%level]%m%n");
 
-        checkLine("[2020-01-01 18:11:00,000]   [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
-        checkLine("[2020-01-01 18:11:00,000] [WARN]:ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("[2020-01-01 18:11:00,000]   [WARN] ddddd", "[%d{yyyy-MM-dd HH:mm:ss,SSS}] %m%n");
+        checkLine("[2020-01-01 18:11:00,000] [WARN]:ddddd", "[%d{yyyy-MM-dd HH:mm:ss,SSS}] %m%n");
         checkLine(" [2020-01-01 18:11:00,000] WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
-        checkLine("2020-01-01 18:11:00,000 z WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("2020-01-01 18:11:00,000 z WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss,SSS} %m%n");
+        checkLine("[2021-10-20_15:40:15.032] [fullhouse,,,] [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA", "[%d{yyyy-MM-dd_HH:mm:ss.SSS}] %m%n");
     }
 
     @Test
@@ -61,8 +62,8 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
 
         checkLine("[2020-Sep-01 18:11:00,000] [my-thread] [WARN] ddddd", "[%d{yyyy-MMM-dd HH:mm:ss,SSS}] [%t] [%level] %m%n");
 
-        checkLine("[2020-01-01 18:11:00,000] my-thread [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
-        checkLine("2020-01-01 18:11:00,000 [my-thread]     [WARN] ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("[2020-01-01 18:11:00,000] my-thread [WARN] ddddd", "[%d{yyyy-MM-dd HH:mm:ss,SSS}] %m%n");
+        checkLine("2020-01-01 18:11:00,000 [my-thread]     [WARN] ddddd", "%d{yyyy-MM-dd HH:mm:ss,SSS} %m%n");
     }
 
     @Test
