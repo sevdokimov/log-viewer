@@ -185,7 +185,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
             fieldPositions[i] = in.readInt();
         }
 
-        fieldNames = new HashMap<>();
+        fieldNames = new LinkedHashMap<>();
         for (int i = 0; i < fieldCount; i++) {
             fieldNames.put(in.readUTF(), i);
         }
