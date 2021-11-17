@@ -21,7 +21,7 @@ machines, all machines must have run LogViewer.
 1. Detecting the format of the log file.
 1. A permanent link to a log position. A user can copy a link to the current position and send it to another user.
 
-[Demo video](https://www.youtube.com/watch?v=zY8b9ACenQo)
+[Demo video](https://www.youtube.com/watch?v=OE7nAiNX07Q)
 
 ### Quick start
 
