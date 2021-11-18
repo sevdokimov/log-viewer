@@ -1,15 +1,21 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
-import {OpenEvent} from '@app/log-navigator/log-navigator.component';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {LogNavigatorComponent, OpenEvent} from '@app/log-navigator/log-navigator.component';
+import {LvUtils} from "@app/utils/utils";
 
 @Component({
     selector: 'lv-main-page',
     templateUrl: './main-page.template.html',
     styleUrls: ['./main-page.style.scss'],
 })
-export class MainPageComponent {
+export class MainPageComponent implements OnInit {
 
-    constructor(private router: Router) {
+    @ViewChild('navigator', {read: LogNavigatorComponent, static: true})
+    private navigatorComponent: LogNavigatorComponent;
+
+    initialPath: string;
+
+    constructor(private router: Router, private route: ActivatedRoute) {
 
     }
 
@@ -23,4 +29,17 @@ export class MainPageComponent {
         }
     }
 
+    ngOnInit(): void {
+        this.initialPath = LvUtils.lastParam(this.route.snapshot.queryParams.dir);
+    }
+
+    directoryChanged(dir: string) {
+        let queryParams: any = {};
+
+        if (dir != this.navigatorComponent.defaultDir) {
+            queryParams.dir = dir;
+        }
+        
+        this.router.navigate([], {queryParams});
+    }
 }

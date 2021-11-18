@@ -50,7 +50,7 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
 
     @NonNull
     @Override
-    public List<LvFsItem> getChildren(@Nullable Path path) throws SecurityException {
+    public List<LvFsItem> getChildren(@Nullable Path path) throws SecurityException, IOException {
         if (path != null && !path.isAbsolute())
             throw new SecurityException("path must be absolute");
 
@@ -78,8 +78,6 @@ public class LvFileNavigationManagerImpl implements LvFileNavigationManager {
                     .collect(Collectors.toList());
         } catch (AccessDeniedException e) {
             throw new SecurityException("Not enough permissions to access file or directory");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

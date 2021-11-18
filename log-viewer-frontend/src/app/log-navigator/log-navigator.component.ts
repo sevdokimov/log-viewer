@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {RequestState} from '../utils/request-state';
 import {FavoritesService, RestFileState} from '../services/favorites.service';
 import {HttpClient} from '@angular/common/http';
@@ -18,7 +18,11 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
     @ViewChild('pathInput', {static: false})
     pathInput: ElementRef;
 
+    @Input() initialDir: string;
+
     @Output() openFile = new EventEmitter<OpenEvent>();
+    
+    @Output() changeDirectory = new EventEmitter<string>();
 
     initialLoading: RequestState = new RequestState(true);
 
@@ -45,6 +49,8 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
 
     dirContentLoading: RequestState = new RequestState(true);
 
+    defaultDir: string;
+
     constructor(
         private http: HttpClient,
         public fwService: FavoritesService,
@@ -57,25 +63,33 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        this.initialLoading.process(this.http.get<RestInitState>('rest/navigator/initState'), res => {
-            this.init = true;
+        let params: any = {}
+        if (this.initialDir) {
+            params.initialDir = this.initialDir;
+        }
 
-            this.favorites = res.favorites;
-            this.favoritesEditable = res.favoritesEditable;
-            this.showFileTree = res.showFileTree;
+        this.initialLoading.process(this.http.get<RestInitState>('rest/navigator/initState', {params}),
+            res => {
+                this.init = true;
 
-            if (res.showFileTree) {
-                this.setCurrentDir(res.initPath);
-                this.setDirContent(res.initDirContent);
-            }
+                this.favorites = res.favorites;
+                this.favoritesEditable = res.favoritesEditable;
+                this.showFileTree = res.showFileTree;
+                this.defaultDir = res.defaultDir;
 
-            this.fwService.editable = this.favoritesEditable;
-        });
+                if (res.showFileTree) {
+                    this.setCurrentDir(res.initDir);
+                    this.setDirContent(res.initDirContent);
+                }
+
+                this.fwService.editable = this.favoritesEditable;
+            });
     }
 
     private setCurrentDir(dir: string) {
         this.currentDir = dir;
         this.currentDirItems = LogNavigatorComponent.parsePath(dir);
+        this.changeDirectory.emit(dir)
     }
 
     cancelEditing() {
@@ -449,7 +463,9 @@ interface RestInitState {
     favoritesEditable: boolean;
 
     showFileTree: boolean;
-    initPath?: string;
+    initDir?: string; // Initial directory for the file navigation dialog. May be "defaultPath" or a value from URL
+
+    defaultDir?: string; // Default directory defined in the configuration
 
     initDirContent: DirContent;
 }

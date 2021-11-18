@@ -474,6 +474,34 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
         assertThat(driver.findElement(By.cssSelector(".dir-content-panel .alert-danger")).getText().trim(), containsString("not accessible"));
     }
 
+    @Test
+    public void saveStateInUrl() {
+        openPage();
+
+        findFile("aaa"); // wait for initialization
+
+        assertThat(driver.getCurrentUrl(), not(containsString("dir="))); // don't add "dir=" param when the default directory is opened
+
+        new Actions(driver).doubleClick(findFile("aaa")).perform();
+
+        waitFor(() -> fileNames().equals(Arrays.asList("a.log", "a2.log")));
+
+        assertThat(driver.getCurrentUrl(), containsString("dir="));
+        assertThat(driver.getCurrentUrl(), containsString("%2Faaa"));
+
+        driver.navigate().refresh();
+
+        waitFor(() -> fileNames().equals(Arrays.asList("a.log", "a2.log")));
+
+        assertThat(driver.getCurrentUrl(), containsString("dir="));
+
+        new Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
+
+        findFile("aaa");
+
+        assertThat(driver.getCurrentUrl(), not(containsString("dir="))); // don't add "dir=" param when the default directory is opened
+    }
+
     private WebElement checkSelectedFile(String expectedSelectedFile) {
         return driver.findElement(By.xpath("//table[contains(@class,'file-list')]//tr[contains(@class, 'selected')]/td[@class='name'][normalize-space(.)='" + expectedSelectedFile + "']"));
     }

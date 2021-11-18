@@ -1,3 +1,5 @@
 <div class="container">
-    <lv-navigator (openFile)="open($event)"></lv-navigator>
+    <lv-navigator #navigator (openFile)="open($event)"
+                  (changeDirectory)="directoryChanged($event)"
+                  [initialDir]="initialPath"></lv-navigator>
 </div>

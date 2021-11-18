@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
@@ -42,9 +43,21 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
 
         res.showFileTree = isFileTreeAllowed();
         if (res.showFileTree) {
-            Path initPath = fileManager.getDefaultDirectory();
-            res.initPath = initPath == null ? null : initPath.toString();
-            res.initDirContent = getDirContent(initPath);
+            Path defaultDirectoryFromConfig = fileManager.getDefaultDirectory();
+            res.defaultDir = defaultDirectoryFromConfig == null ? null : defaultDirectoryFromConfig.toString();
+
+            String initialDir = getRequest().getParameter("initialDir");
+
+            Path initDir;
+
+            if (StringUtils.isEmpty(initialDir)) {
+                initDir = defaultDirectoryFromConfig;
+            } else {
+                initDir = Paths.get(initialDir);
+            }
+            
+            res.initDir = initDir == null ? null : initDir.toString();
+            res.initDirContent = getDirContent(initDir);
         }
 
         return res;
@@ -66,6 +79,8 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
             return new RestContent(createFileItems(items));
         } catch (SecurityException e) {
             return new RestContent(e.getMessage());
+        } catch (IOException e) {
+            return new RestContent("Failed to load file list: " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 
@@ -169,7 +184,9 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
 
         private boolean showFileTree;
 
-        private String initPath;
+        private String initDir; // Initial directory for the file navigation dialog. May be "defaultPath" or a value from URL
+
+        private String defaultDir; // Default derictory defined in the configuration
 
         // {error: string, content: FsItem[]}
         private RestContent initDirContent;
