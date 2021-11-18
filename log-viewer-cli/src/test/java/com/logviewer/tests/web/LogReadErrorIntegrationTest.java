@@ -52,6 +52,14 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void logNotFoundWrongPath() {
+        openUrl("log", "path", "/sdfdfs/sdfsdfsdf/sdfsdfd/notExistingLog");
+
+        WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
+        assert errorMsg.getText().contains("Log file does not exist");
+    }
+
+    @Test
     public void logNotFound2() {
         setSimpleConfig();
 

@@ -33,6 +33,7 @@ public interface LogView {
                                     @NonNull Consumer<SearchResult> listener);
 
 
+    @Nullable
     Destroyer addChangeListener(Consumer<FileAttributes> changeListener);
 
     CompletableFuture<Throwable> tryRead();

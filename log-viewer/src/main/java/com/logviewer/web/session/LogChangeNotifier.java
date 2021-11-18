@@ -8,10 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class LogChangeNotifier implements AutoCloseable {
@@ -34,6 +31,7 @@ public class LogChangeNotifier implements AutoCloseable {
         this.logs = logs;
 
         watcherCloser = Stream.of(logs).map(log -> log.addChangeListener(attr -> logChanged(log, attr)))
+                .filter(Objects::nonNull)
                 .toArray(Destroyer[]::new);
         this.sender = sender;
 
