@@ -237,6 +237,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (this.state !== State.STATE_OPENED || this.modalWindow != null) { return; }
 
         if (this.recRenderer.handleClick(event)) {
+            this.loadRecordsIfNeededBottom()
             return;
         }
 

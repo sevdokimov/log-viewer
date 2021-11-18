@@ -7,7 +7,9 @@ import com.logviewer.mocks.TestFormatRecognizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -111,6 +113,31 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
         WebElement npe1 = Iterables.getOnlyElement(driver.findElementsByClassName("ex-wrapper"));
         assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
         assertEquals(8, npe1.findElements(By.className("ex-stacktrace-line")).size());
+    }
+
+    @Test
+    public void loadBottomAfterCollapse() {
+        openLog("rendering/load-bottom-after-collapse.log");
+        setHeight(8);
+        driver.navigate().refresh();
+
+        checkLastRecord("2017-09-25_12:38:59.686 [http-bio-8088-exec-5] zzz");
+
+        new Actions(driver).sendKeys(Keys.HOME).perform();
+
+        driver.findElement(By.cssSelector(".coll-expander")).click();
+
+        for (int i = 0; i < 8; i++) {
+            new Actions(driver).sendKeys(Keys.DOWN).perform();
+        }
+
+        for (int i = 0; i < 8; i++) {
+            new Actions(driver).sendKeys(Keys.UP).perform();
+        }
+
+        driver.findElement(By.cssSelector(".coll-collapser")).click();
+
+        checkLastRecord("2017-09-25_12:38:59.686 [http-bio-8088-exec-5] zzz");
     }
 
 }
