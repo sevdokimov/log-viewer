@@ -39,7 +39,7 @@ public class IncorrectTimestamp extends AbstractWebTestCase {
         }
 
         // Check filter.
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("2012.01.01 00:50");
 
         driver.findElementById("findPrevArrow").click();

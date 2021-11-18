@@ -67,6 +67,40 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
     }
 
     @Test
+    public void openPermalinkWithHideUnmatched() throws IOException {
+        Path tmpLog = tmpDir.resolve("test.log");
+        Files.write(tmpLog, IntStream.rangeClosed(1, 100).mapToObj(i -> i % 2 == 0 ? "a" : "b")
+                .collect(Collectors.joining("\n", "aaa-start\n", "\nend"))
+                .getBytes());
+
+        openLog(tmpLog);
+        setHeight(5);
+        driver.navigate().refresh();
+
+        WebElement filterInput = FilterPanel.INPUT.findElement(driver);
+        filterInput.sendKeys("a");
+
+        WebElement hideUnmatched = driver.findElement(FilterPanel.HIDE_UNMATCHED);
+        hideUnmatched.click();
+
+        checkLastRecord("a");
+
+        assert getVisibleRecords().matches("[\na]+");
+
+        String link0 = copyPermalink();
+
+        driver.get(link0);
+
+        checkLastRecord("a");
+        assert getVisibleRecords().matches("[\na]+");
+
+        new Actions(driver).sendKeys(Keys.HOME).perform();
+
+        recordByText("aaa-start");
+        assert getVisibleRecords().matches("aaa-start[\na]+");
+    }
+
+    @Test
     public void jsonFilterInUrl() {
         ThreadFilterTest.setFormat();
 
@@ -124,10 +158,10 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
     public void nonAppliedSearchPattern() {
         openLog("search.log");
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("2012.01.01 00:03");
 
-        WebElement hideUnmatched = driver.findElementById("hide-unmatched");
+        WebElement hideUnmatched = driver.findElement(FilterPanel.HIDE_UNMATCHED);
         hideUnmatched.click();
 
         assertEquals("[2012.01.01 00:03][      aaaa] sss 3 3", getVisibleRecords());
@@ -143,7 +177,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         driver.get(link);
 
         driver.findElement(By.cssSelector("#applySearchFilterBlock .tooliconDisabled"));
-        filterInput = driver.findElementById("filterInput");
+        filterInput = driver.findElement(FilterPanel.INPUT);
         assertEquals("2012.01.01 00:03", filterInput.getAttribute("value"));
 
         assertEquals("[2012.01.01 00:03][      aaaa] sss 3 3", getVisibleRecords());
@@ -157,7 +191,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         openLog("search.log");
         setHeight(5);
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("2012.01.01 00:03");
         new Actions(driver).keyDown(Keys.SHIFT).sendKeys(filterInput, Keys.F3).keyUp(Keys.SHIFT).perform();
 

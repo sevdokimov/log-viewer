@@ -1332,6 +1332,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             return;
         }
 
+        let m = event.data.records;
+
         this.searchPattern = event.searchPattern;
         this.searchInputState = event.searchPattern;
         this.searchHideUnmatched = event.hideUnmatched;
@@ -1340,12 +1342,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             $('#filterInput').val(event.searchPattern.s);
             this.searchMatchCase = event.searchPattern.matchCase;
             this.searchRegex = event.searchPattern.regex;
-        }
 
-        let m = event.data.records;
-
-        if (this.searchPattern) {
             SearchUtils.doSimpleSearch(m, this.searchPattern);
+
+            if (event.hideUnmatched) {
+                this.effectiveFilters = this.loadEffectiveFilters()
+            }
         }
 
         this.vs.selectedLine = event.selectedLine;

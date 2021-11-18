@@ -54,7 +54,7 @@ public class LogGrowTest extends AbstractWebTestCase {
 
         notExist(By.xpath("//div[@id='records']/div[@class='record'][text()='40']"));
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("fzdfsdfsdf", Keys.F3);
 
         checkLastRecord("40");

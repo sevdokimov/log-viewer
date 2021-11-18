@@ -24,7 +24,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         List<WebElement> records = recordsParent.findElements(By.cssSelector(".record"));
         assertEquals(12, records.size());
 
-        driver.findElement(By.id("filterInput")).click();
+        driver.findElement(FilterPanel.INPUT).click();
 
         WebElement filterInput = driver.findElement(By.cssSelector("#filterInput:focus"));
 
@@ -64,7 +64,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         setHeight(5);
         openLog("search.log");
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         WebElement prevArrow = driver.findElementById("findPrevArrow");
         WebElement nextArrow = driver.findElementById("findNextArrow");
 
@@ -94,7 +94,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
     public void searchFlags() throws InterruptedException {
         openLog("search.log");
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys(":{5,}");
 
         Thread.sleep(200);
@@ -148,7 +148,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         setHeight(5);
         driver.navigate().refresh();
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys(" a]");
         shiftF3(filterInput);
 
@@ -205,13 +205,13 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
     public void hideUnmatchedEnableDisable() {
         openLog("search.log");
 
-        WebElement filterInput = driver.findElementById("filterInput");
+        WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("::");  // ::
 
         driver.findElementById("findPrevArrow");
         driver.findElementById("findNextArrow");
 
-        WebElement hideUnmatched = driver.findElementById("hide-unmatched");
+        WebElement hideUnmatched = driver.findElement(FilterPanel.HIDE_UNMATCHED);
 
         Point labelLocation = hideUnmatched.getLocation();
 
@@ -260,7 +260,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
     public void searchFieldSize() throws InterruptedException {
         openLog("search.log");
 
-        WebElement filterDiv = driver.findElementById("filterInput").findElement(By.xpath("./.."));
+        WebElement filterDiv = driver.findElement(FilterPanel.INPUT).findElement(By.xpath("./.."));
 
         Dimension size = filterDiv.getSize();
 
