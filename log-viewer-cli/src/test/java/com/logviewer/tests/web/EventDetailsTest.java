@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class EventDetailsTest extends AbstractWebTestCase {
@@ -57,6 +59,8 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         assertEquals(Arrays.asList("date", "thread", "level", "logger", "msg"),
                 fieldLabels.stream().map(WebElement::getText).collect(Collectors.toList()));
+
+        assertThat(driver.findElement(By.cssSelector(".prop-list .log-format")).getText(), is("logback: %d{yyyy-MM-dd_HH:mm:ss.SSS} [%t] %level %logger - %msg%n"));
     }
 
 }

@@ -15,6 +15,8 @@ public class RestLog {
     private final boolean connected;
     private final boolean hasFullDate;
 
+    private final String format;
+
     private final List<RestField> fields;
 
     public RestLog(LogView log) {
@@ -24,6 +26,7 @@ public class RestLog {
         connected = log.isConnected();
         url = log.getPath().getNode() == null ? log.getPath().getFile() : log.getPath().getFile() + '@' + log.getPath().getNode().toString();
         fields = Stream.of(log.getFormat().getFields()).map(RestField::new).collect(Collectors.toList());
+        format = log.getFormat().getHumanReadableString();
         hasFullDate = log.getFormat().hasFullDate();
     }
 

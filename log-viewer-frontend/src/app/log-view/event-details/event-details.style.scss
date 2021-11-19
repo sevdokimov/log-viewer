@@ -21,3 +21,8 @@
 .field-value {
   @include log-text;
 }
+
+.log-format {
+  font-size: 12px;
+  font-family: monospace;
+}

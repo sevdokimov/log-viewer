@@ -8,6 +8,8 @@ export interface LogFile {
     connected: boolean;
     hasFullDate: boolean;
 
+    format: string;
+
     fields: FieldDescr[];
 }
 

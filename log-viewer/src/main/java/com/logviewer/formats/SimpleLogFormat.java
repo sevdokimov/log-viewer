@@ -46,7 +46,7 @@ public class SimpleLogFormat implements LogFormat {
 
     @Override
     public String getHumanReadableString() {
-        return "simple format: each line is event";
+        return "simple format: each line is an event";
     }
 
     public void setCharset(Charset charset) {
