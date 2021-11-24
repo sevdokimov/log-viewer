@@ -227,6 +227,16 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("INFO 2018-Oct-31 23:59:59,999999Z ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss,SSSSSSz} %m%n");
         checkLine("INFO 2018-Oct-31 23:59:59,999999222Z ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss,SSSSSSSSSz} %m%n");
         checkLine("INFO 2018-Oct-31 23:59:59,9999 ddddd", "%level %d{yyyy-MMM-dd HH:mm:ss,SSSS} %m%n");
+
+        checkLine("[18.11.19 18:26:22.160] 00001720 Receive: ParsedData", "[%d{dd.MM.yy HH:mm:ss.SSS}] %m%n");
+        checkLine("[18.11.19_18:26:22,160] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[18.11.22_18:26:22,160] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[31.01.22_18:26:22,160] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[01.01.22_00:00:00,000] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[31.12.22_23:59:59,999] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[21.10.02_23:39:39,999] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
+        checkLine("[21.10.02_23:39:39,999 +0000] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS z}] %m%n");
+        checkLine("[21.13.02_23:39:39,999] 00001720 Receive: ParsedData", null);
     }
 
     private Log4jLogFormat detect(String resourceName) {

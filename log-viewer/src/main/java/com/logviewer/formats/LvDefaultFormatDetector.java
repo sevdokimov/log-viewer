@@ -33,13 +33,16 @@ public class LvDefaultFormatDetector {
 
     private static final String MS_TZ = MS_PATTERN + TZ_PATTERN;
 
+    // 2020-05-29 18:50:12,333
     private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[012]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-
+    // 20200529 185012
     private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[012]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b");
-
+    // 2020 Jul 21 15:04:01
     private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-
+    // 2020-Jul-21 15:04:01
     private static final Pattern DATE_LONG_2 = Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
+    // 18.11.19 18:26:22.160
+    private static final Pattern DATE_UK = Pattern.compile("(?:[012]\\d|3[10])\\.(?:1[012]|0\\d)\\.[012]\\d(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
 
     private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\b");
 
@@ -277,7 +280,22 @@ public class LvDefaultFormatDetector {
 
                         dateField = sb.toString();
                     } else {
-                        return null;
+                        matcher = DATE_UK.matcher(line);
+                        if (matcher.find()) {
+                            String dtSep = matcher.group("dtSep");
+
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("%d{dd.MM.yy").append(dtSep).append("HH:mm:ss");
+
+                            appendMsIfPresent(sb, matcher);
+                            appendTimeZoneIfPresent(sb, matcher);
+
+                            sb.append('}');
+
+                            dateField = sb.toString();
+                        } else {
+                            return null;
+                        }
                     }
                 }
             }
