@@ -52,3 +52,5 @@ The idea to filter logs without indexing sounds questionable. If the filter sett
 the system has to scan the entire file to make sure that no visible events exist. Also, each search can perform a full scan of the log.
 Actually, the full scan is not a big problem, the parser works fast enough. Parsing 1Gb file takes 3,5 sec on my machine. It is viable.<br>
 Setting a date range filter can speed up the tool a lot because only events from the specified date range will be considered.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](sergey.evdokimov85@gmail.com)
