@@ -300,7 +300,7 @@ public class LogViewerServlet extends HttpServlet {
         if (indexHtml == null) {
             URL indexHtmlUrl = getClass().getResource("/log-viewer-web/index.html");
             if (indexHtmlUrl == null) {
-                resp.sendError(500, "index.html not found");
+                resp.sendError(500, "'log-viewer-web/index.html' resource not found. It must be located in 'log-viewer-frontend-$version.jar'");
                 return;
             }
 
