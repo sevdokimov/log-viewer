@@ -17,7 +17,7 @@
     <url>https://github.com/sevdokimov/log-viewer</url>
 
     <properties>
-        <jetty.version>9.4.43.v20210629</jetty.version>
+        <jetty.version>9.4.44.v20210927</jetty.version>
         <release.dir>${project.build.directory}/build-${project.version}</release.dir>
     </properties>
 
