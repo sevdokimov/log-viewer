@@ -27,7 +27,7 @@ machines, all machines must have run LogViewer.
 
 - Download LogViewer from [Github releases](https://github.com/sevdokimov/log-viewer/releases) and unpack it to any folder.
   Make sure the machine has installed Java 8 or later.
-- Run `log-viewer-1.0.1/logviewer.sh`
+- Run `log-viewer-1.0.3/logviewer.sh`
 - Open `http://localhost:8111`. There will be a file chooser to select a log from the file system.
 
 User can open a log file using the file chooser on `http://localhost:8111` or by a direct link: _h<span>t</span>tp://localhost:8111/log?***log=$pathToLogFile***_. For opening several log files in one view, 
@@ -39,7 +39,7 @@ See [embedding to Spring Boot application](_docs/embadded-spring-boot.md) or [em
 
 ### Configuration
 
-Configuration is located in `log-viewer-1.0.1/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
+Configuration is located in `log-viewer-1.0.3/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
 format. 
 
 The most important configuration is a list of available files. Also, you can specify the log format if the automatic format 
