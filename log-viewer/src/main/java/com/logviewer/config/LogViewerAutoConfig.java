@@ -17,8 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public class LogViewerAutoConfig {
@@ -59,9 +63,13 @@ public class LogViewerAutoConfig {
     }
 
     @Bean
-    public LvFileAccessManagerImpl lvLogManager() {
+    public LvFileAccessManagerImpl lvLogManager(@Value("${log-viewer.accessible-files.pattern:}") List<String> accessiblePatterns) {
         LvFileAccessManagerImpl res = new LvFileAccessManagerImpl(null);
-        res.setVisibleFiles(new ArrayList<>(getLogFormats().keySet()));
+
+        Stream<PathPattern> files = getLogFormats().keySet().stream().map(PathPattern::file);
+        Stream<PathPattern> dirs = accessiblePatterns.stream().map(PathPattern::fromPattern);
+
+        res.setPaths(Stream.concat(files, dirs).collect(Collectors.toList()));
         return res;
     }
 
