@@ -46,11 +46,6 @@ public class LvLayoutRegexNode extends LvLayoutCustomTypeNode implements LvLayou
     }
 
     @Override
-    public boolean removeSpacesBefore() {
-        return false;
-    }
-
-    @Override
     public int search(String s, int offset, int end) {
         Matcher matcher = getMatcher(s);
 

@@ -36,11 +36,6 @@ public class LvLayoutHexNode extends LvLayoutCustomTypeNode {
     }
 
     @Override
-    public boolean removeSpacesBefore() {
-        return true;
-    }
-
-    @Override
     public LvLayoutHexNode clone() {
         return new LvLayoutHexNode(getFieldName(), getFieldType(), minLength);
     }

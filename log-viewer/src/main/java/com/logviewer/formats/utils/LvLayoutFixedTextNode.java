@@ -20,16 +20,11 @@ public class LvLayoutFixedTextNode extends LvLayoutCustomTypeNode implements LvL
     @Override
     public int parse(String s, int offset, int end) {
         for (String value : values) {
-            if (s.startsWith(value, offset))
+            if (offset + value.length() <= end && s.startsWith(value, offset))
                 return offset + value.length();
         }
 
         return PARSE_FAILED;
-    }
-
-    @Override
-    public boolean removeSpacesBefore() {
-        return true;
     }
 
     @Override

@@ -68,11 +68,6 @@ public class LvLayoutClassNode implements LvLayoutNode {
     }
 
     @Override
-    public boolean removeSpacesBefore() {
-        return true;
-    }
-
-    @Override
     public LvLayoutClassNode clone() {
         return new LvLayoutClassNode();
     }

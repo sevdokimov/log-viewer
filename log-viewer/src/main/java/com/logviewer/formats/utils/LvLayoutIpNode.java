@@ -67,11 +67,6 @@ public class LvLayoutIpNode extends LvLayoutCustomTypeNode {
     }
 
     @Override
-    public boolean removeSpacesBefore() {
-        return true;
-    }
-
-    @Override
     public LvLayoutIpNode clone() {
         return new LvLayoutIpNode(getFieldName(), getFieldType());
     }

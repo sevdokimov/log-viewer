@@ -18,21 +18,19 @@ public class DefaultFieldSetTest extends AbstractLogTest {
 
     public static final DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
             new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-            new LvLayoutTextNode(" ["),
+            LvLayoutTextNode.of(" ["),
             LvLayoutStretchNode.threadNode(),
-            new LvLayoutTextNode("] "),
+            LvLayoutTextNode.of("] "),
             new LvLayoutFixedTextNode("level", FieldTypes.LEVEL_LOGBACK, "ERROR", "WARN", "INFO", "DEBUG", "TRACE"),
             new LvLayoutClassNode(),
-            new LvLayoutTextNode(" - "),
+            LvLayoutTextNode.of(" - "),
             LvLayoutStretchNode.messageNode());
-
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
 
     @Test
     public void testFinalStretchProperty() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 LvLayoutStretchNode.threadNode());
 
         LogReader reader = format.createReader();
@@ -132,7 +130,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     public void testEmptyStretchProperty() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 LvLayoutStretchNode.messageNode());
 
         buildFailed(format, "2016-12-02_16:05:11.333");
@@ -145,7 +143,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     public void testRequiredSpace() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 new LvLayoutClassNode());
 
         buildFailed(format, "2016-12-02_16:05:11.333com.google.App");
@@ -158,12 +156,36 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     }
 
     @Test
+    public void testRemovingSpaces() {
+        DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
+                new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
+                LvLayoutTextNode.of(" "),
+                new LvLayoutStretchNode("mdc", FieldTypes.MDC, true, 0),
+                LvLayoutTextNode.of(" "),
+                new LvLayoutStretchNode("mdc2", FieldTypes.MDC, true, 0),
+                LvLayoutTextNode.of("!")
+        );
+
+        buildFailed(format, "2016-12-02_16:05:11.333 bbb!");
+
+        LogRecord record = buildRecord(format, "2016-12-02_16:05:11.333 aaa   bbb!");
+        assertEquals("aaa", record.getFieldText("mdc"));
+        assertEquals("bbb", record.getFieldText("mdc2"));
+
+        record = buildRecord(format, "2016-12-02_16:05:11.333     aaa   bbb  !");
+
+        record = buildRecord(format, "2016-12-02_16:05:11.333  bbb!");
+        assertEquals("", record.getFieldText("mdc"));
+        assertEquals("bbb", record.getFieldText("mdc2"));
+    }
+
+    @Test
     public void testRegexFieldAfterStretchField() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 new LvLayoutRegexNode("f0", "f", "\\d+"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 LvLayoutStretchNode.threadNode(),
                 new LvLayoutRegexNode("f", "f", "\\d+")
                 );
@@ -180,7 +202,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     public void testEmptyStretchPropertyMiddle() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 LvLayoutStretchNode.messageNode(),
                 new LvLayoutClassNode()
                 );
@@ -194,7 +216,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     public void testStretchProperty5() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode(" "),
+                LvLayoutTextNode.of(" "),
                 LvLayoutStretchNode.messageNode(),
                 new LvLayoutClassNode()
         );
@@ -211,7 +233,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     public void testSpaceAtEnd() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true,
                 new LvLayoutFixedTextNode("f", "f", "INFO", "WARN"),
-                new LvLayoutTextNode(" ")
+                LvLayoutTextNode.of(" ")
         );
 
         buildFailed(format, "INFO");
@@ -240,7 +262,7 @@ public class DefaultFieldSetTest extends AbstractLogTest {
     @Test
     public void testStringEnd() {
         DefaultFieldSet format = new DefaultFieldSet(StandardCharsets.UTF_8, true, new LvLayoutSimpleDateNode("yyyy-MM-dd_HH:mm:ss.SSS"),
-                new LvLayoutTextNode("___"), new LvLayoutClassNode());
+                LvLayoutTextNode.of("___"), new LvLayoutClassNode());
 
         LogReader reader = format.createReader();
 

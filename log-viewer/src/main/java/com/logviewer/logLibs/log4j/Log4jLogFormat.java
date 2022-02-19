@@ -106,7 +106,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
             addNodes(nodes, converterName, node);
 
             if (converterName.length() < node.getFirst().length())
-                nodes.add(new LvLayoutTextNode(node.getFirst().substring(converterName.length())));
+                nodes.add(LvLayoutTextNode.of(node.getFirst().substring(converterName.length())));
         }
 
         mergeMessageFields(nodes);
@@ -132,9 +132,9 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
         }
 
         if (converterName.equals("x") || converterName.equals("NDC")) {
-            nodes.add(new LvLayoutTextNode("["));
+            nodes.add(LvLayoutTextNode.of("["));
             nodes.add(new LvLayoutStretchNode("ndc", FieldTypes.NDC, false, 0));
-            nodes.add(new LvLayoutTextNode("]"));
+            nodes.add(LvLayoutTextNode.of("]"));
             return;
         }
 
@@ -142,9 +142,9 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
             node = new LvLayoutStretchNode("mdc", FieldTypes.MDC, true, 0);
 
             if (hasBrackets(converter.getSecond())) {
-                nodes.add(new LvLayoutTextNode("{"));
+                nodes.add(LvLayoutTextNode.of("{"));
                 nodes.add(node);
-                nodes.add(new LvLayoutTextNode("}"));
+                nodes.add(LvLayoutTextNode.of("}"));
             } else {
                 nodes.add(node);
             }
@@ -194,7 +194,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
 
         switch (converterName) {
             case "":
-                return new LvLayoutTextNode(options.get(0));
+                return LvLayoutTextNode.of(options.get(0));
 
             case "p":
             case "level":

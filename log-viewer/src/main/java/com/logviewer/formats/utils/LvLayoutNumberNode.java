@@ -72,11 +72,6 @@ public class LvLayoutNumberNode extends LvLayoutCustomTypeNode {
     }
 
     @Override
-    public boolean removeSpacesBefore() {
-        return true;
-    }
-
-    @Override
     public LvLayoutNumberNode clone() {
         return new LvLayoutNumberNode(getFieldName(), getFieldType(), canBeNegative, canHaveFraction);
     }

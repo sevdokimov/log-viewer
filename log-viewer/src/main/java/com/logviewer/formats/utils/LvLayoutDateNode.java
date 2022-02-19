@@ -22,11 +22,6 @@ public abstract class LvLayoutDateNode implements LvLayoutNode {
         return currentDate;
     }
 
-    @Override
-    public boolean removeSpacesBefore() {
-        return false;
-    }
-
     public LvLayoutDateNode withTimeZone(@Nullable TimeZone zone) {
         LvLayoutDateNode res = clone();
         res.zone = zone;

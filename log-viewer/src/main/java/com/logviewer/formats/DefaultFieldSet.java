@@ -112,6 +112,15 @@ public class DefaultFieldSet {
         return lastNode instanceof LvLayoutStretchNode;
     }
 
+    private static boolean spacesOnlyAfter(String s, int offset, int end) {
+        for (; offset < end; offset++) {
+            if (s.charAt(offset) != ' ')
+                return false;
+        }
+
+        return true;
+    }
+
     private class LogReaderImpl extends LogReader {
 
         private final LvLayoutNode[] layoutCopy;
@@ -169,7 +178,7 @@ public class DefaultFieldSet {
                 int nextIdx;
 
                 if (i == layoutCopy.length) {
-                    if (idx == endStr)
+                    if (idx == endStr || spacesOnlyAfter(s, idx, endStr))
                         break;
 
                     nextIdx = LvLayoutNode.PARSE_FAILED;
@@ -185,9 +194,7 @@ public class DefaultFieldSet {
                     if (part instanceof LvLayoutStretchNode) {
                         LvLayoutStretchNode stretchNode = (LvLayoutStretchNode) part;
 
-                        if (!stretchNode.reset(s, idx, endStr)) {
-                            nextIdx = LvLayoutNode.PARSE_FAILED;
-                        } else {
+                        if (stretchNode.reset(s, idx, endStr)) {
                             if (i + 1 < layoutCopy.length) {
                                 stretchFields[stretchFieldSize++] = i;
 
@@ -195,17 +202,17 @@ public class DefaultFieldSet {
                                 assert idx <= endStr;
                                 i++;
                                 continue;
-                            } else {
-                                if (stretchNode.grow(s, endStr, endStr)) {
-                                    assert stretchNode.getEnd() == endStr;
-                                    stretchFields[stretchFieldSize++] = i;
+                            }
 
-                                    break; // parsing finished successfully
-                                }
-                                
-                                nextIdx = LvLayoutNode.PARSE_FAILED;
+                            if (stretchNode.grow(s, endStr, endStr)) {
+                                assert stretchNode.getEnd() == endStr;
+                                stretchFields[stretchFieldSize++] = i;
+
+                                break; // parsing finished successfully
                             }
                         }
+
+                        nextIdx = LvLayoutNode.PARSE_FAILED;
                     } else {
                         nextIdx = part.parse(s, idx, endStr);
                     }
@@ -260,7 +267,7 @@ public class DefaultFieldSet {
                     }
                 } else {
                     if (fieldIdx >= 0) {
-                        fieldOffset[fieldIdx * 2] = idx;
+                        fieldOffset[fieldIdx * 2] = layoutCopy[i].getValueStart(s, idx, endStr);
                         fieldOffset[fieldIdx * 2 + 1] = nextIdx;
                     }
 
@@ -282,7 +289,7 @@ public class DefaultFieldSet {
                 int fieldIdx = fieldIndex[nodeIdx];
 
                 if (fieldIdx >= 0) {
-                    fieldOffset[fieldIdx * 2] = stretchField.getStart();
+                    fieldOffset[fieldIdx * 2] = stretchField.getValueStart(s, stretchField.getStart(), stretchField.getEnd());
                     fieldOffset[fieldIdx * 2 + 1] = stretchField.getEnd();
                 }
             }

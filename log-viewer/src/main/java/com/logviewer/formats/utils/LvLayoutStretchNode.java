@@ -46,7 +46,19 @@ public class LvLayoutStretchNode extends LvLayoutCustomTypeNode {
 
     @Override
     public boolean removeSpacesBefore() {
-        return removeSpacesBefore;
+        return removeSpacesBefore && minSize > 0;
+    }
+
+    @Override
+    public int getValueStart(String s, int idx, int endStr) {
+        if (!removeSpacesBefore)
+            return idx;
+
+        while (idx < endStr && s.charAt(idx) == ' ') {
+            idx++;
+        }
+
+        return idx;
     }
 
     public int getMinSize() {

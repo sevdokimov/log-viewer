@@ -15,7 +15,8 @@ import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
@@ -63,7 +64,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     private static LvLayoutNode createNode(Node n, String pattern) {
         switch (n.getType()) {
             case NODE_LITERAL:
-                return new LvLayoutTextNode((String) n.getValue());
+                return LvLayoutTextNode.of((String) n.getValue());
             case NODE_COMPOSITE_KEYWORD:
                 throw new IllegalArgumentException("log encoder pattern contains unsupported terms [pattern=\""
                         + pattern + "\", term=" + n + "]");

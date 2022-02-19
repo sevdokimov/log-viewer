@@ -115,8 +115,12 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         checkPattern("%-5level [%X] %message%n", event,
                 "INFO", "aaa=111, bbb=222, ccc=333", "Authentication failed 100");
         checkPattern("%-5level %X{aaa} %message%n", event,
+                "INFO", "", "111 Authentication failed 100"); // invalid!
+        checkPattern("%-5level %X{aaa}-%message%n", event,
                 "INFO", "111", "Authentication failed 100");
         checkPattern("%-5level %mdc{zzz:-FF} %message%n", event,
+                "INFO", "", "FF Authentication failed 100"); // invalid!
+        checkPattern("%-5level [%mdc{zzz:-FF}] %message%n", event,
                 "INFO", "FF", "Authentication failed 100");
         checkPattern("%-5level [%thread]: %message%nopexception%nopex%n", event,
                 "INFO", "localhost-startStop-1-EventThread", "Authentication failed 100");
@@ -169,6 +173,10 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         checkPattern("%date{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread/%X{UNIQUE_ID}] %logger{36}:%line - %msg%n", event,
                 "2001-02-21 11:22:03.000", "INFO", "localhost-startStop-1-EventThread", "", "c.l.formats.LogbackLogFormatTest",
                 "-2", "Authentication failed 100");
+
+        checkPattern("%d{yyyy-MM-dd HH:mm:ss, Asia/Seoul} %-10level [%L] [%.-24thread] %logger{50} %ex{30} - %msg%n", event,
+                "2001-02-21 17:22:03", "INFO", "-2", "localhost-startStop-1-Ev", "com.logviewer.formats.LogbackLogFormatTest",
+                "", "Authentication failed 100");
     }
 
     @Test

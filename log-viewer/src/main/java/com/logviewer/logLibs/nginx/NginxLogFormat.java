@@ -37,7 +37,7 @@ public class NginxLogFormat extends AbstractPatternLogFormat {
             if (field != null) {
                 res.add(field(field.substring(1)));
             } else {
-                res.add(new LvLayoutTextNode(matcher.group()));
+                res.add(LvLayoutTextNode.of(matcher.group()));
             }
 
             matcher.region(matcher.end(), pattern.length());

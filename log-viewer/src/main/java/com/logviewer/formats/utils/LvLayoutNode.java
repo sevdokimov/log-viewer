@@ -15,7 +15,13 @@ public interface LvLayoutNode extends Cloneable {
      */
     int parse(String s, int offset, int end);
 
-    boolean removeSpacesBefore();
+    default boolean removeSpacesBefore() {
+        return true;
+    }
+
+    default int getValueStart(String s, int idx, int endStr) {
+        return idx;
+    }
 
     LvLayoutNode clone();
 }

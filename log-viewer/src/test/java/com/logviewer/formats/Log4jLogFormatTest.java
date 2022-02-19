@@ -1,5 +1,6 @@
 package com.logviewer.formats;
 
+import com.google.common.collect.ImmutableMap;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
 import com.logviewer.data2.BufferedFile;
@@ -21,6 +22,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.apache.logging.log4j.core.time.MutableInstant;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.apache.logging.log4j.spi.MutableThreadContextStack;
+import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
@@ -29,6 +31,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
@@ -108,7 +111,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         MutableInstant instant = new MutableInstant();
         instant.initFromEpochMilli(new Date(111, Calendar.OCTOBER, 13, 18, 33, 45).getTime(), 777);
 
-        LogEvent event = Log4jLogEvent.newBuilder()
+        Supplier<Log4jLogEvent.Builder> builderFactory = () -> Log4jLogEvent.newBuilder()
                 .setInstant(instant)
                 .setLevel(Level.ERROR)
                 .setMessage(new ObjectMessage("The log message"))
@@ -118,8 +121,9 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 .setLoggerFqcn("com.google.gson.Gson")
                 .setLoggerName("com.google.gson.Gson")
                 .setContextStack(new MutableThreadContextStack(Arrays.asList("aaa", "bbb")))
-                .setMarker(MarkerManager.getMarker("m-a-r-k-e-r"))
-                .build();
+                .setMarker(MarkerManager.getMarker("m-a-r-k-e-r"));
+
+        LogEvent event = builderFactory.get().build();
 
         // "2011-11-13 18:33:45"
         check("%levelzzz{www}%n", event, true, "ERROR");
@@ -183,8 +187,16 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 "~[a-f\\-0-9]+",
                 "The log message"
         );
-    }
 
+        check1("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p {%X{username} %X{client} %X{location}} %t [%c]: %m%n", event,
+                "2011-10-13 18:33:45,000", "ERROR", "", "", "", "thread-pool-11", "com.google.gson.Gson", "The log message");
+
+        check("%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p {%X{username} %X{client} %X{location}} %t [%c]: %m%n",
+                builderFactory.get().setLevel(Level.INFO)
+                        .setContextData(new SortedArrayStringMap(ImmutableMap.of("username", "smith", "location", "London")))
+                        .build(),
+                "2011-10-13 18:33:45,000", "INFO", "smith", "", "London", "thread-pool-11", "com.google.gson.Gson", "The log message");
+    }
 
     private String getProcessId() {
         String name = ManagementFactory.getRuntimeMXBean().getName();
