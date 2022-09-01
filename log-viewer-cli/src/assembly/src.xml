@@ -33,7 +33,7 @@
             <includes>
                 <include>config.conf</include>
             </includes>
-            <fileMode>0744</fileMode>
+            <fileMode>0644</fileMode>
         </fileSet>
     </fileSets>
     <dependencySets>
