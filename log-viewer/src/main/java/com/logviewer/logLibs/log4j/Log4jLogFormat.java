@@ -2,21 +2,35 @@ package com.logviewer.logLibs.log4j;
 
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.AbstractPatternLogFormat;
-import com.logviewer.formats.utils.*;
+import com.logviewer.formats.utils.LvLayoutClassNode;
+import com.logviewer.formats.utils.LvLayoutDateNode;
+import com.logviewer.formats.utils.LvLayoutFixedTextNode;
+import com.logviewer.formats.utils.LvLayoutLog4jISO8601Date;
+import com.logviewer.formats.utils.LvLayoutNode;
+import com.logviewer.formats.utils.LvLayoutNumberNode;
+import com.logviewer.formats.utils.LvLayoutRegexNode;
+import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
+import com.logviewer.formats.utils.LvLayoutStretchNode;
+import com.logviewer.formats.utils.LvLayoutTextNode;
 import com.logviewer.utils.Triple;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class Log4jLogFormat extends AbstractPatternLogFormat {
 
-    private static final String[] LEVELS = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL",
-            // Additional level names that are not used by Log4J, but added to be compatible with other logging systems
-            "WARNING"
+    // See org.apache.log4j.lf5.LogLevel, org.apache.log4j.Level
+    private static final String[] LEVELS = {"OFF", "FATAL", "ERROR", "WARN", "INFO",
+            "DEBUG", "SEVERE", "TRACE", "ALL", "WARNING", "CONFIG", "FINE", "FINER", "FINEST"
     };
 
     private static final Pattern LOCATION_PATTERN = Pattern.compile("" +

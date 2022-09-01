@@ -33,7 +33,9 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class Log4jLogFormatTest extends AbstractLogTest {
 
@@ -102,6 +104,14 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         Date expectedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse("2011-10-13 18:33:45 +0000");
 
         assertEquals(LvDateUtils.toNanos(expectedDate), record.getTime());
+    }
+
+    @Test
+    public void testLogLevelFine() {
+        Log4jLogFormat format = new Log4jLogFormat("%d{yyyy-MM-dd HH:mm:ss,SSS} %level %m%n");
+
+        LogRecord record = read(format, "2022-09-01 13:08:09,493 FINE [javax.faces.component] (default task-1) No renderer-type for component j_idt3");
+        checkFields(record, "2022-09-01 13:08:09,493", "FINE", "[javax.faces.component] (default task-1) No renderer-type for component j_idt3");
     }
 
     @Test
