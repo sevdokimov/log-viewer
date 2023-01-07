@@ -304,6 +304,10 @@
 </div>
 
 <context-menu #eventContextMenu>
+    <ng-template [visible]="contextMenuHandler.isTextSelected" contextMenuItem
+                 (execute)="contextMenuHandler.copyToClipboard()">
+        Copy
+    </ng-template>
 
     <ng-template [visible]="contextMenuHandler.isTextMenuItemVisible" let-item contextMenuItem [subMenu]="textMenu">
         Text: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;
