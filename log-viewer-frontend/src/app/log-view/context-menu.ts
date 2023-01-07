@@ -11,6 +11,10 @@ export class ContextMenuHandler {
     constructor(private filterPanelStateService: FilterPanelStateService) {
     }
 
+    isTextSelected(): boolean {
+        return !getSelection().isCollapsed;
+    }
+
     isThreadMenuItemVisible(item: Item): boolean {
         return !!item.thread;
     }
@@ -99,6 +103,10 @@ export class ContextMenuHandler {
 
             e = e.parentElement;
         }
+    }
+
+    copyToClipboard(): void {
+        document.execCommand('copy')
     }
 
     hideEventsByTimestamp(record: Record, next: boolean) {
