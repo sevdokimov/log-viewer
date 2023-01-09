@@ -150,6 +150,18 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 
   z-index: 3001;
+
+  background: white;
+}
+
+.sl-dialog-small {
+  width: 400px;
+  height: 100px;
+}
+
+.sl-dialog-big {
+  width: 900px;
+  height: 80vh;
 }
 
 .ace_hidden-cursors .ace_cursor {

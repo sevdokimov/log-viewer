@@ -30,7 +30,6 @@
     "@angular/router": "^14.2.12",
     "@angular/service-worker": "^14.2.12",
     "@fortawesome/fontawesome-free-webfonts": "^1.0.9",
-    "@ng-bootstrap/ng-bootstrap": "^13.1.1",
     "@ngx-translate/core": "^14.0.0",
     "@types/bootstrap": "^5.2.6",
     "@types/jquery": "^3.5.16",

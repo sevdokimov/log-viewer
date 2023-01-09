@@ -18,3 +18,12 @@
   white-space: pre-wrap;
   font-size: 11px;
 }
+
+.log-format {
+  padding: 10px 0 10px 0;
+
+  white-space: pre;
+  font-size: 12px;
+  overflow: auto;
+  font-family: monospace;
+}

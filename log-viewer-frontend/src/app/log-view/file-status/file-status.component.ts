@@ -1,6 +1,6 @@
-import {Component, Input, TemplateRef, ViewChild} from '@angular/core';
+import {Component, Input, TemplateRef} from '@angular/core';
 import {RestStatus} from '@app/log-view/log-file';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 
 @Component({
     selector: 'lv-file-status',
@@ -9,22 +9,16 @@ import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 })
 export class FileStatusComponent {
 
-    @ViewChild('stacktraceDialog', {static: true}) public stacktraceDialog: TemplateRef<any>;
-
-    @ViewChild('formatDialog', {static: true}) public formatDialog: TemplateRef<any>;
-
     @Input() status: RestStatus;
 
     @Input() showErrorMessages: boolean;
 
-    constructor(private modalService: NgbModal) {
+    modalRef: BsModalRef;
+
+    constructor(private modalService: BsModalService) {
     }
 
-    showStacktrace() {
-        this.modalService.open(this.stacktraceDialog, {size: 'xl'});
-    }
-
-    showFormatInfo() {
-        this.modalService.open(this.formatDialog, {size: 'xl'});
+    showDialog(template: TemplateRef<any>) {
+        this.modalRef = this.modalService.show(template, {class: 'modal-lg', animated: false});
     }
 }
