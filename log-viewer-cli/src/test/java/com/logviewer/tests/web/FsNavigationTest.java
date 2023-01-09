@@ -529,6 +529,6 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
     }
 
     private String currentPath() {
-        return driver.findElement(By.className("current-path")).getText().replaceAll("\\s+", "");
+        return driver.findElement(By.className("current-path")).getText().trim();
     }
 }

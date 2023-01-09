@@ -56,17 +56,8 @@
 
                 <span *ngIf="currentDirItems.length === 0" class="path-item">&nbsp;</span>
 
-                <span *ngFor="let path of currentDirItems; let idx = index" class="path-item">
-                    <a href="#" (click)="directoryNameClick(constructPathFromPrefix(idx))">{{path}}</a>
-                    <span class="path-separator">
-                        <span *ngIf="!path.endsWith('/')">/</span>
-                    </span>
-                </span>
+                <span *ngFor="let path of currentDirItems; let idx = index" class="path-item"><a href="#" (click)="directoryNameClick(constructPathFromPrefix(idx))">{{path}}</a><span class="path-separator"><span *ngIf="!path.endsWith('/')">/</span></span></span>
             </div>
-            <!--            <div class="filter-panel">-->
-            <!--                <input type="text" name="typedText" aria-describedby="basic-addon2" autofocus-->
-            <!--                       [(ngModel)]="typedText" placeholder="filter">-->
-            <!--            </div>-->
 
             <div class="search-pane">
                 <span class="tool-button" [class.tool-button-pressed]="filterOpened"
