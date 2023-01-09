@@ -10,7 +10,7 @@ import {SlSizePipe} from './utils/sl-size.pipe';
 import {AceEditorDirective} from './utils/ace-editor.directive';
 import {FavoritesService} from './services/favorites.service';
 import {LogListPanelComponent} from './log-view/log-list-panel.component';
-import {ModalModule} from 'ngx-bootstrap';
+import {ModalModule} from 'ngx-bootstrap/modal';
 import {BsDropdownModule} from 'ngx-bootstrap/dropdown';
 import {ToastrModule} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -20,7 +20,6 @@ import {LevelListComponent} from './log-view/top-filters/level-list/level-list.c
 import {ExceptionOnlyComponent} from '@app/log-view/top-filters/exception-only/exception-only.component';
 import {EventDetailsComponent} from '@app/log-view/event-details/event-details.component';
 import {FileStatusComponent} from '@app/log-view/file-status/file-status.component';
-import {ContextMenuModule} from 'ngx-contextmenu';
 import {LvDateIntervalComponent} from '@app/log-view/top-filters/date-interval/date-interval.component';
 import {NgxMatDatetimePickerModule, NgxMatTimepickerModule} from '@angular-material-components/datetime-picker';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -36,8 +35,9 @@ import {LvJsFilterComponent} from '@app/log-view/top-filters/js-filter/js-filter
 import {LvTextFilterComponent} from '@app/log-view/top-filters/text-filter/text-filter.component';
 import {AutosizeModule} from 'ngx-autosize';
 import {MainPageComponent} from '@app/main-page/main-page.component';
+import {ContextMenuModule} from '@perfectmemory/ngx-contextmenu';
 import {SwitcherComponent} from '@app/switcher/switcher.component';
-import {DownloadDialogComponent} from "@app/log-view/download-dialog/download-dialog.component";
+import {DownloadDialogComponent} from '@app/log-view/download-dialog/download-dialog.component';
 
 export const appRoutes: Routes = [
     {
@@ -57,9 +57,8 @@ export const appRoutes: Routes = [
         ModalModule.forRoot(),
         FormsModule,
         ToastrModule.forRoot(),
-        ContextMenuModule.forRoot({
-            useBootstrap4: true,
-        }),
+
+        ContextMenuModule,
 
         AutosizeModule,
 

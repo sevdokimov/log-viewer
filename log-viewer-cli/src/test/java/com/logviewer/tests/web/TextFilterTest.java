@@ -30,9 +30,9 @@ public class TextFilterTest extends AbstractWebTestCase {
     public static final By TEXTAREA = By.tagName("textarea");
     public static final By APPLY = By.cssSelector(".action-panel button[name=\"apply-button\"]");
     public static final By ADD_TEXT_FILTER = By.xpath("//div[@class='add-filter-menu']//div[contains(@class,'dropdown-menu')]//a[contains(text(),'Text')]");
-    public static final By MENU = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Text:')]");
+    public static final By MENU = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Text:')]");
     public static final By TEXT_AREA_REGEX = By.cssSelector("textarea.regex-mode");
-    public static final By ONLY_EVENT_CONTAINIG = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Only events containing')]");
+    public static final By ONLY_EVENT_CONTAINIG = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Only events containing')]");
 
     @Test
     public void hugeTitles() {
@@ -376,7 +376,7 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).moveToElement(driver.findElement(MENU)).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide events containing')]")).click();
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Hide events containing')]")).click();
 
         notExist(MENU);
 

@@ -2,7 +2,7 @@ import {Component, Input, ViewChild} from '@angular/core';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {LevelFilterDescription} from '@app/log-view/top-filters/level-list/LevelFilterDescription';
 import {FilterEditorComponent} from '@app/log-view/top-filters/filter-editor-component';
-import {BsDropdownDirective} from 'ngx-bootstrap';
+import {BsDropdownDirective} from 'ngx-bootstrap/dropdown';
 
 @Component({
     selector: 'lv-level-list',

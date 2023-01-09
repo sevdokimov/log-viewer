@@ -303,55 +303,60 @@
     </div>
 </div>
 
-<context-menu #eventContextMenu>
+<context-menu menuClass="log-ctx-menu" #eventContextMenu>
+    <ng-template [visible]="contextMenuHandler.isTextMenuItemVisible" let-item contextMenuItem [subMenu]="textMenu">
+        <span>Text: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;</span>
+    </ng-template>
+
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
+                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.value.record, false)">
+        Hide events older than current
+    </ng-template>
+    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
+                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.value.record, true)">
+        Hide events newer than current
+    </ng-template>
+
+    <ng-template [visible]="contextMenuHandler.isThreadMenuItemVisible" let-item contextMenuItem [subMenu]="threadMenu">
+        <span class="menu-item-thread">Thread: <mark>{{item.thread}}</mark>&nbsp;&nbsp;</span>
+    </ng-template>
+
+    <ng-template contextMenuItem (execute)="showEventDetails($event.value.record)">
+        Event details
+    </ng-template>
+
+    <ng-template [visible]="contextMenuHandler.isTextSelected" contextMenuItem divider="true"></ng-template>
+
     <ng-template [visible]="contextMenuHandler.isTextSelected" contextMenuItem
                  (execute)="contextMenuHandler.copyToClipboard()">
         Copy
     </ng-template>
 
-    <ng-template [visible]="contextMenuHandler.isTextMenuItemVisible" let-item contextMenuItem [subMenu]="textMenu">
-        Text: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;
-    </ng-template>
-    <context-menu #textMenu>
-        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.item.selectedText, false)">
-            Only events containing <mark>{{item.selectedTextVisible}}</mark>
-        </ng-template>
+</context-menu>
 
-        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.item.selectedText, true)">
-            Hide events containing <mark class="menu-item-text">{{item.selectedTextVisible}}</mark>
-        </ng-template>
-    </context-menu>
-
-    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
-                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, false)">
-        Hide events older than current
-    </ng-template>
-    <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
-                 (execute)="contextMenuHandler.hideEventsByTimestamp($event.item.record, true)">
-        Hide events newer than current
+<context-menu #textMenu>
+    <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.value.selectedText, false)">
+        <span>Only events containing <mark>{{item.selectedTextVisible}}</mark></span>
     </ng-template>
 
-    <ng-template [visible]="contextMenuHandler.isThreadMenuItemVisible" let-item contextMenuItem [subMenu]="threadMenu">
-        Thread: <span class="menu-item-thread"><mark>{{item.thread}}</mark></span>&nbsp;&nbsp;
+    <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.value.selectedText, true)">
+        <span>Hide events containing <mark class="menu-item-text">{{item.selectedTextVisible}}</mark></span>
     </ng-template>
-    <context-menu #threadMenu>
-        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByThread($event.item.thread)">
-            Show only <mark>{{item.thread}}</mark>
-        </ng-template>
-        <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
-                     (execute)="contextMenuHandler.filterByThread($event.item.threadGroup)">
-            Show only <mark [innerHTML]="item.threadGroupHtml"></mark>
-        </ng-template>
-        <ng-template contextMenuItem let-item (execute)="contextMenuHandler.excludeThread($event.item.thread)">
-            Hide <mark class="menu-item-thread">{{item.thread}}</mark>
-        </ng-template>
-        <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
-                     (execute)="contextMenuHandler.excludeThread($event.item.threadGroup)">
-            Hide <mark [innerHTML]="item.threadGroupHtml"></mark>
-        </ng-template>
-    </context-menu>
+</context-menu>
 
-    <ng-template contextMenuItem (execute)="showEventDetails($event.item.record)">
-        Event details
+<context-menu #threadMenu>
+    <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByThread($event.value.thread)">
+        <span>Show only <mark>{{item.thread}}</mark></span>
+    </ng-template>
+    <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
+                 (execute)="contextMenuHandler.filterByThread($event.value.threadGroup)">
+        <span>Show only <mark [innerHTML]="item.threadGroupHtml"></mark></span>
+    </ng-template>
+    <ng-template contextMenuItem let-item (execute)="contextMenuHandler.excludeThread($event.value.thread)">
+        <span>Hide <mark class="menu-item-thread">{{item.thread}}</mark></span>
+    </ng-template>
+    <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
+                 (execute)="contextMenuHandler.excludeThread($event.value.threadGroup)">
+        <span>Hide <mark [innerHTML]="item.threadGroupHtml"></mark></span>
     </ng-template>
 </context-menu>

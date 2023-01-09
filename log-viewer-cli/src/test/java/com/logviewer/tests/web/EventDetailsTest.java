@@ -23,7 +23,7 @@ public class EventDetailsTest extends AbstractWebTestCase {
     public void openContextMenuByPointer() {
         openLog("rendering/one-line-exception.log");
 
-        By menuItem = By.xpath("//ul[@class='dropdown-menu show']/li");
+        By menuItem = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li");
 
         notExist(menuItem);
 
@@ -53,7 +53,7 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(rec).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]")).click();
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Event details')]")).click();
 
         List<WebElement> fieldLabels = driver.findElementsByCssSelector("lv-event-details .field .field-label");
 

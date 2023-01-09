@@ -26,8 +26,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(lastRecord()).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]"));
-        notExist(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Thread')]"));
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Event details')]"));
+        notExist(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Thread')]"));
     }
 
     private String filterHeader() {
@@ -81,7 +81,7 @@ public class ThreadFilterTest extends AbstractWebTestCase {
     private void rightClickRecord(String recordText) {
         new Actions(driver).contextClick(recordByText(recordText)).perform();
 
-        WebElement menuItem = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Thread')]"));
+        WebElement menuItem = driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Thread')]"));
 
         new Actions(driver).moveToElement(menuItem).perform();
     }
@@ -94,8 +94,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide exec-1')]");
-        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide exec-*')]");
+        By submenu = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Hide exec-1')]");
+        By submenuWildcard = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Hide exec-*')]");
         notExist(submenu);
         notExist(submenuWildcard);
 
@@ -131,8 +131,8 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only exec-1')]");
-        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only exec-*')]");
+        By submenu = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Show only exec-1')]");
+        By submenuWildcard = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Show only exec-*')]");
         notExist(submenu);
         notExist(submenuWildcard);
 
@@ -165,15 +165,15 @@ public class ThreadFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        By submenu = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only \"exec-1\"')]");
-        By submenuWildcard = By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only \"exec-*\"')]");
+        By submenu = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Show only \"exec-1\"')]");
+        By submenuWildcard = By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Show only \"exec-*\"')]");
         notExist(submenu);
         notExist(submenuWildcard);
 
         rightClickRecord("[2012.01.01 00:04][main] d");
 
-        WebElement show = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Show only main')]"));
-        WebElement hide = driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Hide main')]"));
+        WebElement show = driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Show only main')]"));
+        WebElement hide = driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Hide main')]"));
 
         List<WebElement> allMenuItems = show.findElements(By.xpath("../*"));
 

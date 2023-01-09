@@ -26,8 +26,8 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(lastRecord()).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'Event details')]"));
-        notExist(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'older')]"));
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Event details')]"));
+        notExist(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'older')]"));
     }
 
     private String dateFilterHeader() {
@@ -181,15 +181,15 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(recordByText("[2012.01.01 00:41][        ::] sss 41 41")).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'older')]")).click();
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'older')]")).click();
 
         assert getRecord().size() == 4;
 
-        notExist(By.xpath("//ul[@class='dropdown-menu show']"));
+        notExist(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']"));
 
         new Actions(driver).contextClick(recordByText("[2012.01.01 00:43][      ::::] sss 43 43")).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'newer')]")).click();
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'newer')]")).click();
 
         assert getRecord().size() == 3;
         assertThat(dateFilterHeader(), is("2012-01-01 00:41 - 2012-01-01 00:43"));
@@ -203,7 +203,7 @@ public class DateIntervalFilterTest extends AbstractWebTestCase {
 
         new Actions(driver).contextClick(recordByText("2012-01-01 00:00:00.000001 bbb")).perform();
 
-        driver.findElement(By.xpath("//ul[@class='dropdown-menu show']/li[contains(., 'newer')]")).click();
+        driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'newer')]")).click();
 
         assertEquals(3, getRecord().size());
     }

@@ -25,6 +25,9 @@ $material-design-icons-font-directory-path: '~material-design-icons-iconfont/dis
 @import "src/theme/theme";
 @import "src/css/variables";
 
+@import '@angular/cdk/overlay-prebuilt.css';
+@import './node_modules/@perfectmemory/ngx-contextmenu/src/assets/stylesheets/base.scss';
+
 html {
   font-size: 14px;
   height: 100%;
@@ -430,4 +433,11 @@ body {
 
 .highlighted-item {
   box-shadow: 0 0 5px #28a745;
+}
+
+//Context menu
+.log-ctx-menu {
+  --ngx-contextmenu-text-color: #212529;
+  --ngx-contextmenu-item-text-hover-color: #212529;
+  --ngx-contextmenu-item-background-hover-color: #f0f0f0;
 }

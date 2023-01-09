@@ -42,7 +42,7 @@ import {ToastrService} from 'ngx-toastr';
 import {HttpClient} from '@angular/common/http';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {Subscription} from 'rxjs';
-import {ContextMenuComponent, ContextMenuService} from 'ngx-contextmenu';
+import {ContextMenuComponent, ContextMenuService} from '@perfectmemory/ngx-contextmenu';
 import {ContextMenuHandler} from '@app/log-view/context-menu';
 import {LogPathUtils} from '@app/utils/log-path-utills';
 import {OpenEvent} from '@app/log-navigator/log-navigator.component';
@@ -72,7 +72,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     @ViewChild('loadingProgressTop', {static: true})
     loadingProgressTop: ElementRef;
 
-    @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent;
+    @ViewChild('eventContextMenu', {static: true}) public eventContextMenu: ContextMenuComponent<any>;
 
     logs: LogFile[];
 
@@ -132,7 +132,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         public vs: ViewStateService,
         public fwService: FavoritesService,
         private toastr: ToastrService,
-        private contextMenuService: ContextMenuService,
+        private contextMenuService: ContextMenuService<any>,
         public filterPanelStateService: FilterPanelStateService,
         public contextMenuHandler: ContextMenuHandler,
     ) {
@@ -218,10 +218,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private openContextMenu(index: number, event: MouseEvent) {
-        this.contextMenuService.show.next({
-            contextMenu: this.eventContextMenu,
-            event: event,
-            item: this.contextMenuHandler.createItem(this.m[index], this.logs),
+        this.contextMenuService.show(this.eventContextMenu, {
+            value: this.contextMenuHandler.createItem(this.m[index], this.logs),
+            y: event.pageY,
+            x: event.pageX,
         });
 
         event.preventDefault();
