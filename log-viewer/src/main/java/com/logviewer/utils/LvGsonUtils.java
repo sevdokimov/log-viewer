@@ -49,7 +49,7 @@ public class LvGsonUtils {
                 .registerSubtype(FieldValueSetPredicate.class)
                 .registerSubtype(CompositeRecordPredicate.class));
 
-        gsonBuilder.registerTypeAdapter(Charset.class, new TypeAdapter<Charset>() {
+        gsonBuilder.registerTypeHierarchyAdapter(Charset.class, new TypeAdapter<Charset>() {
             @Override
             public void write(JsonWriter out, Charset value) throws IOException {
                 if (value == null) {

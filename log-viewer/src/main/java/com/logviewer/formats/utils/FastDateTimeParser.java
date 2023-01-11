@@ -3,18 +3,19 @@ package com.logviewer.formats.utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.text.Format;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -26,20 +27,7 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
 
     public static final Map<String, TimeZone> ALL_ZONES;
 
-    private static final Method parseUnresolved0Method;
-    private static final Method toResolvedMethod;
     static {
-        try {
-            parseUnresolved0Method = DateTimeFormatter.class.getDeclaredMethod("parseUnresolved0", CharSequence.class, ParsePosition.class);
-            parseUnresolved0Method.setAccessible(true);
-
-            Class<?> ctxClass = parseUnresolved0Method.getReturnType();
-            toResolvedMethod = ctxClass.getDeclaredMethod("toResolved", ResolverStyle.class, Set.class);
-            toResolvedMethod.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-
         ALL_ZONES = new HashMap<>();
 
         for (String zoneId : TimeZone.getAvailableIDs()) {
@@ -67,7 +55,7 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
     }
 
     @NonNull
-    private final DateTimeFormatter formatter;
+    private final Format formatter;
     private final boolean hasTimezone;
 
     private final TimeZone defaultTimeZone;
@@ -76,7 +64,7 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
     private transient TimeZone lastTimeZone;
 
     private FastDateTimeParser(@NonNull String pattern, boolean hasTimezone, @Nullable TimeZone defaultTimeZone) {
-        formatter = DateTimeFormatter.ofPattern(pattern);
+        formatter = DateTimeFormatter.ofPattern(pattern).toFormat();
         this.hasTimezone = hasTimezone;
         this.defaultTimeZone = defaultTimeZone == null ? TimeZone.getDefault() : defaultTimeZone;
     }
@@ -216,26 +204,8 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
     }
 
     @Nullable
-    private static TemporalAccessor parseTimestampWithoutZone(DateTimeFormatter formatter, String s, ParsePosition parsePosition) {
-        try {
-            Object context = parseUnresolved0Method.invoke(formatter, s, parsePosition);
-            if (context == null || parsePosition.getErrorIndex() >= 0)
-                return null;
-
-            return (TemporalAccessor) toResolvedMethod.invoke(context, formatter.getResolverStyle(), formatter.getResolverFields());
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            Throwable target = e.getTargetException();
-            if (target instanceof DateTimeException || target instanceof IndexOutOfBoundsException) {
-                return null;
-            }
-
-            if (target instanceof RuntimeException)
-                throw (RuntimeException)target;
-
-            throw new RuntimeException(e);
-        }
+    private static TemporalAccessor parseTimestampWithoutZone(Format formatter, String s, ParsePosition parsePosition) {
+        return (TemporalAccessor)formatter.parseObject(s, parsePosition);
     }
 
     private static BiFunction<String, ParsePosition, Supplier<Instant>> simpleDateFormatter(@NonNull SimpleDateFormat format) {
