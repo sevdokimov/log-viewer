@@ -26,10 +26,10 @@ public class LogViewerServlet extends HttpServlet {
     public static final String SPRING_CONTEXT_PROPERTY = "org.springframework.web.context.WebApplicationContext.ROOT";
 
     private static final Pattern[] RESOURCE_PATTERNS = new Pattern[]{
-            Pattern.compile("/fa-(?:brands|regular|solid)-\\d+(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
-            Pattern.compile("/MaterialIcons-Regular(\\.[0-9a-f]{20})?\\.[a-z0-9]+"),
-            Pattern.compile("/[\\w\\-]+(\\.[0-9a-f]{20})?\\.(?:png|gif)"),
-            Pattern.compile("/(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{20})?\\.(?:css|js|js\\.map|css\\.map)"),
+            Pattern.compile("/fa-(?:brands|regular|solid)-\\d+(\\.[0-9a-f]{16})?\\.[a-z0-9]+"),
+            Pattern.compile("/MaterialIcons-Regular(\\.[0-9a-f]{16})?\\.[a-z0-9]+"),
+            Pattern.compile("/[\\w\\-]+(\\.[0-9a-f]{16})?\\.(?:png|gif)"),
+            Pattern.compile("/(?:main|polyfills|runtime|styles|vendor)(\\.[0-9a-f]{16})?\\.(?:css|js|js\\.map|css\\.map)"),
     };
 
     private static final Map<String, String> MIME_TYPES_MAP = Utils.newMap("css", "text/css", "js", "application/javascript");
