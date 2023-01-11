@@ -3,8 +3,6 @@ package com.logviewer.tests.web;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.formats.RegexLogFormat;
-import com.logviewer.logLibs.log4j.Log4jLogFormat;
-import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.mocks.TestFilterPanelState;
 import com.logviewer.mocks.TestFormatRecognizer;
 import com.logviewer.utils.FilterPanelState;
@@ -16,13 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.logviewer.tests.utils.TestLogFormats.FORMAT_LEVEL_LOG4j;
+import static com.logviewer.tests.utils.TestLogFormats.FORMAT_LEVEL_LOGBACK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class LogLevelTest extends AbstractWebTestCase {
-
-    private static final LogFormat FORMAT_LOG4j = new Log4jLogFormat("%d{yyMMdd HH:mm:ss} %p %m%n");
-    private static final LogFormat FORMAT_LOGBACK = new LogbackLogFormat("%d{yyMMdd HH:mm:ss} %p %m%n");
 
     private static final LogFormat FORMAT_JAVA = new RegexLogFormat(StandardCharsets.UTF_8,
             "(?<date>\\d{6} \\d\\d:\\d\\d:\\d\\d) (?<level>\\w+) (?<msg>.*)", false,
@@ -34,7 +31,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
     @Test
     public void log4jFilterTest() {
-        ctx.getBean(TestFormatRecognizer.class).setFormat(FORMAT_LOG4j);
+        ctx.getBean(TestFormatRecognizer.class).setFormat(FORMAT_LEVEL_LOG4j);
 
         openLog("level-log4j.log");
 
@@ -48,7 +45,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
     @Test
     public void logbackFilterTest() {
-        ctx.getBean(TestFormatRecognizer.class).setFormat(FORMAT_LOGBACK);
+        ctx.getBean(TestFormatRecognizer.class).setFormat(FORMAT_LEVEL_LOGBACK);
 
         openLog("level-logback.log");
 
@@ -77,9 +74,9 @@ public class LogLevelTest extends AbstractWebTestCase {
     @Test
     public void formatCombination() {
         TestFormatRecognizer recognizer = ctx.getBean(TestFormatRecognizer.class);
-        recognizer.setFormat(getDataFilePath("level-log4j.log"), FORMAT_LOG4j);
+        recognizer.setFormat(getDataFilePath("level-log4j.log"), FORMAT_LEVEL_LOG4j);
         recognizer.setFormat(getDataFilePath("level-java.log"), FORMAT_JAVA);
-        recognizer.setFormat(getDataFilePath("level-logback.log"), FORMAT_LOGBACK);
+        recognizer.setFormat(getDataFilePath("level-logback.log"), FORMAT_LEVEL_LOGBACK);
 
         // ERROR
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setLevel("ERROR"));

@@ -1,5 +1,9 @@
 package com.logviewer.tests.web;
 
+import com.logviewer.mocks.TestFilterPanelState;
+import com.logviewer.mocks.TestFormatRecognizer;
+import com.logviewer.tests.utils.TestLogFormats;
+import com.logviewer.utils.FilterPanelState;
 import com.logviewer.utils.Utils;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -94,6 +98,27 @@ public class LogGrowTest extends AbstractWebTestCase {
         assert recordCount.longValue() < 29;
 
         recordByText("1");
+    }
+
+    @Test
+    public void filterAll() throws IOException {
+        ctx.getBean(TestFormatRecognizer.class).setFormat(TestLogFormats.FORMAT_LEVEL_LOG4j);
+
+        ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setExceptionsOnly(true));
+
+        Path tmpLog = tmpDir.resolve("test.log");
+        Files.write(tmpLog, "160101 10:00:03 DEBUG ddd\n".getBytes());
+
+        openUrl("log", "path", tmpLog.toFile().getAbsolutePath(), "path", getDataFilePath("level-log4j.log"));
+
+        driver.findElement(By.xpath("//span[@class='no-record-msg'][text()='All records filtered']"));
+
+        Files.write(tmpLog, ("160101 10:00:03 DEBUG ddd\n" +
+                "160101 10:00:04 DEBUG ddd\n" +
+                "160101 10:00:05 DEBUG ddd\n").getBytes());
+
+        driver.findElement(By.xpath("//span[@class='file-attr'][text()='78 bytes']"));
+        driver.findElement(By.xpath("//span[@class='no-record-msg'][text()='All records filtered']"));
     }
 
 }

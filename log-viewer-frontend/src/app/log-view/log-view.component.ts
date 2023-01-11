@@ -998,7 +998,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                     if (this.logs.length === 1) {
                         offset = new Position(this.logs[0].id, null, 0);
                     } else {
-                        offset = new Position('', null, 0);
+                        let dateInPastNano = '100000000000000' // 1970-01-02 03:46:40
+                        offset = new Position('', dateInPastNano, 0); // a date in distant past
                     }
                 } else {
                     offset = Position.recordEnd(this.m[this.m.length - 1]);

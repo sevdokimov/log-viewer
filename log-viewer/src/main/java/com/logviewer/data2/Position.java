@@ -10,7 +10,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-public class Position implements Comparable<Position>, Serializable {
+public class Position implements Serializable {
 
     private final String logId;
 
@@ -66,27 +66,20 @@ public class Position implements Comparable<Position>, Serializable {
     @Override
     public int hashCode() {
         int result = logId.hashCode();
-        result = 31 * result + (int) (time ^ (time >>> 32));
-        result = 31 * result + (int) (o ^ (o >>> 32));
+
+        if (time != null)
+            result = 31 * result + time.intValue();
+
+        result = 31 * result + (int) o;
         return result;
     }
 
     @Override
-    public int compareTo(Position o) {
-        int res = Long.compare(time, o.time);
-
-        if (res == 0) {
-            res = logId.compareTo(o.logId);
-
-            if (res == 0)
-                res = Long.compare(this.o, o.o);
-        }
-
-        return res;
-    }
-
-    @Override
     public String toString() {
-        return logId + " - " + DateFormat.getDateTimeInstance().format(new Date(time)) + " - " + o;
+        if (time == null) {
+            return logId + " - " + o;
+        } else {
+            return logId + " - " + DateFormat.getDateTimeInstance().format(new Date(time)) + " - " + o;
+        }
     }
 }
