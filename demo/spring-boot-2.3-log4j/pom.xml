@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.sevdokimov.logviewer.demo</groupId>
 	<artifactId>spring-boot-2.3-log4j</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.0.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>spring-boot-2.3-log4j</name>
 	<description>Demo project for Spring Boot</description>
