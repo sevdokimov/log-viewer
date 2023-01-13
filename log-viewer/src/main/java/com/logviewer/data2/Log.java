@@ -23,6 +23,8 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -34,6 +36,11 @@ import java.util.zip.GZIPInputStream;
 public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
+
+    private static final List<String> GZIP_CONTENT_TYPE = Arrays.asList(
+            "application/octet-stream", // gzip on linux!
+            "application/x-compressed"  // gzip on windows
+    );
 
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
         try {
@@ -247,7 +254,7 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                if ("application/x-compressed".equals(Files.probeContentType(file)))
+                if (GZIP_CONTENT_TYPE.contains((Files.probeContentType(file))))
                     decompressAndCopyGZipFile();
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
