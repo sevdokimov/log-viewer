@@ -253,7 +253,7 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                if (unpackArchive && Arrays.stream(GZIP_EXTENSIONS).anyMatch(it -> file.getFileName().endsWith(it)))
+                if (unpackArchive && Arrays.stream(GZIP_EXTENSIONS).anyMatch(it -> file.toString().toLowerCase().endsWith(it)))
                     decompressAndCopyGZipFile();
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
