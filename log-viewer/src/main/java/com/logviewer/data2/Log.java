@@ -13,14 +13,13 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +29,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.CRC32;
+import java.util.zip.GZIPInputStream;
 
 public class Log implements LogView {
 
@@ -56,7 +56,7 @@ public class Log implements LogView {
 
     private final Object logChangedTaskKey = new Object();
 
-    private final Path file;
+    private Path file;
 
     private final String id;
 
@@ -139,6 +139,25 @@ public class Log implements LogView {
 
             }
         }
+    }
+
+    private void decompressAndCopyGZipFile() throws IOException {
+
+        File tempFile = File.createTempFile("log-viewer-", file.getName(file.getNameCount() - 1) + ".tmp");
+        tempFile.deleteOnExit();
+
+        try (GZIPInputStream gis = new GZIPInputStream(
+                Files.newInputStream(file.toFile().toPath()));
+             FileOutputStream fos = new FileOutputStream(tempFile)) {
+
+            byte[] buffer = new byte[1024 * 10];
+            int len;
+            while ((len = gis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }
+        }
+
+        this.file = tempFile.toPath();
     }
 
     public class LogSnapshot implements Snapshot {
@@ -227,6 +246,9 @@ public class Log implements LogView {
             if (channel == null) {
                 if (error != null)
                     throw new IOException(error);
+
+                if ("application/x-compressed".equals(Files.probeContentType(file)))
+                    decompressAndCopyGZipFile();
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
             }
