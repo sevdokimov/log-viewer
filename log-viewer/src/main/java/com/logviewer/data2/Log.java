@@ -37,10 +37,7 @@ public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
 
-    private static final List<String> GZIP_CONTENT_TYPE = Arrays.asList(
-            "application/octet-stream", // gzip on linux!
-            "application/x-compressed"  // gzip on windows
-    );
+    private static final String[] GZIP_EXTENSIONS = new String[]{".tgz", ".tar.gz", ".gzip"};
 
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
         try {
@@ -84,6 +81,8 @@ public class Log implements LogView {
     private LvFileAccessManager accessManager;
     @Value("${log-viewer.parser.max-unparsable-block-size:2097152}") // 2Mb
     private long unparsableBlockMaxSize;
+    @Value("${log-viewer.unpack-archive:false}")
+    private boolean unpackArchive;
 
     private final MultiListener<Consumer<FileAttributes>> changeListener = new MultiListener<>(this::createFileListener);
 
@@ -150,7 +149,7 @@ public class Log implements LogView {
 
     private void decompressAndCopyGZipFile() throws IOException {
 
-        File tempFile = File.createTempFile("log-viewer-", file.getName(file.getNameCount() - 1) + ".tmp");
+        File tempFile = File.createTempFile("log-viewer-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
         tempFile.deleteOnExit();
 
         try (GZIPInputStream gis = new GZIPInputStream(
@@ -254,7 +253,7 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                if (GZIP_CONTENT_TYPE.contains((Files.probeContentType(file))))
+                if (unpackArchive && Arrays.stream(GZIP_EXTENSIONS).anyMatch(it -> file.getFileName().endsWith(it)))
                     decompressAndCopyGZipFile();
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
