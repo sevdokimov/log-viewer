@@ -27,6 +27,8 @@ public class FileTypesTest {
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.zzz"));
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.log.z"));
 
+        assertEquals(FileTypes.GZ, FileTypes.detectType("aaaa/aaa.log.gz"));
+
         assertEquals(FileTypes.JAVA, FileTypes.detectType("/aaa.java"));
     }
 }

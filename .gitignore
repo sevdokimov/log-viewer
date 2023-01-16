@@ -1,6 +1,7 @@
 hs*.log
 
 /log-viewer-frontend/node_modules/
+/log-viewer-frontend/.angular/
 
 HELP.md
 target/
