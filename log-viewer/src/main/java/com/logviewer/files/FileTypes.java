@@ -21,7 +21,7 @@ public class FileTypes {
             "assets/file-types/text.png");
 
     public static final FileType TEXT = new FileType("text",
-            Pattern.compile(".*\\.txt\\~?", Pattern.CASE_INSENSITIVE),
+            Pattern.compile(".*\\.txt~?", Pattern.CASE_INSENSITIVE),
             "assets/file-types/text.png");
 
     public static final FileType JAVA = new FileType("java",
@@ -60,6 +60,10 @@ public class FileTypes {
             Pattern.compile(".*\\.(tgz|tar\\.gz)", Pattern.CASE_INSENSITIVE),
             "assets/file-types/archive.png");
 
+    public static final FileType GZ = new FileType("gz",
+            Pattern.compile(".*\\.(gz|gzip)", Pattern.CASE_INSENSITIVE),
+            "assets/file-types/archive.png");
+
     public static final FileType ZIP = new FileType("zip",
             Pattern.compile(".*\\.(jar|zip|war)", Pattern.CASE_INSENSITIVE),
             "assets/file-types/archive.png");
@@ -73,8 +77,8 @@ public class FileTypes {
             "assets/file-types/unknown.png");
 
 
-    private static FileType[] ALL_TYPES = new FileType[]{LOG, OUT, TEXT, JAVA, JAVA_SCRIPT, TYPE_SCRIPT, JSON, JSP, HTML,
-            JSPX, XML, PROPS, ZIP, TGZ, UNKNOWN};
+    private static final FileType[] ALL_TYPES = new FileType[]{LOG, OUT, TEXT, JAVA, JAVA_SCRIPT, TYPE_SCRIPT, JSON, JSP, HTML,
+            JSPX, XML, PROPS, ZIP, TGZ, GZ, UNKNOWN};
 
     static {
         Set<String> ids = new HashSet<>();
