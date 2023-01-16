@@ -292,10 +292,7 @@ export class LogNavigatorComponent implements OnInit, AfterViewInit {
         } else {
             let fileType = fsItem.type;
 
-            if (fileType === 'log' || fileType === 'out' || fileType === 'text' ||
-                fileType === 'tgz' ||
-                fileType === 'unknown'  // tgz on linux detected as unknown!
-            ) {
+            if (fileType === 'log' || fileType === 'out' || fileType === 'text' || fileType === 'gz') {
                 this.openFile.emit({path: fsItem.path, isCtrlClick: inNewWindow});
             }
         }

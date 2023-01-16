@@ -19,12 +19,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -33,11 +34,11 @@ import java.util.function.Predicate;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
 
+import static com.logviewer.files.FileTypes.GZ;
+
 public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
-
-    private static final String[] GZIP_EXTENSIONS = new String[]{".tgz", ".tar.gz", ".gzip"};
 
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
         try {
@@ -208,8 +209,7 @@ public class Log implements LogView {
 
                     if (cachedHashTimestamp == lastModification) {
                         hash = cachedHash;
-                    }
-                    else {
+                    } else {
                         hash = calculateHash(size);
 
                         if (!hash.equals(cachedHash)) {
@@ -225,8 +225,7 @@ public class Log implements LogView {
                     success = true;
                 } catch (IOException e) {
                     error = e;
-                }
-                finally {
+                } finally {
                     if (!success)
                         Utils.closeQuietly(this);
                 }
@@ -253,7 +252,7 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                if (unpackArchive && Arrays.stream(GZIP_EXTENSIONS).anyMatch(it -> file.toString().toLowerCase().endsWith(it)))
+                if (unpackArchive && GZ.getPattern().matcher(file.toString()).matches())
                     decompressAndCopyGZipFile();
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
@@ -345,8 +344,7 @@ public class Log implements LogView {
             if (fromPrevLine) {
                 if (!buf.loadPrevLine(firstLine, position))
                     return true;
-            }
-            else {
+            } else {
                 buf.loadLine(firstLine, position);
             }
 
@@ -369,8 +367,7 @@ public class Log implements LogView {
 
                 if (reader.canAppendTail()) {
                     appendTail(buf, reader, line.getEnd(), unparsedEnd);
-                }
-                else {
+                } else {
                     if (!consumer.test(createUnparsedRecord(buf, unparsedStart, unparsedEnd)))
                         return false;
                 }
@@ -406,8 +403,7 @@ public class Log implements LogView {
 
                     if (reader.canAppendTail()) {
                         appendTail(buf, reader, line.getEnd(), unparsedEnd);
-                    }
-                    else {
+                    } else {
                         if (!consumer.test(createUnparsedRecord(buf, unparsedStart, unparsedEnd)))
                             return false;
                     }
@@ -442,8 +438,7 @@ public class Log implements LogView {
             if (fromNextLine) {
                 if (!buf.loadNextLine(line, position))
                     return true;
-            }
-            else {
+            } else {
                 buf.loadLine(line, position);
             }
 
@@ -557,8 +552,7 @@ public class Log implements LogView {
                             if (!consumer.test(createUnparsedRecord(buf, unparsedStart, prevEnd)))
                                 return false;
                         }
-                    }
-                    else {
+                    } else {
                         if (!consumer.test(reader.buildRecord().setLogId(id)))
                             return false;
                     }
@@ -631,7 +625,7 @@ public class Log implements LogView {
                 crc.update(buf.array());
 
                 int hash = (int) crc.getValue();
-                long hashWithLength = (hash & 0xffff_ffffL) | ((long)hashSize << 32);
+                long hashWithLength = (hash & 0xffff_ffffL) | ((long) hashSize << 32);
 
                 return Long.toHexString(hashWithLength);
             } catch (EOFException e) {
@@ -649,7 +643,7 @@ public class Log implements LogView {
 
             int hashSize = (int) ((tLong >>> 32) & 0xff);
 
-            if (hashSize == hashSize(size) ) { // Compare size of block used to has calculation.
+            if (hashSize == hashSize(size)) { // Compare size of block used to has calculation.
                 return hash.equals(this.hash);
             }
 
