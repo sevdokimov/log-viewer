@@ -82,7 +82,7 @@ public class Log implements LogView {
     private LvFileAccessManager accessManager;
     @Value("${log-viewer.parser.max-unparsable-block-size:2097152}") // 2Mb
     private long unparsableBlockMaxSize;
-    @Value("${log-viewer.unpack-archive:false}")
+    @Value("${log-viewer.unpack-gz-archives:false}")
     private boolean unpackArchive;
 
     private final MultiListener<Consumer<FileAttributes>> changeListener = new MultiListener<>(this::createFileListener);
