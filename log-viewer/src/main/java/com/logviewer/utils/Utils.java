@@ -1,6 +1,5 @@
 package com.logviewer.utils;
 
-import com.google.gson.JsonParser;
 import com.logviewer.data2.LogFormat;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -13,10 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -44,7 +40,7 @@ public class Utils {
 
     public static final Object[] EMPTY_OBJECTS = new Object[0];
 
-    public static final JsonParser parser = new JsonParser();
+    private static volatile Path tempDir;
 
     public static final String LOCAL_HOST_NAME;
     static {
@@ -300,5 +296,18 @@ public class Utils {
 
         if (nano < MAX_TIME_MILLIS)
             throw new IllegalArgumentException("Time must be specified in nanoseconds, but looks like it is milliseconds: " + nano);
+    }
+
+    @NonNull
+    public static Path getTempDir() throws IOException {
+        Path res = tempDir;
+        if (res == null) {
+            res = Paths.get(System.getProperty("java.io.tmpdir"), "log-viewer");
+            Files.createDirectories(res);
+
+            tempDir = res;
+        }
+
+        return res;
     }
 }

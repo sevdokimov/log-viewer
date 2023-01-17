@@ -132,7 +132,7 @@ public abstract class AbstractWebTestCase implements LogPage {
         favoritesService.clear();
     }
 
-    protected static void withNewServer(TestUtils.ExceptionalRunnable run) throws Exception {
+    protected static <E extends Throwable> void withNewServer(TestUtils.ExceptionalRunnable<E> run) throws Exception, E {
         clearContext();
 
         try {

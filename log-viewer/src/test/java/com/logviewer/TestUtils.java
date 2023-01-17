@@ -147,7 +147,7 @@ public class TestUtils {
         }
     }
 
-    public static void withTimeZone(String tz, ExceptionalRunnable runnable) throws Exception {
+    public static <E extends Throwable> void withTimeZone(String tz, ExceptionalRunnable<E> runnable) throws E {
         TimeZone saved = TimeZone.getDefault();
 
         TimeZone.setDefault(TimeZone.getTimeZone(tz));
@@ -185,7 +185,20 @@ public class TestUtils {
         return target;
     }
 
-    public interface ExceptionalRunnable {
-        void run() throws Exception;
+    public interface ExceptionalRunnable<E extends Throwable> {
+        void run() throws E;
+    }
+
+    public static <E extends Throwable> void withSystemProp(@Nonnull String name, @Nonnull String value, @Nonnull ExceptionalRunnable<E> runnable) throws E {
+        String old = System.setProperty(name, value);
+        try {
+            runnable.run();
+        } finally {
+            if (old == null) {
+                System.clearProperty(name);
+            } else {
+                System.setProperty(name, value);
+            }
+        }
     }
 }

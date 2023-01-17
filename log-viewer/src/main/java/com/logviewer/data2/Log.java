@@ -13,9 +13,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.EOFException;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -40,7 +39,7 @@ public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
 
-    private static final String UNPACK_GZ_ARCHIVES = "log-viewer.unpack-gz-archives";
+    public static final String UNPACK_GZ_ARCHIVES = "log-viewer.unpack-gz-archives";
 
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
         try {
@@ -63,7 +62,10 @@ public class Log implements LogView {
 
     private final Object logChangedTaskKey = new Object();
 
-    private Path file;
+    private final Path file;
+
+    private volatile Path realDataFile;
+    private final Object realFileMux = new Object();
 
     private final String id;
 
@@ -150,14 +152,12 @@ public class Log implements LogView {
         }
     }
 
-    private void decompressAndCopyGZipFile() throws IOException {
+    private Path decompressAndCopyGZipFile() throws IOException {
+        Path tempFile = Files.createTempFile(Utils.getTempDir(), "unpacked-gz-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
+        tempFile.toFile().deleteOnExit();
 
-        File tempFile = File.createTempFile("log-viewer-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
-        tempFile.deleteOnExit();
-
-        try (GZIPInputStream gis = new GZIPInputStream(
-                Files.newInputStream(file.toFile().toPath()));
-             FileOutputStream fos = new FileOutputStream(tempFile)) {
+        try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(file));
+             OutputStream fos = Files.newOutputStream(tempFile)) {
 
             byte[] buffer = new byte[1024 * 10];
             int len;
@@ -166,7 +166,7 @@ public class Log implements LogView {
             }
         }
 
-        this.file = tempFile.toPath();
+        return tempFile;
     }
 
     public class LogSnapshot implements Snapshot {
@@ -249,22 +249,38 @@ public class Log implements LogView {
             return lastModification;
         }
 
+        private Path getDataRealFile() throws IOException {
+            Path res = realDataFile;
+            if (res == null) {
+                synchronized (realFileMux) {
+                    if (realDataFile != null)
+                        return realDataFile;
+
+                    if (GZ.getPattern().matcher(file.toString()).matches()) {
+                        if (!unpackArchive) {
+                            throw new IOException("Cannot open Gzip file because unpacking Gzip archives is disabled. " +
+                                    "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
+                                    "Be caution, automatic unpacking Gzip can fill up all the disk space.");
+                        }
+
+                        res = decompressAndCopyGZipFile();
+                    } else {
+                        res = file;
+                    }
+
+                    realDataFile = res;
+                }
+            }
+
+            return res;
+        }
+
         private SeekableByteChannel getChannel() throws IOException {
             if (channel == null) {
                 if (error != null)
                     throw new IOException(error);
 
-                if (GZ.getPattern().matcher(file.toString()).matches()) {
-                    if (!unpackArchive) {
-                        throw new IOException("Cannot open Gzip file because unpacking Gzip archives is disabled. " +
-                                "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
-                                "Be caution, automatic unpacking Gzip can fill up all the disk space.");
-                    }
-
-                    decompressAndCopyGZipFile();
-                }
-
-                channel = Files.newByteChannel(file, StandardOpenOption.READ);
+                channel = Files.newByteChannel(getDataRealFile(), StandardOpenOption.READ);
             }
 
             buf = new BufferedFile(channel, size);
