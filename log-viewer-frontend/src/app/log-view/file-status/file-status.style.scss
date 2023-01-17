@@ -27,3 +27,9 @@
   overflow: auto;
   font-family: monospace;
 }
+
+.io-error-message {
+  display: inline-block;
+  max-width: 450px;
+  white-space: pre-wrap;
+}

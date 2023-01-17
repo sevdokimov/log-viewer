@@ -19,7 +19,7 @@
     </span>
     <span *ngSwitchCase="'IOException'" class="file-error" [title]="status.errorMessage">
         IO Error <span (click)="showDialog(stacktraceDialog)" class="fas fa-wrench toolIcon" title="Show details"></span>
-        <span *ngIf="showErrorMessages">({{status.errorMessage}})</span>
+        <span *ngIf="showErrorMessages" class="io-error-message">({{status.errorMessage}})</span>
     </span>
     <span *ngSwitchCase="'NoDateField'" class="file-error" [title]="status.errorMessage">
         <span *ngIf="showErrorMessages">({{status.errorMessage}})</span>

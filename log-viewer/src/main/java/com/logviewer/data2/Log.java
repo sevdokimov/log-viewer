@@ -40,6 +40,8 @@ public class Log implements LogView {
 
     private static final Logger LOG = LoggerFactory.getLogger(Log.class);
 
+    private static final String UNPACK_GZ_ARCHIVES = "log-viewer.unpack-gz-archives";
+
     public static Function<String, String> DEFAULT_ID_GENERATOR = path -> {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
@@ -82,7 +84,7 @@ public class Log implements LogView {
     private LvFileAccessManager accessManager;
     @Value("${log-viewer.parser.max-unparsable-block-size:2097152}") // 2Mb
     private long unparsableBlockMaxSize;
-    @Value("${log-viewer.unpack-gz-archives:false}")
+    @Value("${" + UNPACK_GZ_ARCHIVES + ":false}")
     private boolean unpackArchive;
 
     private final MultiListener<Consumer<FileAttributes>> changeListener = new MultiListener<>(this::createFileListener);
@@ -252,8 +254,15 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                if (unpackArchive && GZ.getPattern().matcher(file.toString()).matches())
+                if (GZ.getPattern().matcher(file.toString()).matches()) {
+                    if (!unpackArchive) {
+                        throw new IOException("Cannot open Gzip file because unpacking Gzip archives is disabled. " +
+                                "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
+                                "Be caution, automatic unpacking Gzip can fill up all the disk space.");
+                    }
+
                     decompressAndCopyGZipFile();
+                }
 
                 channel = Files.newByteChannel(file, StandardOpenOption.READ);
             }
