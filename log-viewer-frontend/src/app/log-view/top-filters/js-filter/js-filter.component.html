@@ -7,29 +7,37 @@
         <span *ngIf="titleName">{{titleName}}</span>
 
         <span *ngIf="!titleName">
-            Script: <span class="header-script">{{titleScript}}</span>
+            {{ 'JS_FILTER.SCRIPT' | translate }} <span class="header-script">{{titleScript}}</span>
         </span>
         &nbsp;<i class="fas fa-caret-down"></i>
     </span>
-    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    <mat-icon (click)="removeFilter()" title="{{ 'JS_FILTER.REMOVE_FILTER' | translate }}"
+              class="remote-filter-icon">
+        close
+    </mat-icon>
     
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
         <form class="js-filter" (ngSubmit)="onApply()">
             <div class="name-panel">
                 <mat-form-field class="filter-name" appearance="fill">
-                    <mat-label>Filter name <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
+                    <mat-label>{{ 'JS_FILTER.FILTER_NAME' | translate }}
+                        <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span>
+                    </mat-label>
                     <input name="name-filter-input" [(ngModel)]="name" matInput>
                 </mat-form-field>
 
                 <div style="float: right">
                     <lv-switch [(value)]="enabled" (valueChange)="enableDisable()"
-                               [title]="enabled ? 'Disable filter' : 'Enable filter'"></lv-switch>
+                               title="{{'TEXT_FILTER.' + (enabled ? 'DISABLE_FILTER' : 'ENABLE_FILTER') | translate }}"
+                    >
+                    </lv-switch>
                 </div>
             </div>
 
             <span class="small">
-                    Function that determines whether the event will be shown or not (JavaScript)
-                    <span *ngIf="script !== originalScript" class="modified-script-flag" title="Script contains unsaved changed"> *</span>
+                    {{ 'JS_FILTER.DESCRIPTION' | translate }}
+                    <span *ngIf="script !== originalScript" class="modified-script-flag"
+                          title="{{ 'JS_FILTER.SCRIPT_CONTAINS_UNSAVED_CHANGED' | translate }}"> *</span>
             </span>
 
             <div class="script-container">
@@ -44,11 +52,10 @@
             </div>
 
             <div class="script-info text-secondary">
-                <span class="field-in-info">text</span> - entire event text.
+                <span class="field-in-info">text</span> - {{ 'JS_FILTER.ENTIRE_EVENT_TEXT' | translate }}
                 <span *ngIf="fieldList.length">
                     <br>
-                    <span class="field-in-info">fields</span> - object containing event fields. The following fields are present
-                    in the current log:
+                    <span class="field-in-info">fields</span> - {{ 'JS_FILTER.FIELDS' | translate }}
                     <span>
                         <span *ngFor="let field of fieldList" class="field-with-comma">
                             <span class="comma">, </span>
@@ -59,13 +66,14 @@
             </div>
 
             <div class="action-panel">
-                <button mat-stroked-button title="Apply filter" (click)="onApply()"
+                <button mat-stroked-button title="{{ 'JS_FILTER.APPLY_FILTER' | translate }}" (click)="onApply()"
                         name="apply-button">
-                    Save
+                    {{ 'JS_FILTER.SAVE' | translate }}
                 </button>
 
-                <button mat-button mat-stroked-button title="Revert changes" (click)="onCancel()" name="cancel-button">
-                    Revert
+                <button mat-button mat-stroked-button title="{{ 'JS_FILTER.REVERT_CHANGES' | translate }}"
+                        (click)="onCancel()" name="cancel-button">
+                    {{ 'JS_FILTER.REVERT' | translate }}
                 </button>
             </div>
         </form>

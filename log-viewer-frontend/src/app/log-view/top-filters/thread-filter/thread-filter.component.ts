@@ -2,6 +2,7 @@ import {Component, ElementRef, ViewChild} from '@angular/core';
 import {FilterPanelStateService, FilterState} from '@app/log-view/filter-panel-state.service';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {LvUtils} from '@app/utils/utils';
+import {LanguageService} from "@app/log-view/language-service";
 
 @Component({
     selector: 'lv-thread-filter',
@@ -22,9 +23,11 @@ export class LvThreadFilterComponent extends FilterWithDropdown {
     excludes: string[];
 
     threadInput: string = '';
+    languageService: LanguageService;
 
-    constructor(filterPanelStateService: FilterPanelStateService) {
+    constructor(filterPanelStateService: FilterPanelStateService, languageService: LanguageService) {
         super(filterPanelStateService);
+        this.languageService = languageService;
     }
 
     protected getDropdownDiv(): ElementRef {
@@ -32,40 +35,53 @@ export class LvThreadFilterComponent extends FilterWithDropdown {
     }
 
     protected loadComponentState(state: FilterState) {
-        this.title = LvThreadFilterComponent.calculateTitle(state);
+        this.title = LvThreadFilterComponent.calculateTitle(state, this.languageService);
 
         this.includes = [...(state.thread?.includes ?? [])];
         this.excludes = [...(state.thread?.excludes ?? [])];
     }
 
-    static calculateTitle(state: FilterState): string {
+    static calculateTitle(state: FilterState, languageService: LanguageService): string {
         if (!state.thread?.includes?.length && !state.thread?.excludes?.length) {
-            return 'Empty thread filter';
+            return languageService.getTranslate('THREAD_FILTER.EMPTY_THREAD_FILTER');
         }
 
-        if (state.thread.includes?.length === 1 && !state.thread.excludes?.length) {
+        const threadIncludesCount = state.thread.includes?.length;
+        const threadExcludesCount = state.thread.excludes?.length;
+
+        if (threadIncludesCount === 1 && !threadExcludesCount) {
             return state.thread.includes[0];
         }
 
-        if (state.thread.excludes?.length === 1 && !state.thread.includes?.length) {
+        if (threadExcludesCount === 1 && !threadIncludesCount) {
             return '- ' + state.thread.excludes[0];
         }
 
         let res = '';
 
-        if (state.thread.includes?.length) {
-            res += state.thread.includes?.length + ' visible';
+        if (threadIncludesCount) {
+            const visible = languageService.getTranslate('THREAD_FILTER.VISIBLE',
+                {count: threadIncludesCount});
+
+            res += `${threadIncludesCount} ${visible}`;
         }
 
-        if (state.thread.excludes?.length) {
+        if (threadExcludesCount) {
             if (res.length > 0) {
                 res += ', ';
             }
-            res += state.thread.excludes?.length + ' hidden';
+            const hidden = languageService.getTranslate('THREAD_FILTER.HIDDEN',
+                {count: threadExcludesCount});
+
+            res += `${threadExcludesCount} ${hidden}`;
         }
 
         if (res.length > 0) {
-            res += ' threads';
+            const countThreads = threadExcludesCount ? threadExcludesCount : threadIncludesCount;
+            const threads = languageService.getTranslate('THREAD_FILTER.HIDDEN_AND_VISIBLE_THREADS',
+                {count: countThreads});
+
+            res += ` ${threads}`;
         }
 
         return res;
@@ -96,7 +112,7 @@ export class LvThreadFilterComponent extends FilterWithDropdown {
             LvUtils.delete(state.thread.includes, thread);
             LvUtils.delete(state.thread.excludes, thread);
         });
-        
+
         LvUtils.delete(this.excludes, thread);
     }
 

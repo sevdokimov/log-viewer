@@ -7,40 +7,40 @@
         <span *ngIf="titleName">{{titleName}}</span>
 
         <span *ngIf="!titleName">
-            Text: <span class="header-script">{{titleText}}</span>
+            {{ 'TEXT_FILTER.TEXT' | translate }}: <span class="header-script">{{titleText}}</span>
         </span>
         &nbsp;<i class="fas fa-caret-down"></i>
     </span>
-    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    <mat-icon (click)="removeFilter()" title="{{ 'TEXT_FILTER.REMOVE_FILTER' | translate }}" class="remote-filter-icon">close</mat-icon>
     
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
         <form class="text-filter" (ngSubmit)="onApply()">
             <div class="position-relative">
                 <mat-form-field class="filter-name" appearance="fill">
-                    <mat-label>Filter name <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
+                    <mat-label>{{ 'TEXT_FILTER.FILTER_NAME' | translate }} <span *ngIf="name !== originalName" class="modifier-name-flag"> *</span></mat-label>
                     <input name="name-filter-input" [(ngModel)]="name" matInput>
                 </mat-form-field>
 
                 <div class="include-exclude-group">
                     <label>
-                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="include"> Show only matched
+                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="include"> {{ 'TEXT_FILTER.SHOW_ONLY_MATCHED' | translate }}
                     </label>
                     <label>
-                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="exclude"> Hide matched
+                        <input type="radio" name="textIncludeExclude" [(ngModel)]="includeExclude" value="exclude"> {{ 'TEXT_FILTER.HIDE_MATCHED' | translate }}
                     </label>
                 </div>
 
                 <div style="float: right">
                     <lv-switch [(value)]="enabled" (valueChange)="enableDisable()"
-                               [title]="enabled ? 'Disable filter' : 'Enable filter'"></lv-switch>
+                               title="{{'TEXT_FILTER.' + (enabled ? 'DISABLE_FILTER' : 'ENABLE_FILTER') | translate }}"></lv-switch>
                 </div>
             </div>
 
             <div class="position-relative">
                 <span class="small">
-                    Text
+                    {{ 'TEXT_FILTER.TEXT' | translate }}
                     <span *ngIf="pattern.s !== patternOriginal.s" class="modified-script-flag"
-                          title="Script contains unsaved changed"> *</span>
+                          title="{{ 'TEXT_FILTER.SCRIPT_CONTAINS_UNSAVED_CHANGED' | translate }}"> *</span>
                 </span>
 
                 <div class="search-controls">
@@ -49,15 +49,15 @@
                                [(ngModel)]="pattern.matchCase">
                         
                         <label class="form-check-label" for="match-case-checkbox">
-                            Match case
+                            {{ 'TEXT_FILTER.MATCH_CASE' | translate }}
                         </label>
                     </div>
-                    <div class="form-check form-check-inline" title="Use text as a regexp">
+                    <div class="form-check form-check-inline" title="{{ 'TEXT_FILTER.USE_TEXT_AS_A_REGEXP' | translate }}">
                         <input id="regex-checkbox" name="regex-checkbox" class="form-check-input" type="checkbox"
                                [(ngModel)]="pattern.regex" (change)="checkRegexp()">
 
                         <label class="form-check-label" for="regex-checkbox">
-                            Regexp
+                            {{ 'TEXT_FILTER.REGEXP' | translate }}
                         </label>
                     </div>
                 </div>
@@ -73,13 +73,13 @@
             </div>
 
             <div class="action-panel">
-                <button mat-stroked-button title="Apply filter" (click)="onApply()" [disabled]="!!regexpError"
+                <button mat-stroked-button title="{{ 'TEXT_FILTER.APPLY_FILTER' | translate }}" (click)="onApply()" [disabled]="!!regexpError"
                         name="apply-button">
-                    Save
+                    {{ 'TEXT_FILTER.SAVE' | translate }}
                 </button>
 
-                <button mat-button mat-stroked-button title="Revert changes" (click)="onCancel()" name="cancel-button">
-                    Revert
+                <button mat-button mat-stroked-button title="{{ 'TEXT_FILTER.REVERT_CHANGES' | translate }}" (click)="onCancel()" name="cancel-button">
+                    {{ 'TEXT_FILTER.REVERT' | translate }}
                 </button>
             </div>
         </form>

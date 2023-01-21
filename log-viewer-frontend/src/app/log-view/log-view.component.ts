@@ -46,6 +46,7 @@ import {ContextMenuComponent, ContextMenuService} from '@perfectmemory/ngx-conte
 import {ContextMenuHandler} from '@app/log-view/context-menu';
 import {LogPathUtils} from '@app/utils/log-path-utills';
 import {OpenEvent} from '@app/log-navigator/log-navigator.component';
+import {LanguageService} from "@app/log-view/language-service";
 
 @Component({
     selector: 'lv-log-view',
@@ -58,6 +59,7 @@ import {OpenEvent} from '@app/log-navigator/log-navigator.component';
         ViewStateService,
         FilterPanelStateService,
         ContextMenuHandler,
+        LanguageService,
     ],
 })
 export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, BackendEventHandlerHolder {
@@ -135,6 +137,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         private contextMenuService: ContextMenuService<any>,
         public filterPanelStateService: FilterPanelStateService,
         public contextMenuHandler: ContextMenuHandler,
+        private languageService: LanguageService,
     ) {
         this.filterPanelStateService.currentRecords = this.m;
     }
@@ -209,7 +212,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 this.setSelectedLine(index);
 
-                this.openContextMenu(index,  event);
+                this.openContextMenu(index, event);
                 break;
             }
         }
@@ -526,10 +529,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             .post('rest/log-view/generatePermalink', [linkHash, linkData])
             .subscribe(
                 res => {
-                    this.toastr.success('Permalink has been copied to the clipboard', null, {closeButton: true});
+                    const successMessage = this.languageService.getTranslate('NOTIFICATIONS.PERMALINK_HAS_BEEN_COPIED');
+
+                    this.toastr.success(successMessage, null, {closeButton: true});
                 },
                 error => {
-                    this.toastr.error('Failed to generate permalink', null, {closeButton: true});
+                    const errorMessage = this.languageService.getTranslate('NOTIFICATIONS.FAILED_TO_GENERATE_PERMALINK');
+
+                    this.toastr.error(errorMessage, null, {closeButton: true});
                 }
             );
 
@@ -684,9 +691,13 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     private showNotFoundMessage(d: number) {
         if (d > 0) {
-            this.toastr.info('Not found. Try find to another direction (press Shift+F3 to search back)');
+            const errorMessage = this.languageService.getTranslate('NOTIFICATIONS.NOT_FOUND_TRY_DIRECTION_BACK');
+
+            this.toastr.info(errorMessage);
         } else {
-            this.toastr.info('Not found. Try find to another direction (press F3 to search forward)');
+            const errorMessage = this.languageService.getTranslate('NOTIFICATIONS.NOT_FOUND_TRY_DIRECTION_FORWARD');
+
+            this.toastr.info(errorMessage);
         }
     }
 
@@ -1163,13 +1174,19 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     private onBackendError(event: BackendErrorEvent) {
         console.error(event.stacktrace);
         this.backendErrorStacktrace = event.stacktrace;
-        this.commService.close('<h5 class="text-danger">Internal error</h5>');
+        const errorMessage = this.languageService.getTranslate('ERROR.INTERNAL_ERROR');
+
+        this.commService.close(`<h5 class="text-danger">${errorMessage}</h5>`);
     }
 
     disconnected(disconnectMessage?: string) {
         this.modalWindow = 'disconnected';
         this.state = State.STATE_DISCONNECTED;
-        this.disconnectMessage = disconnectMessage || '<br><h3 class="text-danger">&nbsp;Disconnected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3><br>';
+        let disconnectMessageDefault;
+        const errorMessage = this.languageService.getTranslate('ERROR.DISCONNECTED');
+        disconnectMessageDefault = `<br><h3 class="text-danger">&nbsp;${errorMessage}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3><br>`;
+
+        this.disconnectMessage = disconnectMessage || disconnectMessageDefault;
     }
 
     @BackendEventHandler()
@@ -1504,7 +1521,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     addNewLog(event: OpenEvent) {
         if (this.logs?.find(l => (!l.node || l.node === this.viewConfig.localhostName) && l.path === event.path)) {
-            this.toastr.info('"' + LvUtils.extractName(event.path) + '" is already present on the view');
+            const errorMessage = this.languageService.getTranslate('NOTIFICATIONS.IS_ALREADY_PRESENT');
+
+            this.toastr.info(`"${LvUtils.extractName(event.path)}" ${errorMessage}`);
+
             this.modalWindow = null;
             return;
         }
@@ -1553,6 +1573,15 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
         }
         return null;
+    }
+
+    setLanguage(language: string) {
+        this.languageService.applyLang(language)
+        localStorage.setItem('language', language);
+    }
+
+    isCurrentLanguage(language: string) {
+        return this.languageService.is(language);
     }
 }
 

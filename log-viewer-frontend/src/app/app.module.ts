@@ -14,7 +14,7 @@ import {ModalModule} from 'ngx-bootstrap/modal';
 import {BsDropdownModule} from 'ngx-bootstrap/dropdown';
 import {ToastrModule} from 'ngx-toastr';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {TopFilterListComponent} from './log-view/top-filters/top-filter-list/top-filter-list.component';
 import {LevelListComponent} from './log-view/top-filters/level-list/level-list.component';
 import {ExceptionOnlyComponent} from '@app/log-view/top-filters/exception-only/exception-only.component';
@@ -37,7 +37,10 @@ import {AutosizeModule} from 'ngx-autosize';
 import {MainPageComponent} from '@app/main-page/main-page.component';
 import {ContextMenuModule} from '@perfectmemory/ngx-contextmenu';
 import {SwitcherComponent} from '@app/switcher/switcher.component';
-import {DownloadDialogComponent} from '@app/log-view/download-dialog/download-dialog.component';
+import {DownloadDialogComponent} from "@app/log-view/download-dialog/download-dialog.component";
+import {TranslateCompiler, TranslateLoader, TranslateModule} from "@ngx-translate/core";
+import {TranslateHttpLoader} from "@ngx-translate/http-loader";
+import {TranslateMessageFormatCompiler} from "ngx-translate-messageformat-compiler";
 
 export const appRoutes: Routes = [
     {
@@ -48,6 +51,10 @@ export const appRoutes: Routes = [
     {path: 'log', component: LogViewComponent, data: {title: 'Log view'}},
 ];
 
+export function HttpLoaderFactory(http: HttpClient) {
+    return new TranslateHttpLoader(http);
+}
+
 @NgModule({
     imports: [
         BrowserModule,
@@ -57,7 +64,17 @@ export const appRoutes: Routes = [
         ModalModule.forRoot(),
         FormsModule,
         ToastrModule.forRoot(),
-
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            },
+            compiler: {
+                provide: TranslateCompiler,
+                useClass: TranslateMessageFormatCompiler
+            }
+        }),
         ContextMenuModule,
 
         AutosizeModule,

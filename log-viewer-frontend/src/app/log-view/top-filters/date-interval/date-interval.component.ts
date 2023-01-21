@@ -6,12 +6,13 @@ import * as moment from 'moment';
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {LvUtils} from '@app/utils/utils';
 import {formatDateAsNanosecondString} from "@app/log-view/top-filters/date-interval/date-interval-filter-factory";
+import {LanguageService} from "@app/log-view/language-service";
 
 const DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 const CUSTOM_DATE_FORMATS: NgxMatDateFormats = {
     parse: {
-         dateInput: DATE_FORMAT,
+        dateInput: DATE_FORMAT,
     },
     display: {
         dateInput: DATE_FORMAT,
@@ -27,7 +28,7 @@ const CUSTOM_DATE_FORMATS: NgxMatDateFormats = {
     styleUrls: ['./date-interval.component.scss'],
 
     providers: [
-        { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
+        {provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS}
     ]
 })
 export class LvDateIntervalComponent extends FilterWithDropdown {
@@ -42,10 +43,13 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
 
     defaultDate: Moment;
 
-    readonly defaultTime = [0, 0 , 0];
+    languageService: LanguageService;
 
-    constructor(filterPanelStateService: FilterPanelStateService) {
+    readonly defaultTime = [0, 0, 0];
+
+    constructor(filterPanelStateService: FilterPanelStateService, languageService: LanguageService) {
         super(filterPanelStateService);
+        this.languageService = languageService;
     }
 
     protected getDropdownDiv(): ElementRef {
@@ -63,14 +67,18 @@ export class LvDateIntervalComponent extends FilterWithDropdown {
         this.endDate = endDateMilli ? moment(endDateMilli) : null;
 
         if (!this.startDate && !this.endDate) {
-            this.title = 'Empty timestamp filter';
+            this.title = this.languageService.getTranslate('DATE_INTERVAL.EMPTY_TIMESTAMP_FILTER');
         } else if (this.startDate && this.endDate) {
             this.title = LvDateIntervalComponent.niceFormat(startDateMilli) + ' - ' + LvDateIntervalComponent.niceFormat(endDateMilli);
         } else {
             if (this.endDate) {
-                this.title = 'Till ' + LvDateIntervalComponent.niceFormat(endDateMilli);
+                const till = this.languageService.getTranslate('DATE_INTERVAL.TILL');
+
+                this.title = `${till} ${LvDateIntervalComponent.niceFormat(endDateMilli)}`;
             } else {
-                this.title = 'Since ' + LvDateIntervalComponent.niceFormat(startDateMilli);
+                const since = this.languageService.getTranslate('DATE_INTERVAL.SINCE');
+
+                this.title = `${since} ${LvDateIntervalComponent.niceFormat(startDateMilli)}`;
             }
         }
     }

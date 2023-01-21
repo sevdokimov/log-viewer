@@ -1,43 +1,55 @@
 <span *ngIf="status?.hash">
     <span class="file-attr"
-          title="File size = {{status.size}}">{{status.size | slSize}}</span>,
+          title="{{ 'FILE_STATUS.FILE_SIZE' | translate }} = {{status.size}}">{{status.size | slSize}}</span>,
     <span class="file-attr"
-          title="Last modification time">{{status.lastModification | date : 'yyyy-MM-dd HH:mm:ss'}}</span>
+          title="{{ 'FILE_STATUS.LAST_MODIFICATION_TIME' | translate }}">
+        {{status.lastModification | date : 'yyyy-MM-dd HH:mm:ss'}}
+    </span>
 </span>
 <span [ngSwitch]="status?.errorType">
     <span *ngSwitchCase="'NoSuchFileException'" class="file-not-found">
-        file not found
+        {{ 'FILE_STATUS.FILE_NOT_FOUND' | translate }}
     </span>
-    <span *ngSwitchCase="'AccessDeniedException'" class="file-error" title="Access denied by OS">
-        access Denied
+    <span *ngSwitchCase="'AccessDeniedException'" class="file-error"
+          title="{{ 'FILE_STATUS.ACCESS_DENIED_BY_OS' | translate }}">
+        {{ 'FILE_STATUS.ACCESS_DENIED' | translate }}
     </span>
-    <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error" title="Access denied in application configuration">
-        access denied <span class="fas fa-wrench"></span>
+    <span *ngSwitchCase="'DirectoryNotVisibleException'" class="file-error"
+          title="{{ 'FILE_STATUS.ACCESS_DENIED_IN_APPLICATION_CONFIGURATION' | translate }}">
+        {{ 'FILE_STATUS.ACCESS_DENIED' | translate }} <span class="fas fa-wrench"></span>
     </span>
     <span *ngSwitchCase="'ConnectionProblem'" class="file-error">
         {{status.errorMessage}}
     </span>
     <span *ngSwitchCase="'IOException'" class="file-error" [title]="status.errorMessage">
-        IO Error <span (click)="showDialog(stacktraceDialog)" class="fas fa-wrench toolIcon" title="Show details"></span>
+        {{ 'FILE_STATUS.IO_ERROR' | translate }} <span (click)="showDialog(stacktraceDialog)"
+                                                       class="fas fa-wrench toolIcon"
+                                                       title="{{ 'FILE_STATUS.SHOW_DETAILS' | translate }}"></span>
         <span *ngIf="showErrorMessages" class="io-error-message">({{status.errorMessage}})</span>
     </span>
     <span *ngSwitchCase="'NoDateField'" class="file-error" [title]="status.errorMessage">
         <span *ngIf="showErrorMessages">({{status.errorMessage}})</span>
-        <span *ngIf="!showErrorMessages">No date field</span>
+        <span *ngIf="!showErrorMessages">{{ 'FILE_STATUS.NO_DATE_FIELD' | translate }}</span>
     </span>
     <span *ngSwitchCase="'internal_error'" class="file-error">
-        Internal error <span (click)="showDialog(stacktraceDialog)" class="fas fa-wrench toolIcon" title="Show details"></span>
+        {{ 'FILE_STATUS.INTERNAL_ERROR' | translate }}
+        <span (click)="showDialog(stacktraceDialog)"
+              class="fas fa-wrench toolIcon"
+              title="{{ 'FILE_STATUS.SHOW_DETAILS' | translate }}">
+        </span>
     </span>
     <span *ngSwitchCase="'IncorrectFormatException'" class="file-error"
-          title="File content cannot be parsed using the specified log format: {{status.metainfo.format}}">
-        Incorrect log format
-        <span (click)="showDialog(formatDialog)" class="fas fa-wrench toolIcon" title="Show details"></span>
+          title="{{ 'FILE_STATUS.INCORRECT_LOG_FORMAT' | translate }} {{status.metainfo.format}}">
+        {{ 'FILE_STATUS.INCORRECT_LOG_FORMAT' | translate }}
+        <span (click)="showDialog(formatDialog)" class="fas fa-wrench toolIcon"
+              title="{{ 'FILE_STATUS.SHOW_DETAILS' | translate }}">
+        </span>
     </span>
 </span>
 
 <ng-template #stacktraceDialog>
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Error details</h4>
+        <h4 class="modal-title" id="modal-basic-title">{{ 'FILE_STATUS.ERROR_DETAILS' | translate }}</h4>
         <button type="button" class="close" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
@@ -49,13 +61,13 @@
 
 <ng-template #formatDialog>
     <div class="modal-header">
-        <h4 class="modal-title">Error details</h4>
+        <h4 class="modal-title">{{ 'FILE_STATUS.ERROR_DETAILS' | translate }}</h4>
         <button type="button" class="close" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        File content cannot be parsed using the specified log format:<br>
+        {{ 'FILE_STATUS.FILE_CONTENT_CANNOT_BE_PARSED' | translate }}<br>
         <div class="log-format">{{status.metainfo.format}}</div>
     </div>
 </ng-template>

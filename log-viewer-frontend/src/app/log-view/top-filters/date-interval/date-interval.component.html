@@ -1,21 +1,35 @@
 <div #dateDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter">
     <span (click)="toggleFilterPanel()" class="interval-title">{{title}}&nbsp;<i class="fas fa-caret-down"></i></span>
-    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    <mat-icon (click)="removeFilter()"
+              title="{{ 'DATE_INTERVAL.REMOVE_FILTER' | translate }}"
+              class="remote-filter-icon">
+        close
+    </mat-icon>
     
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
         <div class="time-select-panel">
             <div class="predefined-intervals-panel">
-                <button mat-button mat-stroked-button name="lastX-button" [matMenuTriggerFor]="lastXMenu">Last X min <i class="fas fa-caret-down"></i></button>
+                <button mat-button mat-stroked-button name="lastX-button" [matMenuTriggerFor]="lastXMenu">{{ 'DATE_INTERVAL.LAST_X_MIN' | translate }} <i class="fas fa-caret-down"></i></button>
 
                 <mat-menu #lastXMenu="matMenu">
-                    <button mat-menu-item name="last5-button" (click)="lastXMin(5)">Last 5 min</button>
-                    <button mat-menu-item name="last15-button" (click)="lastXMin(15)">Last 15 min</button>
-                    <button mat-menu-item name="last60-button" (click)="lastXMin(60)">Last 60 min</button>
-                    <button mat-menu-item name="today-button" (click)="today()">Today</button>
-                    <button mat-menu-item name="yesterday-button" (click)="yesterday()">Yesterday</button>
+                    <button mat-menu-item name="last5-button" (click)="lastXMin(5)">
+                        {{ 'DATE_INTERVAL.LAST_5_MIN' | translate }}
+                    </button>
+                    <button mat-menu-item name="last15-button" (click)="lastXMin(15)">
+                        {{ 'DATE_INTERVAL.LAST_15_MIN' | translate }}
+                    </button>
+                    <button mat-menu-item name="last60-button" (click)="lastXMin(60)">
+                        {{ 'DATE_INTERVAL.LAST_60_MIN' | translate }}
+                    </button>
+                    <button mat-menu-item name="today-button" (click)="today()">
+                        {{ 'DATE_INTERVAL.TODAY' | translate }}
+                    </button>
+                    <button mat-menu-item name="yesterday-button" (click)="yesterday()">
+                        {{ 'DATE_INTERVAL.YESTERDAY' | translate }}
+                    </button>
                 </mat-menu>
 
-                <button mat-button mat-stroked-button name="since-current-button" (click)="sinceCurrentMoment()">Since current moment</button>
+                <button mat-button mat-stroked-button name="since-current-button" (click)="sinceCurrentMoment()">{{ 'DATE_INTERVAL.SINCE_CURRENT_MOMENT' | translate }}</button>
             </div>
 
             <form (ngSubmit)="onApply()">
@@ -23,7 +37,8 @@
                     <tr>
                         <td>
                             <mat-form-field>
-                                <input [(ngModel)]="startDate" name="startDate" placeholder="Start date"
+                                <input [(ngModel)]="startDate" name="startDate"
+                                       placeholder="{{ 'DATE_INTERVAL.START_DATE' | translate }}"
                                        matInput [ngxMatDatetimePicker]="pickerStartDate" autocomplete="off">
 
                                 <mat-datepicker-toggle matSuffix [for]="pickerStartDate"></mat-datepicker-toggle>
@@ -31,12 +46,16 @@
                                                           [defaultTime]="defaultTime" [startAt]="defaultDate">
                                 </ngx-mat-datetime-picker>
 
-                                <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearStartDate()">close</mat-icon>
+                                <mat-icon matSuffix class="clear-icon"
+                                          title="{{ 'DATE_INTERVAL.CLEAR' | translate }}"
+                                          (click)="clearStartDate()">
+                                    close
+                                </mat-icon>
                             </mat-form-field>
                         </td>
                         <td>
                             <mat-form-field>
-                                <input [(ngModel)]="endDate" name="endDate" placeholder="End date"
+                                <input [(ngModel)]="endDate" name="endDate" placeholder="{{ 'DATE_INTERVAL.END_DATE' | translate }}"
                                        matInput [ngxMatDatetimePicker]="pickerEndDate" autocomplete="off">
 
                                 <mat-datepicker-toggle matSuffix [for]="pickerEndDate"></mat-datepicker-toggle>
@@ -44,23 +63,33 @@
                                                          [defaultTime]="defaultTime" [startAt]="defaultDate">
                                 </ngx-mat-datetime-picker>
 
-                                <mat-icon matSuffix class="clear-icon" title="Clear" (click)="clearEndDate()">close</mat-icon>
+                                <mat-icon matSuffix class="clear-icon"
+                                          title="{{ 'DATE_INTERVAL.CLEAR' | translate }}"
+                                          (click)="clearEndDate()">
+                                    close
+                                </mat-icon>
                             </mat-form-field>
                         </td>
                     </tr>
                 </table>
 
                 <div *ngIf="startDate && endDate && (endDate < startDate)" class="time-range-error">
-                    <mat-icon>error_outline</mat-icon> Error: end-date < start-date
+                    <mat-icon>error_outline</mat-icon> {{ 'DATE_INTERVAL.END_DATE_MORE_START_DATE' | translate }}
                 </div>
 
                 <div class="action-panel">
-                    <button mat-button mat-stroked-button title="Apply filter" (click)="onApply()"
-                            name="apply-button" [disabled]="startDate && endDate && (endDate < startDate)">
+                    <button mat-button mat-stroked-button
+                            title="{{ 'DATE_INTERVAL.APPLY_FILTER' | translate }}"
+                            (click)="onApply()"
+                            name="apply-button"
+                            [disabled]="startDate && endDate && (endDate < startDate)">
                         <span class="mat-button-wrapper"><mat-icon>done</mat-icon></span>
                     </button>
 
-                    <button mat-button mat-stroked-button title="Revert changes" (click)="onCancel()" name="cancel-button">
+                    <button mat-button mat-stroked-button
+                            title="{{ 'DATE_INTERVAL.REVERT_CHANGES' | translate }}"
+                            (click)="onCancel()"
+                            name="cancel-button">
                         <span class="mat-button-wrapper"><mat-icon>close</mat-icon></span>
                     </button>
                 </div>

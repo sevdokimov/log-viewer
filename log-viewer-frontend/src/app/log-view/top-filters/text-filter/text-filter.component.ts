@@ -3,6 +3,7 @@ import {FilterPanelStateService, FilterState, TextFilter} from '@app/log-view/fi
 import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown';
 import {LvUtils} from '@app/utils/utils';
 import {SearchPattern, SearchUtils} from '@app/log-view/search';
+import {LanguageService} from "@app/log-view/language-service";
 
 @Component({
     selector: 'lv-text-filter',
@@ -34,8 +35,11 @@ export class LvTextFilterComponent extends FilterWithDropdown {
 
     regexpError: string;
 
-    constructor(filterPanelStateService: FilterPanelStateService) {
+    languageService: LanguageService;
+
+    constructor(filterPanelStateService: FilterPanelStateService, languageService: LanguageService) {
         super(filterPanelStateService);
+        this.languageService = languageService;
     }
 
     protected getDropdownDiv(): ElementRef {
@@ -70,7 +74,7 @@ export class LvTextFilterComponent extends FilterWithDropdown {
             this.titleText = LvUtils.trimText(this.pattern.s, 40);
             
             if (!this.titleText) {
-                this.titleText = '<empty>';
+                this.titleText = this.languageService.getTranslate('TEXT_FILTER.EMPTY');
             }
         }
 

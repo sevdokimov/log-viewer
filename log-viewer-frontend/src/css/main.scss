@@ -447,6 +447,17 @@ body {
   box-shadow: 0 0 5px #28a745;
 }
 
+.dropdown-submenu{
+  position: relative;
+}
+
+.dropdown-submenu:hover .dropdown-menu, .dropdown-submenu:focus .dropdown-menu{
+  display: flex;
+  flex-direction: column;
+  position: absolute !important;
+  right: 100%;
+}
+
 //Context menu
 .log-ctx-menu {
   --ngx-contextmenu-text-color: #212529;
