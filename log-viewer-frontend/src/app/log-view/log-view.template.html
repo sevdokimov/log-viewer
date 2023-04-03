@@ -2,6 +2,15 @@
 
     <div class="right-top-panel">
         <div class="add-filter-menu">
+            <div class="custom-checkbox">
+              <input
+                type="checkbox"
+                name="autoscroll-checkbox"
+                [(ngModel)]="autoScrollEnabled"
+                (ngModelChange)="autoScroll()"
+              />
+              <label for="autoscroll-checkbox">Enable Autoscroll</label>
+            </div>
             <div dropdown class="dropdown">
                 <span data-toggle="dropdown" dropdownToggle class="add-filter-button">
                     + Add filter

@@ -102,6 +102,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     searchRegexError: string;
 
     searchHideUnmatched: boolean;
+    autoScrollEnabled: boolean;
+    autoScrollInterval: any;
+
 
     savedFilterStates: { [key: string]: FilterState } = {};
 
@@ -157,6 +160,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.checkQuickSearch();
         this.applySearchFilter();
     }
+
+    autoScroll() {
+        if (this.autoScrollEnabled) {
+          this.autoScrollInterval = setInterval(() => this.scrollEnd(), 100);
+        } else {
+          clearInterval(this.autoScrollInterval);
+        }
+      }
 
     applySearchFilter() {
         if (this.state !== State.STATE_OPENED) { return; }
