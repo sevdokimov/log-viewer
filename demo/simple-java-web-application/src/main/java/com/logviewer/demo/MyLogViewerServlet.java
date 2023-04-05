@@ -17,8 +17,4 @@ public class MyLogViewerServlet extends LogViewerServlet {
         super.init();
     }
 
-    @Override
-    protected ApplicationContext getSpringContext() {
-        return super.getSpringContext();
-    }
 }
