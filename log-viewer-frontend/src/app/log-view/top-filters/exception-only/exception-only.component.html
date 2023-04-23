@@ -1,5 +1,8 @@
 <div class="top-panel-dropdown closeable-filter"
-     title="Show only events with a stacktrace">
-    <span><i class="fas fa-bolt"></i> has stacktrace</span>
-    <mat-icon (click)="removeFilter()" class="remote-filter-icon" title="Remove filter">close</mat-icon>
+     title="{{ 'EXCEPTION_ONLY.HAS_STACKTRACE_TITLE' | translate }}">
+    <span><i class="fas fa-bolt"></i> {{ 'EXCEPTION_ONLY.HAS_STACKTRACE' | translate }}</span>
+    <mat-icon (click)="removeFilter()" class="remote-filter-icon"
+              title="{{ 'EXCEPTION_ONLY.REMOVE_FILTER' | translate }}">
+        close
+    </mat-icon>
 </div>

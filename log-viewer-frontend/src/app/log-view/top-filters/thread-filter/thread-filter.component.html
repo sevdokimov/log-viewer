@@ -1,29 +1,29 @@
 <div #threadDropDown class="top-panel-dropdown lv-dropdown-panel-holder closeable-filter">
     <span (click)="toggleFilterPanel()">{{title}}&nbsp;<i class="fas fa-caret-down"></i></span>
-    <mat-icon (click)="removeFilter()" title="Remove filter" class="remote-filter-icon">close</mat-icon>
+    <mat-icon (click)="removeFilter()" title="{{ 'THREAD_FILTER.REMOVE_FILTER' | translate }}" class="remote-filter-icon">close</mat-icon>
     
     <div *ngIf="dropdownShown" class="lv-dropdown-panel" [class.lv-dropdown-panel-right]="dropdownRight">
         <div *ngIf="!includes.length && !excludes.length" class="noItems">
-            Empty thread filter
+            {{ 'THREAD_FILTER.EMPTY_THREAD_FILTER' | translate }}
         </div>
 
         <div *ngIf="includes.length > 0">
-            <span class="hhh">Visible threads</span>
+            <span class="hhh">{{ 'THREAD_FILTER.VISIBLE_THREADS' | translate }}</span>
 
             <div *ngFor="let t of includes" class="thread-block">
                 <span class="thread-name">{{t}}</span>
 
-                <mat-icon class="remove-icon" title="Remove" (click)="removeThread(t)">close</mat-icon>
+                <mat-icon class="remove-icon" title="{{ 'THREAD_FILTER.REMOVE' | translate }}" (click)="removeThread(t)">close</mat-icon>
             </div>
         </div>
 
         <div *ngIf="excludes.length > 0">
-            <span class="hhh">Hidden threads</span>
+            <span class="hhh">{{ 'THREAD_FILTER.HIDDEN_THREADS' | translate }}</span>
 
             <div *ngFor="let t of excludes" class="thread-block">
                 <span class="thread-name">{{t}}</span>
 
-                <mat-icon class="remove-icon" title="Remove" (click)="removeThread(t)">close</mat-icon>
+                <mat-icon class="remove-icon" title="{{ 'THREAD_FILTER.REMOVE' | translate }}" (click)="removeThread(t)">close</mat-icon>
             </div>
         </div>
 
@@ -31,7 +31,7 @@
             <div class="form-group">
                 <div class="input-group">
                     <input #inputElement
-                           placeholder="Thread name"
+                           placeholder="{{ 'THREAD_FILTER.THREAD_NAME' | translate }}"
                            aria-label="Thread name"
                            class="form-control"
                            [(ngModel)]="threadInput">
@@ -39,21 +39,21 @@
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button"
                                 (click)="addThreadName(true)"
-                                title="Show events from the thread, hide events from other threads"
+                                title="{{ 'THREAD_FILTER.SHOW_EVENTS_FROM_THE_THREAD' | translate }}"
                                 [disabled]="!threadInput">
-                            Show
+                            {{ 'THREAD_FILTER.SHOW' | translate }}
                         </button>
 
                         <button class="btn btn-outline-secondary" type="button"
                                 (click)="addThreadName(false)"
-                                title="Hide from the thread"
+                                title="{{ 'THREAD_FILTER.HIDE_FROM_THE_THREAD' | translate }}"
                                 [disabled]="!threadInput">
-                            Hide
+                            {{ 'THREAD_FILTER.HIDE' | translate }}
                         </button>
                     </div>
                 </div>
 
-                <small class="form-text text-muted">The asterisk works as a wildcard: http-bio-*-exec-*</small>
+                <small class="form-text text-muted">{{ 'THREAD_FILTER.THE_ASTERISK_WORKS_AS_A_WILDCARD' | translate }}</small>
             </div>
         </div>
     </div>

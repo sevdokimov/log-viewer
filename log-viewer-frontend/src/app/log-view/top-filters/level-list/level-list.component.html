@@ -1,5 +1,5 @@
 <div #levelDd dropdown class="top-panel-dropdown dropdown" [insideClick]="true">
-    <span data-toggle="dropdown" dropdownToggle>Severity: {{maxLevel}}<span *ngIf="hasSkipped">*</span>&nbsp;<i class="fas fa-caret-down"></i></span>
+    <span data-toggle="dropdown" dropdownToggle>{{ 'TOP_PANEL.SEVERITY' | translate }} {{maxLevel}}<span *ngIf="hasSkipped">*</span>&nbsp;<i class="fas fa-caret-down"></i></span>
     <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
         <div class="level-drop-down">
             <div *ngFor="let level of levelsDescription.levels" class="level" [class.mouse-select]="selectUsingMouse[level]">

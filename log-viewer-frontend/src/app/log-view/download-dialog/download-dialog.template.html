@@ -3,7 +3,7 @@
     <input name="filters" type="hidden" [value]="effectiveFiltersJson">
 
     <div class="form-group">
-        <label for="fileName">File Name</label>
+        <label for="fileName">{{ 'DOWNLOAD_DIALOG.FILE_NAME' | translate }}</label>
         <input #fileNameElement class="form-control" id="fileName" name="fileName" [(ngModel)]="fileName">
     </div>
 
@@ -33,16 +33,19 @@
     </div>
 
     <div class="zip-selection">
-        <input type="checkbox" name="zip" [(ngModel)]="zip" id="zip" [disabled]="selectedLogsCount > 1">&nbsp;<label for="zip">compress to zip archive</label>
+        <input type="checkbox" name="zip" [(ngModel)]="zip" id="zip" [disabled]="selectedLogsCount > 1">
+        &nbsp;<label for="zip">{{ 'DOWNLOAD_DIALOG.COMPRESS_TO_ZIP_ARCHIVE' | translate }}</label>
     </div>
 
     <div *ngIf="effectiveFilters.length > 0" class="filters-notification">
-        The filters will be applied to the downloaded log.
+        {{ 'DOWNLOAD_DIALOG.THE_FILTERS_WILL_BE_APPLIED' | translate }}
     </div>
 
     <div *ngIf="errorMsg != null" class="alert alert-danger download-error">
         {{errorMsg}}
     </div>
 
-    <button type="submit" class="btn btn-primary" [disabled]="selectedLogsCount === 0 || !fileName">Download</button>
+    <button type="submit" class="btn btn-primary" [disabled]="selectedLogsCount === 0 || !fileName">
+        {{ 'DOWNLOAD_DIALOG.DOWNLOAD' | translate }}
+    </button>
 </form>

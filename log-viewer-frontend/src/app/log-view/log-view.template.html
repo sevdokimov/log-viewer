@@ -4,32 +4,32 @@
         <div class="add-filter-menu">
             <div dropdown class="dropdown">
                 <span data-toggle="dropdown" dropdownToggle class="add-filter-button">
-                    + Add filter
+                    {{ 'TOP_PANEL.ADD_FILTER' | translate }}
                 </span>
 
                 <div *dropdownMenu class="dropdown-menu dropdown-menu-right">
                     <a id="add-date-filter" class="dropdown-item" href="#"
                        *ngIf="!filterPanelStateService.getFilterState().date && filterPanelStateService.activeFilterEditors.dateRange"
                        (click)="filterPanelStateService.addDateFilter()">
-                        Date filter
+                        {{ 'TOP_PANEL.DATE_FILTER' | translate }}
                     </a>
                     <a id="add-thread-filter" class="dropdown-item" href="#"
                        *ngIf="!filterPanelStateService.getFilterState().thread && filterPanelStateService.activeFilterEditors.thread"
                        (click)="filterPanelStateService.addThreadFilter()">
-                        Thread filter
+                        {{ 'TOP_PANEL.THREAD_FILTER' | translate }}
                     </a>
                     <a id="add-stacktrace-filter" class="dropdown-item" href="#"
                        *ngIf="!filterPanelStateService.getFilterState().exceptionsOnly"
                        (click)="filterPanelStateService.addStacktraceFilter()">
-                        Events containing a stacktrace
+                        {{ 'TOP_PANEL.EVENTS_CONTAINING_A_STACKTRACE' | translate }}
                     </a>
                     <a id="add-text-filter" class="dropdown-item" href="#"
                        (click)="filterPanelStateService.addTextFilter()">
-                        Text filter
+                        {{ 'TOP_PANEL.TEXT_FILTER' | translate }}
                     </a>
                     <a id="add-js-filter" class="dropdown-item" href="#"
                        (click)="filterPanelStateService.addJsFilter()">
-                        JavaScript filter
+                        {{ 'TOP_PANEL.JAVASCRIPT_FILTER' | translate }}
                     </a>
                 </div>
             </div>
@@ -38,11 +38,15 @@
         <div *ngIf="logs" dropdown class="dropdown top-panel-dropdown file-list-block">
             <span id="file-stat-dropdown" data-toggle="dropdown" dropdownToggle>
                 <span *ngIf="vs.filesValidCount < logs.length">
-                    <span id="successFileCount" class="has-problems-files" title="Successfully opened files">{{vs.filesValidCount}}</span>
+                    <span id="{{ 'TOP_PANEL.SUCCESSFULLY_OPENED_FILES' | translate }}" class="has-problems-files"
+                          title="Successfully opened files">{{vs.filesValidCount}}
+                    </span>
                     /
                 </span>
-                <span id="totalFileCount" title="Merged file count">{{logs.length}}</span>
-                {{logs.length === 1 ? 'log' : 'logs'}}
+                <span id="totalFileCount" title="{{ 'TOP_PANEL.MERGED_FILE_COUNT' | translate }}">
+                    {{logs.length}}
+                </span>
+                {{'TOP_PANEL.LOGS' | translate:{count: logs.length} }}
                 <i class="fas fa-caret-down"></i>
             </span>
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
@@ -51,23 +55,48 @@
         </div>
 
         <div class="dropdown" dropdown>
-            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button" title="Menu" alt="menu">
+            <img id="menu-icon" src="img/menu.png" dropdownToggle data-toggle="dropdown" role="button"
+                 title="{{'MENU.TITLE' | translate}}" alt="menu">
             <div class="dropdown-menu dropdown-menu-right" *dropdownMenu aria-labelledby="menu-icon">
-                <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">File browser</a>
+                <a href="javascript:void(0)" class="dropdown-item" [routerLink]="['/']">
+                    {{'MENU.FILE_BROWSE' | translate}}
+                </a>
 
-                <a href="javascript:void(0)" id="add-log-menu-item" class="dropdown-item" (click)="showOpenLogDialog()">Add log to the view</a>
+                <a href="javascript:void(0)" id="add-log-menu-item" class="dropdown-item"
+                   (click)="showOpenLogDialog()">
+                    {{'MENU.ADD_LOG_TO_THE_VIEW' | translate}}
+                </a>
 
-                <a href="javascript:void(0)" id="copyPermalink" class="dropdown-item" (click)="copyPermalink()">Permalink to the current position</a>
-                
+                <a href="javascript:void(0)" id="copyPermalink" class="dropdown-item"
+                   (click)="copyPermalink()">
+                    {{'MENU.PERMALINK_TO_THE_CURRENT_POSITION' | translate}}
+                </a>
+
                 <a href="javascript:void(0)" *ngIf="fwService.editable && logs?.length === 1" class="dropdown-item"
                    (click)="addToFavorites()">
                     <span class="fa fa-star favorite-icon" [class.in-favorites]="inFavorites"></span>
-                    {{inFavorites ? 'Remove from' : 'Add this log to'}} favorites
+                    {{ 'MENU.' + (inFavorites ? 'REMOVE_FROM_FAVORITES' : 'ADD_THIS_LOG_TO_FAVORITES') | translate }}
                 </a>
+
+                <div class="dropdown-submenu dropleft">
+                    <a href="javascript:void(0)" class="dropdown-item dropdown-toggle" data-toggle="dropdown">
+                        {{'MENU.LANGUAGE' | translate}}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <a  href="javascript:void(0)" class="dropdown-item" id="en" (click)="setLanguage('en')"
+                            [ngClass]="isCurrentLanguage('en') ? 'disabled' : ''">
+                            English
+                        </a>
+                        <a href="javascript:void(0)" class="dropdown-item"  id="ru" (click)="setLanguage('ru')"
+                           [ngClass]="isCurrentLanguage('ru') ? 'disabled' : ''">
+                            Русский
+                        </a>
+                    </ul>
+                </div>
 
                 <a href="javascript:void(0)" *ngIf="logs?.length" id="download-menu-item" class="dropdown-item"
                    (click)="modalWindow = 'download'">
-                    Download
+                    {{'MENU.DOWNLOAD' | translate}}
                 </a>
             </div>
         </div>
@@ -78,7 +107,7 @@
             <div class="input-group">
                 <input id="filterInput" type="text"
                        class="form-control"
-                       placeholder="search..."
+                       placeholder="{{'TOP_PANEL.SEARCH_PLACEHOLDER' | translate}}"
                        [title]="searchRegexError ? searchRegexError : ''"
                        [class.search-invalid-regex]="searchRegexError"
                        (keyup)="filterInputKeyUp($event)"
@@ -86,7 +115,7 @@
 
                 <div class="input-group-append">
                 <span id="match-cases"
-                      class="input-group-text search-option" title="Match Case"
+                      class="input-group-text search-option" title="{{'TOP_PANEL.MATCH_CASE' | translate}}"
                       (click)="caseSensitiveClick()"
                       [class.search-option-selected]="searchMatchCase">
                     <i class="fab fa-behance"></i>
@@ -96,7 +125,7 @@
                 </div>
                 <div class="input-group-append">
                 <span id="match-regex"
-                      class="input-group-text search-option" title="Regexp mode"
+                      class="input-group-text search-option" title="{{'TOP_PANEL.REGEXP_MODE' | translate}}"
                       (click)="regexModeClick()"
                       [class.search-option-selected]="searchRegex">
                     <i class="far fa-registered"></i>
@@ -108,16 +137,17 @@
         </div>
 
         <img *ngIf="!searchHideUnmatched" alt="prev"
-             id="findPrevArrow" src="img/previousOccurrence.png" title="Previous Occurrence (Shift+F3)"
+             id="findPrevArrow" src="img/previousOccurrence.png" title="{{'TOP_PANEL.PREVIOUS_OCCURRENCE' | translate}}"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(-1)">
         <img *ngIf="!searchHideUnmatched" alt="next"
-             id="findNextArrow" src="img/nextOccurrence.png" title="Next Occurrence (F3)"
+             id="findNextArrow" src="img/nextOccurrence.png" title="{{'TOP_PANEL.NEXT_OCCURRENCE' | translate}}"
              class="toolIcon" [class.tooliconDisabled]="!searchPattern"
              (click)="findNext(1)">
 
         <span *ngIf="searchHideUnmatched" id="applySearchFilterBlock">
-            <img id="applySearchFilter" src="img/apply-search-filter.png" alt="apply change" width="20" title="Apply filter (F3)"
+            <img id="applySearchFilter" src="img/apply-search-filter.png" alt="apply change" width="20"
+                 title="{{'TOP_PANEL.APPLY_FILTER' | translate}}"
                  class="toolIcon" [class.tooliconDisabled]="!appliedFilterOutdated()"
                  (click)="applySearchFilter()">
 
@@ -125,19 +155,19 @@
         </span>
 
         <input id="hide-unmatched" type="checkbox"
-               [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()"> <label for="hide-unmatched"
-                                                                                                  class="non-bold-label">Hide
-        unmatched</label>
+               [(ngModel)]="searchHideUnmatched" (ngModelChange)="hideUnmatchedChanged()">
+        <label for="hide-unmatched" class="non-bold-label">{{'TOP_PANEL.HIDE_UNMATCHED' | translate}}</label>
     </div>
 
     <lv-top-filter></lv-top-filter>
 </div>
 
 <div #logPane id="logPane" (wheel)="wheelRoll($event)" [class.state-opened]="state === 0"
-     (touchmove)="onTouchMove($event)" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)" (touchcancel)="onTouchEnd($event)">
+     (touchmove)="onTouchMove($event)" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)"
+     (touchcancel)="onTouchEnd($event)">
 
     <div *ngIf="state === 1" class="loading-placeholder">
-        <span><img src="assets/progress.gif" alt="..."> Loading...</span>
+        <span><img src="assets/progress.gif" alt="..."> {{'LOG_PANE.LOADING' | translate}}</span>
     </div>
 
     <div id="heightLimiter" [style.display]="vs.filesValidCount === 0 ? 'none' : 'block'">
@@ -153,49 +183,38 @@
             <img src="img/loader13.gif" alt="loading...">
         </div>
 
-        <div *ngIf="!hasRecordAfter && (hasRecordBefore || m.length > 0)" class="log-end"> ---------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end
-            ------------------------------- end ------------------------------- end -------------------------------
-            end ------------------------------- end ------------------------------- end --------------
+        <div *ngIf="!hasRecordAfter && (hasRecordBefore || m.length > 0)" class="log-end">
+            {{'LOG_PANE.END' | translate}}
         </div>
     </div>
 
-    <div *ngIf="logs && state === 0 && (!hasRecordAfter && !hasRecordBefore && m.length === 0 || vs.filesValidCount === 0)" class="empty-log-message-container">
+    <div *ngIf="logs && state === 0 && (!hasRecordAfter && !hasRecordBefore && m.length === 0 || vs.filesValidCount === 0)"
+         class="empty-log-message-container">
         <div *ngIf="logs.length === 0" class="empty-log-message-container">
             <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
-                Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>
+                {{'LOG_PANE.LOG_PATH_IS_NOT_SPECIFIED' | translate}}
+                <a href="javascript:void(0)" [routerLink]="['/']">
+                    {{'LOG_PANE.FILE_BROWSER' | translate}}
+                </a>
             </div>
         </div>
 
         <div *ngIf="logs.length > 0" class="empty-log-message">
             <span *ngIf="vs.filesErrorCount === 0">
                 <span *ngIf="vs.filesValidCount === 0" class="no-record-msg">
-                    Log file does not exist
+                    {{'LOG_PANE.LOG_FILE_DOES_NOT_EXIST' | translate}}
                 </span>
                 <span *ngIf="vs.filesValidCount > 0">
-                    <span *ngIf="vs.size === 0" class="no-record-msg">Log is empty</span>
-                    <span *ngIf="vs.size > 0" class="no-record-msg">All records filtered</span>
+                    <span *ngIf="vs.size === 0" class="no-record-msg">{{'LOG_PANE.LOG_IS_EMPTY' | translate}}</span>
+                    <span *ngIf="vs.size > 0"
+                          class="no-record-msg">{{'LOG_PANE.ALL_RECORDS_FILTERED' | translate}}</span>
                 </span>
             </span>
             <span *ngIf="vs.filesErrorCount > 0">
-                <span *ngIf="vs.filesValidCount > 0" class="no-record-msg">No record to display</span>
+                <span *ngIf="vs.filesValidCount > 0"
+                      class="no-record-msg">{{'LOG_PANE.NO_RECORD_TO_DISPLAY' | translate}}</span>
                 <span *ngIf="vs.filesValidCount === 0" class="no-record-msg"
-                      style="color: #a22;">Failed to read log</span>
+                      style="color: #a22;">{{'LOG_PANE.FAILED_TO_READ_LOG' | translate}}</span>
             </span>
         </div>
 
@@ -225,7 +244,8 @@
     <div class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
-                <img src="assets/progress.gif" alt="..."> search... <a href="javascript:void(0)" (click)="cancelSearch()">cancel</a>
+                <img src="assets/progress.gif" alt="..."> {{'MODAL_WINDOW.SEARCH' | translate}} <a
+                    href="javascript:void(0)" (click)="cancelSearch()">{{'MODAL_WINDOW.CANCEL' | translate}}</a>
             </div>
         </div>
     </div>
@@ -237,7 +257,7 @@
     <div class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
-                <img src="assets/progress.gif" alt="..."> applying filters ...
+                <img src="assets/progress.gif" alt="..."> {{'MODAL_WINDOW.APPLYING_FILTERS' | translate}}
             </div>
         </div>
     </div>
@@ -259,8 +279,10 @@
         <div style="padding: 10px 20px 0 20px;">
             <div style="display: table; width: 100%; height: 100%; text-align: center;">
                 <div style="display: table-cell; vertical-align: middle;">
-                    Failed to restore position by permalink, may be log file has been rewritten.<br>
-                    <button id="brokenLinkGoTail" class="btn btn-primary" (click)="goToTailAfterBrokenLink()">Open log tail</button>
+                    {{'MODAL_WINDOW.FAILED_TO_RESTORE_POSITION_BY_PERMALINK' | translate}}<br>
+                    <button id="brokenLinkGoTail" class="btn btn-primary" (click)="goToTailAfterBrokenLink()">
+                        {{'MODAL_WINDOW.OPEN_LOG_TAIL'| translate}}
+                    </button>
                 </div>
             </div>
         </div>
@@ -268,17 +290,19 @@
 
     <div *ngSwitchCase="'filter-error'" id="filter-error-modal" class="sl-dialog sl-dialog-big p-2">
         <div class="d-flex justify-content-end">
-            <button id="close-filtering-error-dialog" class="btn btn-link" (click)="modalWindow = null">Close</button>
+            <button id="close-filtering-error-dialog" class="btn btn-link" (click)="modalWindow = null">
+                {{'MODAL_WINDOW.CLOSE' | translate}}
+            </button>
         </div>
 
         <div class="filter-error-text">
-            Filter error: {{filterErrorText}}
+            {{'MODAL_WINDOW.FILTER_ERROR' | translate}} {{filterErrorText}}
         </div>
     </div>
 
     <div *ngSwitchCase="'event-details'" class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
         <div class="d-flex justify-content-end">
-            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+            <button class="btn btn-link" (click)="modalWindow = null">{{'MODAL_WINDOW.CLOSE' | translate}}</button>
         </div>
 
         <lv-event-details [record]="recordWithDetails"></lv-event-details>
@@ -286,7 +310,7 @@
 
     <div *ngSwitchCase="'open-log'" class="sl-dialog sl-dialog-big p-2" style="overflow-y: scroll;">
         <div class="d-flex justify-content-end">
-            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+            <button class="btn btn-link" (click)="modalWindow = null">{{'MODAL_WINDOW.CLOSE' | translate}}</button>
         </div>
 
         <lv-navigator (openFile)="addNewLog($event)"></lv-navigator>
@@ -294,7 +318,7 @@
 
     <div *ngSwitchCase="'download'" id="download-dialog" class="sl-dialog p-2">
         <div class="d-flex justify-content-end">
-            <button class="btn btn-link" (click)="modalWindow = null">Close</button>
+            <button class="btn btn-link" (click)="modalWindow = null">{{'MODAL_WINDOW.CLOSE' | translate}}</button>
         </div>
 
         <lv-download-dialog [logs]="logs" [effectiveFilters]="effectiveFilters">
@@ -305,58 +329,64 @@
 
 <context-menu menuClass="log-ctx-menu" #eventContextMenu>
     <ng-template [visible]="contextMenuHandler.isTextMenuItemVisible" let-item contextMenuItem [subMenu]="textMenu">
-        <span>Text: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;</span>
+        <span>{{ 'CONTEXT_MENU.TEXT' | translate }}: <mark>{{item.selectedTextVisible}}</mark>&nbsp;&nbsp;</span>
     </ng-template>
 
     <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
                  (execute)="contextMenuHandler.hideEventsByTimestamp($event.value.record, false)">
-        Hide events older than current
+        {{ 'CONTEXT_MENU.HIDE_EVENTS_OLDER_THAN_CURRENT' | translate }}
     </ng-template>
     <ng-template [visible]="contextMenuHandler.isDateMenuItemVisible" contextMenuItem
                  (execute)="contextMenuHandler.hideEventsByTimestamp($event.value.record, true)">
-        Hide events newer than current
+        {{ 'CONTEXT_MENU.HIDE_EVENTS_NEWER_THAN_CURRENT' | translate }}
     </ng-template>
 
     <ng-template [visible]="contextMenuHandler.isThreadMenuItemVisible" let-item contextMenuItem [subMenu]="threadMenu">
-        <span class="menu-item-thread">Thread: <mark>{{item.thread}}</mark>&nbsp;&nbsp;</span>
+        <span class="menu-item-thread">{{ 'CONTEXT_MENU.THREAD' | translate }}: <mark>{{item.thread}}</mark>&nbsp;&nbsp;</span>
     </ng-template>
 
     <ng-template contextMenuItem (execute)="showEventDetails($event.value.record)">
-        Event details
+        {{ 'CONTEXT_MENU.EVENT_DETAILS' | translate }}
     </ng-template>
 
     <ng-template [visible]="contextMenuHandler.isTextSelected" contextMenuItem divider="true"></ng-template>
 
     <ng-template [visible]="contextMenuHandler.isTextSelected" contextMenuItem
                  (execute)="contextMenuHandler.copyToClipboard()">
-        Copy
+        {{ 'CONTEXT_MENU.COPY' | translate }}
     </ng-template>
 
 </context-menu>
 
 <context-menu #textMenu>
     <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.value.selectedText, false)">
-        <span>Only events containing <mark>{{item.selectedTextVisible}}</mark></span>
+        <span>{{ 'CONTEXT_MENU.ONLY_EVENTS_CONTAINING' | translate }}
+            <mark>{{item.selectedTextVisible}}</mark></span>
     </ng-template>
 
     <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByText($event.value.selectedText, true)">
-        <span>Hide events containing <mark class="menu-item-text">{{item.selectedTextVisible}}</mark></span>
+        <span>{{ 'CONTEXT_MENU.HIDE_EVENTS_CONTAINING' | translate }}
+            <mark class="menu-item-text">{{item.selectedTextVisible}}</mark></span>
     </ng-template>
 </context-menu>
 
 <context-menu #threadMenu>
     <ng-template contextMenuItem let-item (execute)="contextMenuHandler.filterByThread($event.value.thread)">
-        <span>Show only <mark>{{item.thread}}</mark></span>
+        <span>{{ 'CONTEXT_MENU.SHOW_ONLY' | translate }}
+            <mark>{{item.thread}}</mark></span>
     </ng-template>
     <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
                  (execute)="contextMenuHandler.filterByThread($event.value.threadGroup)">
-        <span>Show only <mark [innerHTML]="item.threadGroupHtml"></mark></span>
+        <span>{{ 'CONTEXT_MENU.SHOW_ONLY' | translate }}
+            <mark [innerHTML]="item.threadGroupHtml"></mark></span>
     </ng-template>
     <ng-template contextMenuItem let-item (execute)="contextMenuHandler.excludeThread($event.value.thread)">
-        <span>Hide <mark class="menu-item-thread">{{item.thread}}</mark></span>
+        <span>{{ 'CONTEXT_MENU.HIDE' | translate }}
+            <mark class="menu-item-thread">{{item.thread}}</mark></span>
     </ng-template>
     <ng-template contextMenuItem let-item [visible]="contextMenuHandler.hasThreadGroup"
                  (execute)="contextMenuHandler.excludeThread($event.value.threadGroup)">
-        <span>Hide <mark [innerHTML]="item.threadGroupHtml"></mark></span>
+        <span>{{ 'CONTEXT_MENU.HIDE' | translate }}
+            <mark [innerHTML]="item.threadGroupHtml"></mark></span>
     </ng-template>
 </context-menu>

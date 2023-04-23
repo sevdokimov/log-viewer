@@ -1,28 +1,32 @@
 <div #rootElement (keydown)="fakeInputPressed($event)" (keypress)="fakeKeyPressed($event)" tabindex="-1" autofocus>
     <div *ngIf="initialLoading.loading">
-        <img src="assets/progress.gif"> Loading log list...
+        <img src="assets/progress.gif"> {{ 'LOG_NAVIGATOR.LOADING_LOG_LIST' | translate }}
     </div>
 
-    <div *ngIf="initialLoading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{initialLoading.errorMsg}}</div>
+    <div *ngIf="initialLoading.errorMsg" class="alert alert-danger"
+         style="white-space: pre-wrap;">{{initialLoading.errorMsg}}</div>
 
     <div *ngIf="init">
-        <h4>Favorites</h4>
+        <h4>{{ 'LOG_NAVIGATOR.FAVORITES' | translate }}</h4>
         <div *ngIf="favorites.length === 0" id="no-favorites" class="noItems">
-            No logs in favorites
+            {{ 'LOG_NAVIGATOR.NO_LOGS_IN_FAVORITES' | translate }}
         </div>
 
         <div *ngFor="let l of favorites" class="favorite-item" [class.not-exist]="l.size == null">
             <a href="#" (click)="favoriteClick(l.path, $event)">{{l.path}}</a>
             <span class="log-size">
-                <span title="File size">{{l.size | slSize}}</span>,
-                <span title="Modification time">{{l.lastModification | date : 'medium'}}</span>
+                <span title="{{ 'LOG_NAVIGATOR.FILE_SIZE' | translate }}">{{l.size | slSize}}</span>,
+                <span title="{{ 'LOG_NAVIGATOR.MODIFICATION_TIME' | translate }}">{{l.lastModification | date : 'medium'}}</span>
             </span>
             <span class="file-non-exist">
-                file not found
+                {{ 'LOG_NAVIGATOR.FILE_NOT_FOUND' | translate }}
             </span>
 
             <span *ngIf="fwService.editable" class="fv-actions-block">
-                <span class="fas fa-times" title="Remove from favorites" (click)="removeFromFavorites(l.path)"></span>
+                <span class="fas fa-times"
+                      title="{{ 'LOG_NAVIGATOR.REMOVE_FROM_FAVORITES' | translate }}"
+                      (click)="removeFromFavorites(l.path)">
+                </span>
             </span>
         </div>
 
@@ -38,30 +42,35 @@
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button" name="open-button"
                                 (click)="openEditedPath()">
-                            Open
+                            {{ 'LOG_NAVIGATOR.OPEN' | translate }}
                         </button>
-                        
+
                         <button class="btn btn-outline-secondary" type="button" name="cancel-button"
                                 (click)="cancelEditing()">
-                            Cancel
+                            {{ 'LOG_NAVIGATOR.CANCEL' | translate }}
                         </button>
                     </div>
                 </div>
             </div>
 
             <div *ngIf="!editingCurrentDir" class="current-path">
-                <div class="edit-icon" title="Edit path" (click)="startPathEditing()">
+                <div class="edit-icon" title="{{ 'LOG_NAVIGATOR.EDIT_PATH' | translate }}" (click)="startPathEditing()">
                     <i class="far fa-edit"></i>
                 </div>
 
                 <span *ngIf="currentDirItems.length === 0" class="path-item">&nbsp;</span>
 
-                <span *ngFor="let path of currentDirItems; let idx = index" class="path-item"><a href="#" (click)="directoryNameClick(constructPathFromPrefix(idx))">{{path}}</a><span class="path-separator"><span *ngIf="!path.endsWith('/')">/</span></span></span>
+                <span *ngFor="let path of currentDirItems; let idx = index" class="path-item">
+                    <a href="#" (click)="directoryNameClick(constructPathFromPrefix(idx))">{{path}}</a>
+                    <span class="path-separator"><span *ngIf="!path.endsWith('/')">/</span></span>
+                </span>
             </div>
 
             <div class="search-pane">
                 <span class="tool-button" [class.tool-button-pressed]="filterOpened"
-                      title="Search" (click)="toggleSearch()"><i class="fas fa-search"></i></span>
+                      title="{{ 'LOG_NAVIGATOR.SEARCH' | translate }}" (click)="toggleSearch()">
+                    <i class="fas fa-search"></i>
+                </span>
                 &nbsp;
                 <input #searchField type="text" name="typedText" aria-describedby="basic-addon2"
                        class="filter-input"
@@ -71,9 +80,13 @@
 
             <img *ngIf="dirContentLoading.loading" src="assets/progress.gif">
 
-            <div *ngIf="dirContentLoading.errorMsg" class="alert alert-danger" style="white-space: pre-wrap;">{{dirContentLoading.errorMsg}}</div>
+            <div *ngIf="dirContentLoading.errorMsg" class="alert alert-danger"
+                 style="white-space: pre-wrap;">{{dirContentLoading.errorMsg}}
+            </div>
 
-            <div *ngIf="dirContent?.error" class="alert alert-danger" style="white-space: pre-wrap;">{{dirContent.error}}</div>
+            <div *ngIf="dirContent?.error" class="alert alert-danger"
+                 style="white-space: pre-wrap;">{{dirContent.error}}
+            </div>
 
             <table *ngIf="dirContent?.content" class="file-list">
                 <tr *ngFor="let fi of visibleDirItems" [class.selected]="selectedPath === fi.item.path"
@@ -84,22 +97,26 @@
                     <td class="name" [innerHTML]="fi.nameHtml"></td>
 
                     <td>
-                        <span *ngIf="fi.item.size != null" class="file-attr" title="{{fi.item.size}} bytes">
+                        <span *ngIf="fi.item.size != null" class="file-attr"
+                              title="{{fi.item.size}} {{ 'LOG_NAVIGATOR.BYTES' | translate }}">
                             {{fi.item.size | slSize}}
                         </span>
                     </td>
                     <td>
-                        <span *ngIf="fi.item.modificationTime" class="file-attr" title="Last modification time">
+                        <span *ngIf="fi.item.modificationTime" class="file-attr"
+                              title="{{ 'LOG_NAVIGATOR.LAST_MODIFICATION_TIME' | translate }}">
                             {{fi.item.modificationTime | date : 'yyyy-MM-dd HH:mm:ss'}}
                         </span>
                     </td>
                 </tr>
             </table>
 
-            <div *ngIf="dirContent?.content?.length === 0" class="noItems">&lt;the folder is empty&gt;</div>
+            <div *ngIf="dirContent?.content?.length === 0" class="noItems">
+                &lt;{{ 'LOG_NAVIGATOR.THE_FOLDER_IS_EMPTY' | translate }}&gt;
+            </div>
 
             <div *ngIf="dirContent?.content?.length && visibleDirItems.length === 0" class="noItems">
-                &lt;no file matches the filter&gt;
+                &lt;{{ 'LOG_NAVIGATOR.NO_FILE_MATCHES_THE_FILTER' | translate }}&gt;
             </div>
         </div>
     </div>
