@@ -7,6 +7,7 @@ import org.springframework.lang.Nullable;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -20,13 +21,21 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
     protected transient Supplier<Instant> timestamp;
 
     public LvLayoutSimpleDateNode(@NonNull String format) {
-        this(format, null);
+        this(format, null, null);
     }
 
     public LvLayoutSimpleDateNode(@NonNull String format, @Nullable TimeZone zone) {
-        super(zone);
+        this(format, null, zone);
+    }
+
+    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable Locale locale) {
+        this(format, locale, null);
+    }
+
+    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable Locale locale, @Nullable TimeZone zone) {
+        super(locale, zone);
         this.format = format;
-        FastDateTimeParser.createFormatter(format, null); // validation
+        FastDateTimeParser.createFormatter(format, locale, null); // validation
     }
 
     public String getFormat() {
@@ -38,7 +47,7 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
         ParsePosition position = new ParsePosition(offset);
 
         if (formatter == null)
-            formatter = FastDateTimeParser.createFormatter(format, zone);
+            formatter = FastDateTimeParser.createFormatter(format, locale, zone);
 
         timestamp = formatter.apply(s, position);
         if (timestamp == null || position.getIndex() > end) {
@@ -58,11 +67,15 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
     @Override
     public boolean isFull() {
+        if (locale != null) {
+            return LvDateUtils.isDateFormatFull(new SimpleDateFormat(format, locale));
+        }
+
         return LvDateUtils.isDateFormatFull(new SimpleDateFormat(format));
     }
 
     @Override
     public LvLayoutDateNode clone() {
-        return new LvLayoutSimpleDateNode(format, zone);
+        return new LvLayoutSimpleDateNode(format, locale, zone);
     }
 }

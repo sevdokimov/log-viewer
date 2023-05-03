@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -52,7 +53,7 @@ public class FastDateTimeParserTest {
     }
 
     private void notParsed(String pattern, String text) {
-        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, null);
+        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, Locale.US, null);
 
         ParsePosition position = new ParsePosition(0);
         Supplier<Instant> res = formatter.apply(text, position);
@@ -61,7 +62,7 @@ public class FastDateTimeParserTest {
     }
 
     private void check(String pattern, String text, Instant expectedResult) {
-        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, null);
+        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, Locale.US, null);
 
         ParsePosition position = new ParsePosition(0);
         Instant res = formatter.apply(text, position).get();
@@ -76,7 +77,7 @@ public class FastDateTimeParserTest {
         String pattern = "yyyy-MM-dd HH:mm:ss.SSS";
 
         SimpleDateFormat format = new SimpleDateFormat(pattern);
-        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, null);
+        BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, Locale.US, null);
 
         String text = "2020-04-11 10:00:03.111";
         ParsePosition position = new ParsePosition(0);
@@ -102,7 +103,7 @@ public class FastDateTimeParserTest {
         try {
             String str = DateTimeFormatter.ofPattern(pattern).format(date);
 
-            BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, TimeZone.getTimeZone(date.getZone()));
+            BiFunction<String, ParsePosition, Supplier<Instant>> formatter = FastDateTimeParser.createFormatter(pattern, Locale.US, TimeZone.getTimeZone(date.getZone()));
 
             ParsePosition position = new ParsePosition(0);
             Supplier<Instant> res = formatter.apply(str, position);

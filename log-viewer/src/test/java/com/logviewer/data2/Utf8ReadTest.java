@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,7 +22,8 @@ public class Utf8ReadTest extends AbstractLogTest {
 
     private static final LogFormat LOG4J_ICO8859 = new Log4jLogFormat(StandardCharsets.ISO_8859_1, "%d{yyyy-MM-dd HH:mm:ss} %msg%n");
 
-    private static final LogFormat FORMAT_REGEX = new RegexLogFormat(StandardCharsets.UTF_8,
+    private static final LogFormat FORMAT_REGEX = new RegexLogFormat(Locale.US,
+            StandardCharsets.UTF_8,
             "(\\d{4}-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d) (.*)",
             false,
             "yyyy-MM-dd HH:mm:ss", "date",

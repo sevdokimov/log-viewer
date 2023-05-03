@@ -18,12 +18,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Log4jLogFormat extends AbstractPatternLogFormat {
@@ -89,15 +84,19 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
     private final boolean realLog4j;
 
     public Log4jLogFormat(@NonNull String pattern) {
-        this(null, pattern, true);
+        this(null, null, pattern, true);
     }
 
     public Log4jLogFormat(@NonNull Charset charset, @NonNull String pattern) {
-        this(charset, pattern, true);
+        this(null, charset, pattern, true);
     }
 
-    public Log4jLogFormat(@Nullable Charset charset, @NonNull String pattern, boolean realLog4j) {
-        super(charset, pattern);
+    public Log4jLogFormat(@Nullable Locale locale, @NonNull Charset charset, @NonNull String pattern) {
+        this(locale, charset, pattern, true);
+    }
+
+    public Log4jLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String pattern, boolean realLog4j) {
+        super(locale, charset, pattern);
 
         this.realLog4j = realLog4j;
     }
@@ -220,7 +219,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
 
                 LvLayoutDateNode res = LvLayoutLog4jISO8601Date.fromPattern(pattern);
                 if (res == null) {
-                    res = new LvLayoutSimpleDateNode(pattern);
+                    res = new LvLayoutSimpleDateNode(pattern, getLocale(), null);
                 }
 
                 if (options.size() > 1)

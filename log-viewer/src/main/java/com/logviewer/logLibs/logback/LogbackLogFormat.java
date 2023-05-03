@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
@@ -31,11 +32,15 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     protected static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
 
     public LogbackLogFormat(@NonNull String pattern) {
-        super(null, pattern);
+        this(null, pattern);
     }
 
     public LogbackLogFormat(@Nullable Charset charset, @NonNull String pattern) {
-        super(charset, pattern);
+        this(null, charset, pattern);
+    }
+
+    public LogbackLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String pattern) {
+        super(locale, charset, pattern);
     }
 
     @Override
@@ -51,7 +56,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         List<LvLayoutNode> nodes = new ArrayList<>();
 
         for (Node n = t; n != null; n = n.getNext()) {
-            LvLayoutNode lvNode = createNode(n, pattern);
+            LvLayoutNode lvNode = createNode(n, pattern, getLocale());
             if (lvNode != null)
                 nodes.add(lvNode);
         }
@@ -61,7 +66,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         return nodes.toArray(new LvLayoutNode[0]);
     }
 
-    private static LvLayoutNode createNode(Node n, String pattern) {
+    private static LvLayoutNode createNode(Node n, String pattern, Locale locale) {
         switch (n.getType()) {
             case NODE_LITERAL:
                 return LvLayoutTextNode.of((String) n.getValue());
@@ -87,14 +92,14 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                             }
 
                             try {
-                                new SimpleDateFormat(datePattern);
+                                new SimpleDateFormat(datePattern, locale);
                             } catch (IllegalArgumentException e) {
                                 datePattern = CoreConstants.ISO8601_PATTERN;
                             }
                         }
 
                         LvLayoutNode res = LvLayoutLog4jISO8601Date.fromPattern(datePattern);  // Optimization, LvLayoutLog4jISO8601Date works much faster.
-                        return res != null ? res : new LvLayoutSimpleDateNode(datePattern);
+                        return res != null ? res : new LvLayoutSimpleDateNode(datePattern, locale);
                     }
 
                     case "c":

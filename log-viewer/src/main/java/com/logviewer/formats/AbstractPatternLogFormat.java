@@ -9,6 +9,7 @@ import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public abstract class AbstractPatternLogFormat implements LogFormat {
@@ -19,11 +20,14 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     private Charset charset;
 
+    private Locale locale;
+
     private String pattern;
 
     private transient volatile DefaultFieldSet fieldSet;
 
-    public AbstractPatternLogFormat(@Nullable Charset charset, @NonNull String pattern) {
+    public AbstractPatternLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String pattern) {
+        this.locale = locale;
         this.charset = charset;
         this.pattern = pattern;
     }
@@ -34,12 +38,23 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
     }
 
     @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
     public boolean hasFullDate() {
         return getDelegate().hasFullDate();
     }
 
     public AbstractPatternLogFormat setCharset(Charset charset) {
         this.charset = charset;
+        this.fieldSet = null;
+        return this;
+    }
+
+    public AbstractPatternLogFormat setLocale(Locale locale) {
+        this.locale = locale;
         this.fieldSet = null;
         return this;
     }
@@ -69,7 +84,7 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
         if (res == null) {
             LvLayoutNode[] nodes = parseLayout(pattern);
-            res = new DefaultFieldSet(charset, nodes);
+            res = new DefaultFieldSet(locale, charset, nodes);
 
             fieldSet = res;
         }

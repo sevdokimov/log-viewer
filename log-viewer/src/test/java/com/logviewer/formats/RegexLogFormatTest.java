@@ -31,7 +31,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
     @Test
     public void testDateUTC() throws ParseException {
-        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+        LogFormat logFormat = new RegexLogFormat(Locale.US,
+                StandardCharsets.UTF_8,
                 "(?<date>[^ ]+) (?<msg>.+)", true,
                 "yyyy-MM-dd:HH:mm:ssZ", "date",
                 RegexLogFormat.field("date", FieldTypes.DATE),
@@ -51,7 +52,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
     @Test
     public void testDate() {
-        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+        LogFormat logFormat = new RegexLogFormat(Locale.US,
+                StandardCharsets.UTF_8,
                 "(?<date>[^ ]+) (?<msg>.+)", true,
                 "yyyy-MM-dd:HH:mm:ss", "date",
                 RegexLogFormat.field("date", FieldTypes.DATE),
@@ -68,7 +70,8 @@ public class RegexLogFormatTest extends AbstractLogTest {
 
     @Test
     public void testDateInOptionalField() {
-        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+        LogFormat logFormat = new RegexLogFormat(Locale.US,
+                StandardCharsets.UTF_8,
                 "(?<level>\\w+) (?<date>\\d[^ ]+)? (?<msg>.+)", true,
                 "yyyy-MM-dd:HH:mm:ss", "date",
                 RegexLogFormat.field("level", FieldTypes.LEVEL),
