@@ -1,17 +1,11 @@
 package com.logviewer;
 
-import com.google.common.io.ByteStreams;
-import org.junit.Test;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Properties;
-import java.util.zip.GZIPInputStream;
 
 public class ConfigTest extends AbstractLogTest {
 
@@ -45,15 +39,6 @@ public class ConfigTest extends AbstractLogTest {
 //            Files.delete(tempFile);
 //        }
 //    }
-
-
-    @Test
-    public void name() throws IOException {
-        try (GZIPInputStream gis = new GZIPInputStream(
-                Files.newInputStream(Paths.get("/home/sevdokimov/ttt/file.tar.gz")))) {
-            ByteStreams.copy(gis, System.out);
-        }
-    }
 
     private static Environment environment(Properties properties) {
         return new StandardEnvironment() {

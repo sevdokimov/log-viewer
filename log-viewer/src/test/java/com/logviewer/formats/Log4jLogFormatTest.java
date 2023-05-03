@@ -33,9 +33,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class Log4jLogFormatTest extends AbstractLogTest {
 
@@ -206,6 +204,9 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                         .setContextData(new SortedArrayStringMap(ImmutableMap.of("username", "smith", "location", "London")))
                         .build(),
                 "2011-10-13 18:33:45,000", "INFO", "smith", "", "London", "thread-pool-11", "com.google.gson.Gson", "The log message");
+
+        check("%date{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %5level %logger{36} - %msg%n", event, "13-10-2011 18:33:45.000", "thread-pool-11", "ERROR", "com.google.gson.Gson", "The log message");
+        check("%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %5level %logger{36} - %msg%n", event, "13-10-2011 18:33:45.000", "thread-pool-11", "ERROR", "com.google.gson.Gson", "The log message");
     }
 
     private String getProcessId() {

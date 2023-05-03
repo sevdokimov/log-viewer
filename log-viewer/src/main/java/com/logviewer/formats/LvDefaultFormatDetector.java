@@ -13,10 +13,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,17 +36,6 @@ public class LvDefaultFormatDetector {
 
     private static final String MS_TZ = MS_PATTERN + TZ_PATTERN;
 
-    // 2020-05-29 18:50:12,333
-    private static final Pattern DATE_ISO8601 = Pattern.compile("\\b20[012]\\d([-/])(?:1[012]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-    // 20200529 185012
-    private static final Pattern DATE_COMPACT = Pattern.compile("\\b20[012]\\d(?:1[012]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b");
-    // 2020 Jul 21 15:04:01
-    private static final Pattern DATE_LONG = Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-    // 2020-Jul-21 15:04:01
-    private static final Pattern DATE_LONG_2 = Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-    // 18.11.19 18:26:22.160
-    private static final Pattern DATE_UK = Pattern.compile("(?:[012]\\d|3[10])\\.(?:1[012]|0\\d)\\.[012]\\d(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b");
-
     private static final Pattern TIME_WITHOUT_DATE = Pattern.compile("\\b(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\b");
 
     private static final Pattern LEVEL = Pattern.compile("\\b(?:ERROR|WARN|INFO|DEBUG|TRACE|SEVERE|WARNING|CONFIG|FINE|FINER|FINEST|FATAL)\\b");
@@ -55,6 +47,133 @@ public class LvDefaultFormatDetector {
     private static final Pattern SPRING_PATTERN = Pattern.compile("\\b20[012]\\d-(?:1[012]|0\\d)-(?:[012]\\d|3[10]) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d\\d\\d +" + LEVEL.pattern() + " +\\d{2,7} --- \\[.+\\] +(?:\\w+\\.)*\\w+ +: .+");
 
     private static final String SPRING_LOG4J_PATTERN = "%d{yyyy-MM-dd HH:mm:ss.SSS} %p %processId --- [%t] %logger : %m%n";
+
+    /**
+     * A list of pairs.
+     * first: a date pattern
+     * second: a function returning a date format
+     */
+    private static final List<Pair<Pattern, Function<Matcher, String>>> DATE_DETECTORS = Arrays.asList(
+            // (DATE_ISO8601) 2020-05-29 18:50:12,333
+            Pair.of(
+                    Pattern.compile("\\b20[012]\\d([-/])(?:1[012]|0\\d)\\1(?:[012]\\d|3[10])(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        StringBuilder sb = new StringBuilder();
+                        String dateSeparator = matcher.group(1);
+
+                        sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd");
+
+                        String timeSeparator = matcher.group("timeSep");
+                        if (timeSeparator.equals("T"))
+                            timeSeparator = "'T'";
+                        sb.append(timeSeparator).append("HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            ),
+
+            // 29-05-2020 18:50:12,333
+            Pair.of(
+                    Pattern.compile("\\b(?:[012]\\d|3[10])-(?:1[012]|0\\d)-20[012]\\d(?<timeSep>[ _T])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.append("%d{dd-MM-yyyy");
+
+                        String timeSeparator = matcher.group("timeSep");
+                        if (timeSeparator.equals("T"))
+                            timeSeparator = "'T'";
+                        sb.append(timeSeparator).append("HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            ),
+
+            // (DATE_COMPACT) 20200529 185012
+            Pair.of(
+                    Pattern.compile("\\b20[012]\\d(?:1[012]|0\\d)(?:[012]\\d|3[10])([ _T]?)(?:0\\d|1\\d|2[0-3])[0-5]\\d[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{yyyyMMdd");
+                        String separator = matcher.group(1);
+                        if (separator.equals("T")) {
+                            sb.append("'T'");
+                        } else {
+                            sb.append(separator);
+                        }
+                        sb.append("HHmmss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            ),
+
+            // (DATE_LONG) 2020 Jul 21 15:04:01
+            Pair.of(
+                    Pattern.compile("\\b(?:[012]\\d|3[10]) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) 20[012]\\d (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{dd MMM yyyy HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+                        return sb.toString();
+                    }
+            ),
+
+            // (DATE_LONG_2) 2020-Jul-21 15:04:01
+            Pair.of(
+                    Pattern.compile("\\b20[012]\\d(?<dateSep>[ -])(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\\1(?:[012]\\d|3[10])(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        String dateSep = matcher.group("dateSep");
+                        String dtSep = matcher.group("dtSep");
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{yyyy").append(dateSep).append("MMM").append(dateSep).append("dd").append(dtSep).append("HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            ),
+
+            // (DATE_UK) 18.11.19 18:26:22.160
+            Pair.of(
+                    Pattern.compile("(?:[012]\\d|3[10])\\.(?:1[012]|0\\d)\\.[012]\\d(?<dtSep>[ _])(?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        String dtSep = matcher.group("dtSep");
+
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{dd.MM.yy").append(dtSep).append("HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            )
+    );
 
     private static int readBuffer(@NonNull Path path, byte[] data) {
         int length = 0;
@@ -213,95 +332,21 @@ public class LvDefaultFormatDetector {
 
     @Nullable
     private static Pair<String, TextRange> findDate(@NonNull String line) {
-        String dateField;
-        TextRange datePos;
+        String dateField = null;
+        Matcher matcher = null;
 
-        Matcher matcher = DATE_ISO8601.matcher(line); // 2020-05-29 18:50:12,333
-        if (matcher.find()) {
-            StringBuilder sb = new StringBuilder();
-            String dateSeparator = matcher.group(1);
-
-            sb.append("%d{yyyy").append(dateSeparator).append("MM").append(dateSeparator).append("dd");
-
-            String timeSeparator = matcher.group("timeSep");
-            if (timeSeparator.equals("T"))
-                timeSeparator = "'T'";
-            sb.append(timeSeparator).append("HH:mm:ss");
-
-            appendMsIfPresent(sb, matcher);
-            appendTimeZoneIfPresent(sb, matcher);
-
-            sb.append('}');
-
-            dateField = sb.toString();
-        } else {
-            matcher = DATE_COMPACT.matcher(line); // 20200529 185012
+        for (Pair<Pattern, Function<Matcher, String>> pair : DATE_DETECTORS) {
+            matcher = pair.getFirst().matcher(line);
             if (matcher.find()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("%d{yyyyMMdd");
-                String separator = matcher.group(1);
-                if (separator.equals("T")) {
-                    sb.append("'T'");
-                } else {
-                    sb.append(separator);
-                }
-                sb.append("HHmmss");
-
-                appendMsIfPresent(sb, matcher);
-                appendTimeZoneIfPresent(sb, matcher);
-
-                sb.append('}');
-
-                dateField = sb.toString();
-            } else {
-                matcher = DATE_LONG.matcher(line); // 2020 Jul 21 15:04:01
-                if (matcher.find()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("%d{dd MMM yyyy HH:mm:ss");
-
-                    appendMsIfPresent(sb, matcher);
-                    appendTimeZoneIfPresent(sb, matcher);
-
-                    sb.append('}');
-                    dateField = sb.toString();
-                } else {
-                    matcher = DATE_LONG_2.matcher(line); // 2020-Jul-21 15:04:01
-                    if (matcher.find()) {
-                        String dateSep = matcher.group("dateSep");
-                        String dtSep = matcher.group("dtSep");
-
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("%d{yyyy").append(dateSep).append("MMM").append(dateSep).append("dd").append(dtSep).append("HH:mm:ss");
-
-                        appendMsIfPresent(sb, matcher);
-                        appendTimeZoneIfPresent(sb, matcher);
-
-                        sb.append('}');
-
-                        dateField = sb.toString();
-                    } else {
-                        matcher = DATE_UK.matcher(line);
-                        if (matcher.find()) {
-                            String dtSep = matcher.group("dtSep");
-
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("%d{dd.MM.yy").append(dtSep).append("HH:mm:ss");
-
-                            appendMsIfPresent(sb, matcher);
-                            appendTimeZoneIfPresent(sb, matcher);
-
-                            sb.append('}');
-
-                            dateField = sb.toString();
-                        } else {
-                            return null;
-                        }
-                    }
-                }
+                dateField = pair.getSecond().apply(matcher);
+                break;
             }
         }
 
-        datePos = new TextRange(matcher.start(), matcher.end());
+        if (dateField == null)
+            return null;
+
+        TextRange datePos = new TextRange(matcher.start(), matcher.end());
 
         if (line.startsWith("[", datePos.getStart() - 1) && line.startsWith("]", datePos.getEnd())) {
             dateField = '[' + dateField + ']';
