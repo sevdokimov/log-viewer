@@ -66,6 +66,10 @@ public class SimpleLogFormat implements LogFormat {
         this.charset = charset;
     }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
     private class DefaultReader extends LogReader {
 
         private String s;
