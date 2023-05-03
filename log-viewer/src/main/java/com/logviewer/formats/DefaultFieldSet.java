@@ -14,6 +14,8 @@ public class DefaultFieldSet {
 
     private final Charset charset;
 
+    private final Locale locale;
+
     private final LvLayoutNode[] layout;
 
     private final boolean canAppendTail;
@@ -26,11 +28,16 @@ public class DefaultFieldSet {
     private final int dateNodeIndex;
 
     public DefaultFieldSet(@Nullable Charset charset, LvLayoutNode ... layout) {
-        this(charset, canAppendTail(layout), layout);
+        this(null, charset, canAppendTail(layout), layout);
     }
 
-    public DefaultFieldSet(@Nullable Charset charset, boolean canAppendTail, LvLayoutNode ... layout) {
+    public DefaultFieldSet(@Nullable Locale locale, @Nullable Charset charset, LvLayoutNode ... layout) {
+        this(locale, charset, canAppendTail(layout), layout);
+    }
+
+    public DefaultFieldSet(@Nullable Locale locale, @Nullable Charset charset, boolean canAppendTail, LvLayoutNode ... layout) {
         this.charset = charset == null ? Charset.defaultCharset() : charset;
+        this.locale = locale == null ? Locale.getDefault(Locale.Category.FORMAT) : locale;
         this.layout = layout.clone();
         this.canAppendTail = canAppendTail;
 
@@ -92,6 +99,10 @@ public class DefaultFieldSet {
     @NonNull
     public Charset getEncoding() {
         return charset;
+    }
+    @NonNull
+    public Locale getLocale() {
+        return locale;
     }
 
     @NonNull

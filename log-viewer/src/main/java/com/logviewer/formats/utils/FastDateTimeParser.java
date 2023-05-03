@@ -12,10 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -63,8 +60,11 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
     private transient String lastTimezoneStr;
     private transient TimeZone lastTimeZone;
 
-    private FastDateTimeParser(@NonNull String pattern, boolean hasTimezone, @Nullable TimeZone defaultTimeZone) {
-        formatter = DateTimeFormatter.ofPattern(pattern).toFormat();
+    private FastDateTimeParser(@NonNull String pattern, @Nullable Locale locale, boolean hasTimezone, @Nullable TimeZone defaultTimeZone) {
+        formatter = locale == null
+                ? DateTimeFormatter.ofPattern(pattern).toFormat()
+                : DateTimeFormatter.ofPattern(pattern, locale).toFormat();
+
         this.hasTimezone = hasTimezone;
         this.defaultTimeZone = defaultTimeZone == null ? TimeZone.getDefault() : defaultTimeZone;
     }
@@ -219,6 +219,7 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
     }
 
     public static BiFunction<String, ParsePosition, Supplier<Instant>> createFormatter(@NonNull String pattern,
+                                                                                       @Nullable Locale locale,
                                                                                        @Nullable TimeZone defaultTimeZone) throws IllegalArgumentException {
         if (!isJDK8031085fixed) {
             int idx = pattern.indexOf("sSSS");
@@ -229,7 +230,7 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
 
                 // DateTimeFormatter doesn't support pattern like "yyyyMMddHHmmssSSS", see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8031085
                 // use SimpleDateFormat as a workaround
-                SimpleDateFormat format = new SimpleDateFormat(pattern);
+                SimpleDateFormat format = locale == null ? new SimpleDateFormat(pattern) : new SimpleDateFormat(pattern, locale);
                 if (defaultTimeZone != null)
                     format.setTimeZone(defaultTimeZone);
                 
@@ -239,10 +240,10 @@ public class FastDateTimeParser implements BiFunction<String, ParsePosition, Sup
 
         Matcher matcher = TIME_PATTERN.matcher(pattern);
         if (!matcher.matches()) {
-            return new FastDateTimeParser(pattern, false, defaultTimeZone);
+            return new FastDateTimeParser(pattern, locale, false, defaultTimeZone);
         }
 
-        return new FastDateTimeParser(matcher.group(1), true, defaultTimeZone);
+        return new FastDateTimeParser(matcher.group(1), locale, true, defaultTimeZone);
     }
 
 }

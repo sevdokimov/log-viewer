@@ -1,7 +1,9 @@
 package com.logviewer.formats.utils;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 public abstract class LvLayoutDateNode implements LvLayoutNode {
@@ -10,9 +12,14 @@ public abstract class LvLayoutDateNode implements LvLayoutNode {
 
     protected TimeZone zone;
 
-    protected LvLayoutDateNode(@Nullable TimeZone zone) {
+    protected Locale locale;
+
+    protected LvLayoutDateNode(@Nullable Locale locale, @Nullable TimeZone zone) {
+        this.locale = locale;
         this.zone = zone;
     }
+
+    public Locale getLocale() { return locale; }
 
     public TimeZone getZone() {
         return zone;

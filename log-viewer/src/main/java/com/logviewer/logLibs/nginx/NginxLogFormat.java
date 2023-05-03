@@ -8,6 +8,7 @@ import org.springframework.lang.NonNull;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +23,11 @@ public class NginxLogFormat extends AbstractPatternLogFormat {
     }
 
     public NginxLogFormat(Charset charset, @NonNull String pattern) {
-        super(charset, pattern);
+        this(null, charset, pattern);
+    }
+
+    public NginxLogFormat(Locale locale, Charset charset, @NonNull String pattern) {
+        super(locale, charset, pattern);
     }
 
     @Override

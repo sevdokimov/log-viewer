@@ -27,7 +27,8 @@ import java.util.stream.Collectors;
 
 public class TestUtils {
 
-    public static final LogFormat MULTIFILE_LOG_FORMAT = new RegexLogFormat(StandardCharsets.UTF_8,
+    public static final LogFormat MULTIFILE_LOG_FORMAT = new RegexLogFormat(Locale.US,
+            StandardCharsets.UTF_8,
             "(150101 10:\\d\\d:\\d\\d) (.*)", false,
             "yyMMdd HH:mm:ss", "date",
             new RegexLogFormat.RegexField("date", 1, FieldTypes.DATE),

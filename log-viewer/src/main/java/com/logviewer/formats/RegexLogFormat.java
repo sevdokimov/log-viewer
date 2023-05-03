@@ -14,10 +14,7 @@ import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -28,6 +25,8 @@ import java.util.stream.Stream;
 public class RegexLogFormat implements LogFormat, Cloneable {
 
     private Charset charset;
+
+    private Locale locale;
 
     private String regex;
 
@@ -44,15 +43,22 @@ public class RegexLogFormat implements LogFormat, Cloneable {
     public RegexLogFormat(@NonNull Charset charset, @NonNull String regex,
                           boolean dontAppendUnmatchedTextToLastField,
                           RegexField... fields) {
-        this(charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
+        this(null, charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
     }
 
-    public RegexLogFormat(@Nullable Charset charset, @NonNull String regex,
+    public RegexLogFormat(@Nullable Locale locale, @NonNull Charset charset, @NonNull String regex,
+                          boolean dontAppendUnmatchedTextToLastField,
+                          RegexField... fields) {
+        this(locale, charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
+    }
+
+    public RegexLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String regex,
                           boolean dontAppendUnmatchedTextToLastField,
                           @Nullable String datePattern, @Nullable String dateFieldName,
                           RegexField... fields) {
         this.regex = regex;
         this.charset = charset;
+        this.locale = locale;
 
         this.fields = fields;
 
@@ -132,10 +138,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (datePattern == null)
                 throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
 
-            if (!LvDateUtils.isDateFormatFull(new SimpleDateFormat(datePattern)))
+            SimpleDateFormat format = locale == null ? new SimpleDateFormat(datePattern) : new SimpleDateFormat(datePattern, locale);
+            if (!LvDateUtils.isDateFormatFull(format))
                 throw new IllegalArgumentException("Invalid date format. Format must include date and time");
 
-            FastDateTimeParser.createFormatter(datePattern, null);// validate date format
+            FastDateTimeParser.createFormatter(datePattern, locale, null);// validate date format
         }
         else {
             if (datePattern != null)
@@ -165,6 +172,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
     @Override
     public Charset getCharset() {
         return charset;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
     }
 
     @Override
@@ -298,7 +310,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (dateFieldIdx != null) {
                 if (fields[dateFieldIdx * 2] >= 0) {
                     if (dateFormat == null)
-                        dateFormat = FastDateTimeParser.createFormatter(datePattern, null);
+                        dateFormat = FastDateTimeParser.createFormatter(datePattern, locale, null);
 
                     Supplier<Instant> timestamp = dateFormat.apply(s, new ParsePosition(fields[dateFieldIdx * 2]));
                     if (timestamp != null) {

@@ -25,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -73,6 +74,8 @@ public class Log implements LogView {
 
     private final Charset encoding;
 
+    private final Locale locale;
+
     private long cachedHashTimestamp;
     private String cachedHash;
 
@@ -99,6 +102,8 @@ public class Log implements LogView {
         this.executor = executor;
 
         encoding = this.format.getCharset() == null ? Charset.defaultCharset() : this.format.getCharset();
+
+        locale = this.format.getLocale() == null ? Locale.getDefault(Locale.Category.FORMAT) : this.format.getLocale();
 
         id = LOG_ID_GENERATOR.apply(path.toString());
     }

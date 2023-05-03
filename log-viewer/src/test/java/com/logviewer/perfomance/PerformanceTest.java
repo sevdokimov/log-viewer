@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Locale;
 
 /**
  *
@@ -19,7 +20,8 @@ import java.nio.file.Files;
 @Ignore
 public class PerformanceTest extends AbstractLogTest {
 
-    private static final LogFormat FORMAT_REGEX = new RegexLogFormat(StandardCharsets.UTF_8,
+    private static final LogFormat FORMAT_REGEX = new RegexLogFormat(Locale.US,
+            StandardCharsets.UTF_8,
             "((?:19|20)\\d\\d-(?:0[1-9]|1[012])-(?:0[1-9]|[12]\\d|3[01])_(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d\\.\\d\\d\\d) \\[(.+?)] (OFF|ERROR|WARN|INFO|DEBUG|TRACE|ALL) {0,5}? ((?:\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*\\.)*\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*) - (.*)",
             false,
             "yyyy-MM-dd_HH:mm:ss.SSS", "date",

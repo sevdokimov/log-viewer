@@ -6,16 +6,24 @@ import com.logviewer.data2.LogRecord;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 public class SimpleLogFormat implements LogFormat {
 
     private Charset charset;
 
+    private Locale locale;
+
     public SimpleLogFormat() {
-        this(null);
+        this(null, null);
     }
 
     public SimpleLogFormat(@Nullable Charset charset) {
+        this(null, charset);
+    }
+
+    public SimpleLogFormat(@Nullable Locale locale, @Nullable Charset charset) {
+        this.locale = locale;
         this.charset = charset;
     }
 
@@ -32,6 +40,11 @@ public class SimpleLogFormat implements LogFormat {
     @Override
     public Charset getCharset() {
         return charset;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
     }
 
     @Override

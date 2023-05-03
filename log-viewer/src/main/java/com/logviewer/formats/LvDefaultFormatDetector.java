@@ -13,10 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -122,7 +119,7 @@ public class LvDefaultFormatDetector {
 
         if (map.get(format) > map.values().stream().mapToInt(x -> x).sum() * 2 / 3) {
             if (format.getFirst()) {
-                return new Log4jLogFormat(null, format.getSecond(), false);
+                return new Log4jLogFormat(null, null, format.getSecond(), false);
             } else {
                 return new NginxLogFormat(format.getSecond());
             }
