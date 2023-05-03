@@ -92,7 +92,11 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                             }
 
                             try {
-                                new SimpleDateFormat(datePattern, locale);
+                                if (locale != null) {
+                                    new SimpleDateFormat(datePattern, locale);
+                                } else {
+                                    new SimpleDateFormat(datePattern);
+                                }
                             } catch (IllegalArgumentException e) {
                                 datePattern = CoreConstants.ISO8601_PATTERN;
                             }
