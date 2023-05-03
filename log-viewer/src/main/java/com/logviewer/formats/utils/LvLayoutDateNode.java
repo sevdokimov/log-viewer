@@ -1,6 +1,5 @@
 package com.logviewer.formats.utils;
 
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Locale;
