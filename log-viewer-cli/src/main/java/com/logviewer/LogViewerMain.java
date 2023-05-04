@@ -187,7 +187,7 @@ public class LogViewerMain {
         String[] roles = ldap.toConfig().getStringList("roles").toArray(new String[0]);
 
         if (roles.length == 0) {
-            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap-config");
+            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property must not be empty");
         }
 
         ConstraintSecurityHandler res = new ConstraintSecurityHandler();
