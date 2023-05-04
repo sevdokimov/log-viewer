@@ -33,6 +33,8 @@ of any characters except "/", "**" matches a sequence of any characters include 
 ${HOME} will be replaced with the environment variable "HOME", it is a feature of [HOCON](https://github.com/lightbend/config#uses-of-substitutions).
 
 ### Authentication
+
+#### Basic authentication
 Basic authentication may be configured. The list of users can be defined in `users = [...]` section.
 Passwords can be defined as plain text or as MD5 checksum. 
 Example:
@@ -49,6 +51,36 @@ users = [
       password-md5: "c81e728d9d4c2f636f067f89cc14862c" // The password is "2". Specified as md5 hash of "2" string.
   } 
 ]
+
+```
+
+#### LDAP authentication
+LDAP authentication may be configured.  
+Example:
+```
+authentication.enabled = true
+authentication.ldap.enabled = true
+
+ldap-config = {
+  roles: ["user"] // user access groups
+  debug: "false"
+  useLdaps: "false"
+  hostname: "ldap.example.com"
+  port: "389"
+  bindDn: "cn=Directory Manager"
+  bindPassword: "directory"
+  authenticationMethod: "simple"
+  forceBindingLogin: "true"
+  userBaseDn: "ou=people,dc=alcatel"
+  userRdnAttribute: "sAMAccountName"
+  userIdAttribute: "sAMAccountName"
+  userPasswordAttribute: "unicodePwd"
+  userObjectClass: "user"
+  roleBaseDn: "ou=groups,dc=example,dc=com"
+  roleNameAttribute: "cn"
+  roleMemberAttribute: "member"
+  roleObjectClass: "group"
+}
 
 ```
 
