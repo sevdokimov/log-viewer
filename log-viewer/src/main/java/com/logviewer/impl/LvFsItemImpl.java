@@ -1,8 +1,6 @@
 package com.logviewer.impl;
 
 import com.logviewer.api.LvFileNavigationManager;
-import com.logviewer.files.FileType;
-import com.logviewer.files.FileTypes;
 import org.springframework.lang.Nullable;
 
 import java.io.IOException;
@@ -23,14 +21,6 @@ public class LvFsItemImpl implements LvFileNavigationManager.LvFsItem {
     @Override
     public boolean isDirectory() {
         return attributes.isDirectory();
-    }
-
-    @Override
-    public FileType getType() {
-        if (attributes.isDirectory())
-            return null;
-
-        return FileTypes.detectType(path.toString());
     }
 
     @Override

@@ -22,6 +22,8 @@ public class FileTypesTest {
         assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log.2012-11-21"));
         assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log.2012.11.21"));
 
+        assertEquals(FileTypes.LOG, FileTypes.detectType("aaaa/aaa.log.bck"));
+
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.log.2012-11.21"));
 
         assertEquals(FileTypes.UNKNOWN, FileTypes.detectType("aaaa/aaa.zzz"));

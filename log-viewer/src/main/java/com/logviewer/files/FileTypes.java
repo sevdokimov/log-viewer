@@ -12,8 +12,10 @@ public class FileTypes {
 
     private static final String LOG_WITH_DATE = ".*\\.log(?:\\.(?:\\d+|[12]\\d\\d\\d([-.])\\d\\d\\1\\d\\d))?";
 
+    private static final String BCK_LOG = ".*\\.log\\.bck";
+
     public static final FileType LOG = new FileType("log",
-            Pattern.compile(SYSLOG + '|' + LOG_WITH_DATE, Pattern.CASE_INSENSITIVE),
+            Pattern.compile(SYSLOG + '|' + LOG_WITH_DATE + '|' + BCK_LOG, Pattern.CASE_INSENSITIVE),
             "assets/file-types/text.png");
 
     public static final FileType OUT = new FileType("out",
