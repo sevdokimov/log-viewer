@@ -175,19 +175,19 @@ public class LogViewerMain {
 
         if (!config.hasPath("ldap-config")) {
             throw new IllegalArgumentException("Invalid configuration: `ldap-config = { ... }` sections is not defined. " +
-                    "List of ldap must be defined when `" + PROP_AUTHENTICATION_LDAP_ENABLED + "=true`");
+                    "ldap-config must be defined when `" + PROP_AUTHENTICATION_LDAP_ENABLED + "=true`");
         }
 
         ConfigObject ldap = config.getObject("ldap-config");
 
         if (ldap.get("roles") == null) {
-            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap");
+            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap-config");
         }
 
         String[] roles = ldap.toConfig().getStringList("roles").toArray(new String[0]);
 
         if (roles.length == 0) {
-            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap");
+            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap-config");
         }
 
         ConstraintSecurityHandler res = new ConstraintSecurityHandler();
