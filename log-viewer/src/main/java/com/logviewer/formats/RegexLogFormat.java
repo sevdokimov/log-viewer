@@ -196,6 +196,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         @Override
         public boolean parseRecord(byte[] data, int offset, int length, long start, long end) {
             String s = new String(data, offset, length, charset);
+            s = Utils.removeAsciiColorCodes(s);
 
             Matcher matcher = getPattern().matcher(s);
             if (!matcher.matches())
@@ -269,7 +270,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                             + RegexLogFormat.this.fields[lastField].name() +"' is not on the end of line");
             }
 
-            s = s + new String(data, offset, length, charset);
+            s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fields[lastField * 2 + 1] = s.length();
         }
 

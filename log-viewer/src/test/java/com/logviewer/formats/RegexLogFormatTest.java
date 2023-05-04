@@ -1,14 +1,23 @@
 package com.logviewer.formats;
 
 import com.logviewer.AbstractLogTest;
-import com.logviewer.data2.*;
+import com.logviewer.data2.FieldTypes;
+import com.logviewer.data2.Log;
+import com.logviewer.data2.LogFormat;
+import com.logviewer.data2.LogRecord;
+import com.logviewer.data2.Snapshot;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -139,5 +148,19 @@ public class RegexLogFormatTest extends AbstractLogTest {
                     res.stream().map(LogRecord::getMessage).collect(Collectors.toList()));
         }
 
+    }
+
+    @Test
+    public void testAsciiColorCodes() throws IOException {
+        LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
+                "(?<date>[^ ]+) (?<msg>.+)", false,
+                "yyyy-MM-dd_HH:mm:ssZ", "date",
+                RegexLogFormat.field("date", FieldTypes.DATE),
+                RegexLogFormat.field("msg", null)
+        );
+
+        List<LogRecord> records = loadLog("LogParser/ascii-color-codes.log", logFormat);
+        assertEquals("foo", records.get(0).getFieldText("msg"));
+        assertEquals("bar\n,fff", records.get(1).getFieldText("msg"));
     }
 }

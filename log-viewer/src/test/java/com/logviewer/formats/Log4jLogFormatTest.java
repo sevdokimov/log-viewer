@@ -25,11 +25,13 @@ import org.apache.logging.log4j.spi.MutableThreadContextStack;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -274,4 +276,14 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         assertEquals("WARN", read(logFormat, "12:00:00 WARN aaa").getFieldText("level"));
         assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText("level"));
     }
+
+    @Test
+    public void testAsciiColorCodes() throws IOException {
+        LogFormat logFormat = new Log4jLogFormat("%d{yyyy-MM-dd_HH:mm:ss} %m%n");
+
+        List<LogRecord> records = loadLog("LogParser/ascii-color-codes.log", logFormat);
+        assertEquals("foo", records.get(0).getFieldText("msg"));
+        assertEquals("bar\n,fff", records.get(1).getFieldText("msg"));
+    }
+
 }
