@@ -1471,7 +1471,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.setGlobalSavedFilters(event.globalSavedFilters)
 
-        this.filterPanelStateService.init(this.logs);
+        this.filterPanelStateService.init(this.logs, uiConfig);
 
         this.effectiveFilters = this.loadEffectiveFilters();
 
