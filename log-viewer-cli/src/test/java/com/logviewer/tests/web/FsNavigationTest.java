@@ -102,7 +102,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
 
         assert selectedFile().getText().endsWith("/aaa");
 
-        int firstItemY = selectedFile().getLocation().y;
+        int firstItemY = selectedFileVerticalOffset();
 
         new Actions(driver).doubleClick(selectedFile()).perform();
 
@@ -110,7 +110,13 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
         assertEquals(Arrays.asList("a.log", "a2.log"), fileNames());
         assertEquals(root.resolve("aaa").toString(), currentPath());
 
-        assertEquals(firstItemY, selectedFile().getLocation().y);
+        assertEquals(firstItemY, selectedFileVerticalOffset());
+    }
+
+    private int selectedFileVerticalOffset() {
+        WebElement fileListTable = driver.findElement(By.cssSelector("table.file-list"));
+
+        return fileListTable.getLocation().y - selectedFile().getLocation().y;
     }
 
     @Test

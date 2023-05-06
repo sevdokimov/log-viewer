@@ -2,6 +2,8 @@ package com.logviewer.tests.utils;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.v112.emulation.Emulation;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
@@ -20,6 +22,12 @@ public class ChromeDriverFactory implements Supplier<RemoteWebDriver> {
 
         options.setExperimentalOption("prefs", perf);
 
-        return new ChromeDriver(options);
+        ChromeDriver res = new ChromeDriver(options);
+
+        DevTools devTools = res.getDevTools();
+        devTools.createSession();
+        devTools.send(Emulation.setTimezoneOverride("Europe/Moscow"));
+
+        return res;
     }
 }
