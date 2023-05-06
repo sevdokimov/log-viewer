@@ -1,26 +1,13 @@
 package com.logviewer.formats;
 
-import com.logviewer.data2.DefaultFieldDesciptor;
-import com.logviewer.data2.FieldTypes;
-import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.LogReader;
-import com.logviewer.data2.LogRecord;
-import com.logviewer.formats.utils.LvLayoutClassNode;
-import com.logviewer.formats.utils.LvLayoutCustomTypeNode;
-import com.logviewer.formats.utils.LvLayoutDateNode;
-import com.logviewer.formats.utils.LvLayoutNode;
-import com.logviewer.formats.utils.LvLayoutNodeSearchable;
-import com.logviewer.formats.utils.LvLayoutStretchNode;
+import com.logviewer.data2.*;
+import com.logviewer.formats.utils.*;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongSupplier;
 
