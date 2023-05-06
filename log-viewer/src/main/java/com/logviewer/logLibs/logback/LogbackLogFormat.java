@@ -11,13 +11,10 @@ import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
 import org.slf4j.event.Level;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
@@ -32,15 +29,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     protected static final int NODE_COMPOSITE_KEYWORD = 2; // Node.COMPOSITE_KEYWORD
 
     public LogbackLogFormat(@NonNull String pattern) {
-        this(null, pattern);
-    }
-
-    public LogbackLogFormat(@Nullable Charset charset, @NonNull String pattern) {
-        this(null, charset, pattern);
-    }
-
-    public LogbackLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String pattern) {
-        super(locale, charset, pattern);
+        super(pattern);
     }
 
     @Override
@@ -56,7 +45,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         List<LvLayoutNode> nodes = new ArrayList<>();
 
         for (Node n = t; n != null; n = n.getNext()) {
-            LvLayoutNode lvNode = createNode(n, pattern, getLocale());
+            LvLayoutNode lvNode = createNode(n, pattern);
             if (lvNode != null)
                 nodes.add(lvNode);
         }
@@ -66,7 +55,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         return nodes.toArray(new LvLayoutNode[0]);
     }
 
-    private static LvLayoutNode createNode(Node n, String pattern, Locale locale) {
+    private LvLayoutNode createNode(Node n, String pattern) {
         switch (n.getType()) {
             case NODE_LITERAL:
                 return LvLayoutTextNode.of((String) n.getValue());
@@ -92,18 +81,17 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                             }
 
                             try {
-                                if (locale != null) {
-                                    new SimpleDateFormat(datePattern, locale);
-                                } else {
-                                    new SimpleDateFormat(datePattern);
-                                }
+                                new SimpleDateFormat(datePattern); // validation
                             } catch (IllegalArgumentException e) {
                                 datePattern = CoreConstants.ISO8601_PATTERN;
                             }
                         }
 
-                        LvLayoutNode res = LvLayoutLog4jISO8601Date.fromPattern(datePattern);  // Optimization, LvLayoutLog4jISO8601Date works much faster.
-                        return res != null ? res : new LvLayoutSimpleDateNode(datePattern, locale);
+                        LvLayoutDateNode res = LvLayoutLog4jISO8601Date.fromPattern(datePattern);  // Optimization, LvLayoutLog4jISO8601Date works much faster.
+                        if (res == null)
+                            res = new LvLayoutSimpleDateNode(datePattern);
+
+                        return res.withLocale(getLocale());
                     }
 
                     case "c":

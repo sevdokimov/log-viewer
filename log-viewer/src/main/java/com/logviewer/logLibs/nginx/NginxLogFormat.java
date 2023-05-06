@@ -5,10 +5,8 @@ import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
 import org.springframework.lang.NonNull;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,15 +17,7 @@ public class NginxLogFormat extends AbstractPatternLogFormat {
     private static final String[] HTTP_METHODS = {"GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE"};
 
     public NginxLogFormat(@NonNull String pattern) {
-        this(null, pattern);
-    }
-
-    public NginxLogFormat(Charset charset, @NonNull String pattern) {
-        this(null, charset, pattern);
-    }
-
-    public NginxLogFormat(Locale locale, Charset charset, @NonNull String pattern) {
-        super(locale, charset, pattern);
+        super(pattern);
     }
 
     @Override

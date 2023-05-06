@@ -52,7 +52,7 @@ public class LogbackConfigImporter implements Supplier<Map<Path, LogFormat>> {
 
                 String pattern = patchPatternWithProcessId(patternEncoder.getPattern());
 
-                LogFormat logFormat = new LogbackLogFormat(patternEncoder.getCharset(), pattern);
+                LogFormat logFormat = new LogbackLogFormat(pattern).setCharset(patternEncoder.getCharset());
 
                 try {
                     logFormat.validate();

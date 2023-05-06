@@ -10,6 +10,7 @@ import com.logviewer.data2.LogRecord;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.utils.LvDateUtils;
+import com.logviewer.utils.LvGsonUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LocationInfo;
 import org.apache.log4j.spi.LoggingEvent;
@@ -27,11 +28,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -48,17 +47,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 
     @Test
     public void testNDC() {
-        MutableInstant instant = new MutableInstant();
-        instant.initFromEpochMilli(new Date(111, Calendar.OCTOBER, 13, 18, 33, 45).getTime(), 777);
-
-        LogEvent event = Log4jLogEvent.newBuilder()
-                .setInstant(instant)
-                .setLevel(Level.ERROR)
-                .setMessage(new ObjectMessage("The log message"))
-                .setContextStack(ThreadContext.EMPTY_STACK)
-                .build();
-
-        check("%p %NDC %m%n", event, true, "ERROR", "", "The log message");
+        check("%p %NDC %m%n", createEvent(), true, "ERROR", "", "The log message");
 
         read(new Log4jLogFormat("%p %NDC %m%n"), "ERROR [] dffsdsf");
         notMatch("%p %NDC %m%n", "ERROR  dffsdsf");
@@ -74,17 +63,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 
     @Test
     public void testMDC() {
-        MutableInstant instant = new MutableInstant();
-        instant.initFromEpochMilli(new Date(111, Calendar.OCTOBER, 13, 18, 33, 45).getTime(), 777);
-
-        LogEvent event = Log4jLogEvent.newBuilder()
-                .setInstant(instant)
-                .setLevel(Level.ERROR)
-                .setMessage(new ObjectMessage("The log message"))
-                .setContextStack(ThreadContext.EMPTY_STACK)
-                .build();
-
-        check("%p %NDC %m%n", event, true, "ERROR", "", "The log message");
+        check("%p %NDC %m%n", createEvent(), true, "ERROR", "", "The log message");
 
         read(new Log4jLogFormat("%p %X %m%n"), "ERROR {} dffsdsf");
         notMatch("%p %X %m%n", "ERROR xxx dffsdsf");
@@ -284,6 +263,78 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         List<LogRecord> records = loadLog("LogParser/ascii-color-codes.log", logFormat);
         assertEquals("foo", records.get(0).getFieldText("msg"));
         assertEquals("bar\n,fff", records.get(1).getFieldText("msg"));
+    }
+
+    private static Log4jLogEvent createEvent() {
+        MutableInstant instant = new MutableInstant();
+        instant.initFromEpochMilli(new Date(111, Calendar.OCTOBER, 13, 18, 33, 45).getTime(), 777);
+
+        return Log4jLogEvent.newBuilder()
+                .setInstant(instant)
+                .setLevel(Level.ERROR)
+                .setMessage(new ObjectMessage("The log message"))
+                .setContextStack(ThreadContext.EMPTY_STACK)
+                .build();
+    }
+
+    @Test
+    public void testLocale() {
+        String pattern = "%d{yyyy MMM dd HH:mm:ss} %m%n";
+        Locale customLocale = new Locale("ru", "RU");
+
+        String str = TestUtils.withLocale(customLocale, () -> {
+            PatternLayout layout = PatternLayout.newBuilder().withPattern(pattern).build();
+
+            return layout.getEventSerializer().toSerializable(createEvent());
+        });
+
+        assertTrue(str.contains("окт")); // "2011 окт 13" in Java 8, "2011 окт. 13" in Java 17
+
+        LogFormat logFormat = new Log4jLogFormat(pattern).setLocale(customLocale);
+        LogRecord read = read(logFormat, str);
+
+        assertTrue(read.hasTime());
+        assertTrue(read.getFieldText("date").matches("2011 окт.? 13 18:33:45")); // "2011 окт 13" in Java 8, "2011 окт. 13" in Java 17
+    }
+
+    @Test
+    public void serialization() {
+//        LogFormat logFormatSample = new Log4jLogFormat("%d{HH:mm:ss} %processId %msg%wEx")
+//                .setRealLog4j(false)
+//                .setLocale(new Locale("ru", "RU"))
+//                .setCharset(StandardCharsets.ISO_8859_1);
+//
+//        String json = LvGsonUtils.GSON.toJson(logFormatSample, LogFormat.class);
+//        System.out.println(json);
+//        if (true)
+//            return;
+
+        String serializedRegexpFormat = "{\n" +
+                "  \"type\": \"Log4jLogFormat\",\n" +
+                "  \"realLog4j\": false,\n" +
+                "  \"charset\": \"ISO-8859-1\",\n" +
+                "  \"locale\": \"ru_RU\",\n" +
+                "  \"pattern\": \"%d{yyyy-MM-dd HH:mm:ss Z} %m%n\"\n" +
+                "}\n";
+
+        Log4jLogFormat logFormat = (Log4jLogFormat) LvGsonUtils.GSON.fromJson(serializedRegexpFormat, LogFormat.class);
+
+        assertEquals(StandardCharsets.ISO_8859_1, logFormat.getCharset());
+        assertEquals(false, logFormat.isRealLog4j());
+        assertEquals(new Locale("ru", "RU"), logFormat.getLocale());
+        assertEquals("%d{yyyy-MM-dd HH:mm:ss Z} %m%n", logFormat.getPattern());
+
+        String json2 = LvGsonUtils.GSON.toJson(logFormat, LogFormat.class);
+
+        LogFormat logFormat2 = LvGsonUtils.GSON.fromJson(json2, LogFormat.class);
+
+
+        // Test no transient fields.
+        LogRecord record = read(logFormat2, "2011-01-01 23:02:01 +0000 foo");
+        assertEquals("foo", record.getFieldText("msg"));
+
+        assertEquals(json2, LvGsonUtils.GSON.toJson(logFormat2, LogFormat.class));
+        assertEquals(json2, LvGsonUtils.GSON.toJson(LvGsonUtils.copy(logFormat2), LogFormat.class));
     }
 
 }

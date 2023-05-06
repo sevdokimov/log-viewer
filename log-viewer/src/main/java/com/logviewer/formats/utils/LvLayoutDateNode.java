@@ -13,13 +13,6 @@ public abstract class LvLayoutDateNode implements LvLayoutNode {
 
     protected Locale locale;
 
-    protected LvLayoutDateNode(@Nullable Locale locale, @Nullable TimeZone zone) {
-        this.locale = locale;
-        this.zone = zone;
-    }
-
-    public Locale getLocale() { return locale; }
-
     public TimeZone getZone() {
         return zone;
     }
@@ -29,13 +22,31 @@ public abstract class LvLayoutDateNode implements LvLayoutNode {
     }
 
     public LvLayoutDateNode withTimeZone(@Nullable TimeZone zone) {
+        if (zone == this.zone)
+            return this;
+
         LvLayoutDateNode res = clone();
         res.zone = zone;
+        return res;
+    }
+
+    public LvLayoutDateNode withLocale(@Nullable Locale locale) {
+        if (locale == this.locale)
+            return this;
+
+        LvLayoutDateNode res = clone();
+        res.locale = locale;
         return res;
     }
 
     public abstract boolean isFull();
 
     @Override
-    public abstract LvLayoutDateNode clone();
+    public LvLayoutDateNode clone() {
+        try {
+            return (LvLayoutDateNode) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

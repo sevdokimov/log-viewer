@@ -10,9 +10,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static com.logviewer.tests.utils.TestLogFormats.FORMAT_LEVEL_LOG4j;
@@ -22,9 +20,8 @@ import static org.junit.Assert.assertThat;
 
 public class LogLevelTest extends AbstractWebTestCase {
 
-    private static final LogFormat FORMAT_JAVA = new RegexLogFormat(Locale.US,
-            StandardCharsets.UTF_8,
-            "(?<date>\\d{6} \\d\\d:\\d\\d:\\d\\d) (?<level>\\w+) (?<msg>.*)", false,
+    private static final LogFormat FORMAT_JAVA = new RegexLogFormat(
+            "(?<date>\\d{6} \\d\\d:\\d\\d:\\d\\d) (?<level>\\w+) (?<msg>.*)",
             "yyMMdd HH:mm:ss", "date",
             RegexLogFormat.field("date", FieldTypes.DATE),
             RegexLogFormat.field("level", FieldTypes.LEVEL),

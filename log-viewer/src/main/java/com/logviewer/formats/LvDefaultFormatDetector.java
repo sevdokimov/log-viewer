@@ -236,7 +236,7 @@ public class LvDefaultFormatDetector {
 
         if (map.get(format) > map.values().stream().mapToInt(x -> x).sum() * 2 / 3) {
             if (format.getFirst()) {
-                return new Log4jLogFormat(null, null, format.getSecond(), false);
+                return new Log4jLogFormat(format.getSecond()).setRealLog4j(false);
             } else {
                 return new NginxLogFormat(format.getSecond());
             }

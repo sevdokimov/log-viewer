@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,8 +23,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class PredicateTest extends AbstractLogTest {
 
-    private final static LogFormat logFormat = new RegexLogFormat(StandardCharsets.UTF_8,
-            "\\[([A-Z]+)\\] (.+)? (\\d+)", true,
+    private final static LogFormat logFormat = new RegexLogFormat(
+            "\\[([A-Z]+)\\] (.+)? (\\d+)",
             new RegexField("level", 1, FieldTypes.LEVEL_LOGBACK), new RegexField("msg", 2), new RegexField("index", 3));
 
     private LogFilterContext filterContext;

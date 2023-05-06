@@ -2,13 +2,10 @@ package com.logviewer.formats.utils;
 
 import com.logviewer.utils.LvDateUtils;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -21,21 +18,8 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
     protected transient Supplier<Instant> timestamp;
 
     public LvLayoutSimpleDateNode(@NonNull String format) {
-        this(format, null, null);
-    }
-
-    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable TimeZone zone) {
-        this(format, null, zone);
-    }
-
-    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable Locale locale) {
-        this(format, locale, null);
-    }
-
-    public LvLayoutSimpleDateNode(@NonNull String format, @Nullable Locale locale, @Nullable TimeZone zone) {
-        super(locale, zone);
         this.format = format;
-        FastDateTimeParser.createFormatter(format, locale, null); // validation
+        FastDateTimeParser.createFormatter(format, null, null); // validation
     }
 
     public String getFormat() {
@@ -67,15 +51,19 @@ public class LvLayoutSimpleDateNode extends LvLayoutDateNode {
 
     @Override
     public boolean isFull() {
-        if (locale != null) {
-            return LvDateUtils.isDateFormatFull(new SimpleDateFormat(format, locale));
-        }
-
-        return LvDateUtils.isDateFormatFull(new SimpleDateFormat(format));
+        SimpleDateFormat sompleFormat = locale != null ? new SimpleDateFormat(format, locale) : new SimpleDateFormat(format);
+        
+        return LvDateUtils.isDateFormatFull(sompleFormat);
     }
 
     @Override
     public LvLayoutDateNode clone() {
-        return new LvLayoutSimpleDateNode(format, locale, zone);
+        LvLayoutSimpleDateNode res = (LvLayoutSimpleDateNode) super.clone();
+
+        // Clear transient fields
+        res.timestamp = null;
+        res.formatter = null;
+
+        return res;
     }
 }

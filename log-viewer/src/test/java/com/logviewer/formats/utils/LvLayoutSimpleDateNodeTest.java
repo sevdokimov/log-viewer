@@ -178,7 +178,7 @@ public class LvLayoutSimpleDateNodeTest {
 
     @Test
     public void testSetZone() {
-        LvLayoutDateNode node = new LvLayoutSimpleDateNode("y/MM/dd HHmmss", TimeZone.getTimeZone("GMT+1000"));
+        LvLayoutDateNode node = new LvLayoutSimpleDateNode("y/MM/dd HHmmss").withTimeZone(TimeZone.getTimeZone("GMT+1000"));
         node = node.withTimeZone(TimeZone.getTimeZone("GMT+0300"));
 
         String s = "2020/01/01 120000";

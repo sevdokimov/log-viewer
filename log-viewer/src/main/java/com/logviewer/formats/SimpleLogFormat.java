@@ -13,18 +13,11 @@ public class SimpleLogFormat implements LogFormat {
 
     private Charset charset;
 
-    private Locale locale;
-
     public SimpleLogFormat() {
-        this(null, null);
+        this(null);
     }
 
     public SimpleLogFormat(@Nullable Charset charset) {
-        this(null, charset);
-    }
-
-    public SimpleLogFormat(@Nullable Locale locale, @Nullable Charset charset) {
-        this.locale = locale;
         this.charset = charset;
     }
 
@@ -45,7 +38,7 @@ public class SimpleLogFormat implements LogFormat {
 
     @Override
     public Locale getLocale() {
-        return locale;
+        return null;
     }
 
     @Override
@@ -65,10 +58,6 @@ public class SimpleLogFormat implements LogFormat {
 
     public void setCharset(Charset charset) {
         this.charset = charset;
-    }
-
-    public void setLocale(Locale locale) {
-        this.locale = locale;
     }
 
     private class DefaultReader extends LogReader {

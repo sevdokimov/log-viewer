@@ -12,7 +12,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -24,8 +23,8 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
 
     @Before
     public void initFormat() {
-        RegexLogFormat format = new RegexLogFormat(StandardCharsets.UTF_8,
-                "\\[?(\\d{4}-\\d\\d-\\d\\d_\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)]? (.*)", false,
+        RegexLogFormat format = new RegexLogFormat(
+                "\\[?(\\d{4}-\\d\\d-\\d\\d_\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)]? (.*)",
                 new RegexLogFormat.RegexField("date", 1, FieldTypes.DATE),
                 new RegexLogFormat.RegexField("msg", 2, "message")
         );

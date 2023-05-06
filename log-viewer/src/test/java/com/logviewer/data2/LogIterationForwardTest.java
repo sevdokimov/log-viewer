@@ -8,7 +8,6 @@ import com.logviewer.formats.RegexLogFormat.RegexField;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,16 +20,18 @@ import static org.junit.Assert.assertEquals;
 
 public class LogIterationForwardTest extends AbstractLogTest {
 
-    public static final LogFormat FORMAT = new RegexLogFormat(StandardCharsets.UTF_8,
-            "\\[(DEBUG|INFO)\\] (.+)", false,
+    public static final LogFormat FORMAT = new RegexLogFormat(
+            "\\[(DEBUG|INFO)\\] (.+)",
             new RegexField("level", 1), new RegexField("body", 2));
 
-    public static final LogFormat LINE_NUMBERS_NO_APPEND = new RegexLogFormat(StandardCharsets.UTF_8,
-            "(?<msg>\\d+)", true, new RegexField("msg"));
+    public static final LogFormat LINE_NUMBERS_NO_APPEND = new RegexLogFormat(
+            "(?<msg>\\d+)", new RegexField("msg"))
+            .setDontAppendUnmatchedTextToLastField(true);
 
-    public static final LogFormat FORMAT_NO_APPEND = new RegexLogFormat(StandardCharsets.UTF_8,
-            "\\[(DEBUG|INFO)\\] (.+)", true,
-            new RegexField("level", 1), new RegexField("body", 2));
+    public static final LogFormat FORMAT_NO_APPEND = new RegexLogFormat(
+            "\\[(DEBUG|INFO)\\] (.+)",
+            new RegexField("level", 1), new RegexField("body", 2))
+            .setDontAppendUnmatchedTextToLastField(true);
 
     @Test
     public void testEmpty() throws IOException {

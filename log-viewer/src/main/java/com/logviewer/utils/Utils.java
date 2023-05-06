@@ -4,11 +4,7 @@ import com.logviewer.data2.LogFormat;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,11 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -232,6 +224,7 @@ public class Utils {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             Utils.putUnencodedChars(digest, LvGsonUtils.GSON.toJson(format));
+            Utils.putUnencodedChars(digest, format.getClass().getName());
             return ByteBuffer.wrap(digest.digest()).getLong();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

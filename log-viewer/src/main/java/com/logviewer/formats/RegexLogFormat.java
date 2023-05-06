@@ -28,9 +28,9 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     private Locale locale;
 
-    private String regex;
+    private final String regex;
 
-    private RegexField[] fields;
+    private final RegexField[] fields;
 
     private boolean dontAppendUnmatchedTextToLastField;
 
@@ -40,30 +40,16 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     private transient volatile Pattern pattern;
 
-    public RegexLogFormat(@NonNull Charset charset, @NonNull String regex,
-                          boolean dontAppendUnmatchedTextToLastField,
-                          RegexField... fields) {
-        this(null, charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
+    public RegexLogFormat(@NonNull String regex, RegexField... fields) {
+        this(regex, null, null, fields);
     }
 
-    public RegexLogFormat(@Nullable Locale locale, @NonNull Charset charset, @NonNull String regex,
-                          boolean dontAppendUnmatchedTextToLastField,
-                          RegexField... fields) {
-        this(locale, charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
-    }
-
-    public RegexLogFormat(@Nullable Locale locale, @Nullable Charset charset, @NonNull String regex,
-                          boolean dontAppendUnmatchedTextToLastField,
+    public RegexLogFormat(@NonNull String regex,
                           @Nullable String datePattern, @Nullable String dateFieldName,
                           RegexField... fields) {
         this.regex = regex;
-        this.charset = charset;
-        this.locale = locale;
-
         this.fields = fields;
 
-        this.dontAppendUnmatchedTextToLastField = dontAppendUnmatchedTextToLastField;
-        
         this.datePattern = datePattern;
 
         if (dateFieldName != null) {
@@ -78,6 +64,21 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     public boolean isDontAppendUnmatchedTextToLastField() {
         return dontAppendUnmatchedTextToLastField;
+    }
+
+    public RegexLogFormat setDontAppendUnmatchedTextToLastField(boolean dontAppendUnmatchedTextToLastField) {
+        this.dontAppendUnmatchedTextToLastField = dontAppendUnmatchedTextToLastField;
+        return this;
+    }
+
+    public RegexLogFormat setCharset(@Nullable Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    public RegexLogFormat setLocale(@Nullable Locale locale) {
+        this.locale = locale;
+        return this;
     }
 
     private Pattern getPattern() {
@@ -138,11 +139,10 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (datePattern == null)
                 throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
 
-            SimpleDateFormat format = locale == null ? new SimpleDateFormat(datePattern) : new SimpleDateFormat(datePattern, locale);
-            if (!LvDateUtils.isDateFormatFull(format))
+            if (!LvDateUtils.isDateFormatFull(new SimpleDateFormat(datePattern)))
                 throw new IllegalArgumentException("Invalid date format. Format must include date and time");
 
-            FastDateTimeParser.createFormatter(datePattern, locale, null);// validate date format
+            FastDateTimeParser.createFormatter(datePattern, null, null);// validate date format
         }
         else {
             if (datePattern != null)

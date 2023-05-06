@@ -6,7 +6,6 @@ import org.springframework.lang.Nullable;
 
 import java.text.ParsePosition;
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,18 +34,10 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
     private transient String currentTimezoneStr;
 
     public LvLayoutLog4jISO8601Date(boolean hasMilliseconds) {
-        this(hasMilliseconds ? 3 : 0, false, null);
+        this(hasMilliseconds ? 3 : 0, false);
     }
 
     public LvLayoutLog4jISO8601Date(int milliseconds, boolean hasTimezone) {
-        this(milliseconds, hasTimezone, null);
-    }
-
-    public LvLayoutLog4jISO8601Date(int milliseconds, boolean hasTimezone, TimeZone zone) {
-        this(milliseconds, hasTimezone, null, zone);
-    }
-    public LvLayoutLog4jISO8601Date(int milliseconds, boolean hasTimezone, Locale locale, TimeZone zone) {
-        super(locale, zone);
         this.milliseconds = milliseconds;
         this.hasTimezone = hasTimezone;
     }
@@ -205,6 +196,11 @@ public class LvLayoutLog4jISO8601Date extends LvLayoutDateNode {
 
     @Override
     public LvLayoutDateNode clone() {
-        return new LvLayoutLog4jISO8601Date(milliseconds, hasTimezone, locale, zone);
+        LvLayoutLog4jISO8601Date res = (LvLayoutLog4jISO8601Date) super.clone();
+
+        // Clear transient fields
+        res.calendar = null;
+        res.currentTimezoneStr = null;
+        return res;
     }
 }

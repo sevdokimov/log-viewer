@@ -27,9 +27,8 @@ import java.util.stream.Collectors;
 
 public class TestUtils {
 
-    public static final LogFormat MULTIFILE_LOG_FORMAT = new RegexLogFormat(Locale.US,
-            StandardCharsets.UTF_8,
-            "(150101 10:\\d\\d:\\d\\d) (.*)", false,
+    public static final LogFormat MULTIFILE_LOG_FORMAT = new RegexLogFormat(
+            "(150101 10:\\d\\d:\\d\\d) (.*)",
             "yyMMdd HH:mm:ss", "date",
             new RegexLogFormat.RegexField("date", 1, FieldTypes.DATE),
             new RegexLogFormat.RegexField("msg", 2, "message")
@@ -190,6 +189,10 @@ public class TestUtils {
         void run() throws E;
     }
 
+    public interface ExceptionalCallable<R, E extends Throwable> {
+        R call() throws E;
+    }
+
     public static <E extends Throwable> void withSystemProp(@Nonnull String name, @Nonnull String value, @Nonnull ExceptionalRunnable<E> runnable) throws E {
         String old = System.setProperty(name, value);
         try {
@@ -200,6 +203,16 @@ public class TestUtils {
             } else {
                 System.setProperty(name, value);
             }
+        }
+    }
+
+    public static <R, E extends Throwable> R withLocale(@Nonnull Locale locale, @Nonnull ExceptionalCallable<R, E> callable) throws E {
+        Locale defaultLocale = Locale.getDefault();
+        Locale.setDefault(locale);
+        try {
+            return callable.call();
+        } finally {
+            Locale.setDefault(defaultLocale);
         }
     }
 }
