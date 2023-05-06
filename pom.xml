@@ -117,6 +117,8 @@
                 <configuration>
                     <systemPropertyVariables>
                         <user.timezone>Europe/Moscow</user.timezone>
+                        <user.country>US</user.country>
+                        <user.language>en</user.language>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
