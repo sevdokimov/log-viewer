@@ -49,6 +49,11 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine(" [2020-01-01 18:11:00,000] WARN ddddd", LvDefaultFormatDetector.UNKNOWN_FORMAT);
         checkLine("2020-01-01 18:11:00,000 z WARN ddddd", "%d{yyyy-MM-dd HH:mm:ss,SSS} %m%n");
         checkLine("[2021-10-20_15:40:15.032] [fullhouse,,,] [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA", "[%d{yyyy-MM-dd_HH:mm:ss.SSS}] %m%n");
+
+        checkLine("13-10-2011 18:33:45.000 [thread-pool-11] ERROR com.google.gson.Gson - The log message", "%d{dd-MM-yyyy HH:mm:ss.SSS} [%t] %level %m%n");
+        checkLine("13-10-2011 18:33:45.000Z [thread-pool-11] ERROR com.google.gson.Gson - The log message", "%d{dd-MM-yyyy HH:mm:ss.SSSz} [%t] %level %m%n");
+        checkLine("13-10-2011 18:33:45.000 +06:00 [thread-pool-11] ERROR com.google.gson.Gson - The log message", "%d{dd-MM-yyyy HH:mm:ss.SSS z} [%t] %level %m%n");
+        checkLine("[13-10-2011 18:33:45.000 +06:00] [thread-pool-11] ERROR com.google.gson.Gson - The log message", "[%d{dd-MM-yyyy HH:mm:ss.SSS z}] [%t] %level %m%n");
     }
 
     @Test

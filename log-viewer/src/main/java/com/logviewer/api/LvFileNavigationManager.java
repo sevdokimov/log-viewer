@@ -1,6 +1,5 @@
 package com.logviewer.api;
 
-import com.logviewer.files.FileType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -24,8 +23,6 @@ public interface LvFileNavigationManager {
         Path getPath();
 
         boolean isDirectory();
-
-        FileType getType();
 
         long getSize();
 

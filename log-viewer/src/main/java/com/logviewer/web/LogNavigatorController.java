@@ -4,6 +4,7 @@ import com.logviewer.api.LvFileAccessManager;
 import com.logviewer.api.LvFileNavigationManager;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.files.FileType;
+import com.logviewer.files.FileTypes;
 import com.logviewer.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -17,7 +18,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class LogNavigatorController extends AbstractRestRequestHandler {
 
@@ -33,6 +39,9 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
     private LvFileAccessManager fileAccessManager;
     @Autowired
     private Environment environment;
+
+    private Pattern logFilePattern;
+    private volatile boolean logFilePatternInited;
 
     @Endpoint
     public RestInitState initState() {
@@ -70,7 +79,7 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
     /**
      * @return {error: string, content: FsItem[]}
      */
-    private RestContent getDirContent(@Nullable Path dir) {
+    RestContent getDirContent(@Nullable Path dir) {
         if (!isFileTreeAllowed())
             return new RestContent("File system navigation is disabled");
 
@@ -84,13 +93,28 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         }
     }
 
+    private boolean isLog(Path path) {
+        if (!logFilePatternInited) {
+            String logFilePattern = environment.getProperty("log-viewer.navigation.log-file-pattern");
+            if (!StringUtils.isEmpty(logFilePattern)) {
+                this.logFilePattern = Pattern.compile(logFilePattern);
+            }
+
+            logFilePatternInited = true;
+        }
+
+        return this.logFilePattern != null && this.logFilePattern.matcher(path.toString()).matches();
+    }
+
     private List<FsItem> createFileItems(List<LvFileNavigationManager.LvFsItem> files) {
         List<FsItem> res = new ArrayList<>(files.size());
         for (LvFileNavigationManager.LvFsItem file : files) {
             if (file.isDirectory()) {
                 res.add(new DirItem(file.getPath(), DIR_ICON));
             } else {
-                res.add(new FileItem(file.getPath(), file.getType(), file.getSize(), file.getModificationTime()));
+                FileType fileType = isLog(file.getPath()) ? FileTypes.LOG : FileTypes.detectType(file.getPath().toString());
+
+                res.add(new FileItem(file.getPath(), fileType, file.getSize(), file.getModificationTime()));
             }
         }
 
@@ -198,9 +222,9 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         private Long lastModification;
     }
 
-    private static class RestContent {
-        private String error;
-        private List<FsItem> content;
+    static class RestContent {
+        String error;
+        List<FsItem> content;
 
         public RestContent(String error) {
             this.error = error;
@@ -227,7 +251,7 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         }
     }
 
-    private static abstract class FsItem implements Comparable<FsItem> {
+    static abstract class FsItem implements Comparable<FsItem> {
         protected final String path;
         protected final String name;
         protected final String icon;
@@ -266,8 +290,8 @@ public class LogNavigatorController extends AbstractRestRequestHandler {
         }
     }
 
-    private static class FileItem extends FsItem {
-        private final String type;
+    static class FileItem extends FsItem {
+        final String type;
         private final long size;
         private final Long modificationTime;
 
