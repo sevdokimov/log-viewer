@@ -77,7 +77,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     public void exceptions() {
         openLog("rendering/exceptions.log");
 
-        List<WebElement> exceptions = driver.findElementsByClassName("ex-wrapper");
+        List<WebElement> exceptions = driver.findElements(By.className("ex-wrapper"));
         assertEquals(5, exceptions.size());
 
         WebElement npe1 = exceptions.get(0);
@@ -109,7 +109,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     public void exceptionWithJarname() {
         openLog("rendering/exceptions-with-jarname.log");
 
-        WebElement npe1 = Iterables.getOnlyElement(driver.findElementsByClassName("ex-wrapper"));
+        WebElement npe1 = Iterables.getOnlyElement(driver.findElements(By.className("ex-wrapper")));
         assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
         assertEquals(8, npe1.findElements(By.className("ex-stacktrace-line")).size());
     }

@@ -20,17 +20,17 @@ public class FilteringErrorTest extends AbstractWebTestCase {
 
         checkLastRecord("7");
 
-        assertEquals(7, driver.findElementsByClassName("filtering-error").size());
+        assertEquals(7, driver.findElements(By.className("filtering-error")).size());
 
         WebElement r7 = recordByText("7");
         WebElement errorIcon = r7.findElement(By.className("filtering-error"));
         errorIcon.click();
 
-        WebElement model = driver.findElementById("filter-error-modal");
+        WebElement model = driver.findElement(By.id("filter-error-modal"));
         assert model.isDisplayed();
         assert model.getText().contains("ppppp");
 
-        driver.findElementById("close-filtering-error-dialog").click();
+        driver.findElement(By.id("close-filtering-error-dialog")).click();
 
         notExist(By.id("filter-error-modal"));
     }

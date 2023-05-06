@@ -35,7 +35,7 @@ public class FilterUrlParamsTest extends AbstractWebTestCase {
         assert driver.getCurrentUrl().contains("filters=%7B%22");
 
         driver.findElement(ADD_FILTER_BUTTON).click();
-        driver.findElementById("add-stacktrace-filter").click();
+        driver.findElement(By.id("add-stacktrace-filter")).click();
         driver.findElement(By.tagName("lv-exception-only"));
 
         assert driver.getCurrentUrl().matches(".*filters=[a-f0-9]{32}.*");

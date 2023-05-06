@@ -22,11 +22,11 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
         openLog("rendering/milliseconds.log");
 
         driver.findElement(By.className("text-milliseconds")); // wait for rendering
-        List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
+        List<WebElement> elements = driver.findElements(By.className("text-milliseconds"));
 
         checkAllMillis(elements);
 
-        elements = driver.findElementsByCssSelector(".exception-message .text-milliseconds");
+        elements = driver.findElements(By.cssSelector(".exception-message .text-milliseconds"));
         Assert.assertEquals(Arrays.asList("39532ms", "18522ms"),
                 elements.stream().map(WebElement::getText).collect(Collectors.toList()));
     }
@@ -39,7 +39,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
         openLog("rendering/milliseconds.log");
 
         driver.findElement(By.className("text-milliseconds")); // wait for rendering
-        List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
+        List<WebElement> elements = driver.findElements(By.className("text-milliseconds"));
 
         checkAllMillis(elements);
     }
@@ -52,7 +52,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
         openLog("rendering/milliseconds.log");
 
         driver.findElement(By.className("text-milliseconds")); // wait for rendering
-        List<WebElement> elements = driver.findElementsByClassName("text-milliseconds");
+        List<WebElement> elements = driver.findElements(By.className("text-milliseconds"));
 
         checkAllMillis(elements);
     }
@@ -74,7 +74,7 @@ public class MillisecondRendererTest extends AbstractWebTestCase {
 
         openLog("rendering/date-in-milliseconds.log");
 
-        List<WebElement> elements = driver.findElementsByClassName("text-date-in-milliseconds");
+        List<WebElement> elements = driver.findElements(By.className("text-date-in-milliseconds"));
 
         Assert.assertEquals(Arrays.asList("1552698301463", "1552699301463"),
                 elements.stream().map(WebElement::getText).collect(Collectors.toList()));

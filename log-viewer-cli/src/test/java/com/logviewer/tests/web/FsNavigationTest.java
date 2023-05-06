@@ -62,7 +62,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
 
         openUrl("/");
 
-        List<WebElement> favorites = driver.findElementsByClassName("favorite-item");
+        List<WebElement> favorites = driver.findElements(By.className("favorite-item"));
         assert favorites.size() == 1;
     }
 
@@ -145,7 +145,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
     }
 
     private void clickNavigation(@NonNull String pathPart) {
-        List<WebElement> navigationRoots = driver.findElementsByXPath("//div[@class='current-path']/span[@class='path-item']/a[text()='" + pathPart + "']");
+        List<WebElement> navigationRoots = driver.findElements(By.xpath("//div[@class='current-path']/span[@class='path-item']/a[text()='" + pathPart + "']"));
         navigationRoots.get(navigationRoots.size() - 1).click();
     }
 
@@ -284,7 +284,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
         new Actions(driver).sendKeys("ab").perform(); // check that focus was not lost
 
         assertEquals(Arrays.asList("ab.log", "abc.log", "abc1.log"), fileNames());
-        assertEquals(Collections.nCopies(3, "ab"), driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
+        assertEquals(Collections.nCopies(3, "ab"), driver.findElements(By.cssSelector(".file-list .name .occurrence")).stream()
                 .map(WebElement::getText).collect(Collectors.toList()));
 
         checkSelectedFile("ab.log");
@@ -295,7 +295,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
 
         assertEquals("a", driver.findElement(By.cssSelector(".search-pane .filter-input")).getAttribute("value"));
 
-        assertEquals(Collections.nCopies(6, "a"), driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
+        assertEquals(Collections.nCopies(6, "a"), driver.findElements(By.cssSelector(".file-list .name .occurrence")).stream()
                 .map(WebElement::getText).collect(Collectors.toList()));
 
         assertEquals(Arrays.asList("aaa.log", "ab.log", "abc.log", "abc1.log"), fileNames());
@@ -332,7 +332,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
         new Actions(driver).sendKeys("aAa").perform();
 
         assertEquals(Arrays.asList("aaa1.log", "AAA2.log"), fileNames());
-        assertEquals("aaaAAA", driver.findElementsByCssSelector(".file-list .name .occurrence").stream()
+        assertEquals("aaaAAA", driver.findElements(By.cssSelector(".file-list .name .occurrence")).stream()
                 .map(WebElement::getText).collect(Collectors.joining()));
     }
 
@@ -345,7 +345,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
 
         searchToggler.click();
 
-        driver.findElementsByCssSelector(".search-pane .tool-button.tool-button-pressed");
+        driver.findElements(By.cssSelector(".search-pane .tool-button.tool-button-pressed"));
 
         WebElement filterInput = driver.findElement(By.cssSelector(".search-pane .filter-input:focus"));
 
@@ -523,7 +523,7 @@ public class FsNavigationTest extends AbstractWebTestCase implements ChooserPage
     }
 
     private List<String> fileNames() {
-        return driver.findElementsByCssSelector(".file-list .file-list-item .name").stream()
+        return driver.findElements(By.cssSelector(".file-list .file-list-item .name")).stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
     }

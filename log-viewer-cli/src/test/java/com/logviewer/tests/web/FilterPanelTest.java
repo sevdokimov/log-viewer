@@ -21,7 +21,7 @@ public class FilterPanelTest extends AbstractWebTestCase {
 
         addFilterMenuClick();
 
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(3));
+        assertThat(driver.findElements(By.cssSelector(".add-filter-menu .dropdown-menu a")).size(), is(3));
     }
 
     @Test
@@ -37,26 +37,26 @@ public class FilterPanelTest extends AbstractWebTestCase {
         notExist(By.tagName("lv-thread-filter"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(5));
+        assertThat(driver.findElements(By.cssSelector(".add-filter-menu .dropdown-menu a")).size(), is(5));
 
-        driver.findElementById("add-date-filter").click();
+        driver.findElement(By.id("add-date-filter")).click();
 
         assert !driver.findElement(By.cssSelector(".add-filter-menu .dropdown-menu")).isDisplayed(); // menu disappeared.
 
         driver.findElement(By.cssSelector("lv-date-interval .lv-dropdown-panel"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(4));
-        driver.findElementById("add-thread-filter").click();
+        assertThat(driver.findElements(By.cssSelector(".add-filter-menu .dropdown-menu a")).size(), is(4));
+        driver.findElement(By.id("add-thread-filter")).click();
         driver.findElement(By.cssSelector("lv-thread-filter .lv-dropdown-panel"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(3));
-        driver.findElementById("add-stacktrace-filter").click();
+        assertThat(driver.findElements(By.cssSelector(".add-filter-menu .dropdown-menu a")).size(), is(3));
+        driver.findElement(By.id("add-stacktrace-filter")).click();
         driver.findElement(By.tagName("lv-exception-only"));
 
         addFilterMenuClick();
-        assertThat(driver.findElementsByCssSelector(".add-filter-menu .dropdown-menu a").size(), is(2));
+        assertThat(driver.findElements(By.cssSelector(".add-filter-menu .dropdown-menu a")).size(), is(2));
     }
 
     private void addFilterMenuClick() {

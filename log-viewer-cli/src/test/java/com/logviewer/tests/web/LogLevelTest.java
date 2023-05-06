@@ -36,7 +36,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "FATAL,ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -50,7 +50,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -64,7 +64,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -105,7 +105,7 @@ public class LogLevelTest extends AbstractWebTestCase {
         // Test filter items
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));
