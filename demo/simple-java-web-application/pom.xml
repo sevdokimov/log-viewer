@@ -6,7 +6,7 @@
 
     <groupId>io.github.sevdokimov.logviewer.demo</groupId>
     <artifactId>simple-java-web-application</artifactId>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
     <packaging>war</packaging>
 
     <name>simple-java-web-application Maven Webapp</name>
