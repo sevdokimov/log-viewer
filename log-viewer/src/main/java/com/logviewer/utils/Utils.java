@@ -9,9 +9,9 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
@@ -370,5 +370,33 @@ public class Utils {
         res.append(s, i, s.length());
 
         return res.toString();
+    }
+
+    /**
+     * Decodes text from a byte array. The end of the data may be broken UTF8 sequence, skip it.
+     *
+     * @param data The bytes to decode
+     * @param encoding The encoding
+     * @return A pair of the decoded text and the actual size of the text in bytes.
+     */
+    public static Pair<String, Integer> decode(byte[] data, Charset encoding) {
+        ByteBuffer in = ByteBuffer.wrap(data);
+
+        CharsetDecoder decoder = encoding.newDecoder()
+                .onUnmappableCharacter(CodingErrorAction.REPLACE)
+                .onMalformedInput(CodingErrorAction.REPLACE);
+
+        CharBuffer out = CharBuffer.allocate(data.length + 1);
+
+
+        CoderResult result = decoder.decode(in, out, false);
+
+        out.flip();
+
+        if (result.isUnderflow() && (in.position() == 0 || !out.hasRemaining())) {
+            return Pair.of(encoding.decode(in).toString(), data.length);
+        }
+
+        return Pair.of(out.toString(), in.position());
     }
 }

@@ -1,10 +1,7 @@
 package com.logviewer.data2.net;
 
 import com.logviewer.data2.*;
-import com.logviewer.data2.net.server.AbstractDataLoaderTask;
-import com.logviewer.data2.net.server.RecordLoaderRemoteTask;
-import com.logviewer.data2.net.server.RecordSearcherRemoteTask;
-import com.logviewer.data2.net.server.TryReadTask;
+import com.logviewer.data2.net.server.*;
 import com.logviewer.data2.net.server.api.RemoteTaskController;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Destroyer;
@@ -128,6 +125,21 @@ public class RemoteLog implements LogView {
         CompletableFuture<Throwable> res = new CompletableFuture<>();
 
         remoteNodeService.startTask(node, new TryReadTask(path.getFile(), serializedFormat), (aVoid, error) -> res.complete(error));
+
+        return res;
+    }
+
+    @Override
+    public CompletableFuture<Pair<String, Integer>> loadContent(long offset, int length) {
+        CompletableFuture<Pair<String, Integer>> res = new CompletableFuture<>();
+
+        remoteNodeService.startTask(node, new LoadContentTask(path.getFile(), offset, length, format.getCharset()), (data, error) -> {
+            if (error != null) {
+                res.completeExceptionally(error);
+            } else {
+                res.complete(data);
+            }
+        });
 
         return res;
     }

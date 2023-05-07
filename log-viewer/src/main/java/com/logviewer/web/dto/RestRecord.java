@@ -20,7 +20,7 @@ public class RestRecord {
     private final long start;
     private final long end;
 
-    private final boolean hasMore;
+    private int loadedTextLengthBytes;
 
     @JsonAdapter(GsonNanosecondsAdapter.class)
     private final Long time;
@@ -43,7 +43,7 @@ public class RestRecord {
         s = record.getMessage();
         start = record.getStart();
         end = record.getEnd();
-        hasMore = record.hasMore();
+        loadedTextLengthBytes = record.getLoadedTextLengthBytes();
 
         fields = new ArrayList<>();;
         for (String fieldName : record.getFieldNames()) {

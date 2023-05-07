@@ -7,6 +7,7 @@ import com.logviewer.filters.CompositeRecordPredicate;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.filters.SubstringPredicate;
 import com.logviewer.utils.LvTimer;
+import com.logviewer.utils.Pair;
 import com.logviewer.utils.Utils;
 import com.logviewer.utils.Wrappers;
 import com.logviewer.web.dto.LogList;
@@ -339,6 +340,31 @@ public class LogSession {
     @Remote
     public synchronized void cancelSearch() {
         cancelExecutions(t -> t instanceof SearchTask);
+    }
+
+    @Remote
+    public synchronized void loadLogContent(String logId, long recordStart, long offset, long end) {
+        LogView log = null;
+        for (LogView l : logs) {
+            if (l.getId().equals(logId)) {
+                log = l;
+                break;
+            }
+        }
+
+        if (log == null) {
+            LOG.error("Unknown logId passed to loadRecordTail() remote method: {}", logId);
+            return;
+        }
+
+        int bytesToLoad = (int)Math.min(end - offset, ParserConfig.MAX_LINE_LENGTH);
+
+        log.loadContent(offset, bytesToLoad).whenComplete(new LogExecutionHandler<Pair<String, Integer>>() {
+            @Override
+            protected void handle(Pair<String, Integer> res) {
+                sender.send(new LoadLogContentResponse(logId, res.getFirst(), res.getSecond(), recordStart, offset));
+            }
+        });
     }
 
     @Remote

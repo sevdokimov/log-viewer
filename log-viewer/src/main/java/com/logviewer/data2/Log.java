@@ -15,6 +15,7 @@ import org.springframework.lang.Nullable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
@@ -133,13 +134,13 @@ public class Log implements LogView {
     }
 
     private LogRecord createUnparsedRecord(BufferedFile buf, long start, long end) throws IOException {
-        long readLength = Math.min(end - start, ParserConfig.MAX_LINE_LENGTH);
+        int readLength = (int)Math.min(end - start, ParserConfig.MAX_LINE_LENGTH);
 
         ByteBuffer b = buf.read(start, readLength);
 
         String text = Utils.toString(b, encoding);
 
-        return LogRecord.createUnparsedRecord(text, 0, start, end, readLength < end - start).setLogId(id);
+        return LogRecord.createUnparsedRecord(text, 0, start, end, readLength).setLogId(id);
     }
 
     public Snapshot createSnapshot() {
@@ -764,6 +765,36 @@ public class Log implements LogView {
         try (Snapshot snapshot = createSnapshot()) {
             return CompletableFuture.completedFuture(snapshot.getError());
         }
+    }
+
+    @Override
+    public CompletableFuture<Pair<String, Integer>> loadContent(long offset, int length) {
+        CompletableFuture<Pair<String, Integer>> res = new CompletableFuture<>();
+
+        executor.submit(() -> {
+            try {
+                if (!accessManager.isFileVisible(file)) {
+                    res.completeExceptionally(new SecurityException(accessManager.errorMessage(file)));
+                    return;
+                }
+
+                if (length > ParserConfig.MAX_LINE_LENGTH)
+                    throw new IllegalStateException();
+
+                try (RandomAccessFile input = new RandomAccessFile(file.toFile(), "r")) {
+                    input.seek(offset);
+
+                    byte[] data = new byte[length];
+                    input.readFully(data);
+
+                    res.complete(Utils.decode(data, encoding));
+                }
+            } catch (Throwable e) {
+                res.completeExceptionally(e);
+            }
+        });
+
+        return res;
     }
 
     @Override

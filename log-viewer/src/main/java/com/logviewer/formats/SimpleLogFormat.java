@@ -65,7 +65,7 @@ public class SimpleLogFormat implements LogFormat {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+        private int loadedTextLengthBytes;
 
         private final Charset charset = SimpleLogFormat.this.charset == null ? Charset.defaultCharset() : SimpleLogFormat.this.charset;
 
@@ -75,7 +75,7 @@ public class SimpleLogFormat implements LogFormat {
 
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             return true;
         }
@@ -105,7 +105,7 @@ public class SimpleLogFormat implements LogFormat {
             if (s == null)
                 throw new IllegalStateException();
 
-            LogRecord res = new LogRecord(s, 0, start, end, hasMore);
+            LogRecord res = new LogRecord(s, 0, start, end, loadedTextLengthBytes);
 
             s = null;
 

@@ -5,6 +5,7 @@ import com.logviewer.data2.LogView;
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Destroyer;
+import com.logviewer.utils.Pair;
 import com.logviewer.web.session.LogDataListener;
 import com.logviewer.web.session.LogProcess;
 import com.logviewer.web.session.SearchResult;
@@ -43,6 +44,13 @@ public abstract class BrokenLog implements LogView {
     @Override
     public CompletableFuture<Throwable> tryRead() {
         return CompletableFuture.completedFuture(error);
+    }
+
+    @Override
+    public CompletableFuture<Pair<String, Integer>> loadContent(long offset, int length) {
+        CompletableFuture<Pair<String, Integer>> res = new CompletableFuture<>();
+        res.completeExceptionally(error);
+        return res;
     }
 
     private static class DummyLogProcess implements LogProcess {

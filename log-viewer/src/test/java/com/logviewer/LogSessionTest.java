@@ -1,5 +1,6 @@
 package com.logviewer;
 
+import com.logviewer.data2.ParserConfig;
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.TestPredicate;
@@ -13,6 +14,9 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -296,6 +300,31 @@ public class LogSessionTest extends LogSessionTestBase {
         Config uiConfig = ConfigFactory.parseString(init.getUiConfig());
 
         assert !uiConfig.hasPath("java.class.path");
+    }
+
+    @Test
+    public void testLoadContent() throws IOException, InterruptedException {
+        ApplicationContext ctx = createContext(MultifileConfiguration.class);
+        LogSession session = LogSession.fromContext(adapter, ctx);
+
+        String file = getTestLog("big-log-event.log");
+
+        session.init(LogList.of(file));
+
+        int offset = 100;
+
+        session.loadLogContent(session.getLogs()[0].getId(), 777, offset, offset + ParserConfig.MAX_LINE_LENGTH + 1000);
+
+        LoadLogContentResponse resp = adapter.waitForType(LoadLogContentResponse.class);
+
+        assertEquals(offset, resp.getOffset());
+        assertEquals(777, resp.getRecordStart());
+
+        int loadedBytes = resp.getTextLengthBytes();
+        assert loadedBytes <= ParserConfig.MAX_LINE_LENGTH && loadedBytes > ParserConfig.MAX_LINE_LENGTH - 20;
+
+        byte[] bytes = Files.readAllBytes(Paths.get(session.getLogs()[0].getPath().getFile()));
+        assertEquals(new String(bytes, offset, loadedBytes, StandardCharsets.UTF_8), resp.getText());
     }
 
     public String[] createMultifileLog(String file) throws IOException {

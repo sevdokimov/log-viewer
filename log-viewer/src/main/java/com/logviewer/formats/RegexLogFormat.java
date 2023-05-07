@@ -1,9 +1,6 @@
 package com.logviewer.formats;
 
-import com.logviewer.data2.DefaultFieldDesciptor;
-import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.LogReader;
-import com.logviewer.data2.LogRecord;
+import com.logviewer.data2.*;
 import com.logviewer.formats.utils.FastDateTimeParser;
 import com.logviewer.utils.LvDateUtils;
 import com.logviewer.utils.Utils;
@@ -189,7 +186,12 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+
+        /**
+         * The length of {@link #s} in bytes. The value must be (end - start) for log records with length less than {@link ParserConfig#MAX_LINE_LENGTH}.
+         * For long log records the value will be less than (end - start).
+         */
+        private int loadedTextLengthBytes;
 
         private BiFunction<String, ParsePosition, Supplier<Instant>> dateFormat;
 
@@ -217,7 +219,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             this.s = s;
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             for (int fieldIndex = 0; fieldIndex < RegexLogFormat.this.fields.length; fieldIndex++) {
                 RegexField field = RegexLogFormat.this.fields[fieldIndex];
@@ -266,9 +268,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (length == 0)
                 return;
 
+            boolean recordLengthLimitExceed = loadedTextLengthBytes < end - start;
+
             end += realLength;
 
-            if (hasMore)
+            if (recordLengthLimitExceed)
                 return;
 
             int lastField = RegexLogFormat.this.fields.length - 1;
@@ -285,7 +289,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fields[lastField * 2 + 1] = s.length();
 
-            hasMore = length < realLength;
+            loadedTextLengthBytes += length;
         }
 
         @Override
@@ -323,7 +327,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                 }
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fields.clone(), fieldNames);
+            LogRecord res = new LogRecord(s, time, start, end, loadedTextLengthBytes, fields.clone(), fieldNames);
 
             s = null;
 

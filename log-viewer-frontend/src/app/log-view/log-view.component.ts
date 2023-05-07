@@ -32,6 +32,7 @@ import {
     EventSearchResponse,
     EventSetViewState,
     EventsLogChanged,
+    LoadLogContentResponse,
     SetFilterStateEvent,
     StatusHolderEvent,
     UiConfig,
@@ -243,7 +244,24 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (window.getSelection().toString().length > 0) { return; }
 
-        for (let e = <Element>event.target; e; e = e.parentElement) {
+        let target = <Element>event.target;
+
+        if (target.classList.contains('has-more-load-more')) {
+            let record = $(target).parents('div.record')[0]
+            LvUtils.assert(record != null)
+            let rec = this.m[LogViewComponent.getLineIndex(record)]
+            if (rec.loadedTextLengthBytes >= rec.end - rec.start)
+                return;
+
+            target.replaceWith($('<img src="assets/progress.gif">')[0])
+
+            this.commService.send(new Command('loadLogContent', {logId: rec.logId, recordStart: rec.start,
+                offset: rec.start + rec.loadedTextLengthBytes, end: rec.end}))
+
+            return;
+        }
+
+        for (let e = target; e; e = e.parentElement) {
             if (e.classList.contains('filtering-error')) {
                 this.modalWindow = 'filter-error';
                 this.filterErrorText = (<any>e).errorText;
@@ -1170,6 +1188,24 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.modalWindow = 'disconnected';
         this.state = State.STATE_DISCONNECTED;
         this.disconnectMessage = disconnectMessage || '<br><h3 class="text-danger">&nbsp;Disconnected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h3><br>';
+    }
+
+    @BackendEventHandler()
+    private onLoadLogContentResponse(event: LoadLogContentResponse) {
+        for (let idx = 0; idx < this.m.length; idx++) {
+            let record = this.m[idx];
+
+            if (record.logId === event.logId && record.start === event.recordStart) {
+                if (record.start + record.loadedTextLengthBytes === event.offset) {
+                    let originalTextLength = record.s.length
+
+                    record.s += event.text;
+                    record.loadedTextLengthBytes += event.textLengthBytes;
+
+                    this.recRenderer.renderNewAppendedText(record, originalTextLength, idx, this.records.nativeElement);
+                }
+            }
+        }
     }
 
     @BackendEventHandler()

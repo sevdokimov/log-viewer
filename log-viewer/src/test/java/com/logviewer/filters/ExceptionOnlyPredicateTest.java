@@ -28,7 +28,7 @@ public class ExceptionOnlyPredicateTest {
     private static void check(String message, boolean expected) {
         ExceptionOnlyPredicate p = new ExceptionOnlyPredicate();
 
-        LogRecord record = new LogRecord(message, LvDateUtils.toNanos(new Date()), 0, message.length(), false);
+        LogRecord record = new LogRecord(message, LvDateUtils.toNanos(new Date()), 0, message.length(), message.length());
 
         assert p.test(record, Mockito.mock(LvPredicateChecker.class)) == expected;
     }

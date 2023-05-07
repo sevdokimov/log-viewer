@@ -98,15 +98,6 @@ public class DefaultFieldSet {
     }
 
     @NonNull
-    public Charset getEncoding() {
-        return charset;
-    }
-    @NonNull
-    public Locale getLocale() {
-        return locale;
-    }
-
-    @NonNull
     public LogReader createReader() {
         return new LogReaderImpl();
     }
@@ -146,7 +137,7 @@ public class DefaultFieldSet {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+        private int loadedTextLengthBytes;
 
         public LogReaderImpl() {
             layoutCopy = DefaultFieldSet.this.layout.clone();
@@ -293,7 +284,7 @@ public class DefaultFieldSet {
             this.s = s;
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             for (int i = 0; i < stretchFieldSize; i++) {
                 int nodeIdx = stretchFields[i];
@@ -320,9 +311,11 @@ public class DefaultFieldSet {
             if (length == 0)
                 return;
 
+            boolean recordLengthLimitExceed = loadedTextLengthBytes < end - start;
+
             end += realLength;
 
-            if (hasMore)
+            if (recordLengthLimitExceed)
                 return;
 
             int lastFieldOffset = (fields.length - 1) * 2;
@@ -336,7 +329,7 @@ public class DefaultFieldSet {
             s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fieldOffset[lastFieldOffset + 1] = s.length();
 
-            hasMore = length < realLength;
+            loadedTextLengthBytes += length;
         }
 
         @Override
@@ -360,7 +353,7 @@ public class DefaultFieldSet {
                 time = dateExtractor.getAsLong();
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fieldOffset.clone(), fieldNameIndexes);
+            LogRecord res = new LogRecord(s, time, start, end, loadedTextLengthBytes, fieldOffset.clone(), fieldNameIndexes);
 
             s = null;
 
