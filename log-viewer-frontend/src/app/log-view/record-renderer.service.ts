@@ -285,7 +285,7 @@ export class RecordRendererService {
             moreDiv.innerText =
                 '...the log record is too big (' +
                 LvUtils.renderFileSize(r.end - r.start) +
-                '), only begin of the record is shown ...';
+                '), only the beginning of the record is shown ...';
             e.appendChild(moreDiv);
         }
 

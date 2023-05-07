@@ -284,6 +284,8 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
             s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fields[lastField * 2 + 1] = s.length();
+
+            hasMore = length < realLength;
         }
 
         @Override

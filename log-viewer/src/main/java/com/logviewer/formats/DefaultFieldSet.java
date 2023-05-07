@@ -335,6 +335,8 @@ public class DefaultFieldSet {
 
             s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fieldOffset[lastFieldOffset + 1] = s.length();
+
+            hasMore = length < realLength;
         }
 
         @Override

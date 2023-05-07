@@ -93,7 +93,9 @@ public class LogIterationForwardTest extends AbstractLogTest {
             assert log.processRecords(log.getSize(), res::add);
             TestUtils.assertEquals(rec, Iterables.getOnlyElement(res));
 
-            log.processRecords(log.getSize(), true, t -> {throw new RuntimeException();});
+            log.processRecords(log.getSize(), true, t -> {
+                throw new RuntimeException();
+            });
         }
     }
 
