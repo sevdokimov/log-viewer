@@ -1,9 +1,6 @@
 package com.logviewer.formats;
 
-import com.logviewer.data2.DefaultFieldDesciptor;
-import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.LogReader;
-import com.logviewer.data2.LogRecord;
+import com.logviewer.data2.*;
 import com.logviewer.formats.utils.FastDateTimeParser;
 import com.logviewer.utils.LvDateUtils;
 import com.logviewer.utils.Utils;
@@ -14,10 +11,7 @@ import java.nio.charset.Charset;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -29,9 +23,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     private Charset charset;
 
-    private String regex;
+    private Locale locale;
 
-    private RegexField[] fields;
+    private final String regex;
+
+    private final RegexField[] fields;
 
     private boolean dontAppendUnmatchedTextToLastField;
 
@@ -41,23 +37,16 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     private transient volatile Pattern pattern;
 
-    public RegexLogFormat(@NonNull Charset charset, @NonNull String regex,
-                          boolean dontAppendUnmatchedTextToLastField,
-                          RegexField... fields) {
-        this(charset, regex, dontAppendUnmatchedTextToLastField, null, null, fields);
+    public RegexLogFormat(@NonNull String regex, RegexField... fields) {
+        this(regex, null, null, fields);
     }
 
-    public RegexLogFormat(@Nullable Charset charset, @NonNull String regex,
-                          boolean dontAppendUnmatchedTextToLastField,
+    public RegexLogFormat(@NonNull String regex,
                           @Nullable String datePattern, @Nullable String dateFieldName,
                           RegexField... fields) {
         this.regex = regex;
-        this.charset = charset;
-
         this.fields = fields;
 
-        this.dontAppendUnmatchedTextToLastField = dontAppendUnmatchedTextToLastField;
-        
         this.datePattern = datePattern;
 
         if (dateFieldName != null) {
@@ -72,6 +61,21 @@ public class RegexLogFormat implements LogFormat, Cloneable {
 
     public boolean isDontAppendUnmatchedTextToLastField() {
         return dontAppendUnmatchedTextToLastField;
+    }
+
+    public RegexLogFormat setDontAppendUnmatchedTextToLastField(boolean dontAppendUnmatchedTextToLastField) {
+        this.dontAppendUnmatchedTextToLastField = dontAppendUnmatchedTextToLastField;
+        return this;
+    }
+
+    public RegexLogFormat setCharset(@Nullable Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    public RegexLogFormat setLocale(@Nullable Locale locale) {
+        this.locale = locale;
+        return this;
     }
 
     private Pattern getPattern() {
@@ -135,7 +139,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (!LvDateUtils.isDateFormatFull(new SimpleDateFormat(datePattern)))
                 throw new IllegalArgumentException("Invalid date format. Format must include date and time");
 
-            FastDateTimeParser.createFormatter(datePattern, null);// validate date format
+            FastDateTimeParser.createFormatter(datePattern, null, null);// validate date format
         }
         else {
             if (datePattern != null)
@@ -168,6 +172,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
     }
 
     @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
     public boolean hasFullDate() {
         return dateFieldIdx != null || dateFieldName != null;
     }
@@ -177,7 +186,12 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+
+        /**
+         * The length of {@link #s} in bytes. The value must be (end - start) for log records with length less than {@link ParserConfig#MAX_LINE_LENGTH}.
+         * For long log records the value will be less than (end - start).
+         */
+        private int loadedTextLengthBytes;
 
         private BiFunction<String, ParsePosition, Supplier<Instant>> dateFormat;
 
@@ -196,6 +210,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
         @Override
         public boolean parseRecord(byte[] data, int offset, int length, long start, long end) {
             String s = new String(data, offset, length, charset);
+            s = Utils.removeAsciiColorCodes(s);
 
             Matcher matcher = getPattern().matcher(s);
             if (!matcher.matches())
@@ -204,7 +219,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             this.s = s;
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             for (int fieldIndex = 0; fieldIndex < RegexLogFormat.this.fields.length; fieldIndex++) {
                 RegexField field = RegexLogFormat.this.fields[fieldIndex];
@@ -253,9 +268,11 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (length == 0)
                 return;
 
+            boolean recordLengthLimitExceed = loadedTextLengthBytes < end - start;
+
             end += realLength;
 
-            if (hasMore)
+            if (recordLengthLimitExceed)
                 return;
 
             int lastField = RegexLogFormat.this.fields.length - 1;
@@ -269,8 +286,10 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                             + RegexLogFormat.this.fields[lastField].name() +"' is not on the end of line");
             }
 
-            s = s + new String(data, offset, length, charset);
+            s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fields[lastField * 2 + 1] = s.length();
+
+            loadedTextLengthBytes += length;
         }
 
         @Override
@@ -298,7 +317,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
             if (dateFieldIdx != null) {
                 if (fields[dateFieldIdx * 2] >= 0) {
                     if (dateFormat == null)
-                        dateFormat = FastDateTimeParser.createFormatter(datePattern, null);
+                        dateFormat = FastDateTimeParser.createFormatter(datePattern, locale, null);
 
                     Supplier<Instant> timestamp = dateFormat.apply(s, new ParsePosition(fields[dateFieldIdx * 2]));
                     if (timestamp != null) {
@@ -308,7 +327,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                 }
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fields.clone(), fieldNames);
+            LogRecord res = new LogRecord(s, time, start, end, loadedTextLengthBytes, fields.clone(), fieldNames);
 
             s = null;
 

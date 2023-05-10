@@ -8,6 +8,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +32,7 @@ public class ViewLogIntegrationTest extends AbstractWebTestCase implements LogPa
         // Scroll to head
         new Actions(driver).sendKeys(Keys.HOME).perform();
 
-        WebDriverWait driverWait = new WebDriverWait(driver, 5);
+        WebDriverWait driverWait = new WebDriverWait(driver, Duration.ofSeconds(5));
         driverWait.until(o -> {
             WebElement r = recordsParent.findElement(By.cssSelector(".record:first-child"));
             return r.getAttribute("textContent").startsWith("[2012.01.01 00:00]");

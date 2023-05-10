@@ -300,7 +300,7 @@ public abstract class AbstractWebTestCase implements LogPage {
     }
 
     protected void setHeight(int lineCount) {
-        int overhead = driver.manage().window().getSize().height - driver.findElementById("logPane").getSize().height;
+        int overhead = driver.manage().window().getSize().height - driver.findElement(By.id("logPane")).getSize().height;
         driver.manage().window().setSize(new Dimension(WINDOW_WIDTH, overhead + lineCount * LINE_HEIGHT + 4));
     }
 
@@ -376,7 +376,7 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected String copyPermalink() {
         driver.findElement(MENU).click();
-        driver.findElementById("copyPermalink").click();
+        driver.findElement(By.id("copyPermalink")).click();
 
         closeSuccessAlert();
         driver.findElement(MENU).click();
@@ -406,7 +406,7 @@ public abstract class AbstractWebTestCase implements LogPage {
     }
 
     protected int getRecordViewPosition(WebElement record) {
-        WebElement logPane = driver.findElementById("logPane");
+        WebElement logPane = driver.findElement(By.id("logPane"));
         int logPanePosition = logPane.getLocation().y
                 + 0// parseCssSize(logPane.getCssValue("padding-top"))
                 + 0//parseCssSize(logPane.getCssValue("margin-top"))
@@ -432,11 +432,11 @@ public abstract class AbstractWebTestCase implements LogPage {
     }
 
     protected List<WebElement> getRecord() {
-        return driver.findElementsByCssSelector("#records > .record");
+        return driver.findElements(By.cssSelector("#records > .record"));
     }
 
     protected String getVisibleRecords() {
-        WebElement logPane = driver.findElementById("logPane");
+        WebElement logPane = driver.findElement(By.id("logPane"));
         int logPaneInternalHeight = logPane.getSize().height
                 - parseCssSize(logPane.getCssValue("padding-top"))
                 - parseCssSize(logPane.getCssValue("margin-top"))
@@ -445,7 +445,7 @@ public abstract class AbstractWebTestCase implements LogPage {
                 - parseCssSize(logPane.getCssValue("margin-bottom"))
                 - parseCssSize(logPane.getCssValue("border-bottom-width"));
 
-        return driver.findElementsByCssSelector("#records > .record > .rec-text").stream()
+        return driver.findElements(By.cssSelector("#records > .record > .rec-text")).stream()
                 .filter(r -> {
                     int pos = getRecordViewPosition(r);
                     return pos >= 0 && pos < logPaneInternalHeight - LINE_HEIGHT;
@@ -465,7 +465,7 @@ public abstract class AbstractWebTestCase implements LogPage {
         driver.findElement(By.cssSelector("." + classname + ".ngx-toastr")).click();
 
         waitFor(() -> {
-            return noImplicitWait(() -> driver.findElementsByCssSelector(".toast-success.ngx-toastr").isEmpty());
+            return noImplicitWait(() -> driver.findElements(By.cssSelector(".toast-success.ngx-toastr")).isEmpty());
         });
     }
 

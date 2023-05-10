@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,14 +28,15 @@ public class LoadingLogTest extends AbstractLogTest {
     @Test
     public void testFormatModification() throws IOException {
         LogbackLogFormat format = new LogbackLogFormat("%d{ddMMyy HH:mm:ss} %m");
+        format.setCharset(StandardCharsets.ISO_8859_1);
 
         String logPath = getTestLog("multilog/search.log");
 
         Log log = getLogService().openLog(logPath, format);
 
-        format.setPattern("%l");
+        format.setCharset(StandardCharsets.UTF_8);
 
-        assertEquals("%d{ddMMyy HH:mm:ss} %m", ((LogbackLogFormat)log.getFormat()).getPattern());
+        assertEquals(StandardCharsets.ISO_8859_1, log.getFormat().getCharset()); // the log object contains a copy of the format
 
         try (Snapshot snapshot = log.createSnapshot()) {
             List<LogRecord> list = new ArrayList<>();

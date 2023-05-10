@@ -21,4 +21,6 @@ public class TestLogFormats {
     public static final LogFormat FORMAT_LEVEL_LOG4j = new Log4jLogFormat("%d{yyMMdd HH:mm:ss} %p %m%n");
     public static final LogFormat FORMAT_LEVEL_LOGBACK = new LogbackLogFormat("%d{yyMMdd HH:mm:ss} %p %m%n");
 
+    public static final LogFormat SIMPLE_FORMAT = new LogbackLogFormat("%d{yyyy-MM-dd HH:mm:ss} %m%n");
+
 }

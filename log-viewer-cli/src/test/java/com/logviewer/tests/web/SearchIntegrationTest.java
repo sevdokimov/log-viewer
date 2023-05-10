@@ -50,11 +50,11 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
 
         assertFalse(driver.executeScript("return document.activeElement.id").equals("filterInput"));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
 
         assertEquals("filterInput", driver.executeScript("return document.activeElement.id"));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
 
         assertEquals("filterInput", driver.executeScript("return document.activeElement.id"));
     }
@@ -65,8 +65,8 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         openLog("search.log");
 
         WebElement filterInput = driver.findElement(FilterPanel.INPUT);
-        WebElement prevArrow = driver.findElementById("findPrevArrow");
-        WebElement nextArrow = driver.findElementById("findNextArrow");
+        WebElement prevArrow = driver.findElement(By.id("findPrevArrow"));
+        WebElement nextArrow = driver.findElement(By.id("findNextArrow"));
 
         assert prevArrow.getAttribute("class").contains("tooliconDisabled");
         assert nextArrow.getAttribute("class").contains("tooliconDisabled");
@@ -103,7 +103,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
 
         notExist(By.className("search-result"));
 
-        driver.findElementById("match-regex").click();
+        driver.findElement(By.id("match-regex")).click();
 
         assertEquals(":::::", join(driver.findElements(By.className("search-result"))));
 
@@ -112,11 +112,11 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         assert filterInput.getAttribute("title").contains("\\") : filterInput.getAttribute("title");
         notExist(By.className("search-result"));
 
-        assert driver.findElementById("findPrevArrow").getAttribute("class").contains("tooliconDisabled");
-        assert driver.findElementById("findNextArrow").getAttribute("class").contains("tooliconDisabled");
+        assert driver.findElement(By.id("findPrevArrow")).getAttribute("class").contains("tooliconDisabled");
+        assert driver.findElement(By.id("findNextArrow")).getAttribute("class").contains("tooliconDisabled");
 
 
-        driver.findElementById("match-regex").click();
+        driver.findElement(By.id("match-regex")).click();
         waitFor(() -> !filterInput.getAttribute("class").contains("search-invalid-regex"));
         assertEquals("", filterInput.getAttribute("title"));
         notExist(By.className("search-result"));
@@ -128,17 +128,17 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys("S");
         driver.findElement(By.className("search-result"));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
 
         notExist(By.className("search-result"));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
 
         filterInput.sendKeys("\\b");
         notExist(By.className("search-result"));
-        driver.findElementById("match-regex").click();
+        driver.findElement(By.id("match-regex")).click();
         driver.findElement(By.className("search-result"));
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
         notExist(By.className("search-result"));
     }
 
@@ -152,7 +152,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys(" a]");
         shiftF3(filterInput);
 
-        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+        assertEquals(" a]", join(driver.findElements(By.className("search-result"))));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.END).perform();
         notExist(By.className("search-result"));
@@ -161,30 +161,30 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys(" A]");
         shiftF3(filterInput);
 
-        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+        assertEquals(" a]", join(driver.findElements(By.className("search-result"))));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
         shiftF3(filterInput);
 
         notExist(By.className("search-result"));
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
         shiftF3(filterInput);
 
-        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+        assertEquals(" a]", join(driver.findElements(By.className("search-result"))));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.ESCAPE, Keys.END).perform();
         notExistWait(By.className("search-result"));
-        driver.findElementById("match-regex").click();
+        driver.findElement(By.id("match-regex")).click();
 
         setValue(filterInput, "");
         filterInput.sendKeys(" A\\]");
         shiftF3(filterInput);
-        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+        assertEquals(" a]", join(driver.findElements(By.className("search-result"))));
 
         new Actions(driver).sendKeys(Keys.ESCAPE, Keys.ESCAPE, Keys.END).perform();
         notExist(By.className("search-result"));
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
         shiftF3(filterInput);
 
         closeInfoAlert();
@@ -194,7 +194,7 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         setValue(filterInput, "");
         filterInput.sendKeys(" a\\]");
         shiftF3(filterInput);
-        assertEquals(" a]", join(driver.findElementsByClassName("search-result")));
+        assertEquals(" a]", join(driver.findElements(By.className("search-result"))));
     }
 
     private void shiftF3(WebElement filterInput) {
@@ -208,8 +208,8 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("::");  // ::
 
-        driver.findElementById("findPrevArrow");
-        driver.findElementById("findNextArrow");
+        driver.findElement(By.id("findPrevArrow"));
+        driver.findElement(By.id("findNextArrow"));
 
         WebElement hideUnmatched = driver.findElement(FilterPanel.HIDE_UNMATCHED);
 
@@ -221,16 +221,16 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         notExist(By.id("findNextArrow"));
         assertEquals(labelLocation, hideUnmatched.getLocation());
 
-        WebElement applySearchFilter = driver.findElementById("applySearchFilter");
+        WebElement applySearchFilter = driver.findElement(By.id("applySearchFilter"));
         assert applySearchFilter.getAttribute("class").contains("tooliconDisabled");
 
-        waitFor(() -> driver.findElementsByCssSelector("#records .record").size() == 4);
+        waitFor(() -> driver.findElements(By.cssSelector("#records .record")).size() == 4);
 
-        assertEquals("::::::::::::", join(driver.findElementsByClassName("search-result")));
+        assertEquals("::::::::::::", join(driver.findElements(By.className("search-result"))));
 
         filterInput.sendKeys(":"); // :::
 
-        assertEquals("::::::::::::", join(driver.findElementsByClassName("search-result")));
+        assertEquals("::::::::::::", join(driver.findElements(By.className("search-result"))));
 
         assert !applySearchFilter.getAttribute("class").contains("tooliconDisabled");
         filterInput.sendKeys(Keys.BACK_SPACE);  // ::
@@ -239,20 +239,20 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
         filterInput.sendKeys(":"); // :::
         applySearchFilter.click();
 
-        waitFor(() -> driver.findElementsByCssSelector("#records .record").size() == 3);
-        assertEquals(":::::::::", join(driver.findElementsByClassName("search-result")));
+        waitFor(() -> driver.findElements(By.cssSelector("#records .record")).size() == 3);
+        assertEquals(":::::::::", join(driver.findElements(By.className("search-result"))));
 
         filterInput.sendKeys(":"); // ::::
 
         hideUnmatched.click();
         assertEquals(labelLocation, hideUnmatched.getLocation());
 
-        waitFor(() -> driver.findElementsByCssSelector("#records .record").size() > 5);
+        waitFor(() -> driver.findElements(By.cssSelector("#records .record")).size() > 5);
 
-        assertEquals("::::::::", join(driver.findElementsByClassName("search-result")));
+        assertEquals("::::::::", join(driver.findElements(By.className("search-result"))));
 
-        driver.findElementById("findPrevArrow");
-        driver.findElementById("findNextArrow");
+        driver.findElement(By.id("findPrevArrow"));
+        driver.findElement(By.id("findNextArrow"));
         notExist(By.id("applySearchFilter"));
     }
 
@@ -264,12 +264,12 @@ public class SearchIntegrationTest extends AbstractWebTestCase {
 
         Dimension size = filterDiv.getSize();
 
-        driver.findElementById("match-cases").click();
+        driver.findElement(By.id("match-cases")).click();
         Thread.sleep(10);
 
         assertEquals(size, filterDiv.getSize());
 
-        driver.findElementById("match-regex").click();
+        driver.findElement(By.id("match-regex")).click();
         Thread.sleep(10);
 
         assertEquals(size, filterDiv.getSize());

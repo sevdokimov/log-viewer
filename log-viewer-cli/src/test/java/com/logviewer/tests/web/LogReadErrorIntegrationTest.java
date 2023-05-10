@@ -112,9 +112,9 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         WebElement errorMsg = driver.findElement(By.className("no-record-msg"));
         assert errorMsg.getText().contains("Failed to read log");
 
-        assert driver.findElementsByCssSelector(".file-list .file-error").size() == 2;
-        assertEquals("0", driver.findElementById("successFileCount").getText());
-        assertEquals("2", driver.findElementById("totalFileCount").getText());
+        assert driver.findElements(By.cssSelector(".file-list .file-error")).size() == 2;
+        assertEquals("0", driver.findElement(By.id("successFileCount")).getText());
+        assertEquals("2", driver.findElement(By.id("totalFileCount")).getText());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
 
         new Actions(driver).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).sendKeys(Keys.PAGE_UP).perform();
 
-        assert !driver.findElementById("records").isDisplayed();
+        assert !driver.findElement(By.id("records")).isDisplayed();
 
         driver.findElement(By.cssSelector(".file-not-found"));
     }
@@ -162,7 +162,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         openUrl("log", "path", path1 + ".blabla.log", "path", path2 + ".blabla.log");
 
         driver.findElement(By.className("file-not-found")); // Wait for rendering
-        assertEquals(2, driver.findElementsByClassName("file-not-found").size());
+        assertEquals(2, driver.findElements(By.className("file-not-found")).size());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class LogReadErrorIntegrationTest extends AbstractWebTestCase {
         openUrl("log", "path", path1, "path", path2);
 
         driver.findElement(By.className("file-error")); // Wait for rendering
-        List<WebElement> elements = driver.findElementsByClassName("file-error");
+        List<WebElement> elements = driver.findElements(By.className("file-error"));
         assertEquals(2, elements.size());
 
         elements.forEach(e -> e.getText().contains("Access Denied"));

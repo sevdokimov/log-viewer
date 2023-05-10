@@ -9,15 +9,13 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class FieldRendererTest extends AbstractWebTestCase {
 
-    public static final RegexLogFormat FORMAT = new RegexLogFormat(StandardCharsets.UTF_8, "(\\d+)", false,
+    public static final RegexLogFormat FORMAT = new RegexLogFormat("(\\d+)",
             new RegexLogFormat.RegexField("msg", 1, "custom-field-type"));
 
     @Test

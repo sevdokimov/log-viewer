@@ -5,6 +5,7 @@ import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.util.Locale;
 
 /**
  *
@@ -27,6 +28,9 @@ public interface LogFormat {
 
     @Nullable
     Charset getCharset();
+
+    @Nullable
+    Locale getLocale();
 
     /**
      * @return {@code true} if log entry contains a date.

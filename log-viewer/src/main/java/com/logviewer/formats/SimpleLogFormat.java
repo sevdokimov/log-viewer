@@ -3,9 +3,11 @@ package com.logviewer.formats;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.data2.LogRecord;
+import com.logviewer.utils.Utils;
 import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
+import java.util.Locale;
 
 public class SimpleLogFormat implements LogFormat {
 
@@ -35,6 +37,11 @@ public class SimpleLogFormat implements LogFormat {
     }
 
     @Override
+    public Locale getLocale() {
+        return null;
+    }
+
+    @Override
     public boolean hasFullDate() {
         return false;
     }
@@ -58,17 +65,17 @@ public class SimpleLogFormat implements LogFormat {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+        private int loadedTextLengthBytes;
 
         private final Charset charset = SimpleLogFormat.this.charset == null ? Charset.defaultCharset() : SimpleLogFormat.this.charset;
 
         @Override
         public boolean parseRecord(byte[] data, int offset, int length, long start, long end) {
-            s = new String(data, offset, length, charset);
+            s = Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
 
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             return true;
         }
@@ -98,7 +105,7 @@ public class SimpleLogFormat implements LogFormat {
             if (s == null)
                 throw new IllegalStateException();
 
-            LogRecord res = new LogRecord(s, 0, start, end, hasMore);
+            LogRecord res = new LogRecord(s, 0, start, end, loadedTextLengthBytes);
 
             s = null;
 

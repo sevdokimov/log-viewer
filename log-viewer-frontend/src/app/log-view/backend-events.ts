@@ -102,6 +102,16 @@ export interface EventSearchResponse extends StatusHolderEvent {
     hasNextLine: boolean;
 }
 
+export interface LoadLogContentResponse extends BackendEvent {
+    logId: string;
+
+    text: string;
+    textLengthBytes: number;
+
+    recordStart: number;
+    offset: number;
+}
+
 export interface DataHolderEvent extends StatusHolderEvent {
     data: RecordBundle;
 }

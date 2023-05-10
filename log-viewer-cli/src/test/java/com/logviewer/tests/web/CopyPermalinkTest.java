@@ -141,13 +141,13 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         notExist(By.xpath("//div[@id='records']/div[@class='record'][text()='1']"));
 
-        driver.findElementById("brokenLinkGoTail");
+        driver.findElement(By.id("brokenLinkGoTail"));
 
         assert driver.getCurrentUrl().contains("state=");
 
         driver.navigate().refresh();
 
-        driver.findElementById("brokenLinkGoTail").click();
+        driver.findElement(By.id("brokenLinkGoTail")).click();
 
         checkLastRecord("19");
 
@@ -183,7 +183,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         assertEquals("[2012.01.01 00:03][      aaaa] sss 3 3", getVisibleRecords());
 
         driver.findElement(By.cssSelector("#hide-unmatched:checked"));
-        assertEquals("2012.01.01 00:03", join(driver.findElementsByClassName("search-result")));
+        assertEquals("2012.01.01 00:03", join(driver.findElements(By.className("search-result"))));
     }
 
     @Test
@@ -195,7 +195,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         filterInput.sendKeys("2012.01.01 00:03");
         new Actions(driver).keyDown(Keys.SHIFT).sendKeys(filterInput, Keys.F3).keyUp(Keys.SHIFT).perform();
 
-        List<WebElement> searchRes = driver.findElementsByClassName("search-result");
+        List<WebElement> searchRes = driver.findElements(By.className("search-result"));
 
         assertEquals("2012.01.01 00:03", join(searchRes));
 
@@ -205,7 +205,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         driver.get(link);
 
-        searchRes = driver.findElementsByClassName("search-result");
+        searchRes = driver.findElements(By.className("search-result"));
 
         assertEquals("2012.01.01 00:03", join(searchRes));
 
@@ -219,7 +219,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         openLog("level-logback.log");
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
-        WebElement warn = driver.findElementsByCssSelector(".level-drop-down .level-name").stream().filter(r -> r.getText().equals("WARN")).findFirst().get();
+        WebElement warn = driver.findElements(By.cssSelector(".level-drop-down .level-name")).stream().filter(r -> r.getText().equals("WARN")).findFirst().get();
         warn.click();
 
         waitFor(() -> {

@@ -4,10 +4,9 @@ import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.web.LogViewerServlet;
 import com.logviewer.web.LogViewerWebsocket;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
-import com.typesafe.config.ConfigValue;
-import com.typesafe.config.ConfigValueType;
+import com.typesafe.config.*;
+import org.eclipse.jetty.jaas.JAASLoginService;
+import org.eclipse.jetty.jaas.spi.LdapLoginModule;
 import org.eclipse.jetty.security.*;
 import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Connector;
@@ -31,12 +30,14 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.Configuration;
 import javax.websocket.server.ServerEndpointConfig;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LogViewerMain {
 
@@ -48,6 +49,10 @@ public class LogViewerMain {
     public static final String USER_ROLE = "user";
 
     private static final String PROP_AUTHENTICATION_ENABLED = "authentication.enabled";
+
+    private static final String PROP_AUTHENTICATION_LDAP_ENABLED = "authentication.ldap.enabled";
+
+    private static final String CONTEXT_FACTORY = "com.sun.jndi.ldap.LdapCtxFactory";
 
     @Value("${log-viewer.server.port:8111}")
     private int port;
@@ -63,6 +68,9 @@ public class LogViewerMain {
     private boolean useWebSocket;
     @Value("${" + PROP_AUTHENTICATION_ENABLED + ":false}")
     private boolean authenticationEnabled;
+
+    @Value("${" + PROP_AUTHENTICATION_LDAP_ENABLED + ":false}")
+    private boolean authenticationLdapEnabled;
 
     public Server startup() throws Exception {
         boolean closeAppContext = false;
@@ -101,8 +109,13 @@ public class LogViewerMain {
             webAppCtx.setBaseResource(Resource.newResource(webAppUrl));
             webAppCtx.setAttribute(LogViewerServlet.SPRING_CONTEXT_PROPERTY, appCtx);
 
-            if (authenticationEnabled)
-                webAppCtx.setSecurityHandler(createSecurityHandler());
+            if (authenticationEnabled) {
+                if (authenticationLdapEnabled) {
+                    webAppCtx.setSecurityHandler(createLdapSecurityHandler());
+                } else {
+                    webAppCtx.setSecurityHandler(createSimpleSecurityHandler());
+                }
+            }
 
             srv.setHandler(webAppCtx);
 
@@ -137,7 +150,7 @@ public class LogViewerMain {
         }
     }
 
-    private static SecurityHandler createSecurityHandler() {
+    private static SecurityHandler createSimpleSecurityHandler() {
         ConstraintSecurityHandler res = new ConstraintSecurityHandler();
 
         res.setAuthenticator(new BasicAuthenticator());
@@ -154,6 +167,62 @@ public class LogViewerMain {
         res.setRoles(Collections.singleton(USER_ROLE));
 
         res.setLoginService(createRealm(TypesafePropertySourceFactory.getHoconConfig()));
+        return res;
+    }
+
+    private static SecurityHandler createLdapSecurityHandler() {
+        Config config = TypesafePropertySourceFactory.getHoconConfig();
+
+        if (!config.hasPath("ldap-config")) {
+            throw new IllegalArgumentException("Invalid configuration: `ldap-config = { ... }` sections is not defined. " +
+                    "ldap-config must be defined when `" + PROP_AUTHENTICATION_LDAP_ENABLED + "=true`");
+        }
+
+        ConfigObject ldap = config.getObject("ldap-config");
+
+        if (ldap.get("roles") == null) {
+            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property is not specified for the ldap-config");
+        }
+
+        String[] roles = ldap.toConfig().getStringList("roles").toArray(new String[0]);
+
+        if (roles.length == 0) {
+            throw new IllegalArgumentException("Invalid configuration [line=" + ldap.origin().lineNumber() + "] \"roles\" property must not be empty");
+        }
+
+        ConstraintSecurityHandler res = new ConstraintSecurityHandler();
+
+        res.setAuthenticator(new BasicAuthenticator());
+
+        res.setRealmName(res.getRealmName());
+
+        ConstraintMapping mapping = new ConstraintMapping();
+        mapping.setPathSpec("/*");
+        Constraint constraint = new Constraint();
+        constraint.setName(Constraint.__BASIC_AUTH);
+        constraint.setRoles(roles);
+        constraint.setAuthenticate(true);
+        mapping.setConstraint(constraint);
+        res.addConstraintMapping(mapping);
+
+        Configuration ldapConfiguration = createLdapConfig(ldap.toConfig());
+
+        res.setLoginService(ldapLoginService(ldapConfiguration));
+        return res;
+    }
+
+    private static String extractString(ConfigValue value, String name) {
+        if (value.valueType() != ConfigValueType.STRING) {
+            throw new IllegalArgumentException("Invalid configuration [line=" + value.origin().lineNumber() + "] \""
+                    + name +"\" must be a string");
+        }
+
+        String res = ((String) value.unwrapped()).trim();
+
+        if (res.isEmpty()) {
+            throw new IllegalArgumentException("Invalid configuration [line=" + value.origin().lineNumber() + "] \""
+                    + name + "\" must not be empty");
+        }
 
         return res;
     }
@@ -189,22 +258,6 @@ public class LogViewerMain {
         return loginService;
     }
 
-    private static String extractString(ConfigValue value, String name) {
-        if (value.valueType() != ConfigValueType.STRING) {
-            throw new IllegalArgumentException("Invalid configuration [line=" + value.origin().lineNumber() + "] \""
-                    + name +"\" must be a string");
-        }
-
-        String res = ((String) value.unwrapped()).trim();
-
-        if (res.isEmpty()) {
-            throw new IllegalArgumentException("Invalid configuration [line=" + value.origin().lineNumber() + "] \""
-                    + name + "\" must not be empty");
-        }
-
-        return res;
-    }
-
     private static Credential credential(ConfigObject user, String sName) {
         ConfigValue password = user.get(PASSWORD);
         ConfigValue passwordMd5 = user.get(PASSWORD_MD_5);
@@ -231,6 +284,41 @@ public class LogViewerMain {
 
             return Credential.getCredential("MD5:" + md5);
         }
+    }
+
+    private static LoginService ldapLoginService(Configuration ldapConfiguration) throws IllegalArgumentException {
+        try {
+            JAASLoginService loginService = new JAASLoginService("ldaploginmodule");
+            loginService.setConfiguration(ldapConfiguration);
+            loginService.setIdentityService(new DefaultIdentityService());
+            return loginService;
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid authenticationException", e);
+        }
+    }
+
+    private static Configuration createLdapConfig(Config ldapConfig) {
+        final Map<String, String> props = ldapConfig.entrySet()
+                .stream()
+                .filter(it -> !it.getKey().equals("roles"))
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().unwrapped().toString()));
+
+        props.put("contextFactory", LogViewerMain.CONTEXT_FACTORY);
+
+        AppConfigurationEntry[] entries = {
+                new AppConfigurationEntry(
+                        LdapLoginModule.class.getCanonicalName(),
+                        AppConfigurationEntry.LoginModuleControlFlag.REQUIRED,
+                        props
+                )
+        };
+
+        return new Configuration() {
+            @Override
+            public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+                return entries;
+            }
+        };
     }
 
     public static void main(String[] args) throws Exception {

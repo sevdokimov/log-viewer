@@ -226,6 +226,34 @@ export class RecordRendererService {
         }
     }
 
+    renderNewAppendedText(r: Record, originalTextLength: number, idx: number, target: HTMLElement) {
+        let element = target.children.item(idx);
+
+        let recText = $('.rec-text', element)[0]
+        $('.has-more', recText).remove()
+
+        const rendererCtx: RenderContext = {textRenderer: this.textRenderer, compact: true};
+
+        this.defaultFieldRenderer.append(recText, r.s.substring(originalTextLength), r, rendererCtx)
+
+        this.appendLoadMoreIfNeeded(r, recText)
+        
+        this.setStrLenAttribute(recText);
+    }
+
+    private appendLoadMoreIfNeeded(r: Record, e: HTMLElement) {
+        if (r.loadedTextLengthBytes < r.end - r.start) {
+            let moreDiv = document.createElement('DIV');
+            (<SlElement>moreDiv).virtual = true;
+            moreDiv.className = 'has-more lv-virtual';
+            moreDiv.innerHTML =
+                '...the log record is too big (' +
+                LvUtils.renderFileSize(r.end - r.start) +
+                '), only the beginning of the record is shown ... <a href="javascript:void(0)" class="has-more-load-more">[load more]</a>';
+            e.appendChild(moreDiv);
+        }
+    }
+
     private render(r: Record): HTMLDivElement {
         let e: HTMLDivElement = <HTMLDivElement>document.createElement('DIV');
         e.className = 'rec-text';
@@ -278,16 +306,7 @@ export class RecordRendererService {
             if (i < s.length) { e.appendChild(document.createTextNode(s.substring(i))); }
         }
 
-        if (r.hasMore) {
-            let moreDiv = document.createElement('DIV');
-            (<SlElement>moreDiv).virtual = true;
-            moreDiv.className = 'has-more lv-virtual';
-            moreDiv.innerText =
-                '...the log record is too big (' +
-                LvUtils.renderFileSize(r.end - r.start) +
-                '), only begin of the record is shown ...';
-            e.appendChild(moreDiv);
-        }
+        this.appendLoadMoreIfNeeded(r, e);
 
         this.setStrLenAttribute(e);
 

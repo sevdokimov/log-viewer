@@ -11,6 +11,7 @@ import com.logviewer.data2.FieldTypes;
 import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogRecord;
 import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
+import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.utils.LvDateUtils;
 import org.junit.Test;
@@ -20,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +50,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
         layout.stop();
 
-        LogFormat logFormat = new LogbackLogFormat(null, pattern);
+        LogFormat logFormat = new LogbackLogFormat(pattern);
 
         LogRecord record = read(logFormat, logRecord);
         checkFields(record, fields);
@@ -55,25 +58,25 @@ public class LogbackLogFormatTest extends AbstractLogTest {
 
     @Test
     public void nameCollision() {
-        LogFormat logFormat = new LogbackLogFormat(null, "%d %d %d");
+        LogFormat logFormat = new LogbackLogFormat("%d %d %d");
         assertEquals(Arrays.asList("date", "date_1", "date_2"), Stream.of(logFormat.getFields()).map(LogFormat.FieldDescriptor::name).collect(Collectors.toList()));
     }
 
     @Test
     public void invalidPattern1() {
-        LogFormat logFormat = new LogbackLogFormat(null, "%d %d %");
+        LogFormat logFormat = new LogbackLogFormat("%d %d %");
         TestUtils.assertError(IllegalArgumentException.class, () -> logFormat.getFields());
     }
 
     @Test
     public void invalidPattern2() {
-        LogFormat logFormat = new LogbackLogFormat(null, "%d %d %dfdsfsdf");
+        LogFormat logFormat = new LogbackLogFormat("%d %d %dfdsfsdf");
         TestUtils.assertError(IllegalArgumentException.class, () -> logFormat.getFields());
     }
 
     @Test
     public void dateFieldFormat() {
-        LogbackLogFormat logFormat = new LogbackLogFormat(null, "[%date{yyyy MM-dd_HH:mm:ss.SSS}] [%thread] %-5level %logger{35} - %X{pipelineId}%X{contentId}%msg%n");
+        LogbackLogFormat logFormat = new LogbackLogFormat("[%date{yyyy MM-dd_HH:mm:ss.SSS}] [%thread] %-5level %logger{35} - %X{pipelineId}%X{contentId}%msg%n");
 
         LvLayoutSimpleDateNode dateNode = (LvLayoutSimpleDateNode) Stream.of(logFormat.getDelegate().getLayout())
                 .filter(f -> f instanceof LvLayoutSimpleDateNode).findFirst().orElse(null);
@@ -332,4 +335,35 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         assertEquals("WARNING", read(logFormat, "12:00:00 WARNING aaa").getFieldText("level"));
     }
 
+    @Test
+    public void testLocale() {
+        String pattern = "%d{yyyy MMM dd HH:mm:ss Z} %m%n";
+        Instant ts = Instant.parse("2007-01-03T10:15:30.00Z");
+        Locale customLocale = new Locale("ru", "RU");
+
+        String str = TestUtils.withLocale(customLocale, () -> {
+            LoggingEvent event = new LoggingEvent(
+                    LogbackLogFormatTest.class.getName(),
+                    (ch.qos.logback.classic.Logger) LOG,
+                    Level.ERROR, "foo", null, new Object[]{});
+
+            event.setTimeStamp(ts.toEpochMilli());
+
+            PatternLayout layout = new PatternLayout();
+            layout.setPattern(pattern);
+            layout.setContext(((ch.qos.logback.classic.Logger)LOG).getLoggerContext());
+            layout.start();
+
+            return layout.doLayout(event);
+        });
+
+        assertTrue(str, str.contains("янв")); // "2011 окт 13" in Java 8, "2011 окт. 13" in Java 17
+
+        LogFormat logFormat = new Log4jLogFormat(pattern).setLocale(customLocale);
+        LogRecord read = read(logFormat, str);
+
+        assertTrue(read.hasTime());
+        assertTrue(read.getFieldText("date").matches("2007 янв.? 03.*")); // "2007 янв 03" in Java 8, "2007 янв. 03" in Java 17
+        assertEquals(ts.toEpochMilli(), read.getTimeMillis());
+    }
 }

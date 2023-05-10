@@ -32,7 +32,11 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     private long start;
     private long end;
 
-    private boolean hasMore;
+    /**
+     * The length of {@link #message} in bytes. The value must be (end - start) for log records with length less than {@link ParserConfig#MAX_LINE_LENGTH}.
+     * For long log records the value will be less than (end - start).
+     */
+    private int loadedTextLengthBytes;
 
     /**
      * Used by deserializer only.
@@ -41,11 +45,11 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
     }
 
-    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore) {
-        this(message, timeNanos, start, end, hasMore, Utils.EMPTY_INT_ARRAY, Collections.emptyMap());
+    public LogRecord(@NonNull String message, long timeNanos, long start, long end, int loadedTextLengthBytes) {
+        this(message, timeNanos, start, end, loadedTextLengthBytes, Utils.EMPTY_INT_ARRAY, Collections.emptyMap());
     }
 
-    public LogRecord(@NonNull String message, long timeNanos, long start, long end, boolean hasMore,
+    public LogRecord(@NonNull String message, long timeNanos, long start, long end, int loadedTextLengthBytes,
                      @NonNull int[] fieldPositions, @NonNull Map<String, Integer> fieldNames) {
         assert fieldPositions.length == fieldNames.size() * 2;
 
@@ -56,7 +60,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
 
         this.start = start;
         this.end = end;
-        this.hasMore = hasMore;
+        this.loadedTextLengthBytes = loadedTextLengthBytes;
 
         this.fieldPositions = fieldPositions;
         this.fieldNames = fieldNames;
@@ -80,7 +84,11 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     }
 
     public boolean hasMore() {
-        return hasMore;
+        return loadedTextLengthBytes < end - start;
+    }
+
+    public int getLoadedTextLengthBytes() {
+        return loadedTextLengthBytes;
     }
 
     public long getTime() {
@@ -154,7 +162,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         out.writeLong(timeNanos);
         out.writeLong(start);
         out.writeLong(end);
-        out.writeBoolean(hasMore);
+        out.writeInt(loadedTextLengthBytes);
 
         assert fieldNames.size() * 2 == fieldPositions.length;
 
@@ -176,7 +184,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         timeNanos = in.readLong();
         start = in.readLong();
         end = in.readLong();
-        hasMore = in.readBoolean();
+        loadedTextLengthBytes = in.readInt();
 
         int fieldCount = in.readUnsignedShort();
 
@@ -192,8 +200,8 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
     }
 
     @NonNull
-    public static LogRecord createUnparsedRecord(@NonNull String message, long time, long start, long end, boolean hasMore) {
-        return new LogRecord(message, time, start, end, hasMore);
+    public static LogRecord createUnparsedRecord(@NonNull String message, long time, long start, long end, int loadedTextLengthBytes) {
+        return new LogRecord(message, time, start, end, loadedTextLengthBytes);
     }
 
     @Override
@@ -201,7 +209,7 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LogRecord record = (LogRecord) o;
-        return timeNanos == record.timeNanos && start == record.start && end == record.end && hasMore == record.hasMore
+        return timeNanos == record.timeNanos && start == record.start && end == record.end && loadedTextLengthBytes == record.loadedTextLengthBytes
                 && logId.equals(record.logId) && message.equals(record.message)
                 && Arrays.equals(fieldPositions, record.fieldPositions)
                 && fieldNames.keySet().equals(record.fieldNames.keySet());

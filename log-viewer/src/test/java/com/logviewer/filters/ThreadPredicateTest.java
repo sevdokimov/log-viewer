@@ -46,7 +46,7 @@ public class ThreadPredicateTest {
     }
 
     private void check(ThreadPredicate p, String thread, boolean expected) {
-        LogRecord record = new LogRecord(thread, LvDateUtils.toNanos(new Date()), 0, thread.length(), false,
+        LogRecord record = new LogRecord(thread, LvDateUtils.toNanos(new Date()), 0, thread.length(), thread.length(),
                 new int[]{0, thread.length()}, Collections.singletonMap("t", 0));
 
         LogFormat.FieldDescriptor[] fields = new LogFormat.FieldDescriptor[]{new DefaultFieldDesciptor("t", FieldTypes.THREAD)};

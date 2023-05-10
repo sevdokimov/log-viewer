@@ -93,7 +93,7 @@ public class LogGrowTest extends AbstractWebTestCase {
 
         notExist(By.xpath("//div[@id='records']/div[@class='record'][last()][text()='30']"));
 
-        Number recordCount = (Number) driver.executeScript("return arguments[0].childElementCount", driver.findElementById("records"));
+        Number recordCount = (Number) driver.executeScript("return arguments[0].childElementCount", driver.findElement(By.id("records")));
         assert recordCount.longValue() > 5;
         assert recordCount.longValue() < 29;
 

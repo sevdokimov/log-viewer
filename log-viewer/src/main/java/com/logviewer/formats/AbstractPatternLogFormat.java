@@ -5,10 +5,10 @@ import com.logviewer.data2.LogReader;
 import com.logviewer.formats.utils.LvLayoutNode;
 import com.logviewer.formats.utils.LvLayoutStretchNode;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public abstract class AbstractPatternLogFormat implements LogFormat {
@@ -19,12 +19,13 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     private Charset charset;
 
-    private String pattern;
+    private Locale locale;
+
+    private final String pattern;
 
     private transient volatile DefaultFieldSet fieldSet;
 
-    public AbstractPatternLogFormat(@Nullable Charset charset, @NonNull String pattern) {
-        this.charset = charset;
+    public AbstractPatternLogFormat(@NonNull String pattern) {
         this.pattern = pattern;
     }
 
@@ -34,24 +35,33 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
     }
 
     @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
     public boolean hasFullDate() {
         return getDelegate().hasFullDate();
     }
 
     public AbstractPatternLogFormat setCharset(Charset charset) {
         this.charset = charset;
-        this.fieldSet = null;
+        clearTemporaryState();
         return this;
+    }
+
+    public AbstractPatternLogFormat setLocale(Locale locale) {
+        this.locale = locale;
+        clearTemporaryState();
+        return this;
+    }
+
+    protected void clearTemporaryState() {
+        this.fieldSet = null;
     }
 
     public String getPattern() {
         return pattern;
-    }
-
-    public AbstractPatternLogFormat setPattern(String pattern) {
-        this.pattern = pattern;
-        this.fieldSet = null;
-        return this;
     }
 
     @Override
@@ -69,7 +79,7 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
         if (res == null) {
             LvLayoutNode[] nodes = parseLayout(pattern);
-            res = new DefaultFieldSet(charset, nodes);
+            res = new DefaultFieldSet(locale, charset, nodes);
 
             fieldSet = res;
         }

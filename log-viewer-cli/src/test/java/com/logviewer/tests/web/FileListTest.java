@@ -40,13 +40,13 @@ public class FileListTest extends AbstractWebTestCase {
 
         checkFileListHeader("1 / 3 logs");
 
-        WebElement fileStatDropdown = driver.findElementById("file-stat-dropdown");
+        WebElement fileStatDropdown = driver.findElement(By.id("file-stat-dropdown"));
 
         assertThat(fileStatDropdown.findElement(By.cssSelector("#successFileCount.has-problems-files")).getText(), is("1"));
 
         fileStatDropdown.click();
 
-        assert driver.findElementsByCssSelector("lv-log-list-panel lv-file-status .file-not-found").size() == 2;
+        assert driver.findElements(By.cssSelector("lv-log-list-panel lv-file-status .file-not-found")).size() == 2;
     }
 
     @Test
@@ -55,10 +55,10 @@ public class FileListTest extends AbstractWebTestCase {
 
         checkFileListHeader("0 / 1 log");
 
-        WebElement fileStatDropdown = driver.findElementById("file-stat-dropdown");
+        WebElement fileStatDropdown = driver.findElement(By.id("file-stat-dropdown"));
         fileStatDropdown.click();
 
-        WebElement status = Iterables.getOnlyElement(driver.findElementsByCssSelector("lv-log-list-panel lv-file-status"));
+        WebElement status = Iterables.getOnlyElement(driver.findElements(By.cssSelector("lv-log-list-panel lv-file-status")));
         assertThat(status.getText(), is("IO Error"));
 
         status.findElement(By.cssSelector(".fa-wrench")).click(); // Show Details icon

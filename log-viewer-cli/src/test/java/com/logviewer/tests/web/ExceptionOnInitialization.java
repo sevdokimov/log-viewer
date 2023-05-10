@@ -18,6 +18,7 @@ import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Locale;
 
 public class ExceptionOnInitialization extends AbstractWebTestCase {
 
@@ -50,6 +51,12 @@ public class ExceptionOnInitialization extends AbstractWebTestCase {
         @Nullable
         @Override
         public Charset getCharset() {
+            throw new RuntimeException("Problem!!!");
+        }
+
+        @Nullable
+        @Override
+        public Locale getLocale() {
             throw new RuntimeException("Problem!!!");
         }
 

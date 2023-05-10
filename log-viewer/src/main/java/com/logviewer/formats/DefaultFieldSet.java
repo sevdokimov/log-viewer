@@ -2,6 +2,7 @@ package com.logviewer.formats;
 
 import com.logviewer.data2.*;
 import com.logviewer.formats.utils.*;
+import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -13,6 +14,8 @@ import java.util.function.LongSupplier;
 public class DefaultFieldSet {
 
     private final Charset charset;
+
+    private final Locale locale;
 
     private final LvLayoutNode[] layout;
 
@@ -26,11 +29,16 @@ public class DefaultFieldSet {
     private final int dateNodeIndex;
 
     public DefaultFieldSet(@Nullable Charset charset, LvLayoutNode ... layout) {
-        this(charset, canAppendTail(layout), layout);
+        this(null, charset, canAppendTail(layout), layout);
     }
 
-    public DefaultFieldSet(@Nullable Charset charset, boolean canAppendTail, LvLayoutNode ... layout) {
+    public DefaultFieldSet(@Nullable Locale locale, @Nullable Charset charset, LvLayoutNode ... layout) {
+        this(locale, charset, canAppendTail(layout), layout);
+    }
+
+    public DefaultFieldSet(@Nullable Locale locale, @Nullable Charset charset, boolean canAppendTail, LvLayoutNode ... layout) {
         this.charset = charset == null ? Charset.defaultCharset() : charset;
+        this.locale = locale == null ? Locale.getDefault(Locale.Category.FORMAT) : locale;
         this.layout = layout.clone();
         this.canAppendTail = canAppendTail;
 
@@ -90,11 +98,6 @@ public class DefaultFieldSet {
     }
 
     @NonNull
-    public Charset getEncoding() {
-        return charset;
-    }
-
-    @NonNull
     public LogReader createReader() {
         return new LogReaderImpl();
     }
@@ -134,7 +137,7 @@ public class DefaultFieldSet {
         private String s;
         private long start;
         private long end;
-        private boolean hasMore;
+        private int loadedTextLengthBytes;
 
         public LogReaderImpl() {
             layoutCopy = DefaultFieldSet.this.layout.clone();
@@ -167,6 +170,7 @@ public class DefaultFieldSet {
         @Override
         public boolean parseRecord(byte[] data, int offset, int length, long start, long end) {
             String s = new String(data, offset, length, charset);
+            s = Utils.removeAsciiColorCodes(s);
 
             int idx = 0;
             int endStr = s.length();
@@ -280,7 +284,7 @@ public class DefaultFieldSet {
             this.s = s;
             this.start = start;
             this.end = end;
-            hasMore = length < end - start;
+            loadedTextLengthBytes = length;
 
             for (int i = 0; i < stretchFieldSize; i++) {
                 int nodeIdx = stretchFields[i];
@@ -307,9 +311,11 @@ public class DefaultFieldSet {
             if (length == 0)
                 return;
 
+            boolean recordLengthLimitExceed = loadedTextLengthBytes < end - start;
+
             end += realLength;
 
-            if (hasMore)
+            if (recordLengthLimitExceed)
                 return;
 
             int lastFieldOffset = (fields.length - 1) * 2;
@@ -320,8 +326,10 @@ public class DefaultFieldSet {
             if (fieldOffset[lastFieldOffset + 1] != s.length())
                 throw new IllegalStateException();
 
-            s = s + new String(data, offset, length, charset);
+            s = s + Utils.removeAsciiColorCodes(new String(data, offset, length, charset));
             fieldOffset[lastFieldOffset + 1] = s.length();
+
+            loadedTextLengthBytes += length;
         }
 
         @Override
@@ -345,7 +353,7 @@ public class DefaultFieldSet {
                 time = dateExtractor.getAsLong();
             }
 
-            LogRecord res = new LogRecord(s, time, start, end, hasMore, fieldOffset.clone(), fieldNameIndexes);
+            LogRecord res = new LogRecord(s, time, start, end, loadedTextLengthBytes, fieldOffset.clone(), fieldNameIndexes);
 
             s = null;
 

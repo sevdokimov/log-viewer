@@ -1,6 +1,6 @@
 import {Marker} from '../utils/marker';
 
-export class Record {
+export interface Record {
     logId: string;
 
     start: number;
@@ -8,7 +8,7 @@ export class Record {
 
     time: string; // nanoseconds in string representation like "01623601564799000000"
 
-    hasMore: boolean;
+    loadedTextLengthBytes: number;
 
     s: string;
 

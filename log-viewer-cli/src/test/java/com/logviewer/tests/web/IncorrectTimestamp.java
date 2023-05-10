@@ -42,7 +42,7 @@ public class IncorrectTimestamp extends AbstractWebTestCase {
         WebElement filterInput = driver.findElement(FilterPanel.INPUT);
         filterInput.sendKeys("2012.01.01 00:50");
 
-        driver.findElementById("findPrevArrow").click();
+        driver.findElement(By.id("findPrevArrow")).click();
         driver.findElement(By.xpath("//span[@class='search-result'][normalize-space(.)='2012.01.01 00:50']"));
         
         checkReversedOrder(getRecord());

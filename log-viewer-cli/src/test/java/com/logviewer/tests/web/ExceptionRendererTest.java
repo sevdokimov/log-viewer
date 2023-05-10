@@ -12,7 +12,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -24,8 +23,8 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
 
     @Before
     public void initFormat() {
-        RegexLogFormat format = new RegexLogFormat(StandardCharsets.UTF_8,
-                "\\[?(\\d{4}-\\d\\d-\\d\\d_\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)]? (.*)", false,
+        RegexLogFormat format = new RegexLogFormat(
+                "\\[?(\\d{4}-\\d\\d-\\d\\d_\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d)]? (.*)",
                 new RegexLogFormat.RegexField("date", 1, FieldTypes.DATE),
                 new RegexLogFormat.RegexField("msg", 2, "message")
         );
@@ -78,7 +77,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     public void exceptions() {
         openLog("rendering/exceptions.log");
 
-        List<WebElement> exceptions = driver.findElementsByClassName("ex-wrapper");
+        List<WebElement> exceptions = driver.findElements(By.className("ex-wrapper"));
         assertEquals(5, exceptions.size());
 
         WebElement npe1 = exceptions.get(0);
@@ -110,7 +109,7 @@ public class ExceptionRendererTest extends AbstractWebTestCase {
     public void exceptionWithJarname() {
         openLog("rendering/exceptions-with-jarname.log");
 
-        WebElement npe1 = Iterables.getOnlyElement(driver.findElementsByClassName("ex-wrapper"));
+        WebElement npe1 = Iterables.getOnlyElement(driver.findElements(By.className("ex-wrapper")));
         assertEquals("java.lang.NullPointerException", npe1.findElement(By.className("exception-class")).getText());
         assertEquals(8, npe1.findElements(By.className("ex-stacktrace-line")).size());
     }

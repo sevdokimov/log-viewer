@@ -9,9 +9,9 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
@@ -224,6 +224,7 @@ public class Utils {
         try {
             MessageDigest digest = MessageDigest.getInstance("MD5");
             Utils.putUnencodedChars(digest, LvGsonUtils.GSON.toJson(format));
+            Utils.putUnencodedChars(digest, format.getClass().getName());
             return ByteBuffer.wrap(digest.digest()).getLong();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -309,5 +310,93 @@ public class Utils {
         }
 
         return res;
+    }
+
+    public static String removeAsciiColorCodes(String s) {
+//        return s.replaceAll("\u001B\\[[\\d;]*m", "");    - don't use the regexp, the performance of the regexp is not good.
+
+        StringBuilder res = null;
+
+        int i = 0;
+
+        while (i < s.length()) {
+            int escapeIdx = s.indexOf('\u001B', i);
+            if (escapeIdx < 0)
+                break;
+
+            if (escapeIdx + 2 < s.length()) {
+                if (s.charAt(escapeIdx + 1) == '[') {
+                    int k = escapeIdx + 2;
+                    char a;
+
+                    do {
+                        a = s.charAt(k);
+
+                        if (a == ';' || (a >= '0' && a <= '9')) {
+                            k++;
+
+                            if (k >= s.length())
+                                break;
+
+                            continue;
+                        }
+
+                        break;
+                    } while (true);
+
+                    if (a == 'm') {
+                        if (res == null) {
+                            res = new StringBuilder(s.length());
+                            res.append(s, 0, escapeIdx);
+                        } else {
+                            res.append(s, i, escapeIdx);
+                        }
+
+                        i = k + 1;
+                        continue;
+                    }
+                }
+            }
+
+            if (res != null)
+                res.append(s, i, escapeIdx + 1);
+
+            i = escapeIdx + 1;
+        }
+
+        if (res == null)
+            return s;
+
+        res.append(s, i, s.length());
+
+        return res.toString();
+    }
+
+    /**
+     * Decodes text from a byte array. The end of the data may be broken UTF8 sequence, skip it.
+     *
+     * @param data The bytes to decode
+     * @param encoding The encoding
+     * @return A pair of the decoded text and the actual size of the text in bytes.
+     */
+    public static Pair<String, Integer> decode(byte[] data, Charset encoding) {
+        ByteBuffer in = ByteBuffer.wrap(data);
+
+        CharsetDecoder decoder = encoding.newDecoder()
+                .onUnmappableCharacter(CodingErrorAction.REPLACE)
+                .onMalformedInput(CodingErrorAction.REPLACE);
+
+        CharBuffer out = CharBuffer.allocate(data.length + 1);
+
+
+        CoderResult result = decoder.decode(in, out, false);
+
+        out.flip();
+
+        if (result.isUnderflow() && (in.position() == 0 || !out.hasRemaining())) {
+            return Pair.of(encoding.decode(in).toString(), data.length);
+        }
+
+        return Pair.of(out.toString(), in.position());
     }
 }

@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +20,8 @@ import static org.junit.Assert.assertThat;
 
 public class LogLevelTest extends AbstractWebTestCase {
 
-    private static final LogFormat FORMAT_JAVA = new RegexLogFormat(StandardCharsets.UTF_8,
-            "(?<date>\\d{6} \\d\\d:\\d\\d:\\d\\d) (?<level>\\w+) (?<msg>.*)", false,
+    private static final LogFormat FORMAT_JAVA = new RegexLogFormat(
+            "(?<date>\\d{6} \\d\\d:\\d\\d:\\d\\d) (?<level>\\w+) (?<msg>.*)",
             "yyMMdd HH:mm:ss", "date",
             RegexLogFormat.field("date", FieldTypes.DATE),
             RegexLogFormat.field("level", FieldTypes.LEVEL),
@@ -37,7 +36,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "FATAL,ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -51,7 +50,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -65,7 +64,7 @@ public class LogLevelTest extends AbstractWebTestCase {
 
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));
@@ -106,7 +105,7 @@ public class LogLevelTest extends AbstractWebTestCase {
         // Test filter items
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
 
-        List<WebElement> levelName = driver.findElementsByCssSelector(".level-drop-down .level-name");
+        List<WebElement> levelName = driver.findElements(By.cssSelector(".level-drop-down .level-name"));
         assertThat(levelName.stream().map(WebElement::getText).collect(Collectors.joining(",")), is(
                 "ERROR,WARN,INFO,DEBUG,TRACE"
         ));

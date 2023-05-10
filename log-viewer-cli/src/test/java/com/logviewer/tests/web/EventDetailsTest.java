@@ -48,14 +48,14 @@ public class EventDetailsTest extends AbstractWebTestCase {
 
         openLog("rendering/one-line-exception.log");
 
-        List<WebElement> records = driver.findElementsByClassName("record");
+        List<WebElement> records = driver.findElements(By.className("record"));
         WebElement rec = Iterables.getOnlyElement(records);
 
         new Actions(driver).contextClick(rec).perform();
 
         driver.findElement(By.xpath("//ul[@class='ngx-contextmenu--dropdown-menu']/li[contains(., 'Event details')]")).click();
 
-        List<WebElement> fieldLabels = driver.findElementsByCssSelector("lv-event-details .field .field-label");
+        List<WebElement> fieldLabels = driver.findElements(By.cssSelector("lv-event-details .field .field-label"));
 
         assertEquals(Arrays.asList("date", "thread", "level", "logger", "msg"),
                 fieldLabels.stream().map(WebElement::getText).collect(Collectors.toList()));

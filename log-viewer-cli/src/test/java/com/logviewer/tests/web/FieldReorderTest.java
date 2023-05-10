@@ -8,20 +8,18 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.Assert.assertEquals;
 
 public class FieldReorderTest extends AbstractWebTestCase {
 
-    public static final RegexLogFormat FORMAT = new RegexLogFormat(StandardCharsets.UTF_8,
-            "(\\[[^\\]]+\\])\\[ *([^\\]]+)\\] (\\w+) (\\d+) (\\d+)", true,
+    public static final RegexLogFormat FORMAT = new RegexLogFormat(
+            "(\\[[^\\]]+\\])\\[ *([^\\]]+)\\] (\\w+) (\\d+) (\\d+)",
             new RegexLogFormat.RegexField("num2", 4, "number"),
             new RegexLogFormat.RegexField("num1", 5, "number"),
             new RegexLogFormat.RegexField("f3", 3),
             new RegexLogFormat.RegexField("f2", 2),
             new RegexLogFormat.RegexField("date", 1, "my-date")
-            );
+            ).setDontAppendUnmatchedTextToLastField(true);
 
     @Test
     public void styleForFieldType() {

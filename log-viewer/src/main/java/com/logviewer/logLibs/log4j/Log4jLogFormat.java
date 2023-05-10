@@ -2,23 +2,11 @@ package com.logviewer.logLibs.log4j;
 
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.AbstractPatternLogFormat;
-import com.logviewer.formats.utils.LvLayoutClassNode;
-import com.logviewer.formats.utils.LvLayoutDateNode;
-import com.logviewer.formats.utils.LvLayoutFixedTextNode;
-import com.logviewer.formats.utils.LvLayoutLog4jISO8601Date;
-import com.logviewer.formats.utils.LvLayoutNode;
-import com.logviewer.formats.utils.LvLayoutNumberNode;
-import com.logviewer.formats.utils.LvLayoutRegexNode;
-import com.logviewer.formats.utils.LvLayoutSimpleDateNode;
-import com.logviewer.formats.utils.LvLayoutStretchNode;
-import com.logviewer.formats.utils.LvLayoutTextNode;
-import com.logviewer.data2.LogLevels;
+import com.logviewer.formats.utils.*;
 import com.logviewer.utils.Triple;
 import com.logviewer.utils.Utils;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -77,20 +65,23 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
         Arrays.sort(ALL_CONVERTERS, Comparator.<String>comparingInt(s -> s.length()).reversed());
     }
 
-    private final boolean realLog4j;
+    /**
+     * {@code false} means the format was detected automatically, we are not sure that it is a real log4J format.
+     */
+    private boolean realLog4j = true;
 
     public Log4jLogFormat(@NonNull String pattern) {
-        this(null, pattern, true);
+        super(pattern);
     }
 
-    public Log4jLogFormat(@NonNull Charset charset, @NonNull String pattern) {
-        this(charset, pattern, true);
+    public boolean isRealLog4j() {
+        return realLog4j;
     }
 
-    public Log4jLogFormat(@Nullable Charset charset, @NonNull String pattern, boolean realLog4j) {
-        super(charset, pattern);
-
+    public Log4jLogFormat setRealLog4j(boolean realLog4j) {
         this.realLog4j = realLog4j;
+        clearTemporaryState();
+        return this;
     }
 
     @Override
@@ -209,10 +200,12 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
             case "date": {
                 String pattern = datePatternFomOptions(options);
 
-                LvLayoutDateNode res = LvLayoutLog4jISO8601Date.fromPattern(pattern);
+                LvLayoutDateNode res = LvLayoutLog4jISO8601Date.fromPattern(pattern);   // Optimization, LvLayoutLog4jISO8601Date works much faster.
                 if (res == null) {
                     res = new LvLayoutSimpleDateNode(pattern);
                 }
+
+                res = res.withLocale(getLocale());
 
                 if (options.size() > 1)
                     res = res.withTimeZone(TimeZone.getTimeZone(options.get(1)));
