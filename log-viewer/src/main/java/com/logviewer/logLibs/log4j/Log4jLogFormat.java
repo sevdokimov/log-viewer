@@ -1,6 +1,7 @@
 package com.logviewer.logLibs.log4j;
 
 import com.logviewer.data2.FieldTypes;
+import com.logviewer.data2.LogLevels;
 import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
 import com.logviewer.utils.Triple;
