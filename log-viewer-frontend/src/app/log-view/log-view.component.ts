@@ -103,6 +103,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     searchRegexError: string;
 
     searchHideUnmatched: boolean;
+    autoScroll: boolean = true;
 
     savedFilterStates: { [key: string]: FilterState } = {};
 
@@ -1290,6 +1291,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }
 
         this.loadRecordsIfNeeded();
+        if(this.autoScroll){
+            this.scrollEnd();
+        }
     }
 
     private static isStartEquals(a: Record, b: Record): boolean {
