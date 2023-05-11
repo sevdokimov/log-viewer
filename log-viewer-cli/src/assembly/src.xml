@@ -35,6 +35,19 @@
             </includes>
             <fileMode>0644</fileMode>
         </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/bin/etc</directory>
+            <filtered>true</filtered>
+            <outputDirectory>etc</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/bin</directory>
+            <outputDirectory>logs</outputDirectory>
+            <excludes>
+                <exclude>**/*</exclude>
+            </excludes>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
