@@ -1,0 +1,19 @@
+[Unit]
+Description=LogViewer is a Web application for monitoring server logs in real-time in the browser.
+Documentation=https://github.com/sevdokimov/log-viewer/tree/master/_docs
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/log-viewer/
+ExecStart=/bin/java -ea -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
+Restart=on-failure
+RestartSec=1
+SuccessExitStatus=3 4
+RestartForceExitStatus=3 4
+SuccessExitStatus=143
+StandardOutput=file:/path/to/log-viewer/logs/log-viewer.log
+StandardError=file:/path/to/log-viewer/logs/error.log
+
+[Install]
+WantedBy=multi-user.target
