@@ -13,6 +13,8 @@ import {FilterWithDropdown} from '@app/log-view/top-filters/filter-with-dropdown
 import * as $ from 'jquery';
 import {SearchPattern} from '@app/log-view/search';
 import {TextFilterFactory} from '@app/log-view/top-filters/text-filter/text-filter-factory';
+import {UiConfig} from '@app/log-view/backend-events';
+import {get} from 'lodash';
 
 @Injectable()
 export class FilterPanelStateService {
@@ -23,6 +25,8 @@ export class FilterPanelStateService {
     get urlParamValue() {
         return this._urlParamValue;
     }
+
+    uiConfig: UiConfig;
 
     activeFilterEditors: {[key: string]: FilterFactory} = {};
 
@@ -67,17 +71,18 @@ export class FilterPanelStateService {
         return type;
     }
 
-    init(logs: LogFile[]) {
+    init(logs: LogFile[], uiConfig: UiConfig) {
+        this.uiConfig = uiConfig;
         let levelType = FilterPanelStateService.findCommonLevelType(logs);
+        let uiLevels = get(uiConfig, 'field-types.level.args', {});
 
         if (levelType === 'level/log4j') {
             this.activeFilterEditors.level = new LevelFilterDescription(['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'],
-                'level');
+                'level', uiLevels);
         } else if (levelType) {
             // level/logback or any other log level
-
             this.activeFilterEditors.level = new LevelFilterDescription(['ERROR', 'WARN', 'INFO', 'DEBUG', 'TRACE'],
-                'level');
+                'level', uiLevels);
         }
 
         if (!logs.find(l => l.connected && !l.hasFullDate)) {

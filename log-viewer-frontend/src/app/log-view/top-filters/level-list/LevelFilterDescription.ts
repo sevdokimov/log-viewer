@@ -4,18 +4,29 @@ import {FieldValueSetPredicate, NotPredicate, Predicate} from '@app/log-view/pre
 export class LevelFilterDescription implements FilterFactory {
 
     private static levelGroups = [
-        ['ERROR', 'SEVERE', 'FATAL'],
+        ['OFF', 'FATAL', 'SEVERE', 'EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR'],
         ['WARN', 'WARNING'],
-        ['INFO'],
-        ['DEBUG', 'CONFIG'],
-        ['TRACE', 'FINE', 'FINER', 'FINEST'],
+        ['INFO', 'CONFIG', 'NOTICE', 'INFORMATIONAL'],
+        ['DEBUG', 'FINE', 'FINER'],
+        ['FINEST', 'TRACE', 'ALL'],
     ];
 
     private synonyms: {[key: string]: string[]} = {};
 
     constructor(public levels: string[],
                 public fieldType: string,
+                public levelGroups: Object
                 ) {
+        if (Object.keys(levelGroups).length > 0) {
+            for (const lg of Object.keys(levelGroups)) {
+                const ind = levelGroups[lg].group || -1;
+                if ((ind >= 0 && ind <= 4)
+                    && !LevelFilterDescription.levelGroups[ind].includes(lg)) {
+                    LevelFilterDescription.levelGroups[ind].push(lg);
+                }
+            }
+        }
+
         for (let l of levels) {
             let group = LevelFilterDescription.levelGroups.find(g => g.includes(l)) || [];
             this.synonyms[l] = group.filter(s => !levels.includes(s));
