@@ -32,6 +32,7 @@
             <outputDirectory/>
             <includes>
                 <include>config.conf</include>
+                <include>logback.xml</include>
             </includes>
             <fileMode>0644</fileMode>
         </fileSet>
@@ -40,13 +41,6 @@
             <filtered>true</filtered>
             <outputDirectory>etc</outputDirectory>
             <fileMode>0644</fileMode>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/bin</directory>
-            <outputDirectory>logs</outputDirectory>
-            <excludes>
-                <exclude>**/*</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>

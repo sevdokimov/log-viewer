@@ -5,14 +5,13 @@ Documentation=https://github.com/sevdokimov/log-viewer/tree/master/_docs
 [Service]
 Type=simple
 WorkingDirectory=/path/to/log-viewer/
-ExecStart=/bin/java -ea -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
+ExecStart=/bin/java -ea -Dlogback.configurationFile=./logback.xml -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
 Restart=on-failure
 RestartSec=1
 SuccessExitStatus=3 4
 RestartForceExitStatus=3 4
 SuccessExitStatus=143
-StandardOutput=file:/path/to/log-viewer/logs/log-viewer.log
-StandardError=file:/path/to/log-viewer/logs/error.log
+StandardOutput=null
 
 [Install]
 WantedBy=default.target
