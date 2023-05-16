@@ -37,7 +37,7 @@
             <fileMode>0644</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/bin/etc</directory>
+            <directory>${project.basedir}/etc</directory>
             <filtered>true</filtered>
             <outputDirectory>etc</outputDirectory>
             <fileMode>0644</fileMode>
