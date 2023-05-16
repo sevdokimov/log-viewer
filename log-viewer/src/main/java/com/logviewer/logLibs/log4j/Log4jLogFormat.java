@@ -1,7 +1,6 @@
 package com.logviewer.logLibs.log4j;
 
 import com.logviewer.data2.FieldTypes;
-import com.logviewer.data2.LogLevels;
 import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
 import com.logviewer.utils.Triple;
@@ -195,7 +194,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
 
             case "p":
             case "level":
-                return new LvLayoutFixedTextNode("level", (realLog4j ? FieldTypes.LEVEL_LOG4J : FieldTypes.LEVEL), LogLevels.getLevels());
+                return new LvLayoutFixedTextNode("level", (realLog4j ? FieldTypes.LEVEL_LOG4J : FieldTypes.LEVEL), allLogLevels());
 
             case "d":
             case "date": {

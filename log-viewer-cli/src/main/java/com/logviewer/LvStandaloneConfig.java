@@ -1,6 +1,9 @@
 package com.logviewer;
 
-import com.logviewer.api.*;
+import com.logviewer.api.LvFilterPanelStateProvider;
+import com.logviewer.api.LvFormatRecognizer;
+import com.logviewer.api.LvPathResolver;
+import com.logviewer.api.LvUiConfigurer;
 import com.logviewer.config.LvConfigBase;
 import com.logviewer.data2.FavoriteLogService;
 import com.logviewer.data2.FileFavoriteLogService;
@@ -8,7 +11,6 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.config.ConfigDirHolder;
 import com.logviewer.impl.LvHoconFilterPanelStateProvider;
 import com.logviewer.impl.LvPatternFormatRecognizer;
-import com.logviewer.data2.LogLevels;
 import com.logviewer.services.LvFileAccessManagerImpl;
 import com.logviewer.services.PathPattern;
 import com.logviewer.utils.Pair;
@@ -57,11 +59,6 @@ public class LvStandaloneConfig {
 
             return null;
         };
-    }
-
-    @Bean
-    public LogLevels hoconLogLevels() {
-        return new LogLevels(TypesafePropertySourceFactory.getHoconConfig());
     }
 
     @Bean

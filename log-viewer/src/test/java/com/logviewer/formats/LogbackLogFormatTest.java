@@ -22,10 +22,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -365,5 +362,16 @@ public class LogbackLogFormatTest extends AbstractLogTest {
         assertTrue(read.hasTime());
         assertTrue(read.getFieldText("date").matches("2007 янв.? 03.*")); // "2007 янв 03" in Java 8, "2007 янв. 03" in Java 17
         assertEquals(ts.toEpochMilli(), read.getTimeMillis());
+    }
+
+    @Test
+    public void customLevel() {
+        LogbackLogFormat format = new LogbackLogFormat("%d{yyyy-MM-dd_HH:mm:ss} [%level] %msg%n");
+        assertEquals(Collections.emptyList(), format.getCustomLevels());
+        format.addCustomLevels(Collections.singletonList("XXX"));
+        assertEquals(Collections.singletonList("XXX"), format.getCustomLevels());
+
+        LogRecord record = read(format, "2017-11-24 11:00:00 [XXX] foo");
+        assertEquals("XXX", record.getFieldText("level"));
     }
 }

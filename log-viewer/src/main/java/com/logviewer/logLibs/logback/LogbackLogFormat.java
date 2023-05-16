@@ -9,14 +9,11 @@ import ch.qos.logback.core.util.OptionHelper;
 import com.logviewer.data2.FieldTypes;
 import com.logviewer.formats.AbstractPatternLogFormat;
 import com.logviewer.formats.utils.*;
-import com.logviewer.data2.LogLevels;
-import org.slf4j.event.Level;
 import org.springframework.lang.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class LogbackLogFormat extends AbstractPatternLogFormat {
 
@@ -123,11 +120,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
                     case "p":
                     case "le":
                     case "level":
-                        return new LvLayoutFixedTextNode("level", FieldTypes.LEVEL_LOGBACK,
-                                Stream.concat(
-                                        Stream.of(Level.values()).map(Level::toString),
-                                        Stream.of(LogLevels.getLevels())
-                                ).distinct().toArray(String[]::new));
+                        return new LvLayoutFixedTextNode("level", FieldTypes.LEVEL_LOGBACK, allLogLevels());
 
                     case "nopex":
                     case "nopexception":
