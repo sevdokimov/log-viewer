@@ -27,7 +27,7 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/bin</directory>
+            <directory>${project.basedir}/conf</directory>
             <filtered>false</filtered>
             <outputDirectory/>
             <includes>
