@@ -1,0 +1,36 @@
+<configuration scan="true" debug="false">
+    <contextName>Log-viewer</contextName>
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+    <jmxConfigurator/>
+
+    <property name="DEFAULT_LOG_FORMAT"
+              value="%date{yyyy-MM-dd_HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/log-viewer.log</file>
+        <append>true</append>
+        <immediateFlush>true</immediateFlush>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/log-viewer.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>utf-8</charset>
+            <pattern>${DEFAULT_LOG_FORMAT}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <logger name="org.eclipse.jetty" level="WARN"/>
+
+    <logger name="org.springframework.beans.factory.support.DefaultListableBeanFactory" level="WARN" />
+    <logger name="org.springframework.context.annotation.AnnotationConfigApplicationContext" level="WARN" />
+    
+<!--    <logger name="com.logviewerr.data2.FileWatcherService" level="DEBUG"/>-->
+<!--    <logger name="com.logviewerr.web.session.LogChangeNotifier" level="DEBUG"/>-->
+<!--    <logger name="com.logviewerr.web.WebsocketEmulationController" level="DEBUG"/>-->
+
+</configuration>

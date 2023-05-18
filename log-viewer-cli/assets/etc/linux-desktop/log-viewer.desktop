@@ -3,7 +3,7 @@ Name=Start LogViewer
 GenericName=LogViewer
 Comment=LogViewer is a Web application for monitoring server logs in real-time in the browser.
 Path=/path/to/log-viewer/
-Exec=/bin/java -ea -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup >>logs/log-viewer.log 2>>logs/error.log
+Exec=java -ea -Dlogback.configurationFile=./logback.xml -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
 Icon=LogViewer
 Terminal=false
 Type=Application
