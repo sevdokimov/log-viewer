@@ -121,7 +121,7 @@ public class LogViewerMain {
 
             ServletHolder lvServlet = webAppCtx.addServlet(LogViewerServlet.class, servletPath);
             if (useWebSocket) {
-                ServerContainer websocketCtx = WebSocketServerContainerInitializer.configureContext(webAppCtx);
+                ServerContainer websocketCtx = WebSocketServerContainerInitializer.initialize(webAppCtx);
                 String wsPath = servletPath.replaceAll("/+\\**$", "") + "/ws";
                 websocketCtx.addEndpoint(ServerEndpointConfig.Builder.create(LogViewerWebsocket.class, wsPath).build());
 
