@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/path/to/log-viewer/
-ExecStart=/bin/java -ea -Dlogback.configurationFile=./logback.xml -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
+ExecStart=java -ea -Dlogback.configurationFile=./logback.xml -Dlog-viewer.config-file=config.conf -jar lib/log-viewer-cli-${project.version}.jar startup
 Restart=on-failure
 RestartSec=1
 SuccessExitStatus=3 4
