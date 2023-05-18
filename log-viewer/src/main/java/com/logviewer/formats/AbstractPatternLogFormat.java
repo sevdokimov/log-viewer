@@ -4,14 +4,26 @@ import com.logviewer.data2.LogFormat;
 import com.logviewer.data2.LogReader;
 import com.logviewer.formats.utils.LvLayoutNode;
 import com.logviewer.formats.utils.LvLayoutStretchNode;
+import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Stream;
 
 public abstract class AbstractPatternLogFormat implements LogFormat {
+
+    /**
+     * See org.apache.log4j.lf5.LogLevel, org.apache.log4j.Level, org.slf4j.event.Level, https://en.wikipedia.org/wiki/Syslog
+     */
+    private static final String[] LEVELS = {
+            "OFF", "FATAL", "SEVERE", "EMERGENCY", "ALERT", "CRITICAL", "ERROR",
+            "WARN", "WARNING",
+            "INFO", "CONFIG", "NOTICE", "INFORMATIONAL",
+            "DEBUG", "FINE", "FINER",
+            "FINEST", "TRACE", "ALL",
+    };
 
     protected static final String SOURCE_FILE_PATTERN = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*\\.[a-z]{1,5}";
 
@@ -22,6 +34,8 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
     private Locale locale;
 
     private final String pattern;
+
+    private List<String> customLevels = new ArrayList<>();
 
     private transient volatile DefaultFieldSet fieldSet;
 
@@ -62,6 +76,37 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     public String getPattern() {
         return pattern;
+    }
+
+    public List<String> getCustomLevels() {
+        if (customLevels == null)
+            return Collections.emptyList();
+
+        return Collections.unmodifiableList(customLevels);
+    }
+
+    protected String[] allLogLevels() {
+        return Stream.concat(Stream.of(LEVELS), getCustomLevels().stream())
+                .distinct()
+                .toArray(String[]::new);
+    }
+
+    public AbstractPatternLogFormat addCustomLevels(@Nullable List<String> customLevels) {
+        if (customLevels != null) {
+            if (this.customLevels == null)
+                this.customLevels = new ArrayList<>();
+
+            this.customLevels.addAll(customLevels);
+        }
+
+        return this;
+    }
+
+    @Override
+    public void loadGlobalConfig(Environment env) {
+        String[] customLevels = env.getProperty("log-viewer.log-levels", String[].class);
+        if (customLevels != null)
+            addCustomLevels(Arrays.asList(customLevels));
     }
 
     @Override

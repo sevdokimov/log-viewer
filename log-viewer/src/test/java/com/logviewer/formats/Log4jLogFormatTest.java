@@ -3,10 +3,7 @@ package com.logviewer.formats;
 import com.google.common.collect.ImmutableMap;
 import com.logviewer.AbstractLogTest;
 import com.logviewer.TestUtils;
-import com.logviewer.data2.BufferedFile;
-import com.logviewer.data2.LogFormat;
-import com.logviewer.data2.LogReader;
-import com.logviewer.data2.LogRecord;
+import com.logviewer.data2.*;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.logback.LogbackLogFormat;
 import com.logviewer.utils.LvDateUtils;
@@ -314,6 +311,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 "  \"realLog4j\": false,\n" +
                 "  \"charset\": \"ISO-8859-1\",\n" +
                 "  \"locale\": \"ru_RU\",\n" +
+                "  \"customLevels\": [\"XXX\", \"YYY\"],\n" +
                 "  \"pattern\": \"%d{yyyy-MM-dd HH:mm:ss Z} %m%n\"\n" +
                 "}\n";
 
@@ -323,6 +321,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         assertEquals(false, logFormat.isRealLog4j());
         assertEquals(new Locale("ru", "RU"), logFormat.getLocale());
         assertEquals("%d{yyyy-MM-dd HH:mm:ss Z} %m%n", logFormat.getPattern());
+        assertEquals(Arrays.asList("XXX", "YYY"), logFormat.getCustomLevels());
 
         String json2 = LvGsonUtils.GSON.toJson(logFormat, LogFormat.class);
 
@@ -337,4 +336,25 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         assertEquals(json2, LvGsonUtils.GSON.toJson(LvGsonUtils.copy(logFormat2), LogFormat.class));
     }
 
+    @Test
+    public void customLevel() {
+        Log4jLogFormat format = new Log4jLogFormat("%d{yyyy-MM-dd_HH:mm:ss} [%level] %msg%n");
+        format.addCustomLevels(Collections.singletonList("XXX"));
+
+        LogRecord record = read(format, "2017-11-24_11:00:00 [XXX] foo");
+        assertEquals("XXX", record.getFieldText("level"));
+    }
+
+    @Test
+    public void customLevelFromGlobalConfig() {
+        TestUtils.withSystemProp("log-viewer.log-levels", "XXX,YYY", () -> {
+            Log log = getLogService().openLog(getTestLog("format-detection/level-date.log"));
+            AbstractPatternLogFormat format = (AbstractPatternLogFormat) log.getFormat();
+            assertEquals(Arrays.asList("XXX", "YYY"), format.getCustomLevels());
+        });
+
+        Log log = getLogService().openLog(getTestLog("format-detection/level-date.log"));
+        AbstractPatternLogFormat format = (AbstractPatternLogFormat) log.getFormat();
+        assertEquals(Collections.emptyList(), format.getCustomLevels());
+    }
 }

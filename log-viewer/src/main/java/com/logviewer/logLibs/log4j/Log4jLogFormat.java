@@ -12,11 +12,6 @@ import java.util.regex.Pattern;
 
 public class Log4jLogFormat extends AbstractPatternLogFormat {
 
-    // See org.apache.log4j.lf5.LogLevel, org.apache.log4j.Level
-    private static final String[] LEVELS = {"OFF", "FATAL", "ERROR", "WARN", "INFO",
-            "DEBUG", "SEVERE", "TRACE", "ALL", "WARNING", "CONFIG", "FINE", "FINER", "FINEST"
-    };
-
     private static final Pattern LOCATION_PATTERN = Pattern.compile("" +
             "(?:\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*\\.)*\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*" +
             "\\." +
@@ -199,7 +194,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
 
             case "p":
             case "level":
-                return new LvLayoutFixedTextNode("level", (realLog4j ? FieldTypes.LEVEL_LOG4J : FieldTypes.LEVEL), LEVELS);
+                return new LvLayoutFixedTextNode("level", (realLog4j ? FieldTypes.LEVEL_LOG4J : FieldTypes.LEVEL), allLogLevels());
 
             case "d":
             case "date": {

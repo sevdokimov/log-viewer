@@ -1,5 +1,6 @@
 package com.logviewer.data2;
 
+import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -41,6 +42,10 @@ public interface LogFormat {
     void validate() throws IllegalArgumentException;
 
     String getHumanReadableString();
+
+    default void loadGlobalConfig(@NonNull Environment env) {
+
+    }
 
     interface FieldDescriptor {
         FieldDescriptor[] EMPTY_ARRAY = new FieldDescriptor[0];

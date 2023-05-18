@@ -69,7 +69,7 @@ public class LvPatternFormatRecognizer implements LvFormatRecognizer {
                         logFormat.validate();
                     } catch (Exception e) {
                         throw new IllegalArgumentException("Invalid configuration [line=" + filterObj.origin().lineNumber() +
-                                "]: invalid log format: " + e.getMessage());
+                                "]: invalid log format: " + e.getMessage(), e);
                     }
                 }
 

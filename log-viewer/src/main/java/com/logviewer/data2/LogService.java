@@ -15,6 +15,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -46,6 +47,8 @@ public class LogService implements InitializingBean, DisposableBean {
     private RemoteNodeService remoteNodeService;
     @Autowired
     private LvFileAccessManager accessManager;
+    @Autowired
+    private Environment environment;
     @Autowired
     private RemoteLogChangeListenerService remoteLogChangeListenerService;
     @Autowired
@@ -102,14 +105,24 @@ public class LogService implements InitializingBean, DisposableBean {
         if (!accessManager.isFileVisible(path))
             return null;
 
-        for (LvFormatRecognizer formatRecognizer : formatRecognizers) {
-            LogFormat formatName = formatRecognizer.getFormat(path);
+        LogFormat format = null;
 
-            if (formatName != null)
-                return formatName;
+        for (LvFormatRecognizer formatRecognizer : formatRecognizers) {
+            format = formatRecognizer.getFormat(path);
+
+            if (format != null) {
+                format = LvGsonUtils.copy(format);
+                break;
+            }
         }
 
-        return LvDefaultFormatDetector.detectFormat(path);
+        if (format == null)
+            format = LvDefaultFormatDetector.detectFormat(path);
+
+        if (format != null)
+            format.loadGlobalConfig(environment);
+
+        return format;
     }
 
     @NonNull

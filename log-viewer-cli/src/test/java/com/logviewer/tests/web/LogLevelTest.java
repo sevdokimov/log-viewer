@@ -90,17 +90,17 @@ public class LogLevelTest extends AbstractWebTestCase {
         // INFO
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setLevel("INFO"));
         openLog("level-logback.log", "level-log4j.log", "level-java.log");
-        waitFor(() -> getVisibleRecords().matches(".+INFO.+\n.+INFO.+\n.+INFO.+"));
+        waitFor(() -> getVisibleRecords().matches(".+CONFIG.+\n.+INFO.+\n.+INFO.+\n.+INFO.+"));
 
         // DEBUG
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setLevel("DEBUG"));
         openLog("level-logback.log", "level-log4j.log", "level-java.log");
-        waitFor(() -> getVisibleRecords().matches(".+DEBUG.+\n.+CONFIG.+\n.+DEBUG.+"));
+        waitFor(() -> getVisibleRecords().matches(".+DEBUG.+\n.+FINER.+\n.+FINE.+\n.+DEBUG.+"));
 
         // TRACE
         ctx.getBean(TestFilterPanelState.class).addFilterSet("default", new FilterPanelState().setLevel("TRACE"));
         openLog("level-logback.log", "level-log4j.log", "level-java.log");
-        waitFor(() -> getVisibleRecords().matches(".+TRACE.+\n.+FINEST.+\n.+FINER.+\n.+FINE.+\n.+TRACE.+"));
+        waitFor(() -> getVisibleRecords().matches(".+TRACE.+\n.+FINEST.+\n.+TRACE.+"));
 
         // Test filter items
         driver.findElement(By.cssSelector("lv-level-list > div > span")).click();
