@@ -304,6 +304,7 @@ public class LogViewerMain {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().unwrapped().toString()));
 
         props.put("contextFactory", LogViewerMain.CONTEXT_FACTORY);
+        LOG.debug("ldapParams: {}", props);
 
         AppConfigurationEntry[] entries = {
                 new AppConfigurationEntry(
