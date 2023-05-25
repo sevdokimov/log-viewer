@@ -64,6 +64,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
         }
 
         if (logs.length == 0) {
+            finished = true;
             consumer.accept(new LoadNextResponse(Collections.emptyList(), statuses, true), null);
             return;
         }
@@ -73,7 +74,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
             LogProcess loader = log.loadRecords(filter, recordCount,
                     start, backward, hash, MAX_BATCH_SIZE,
-                    new MyLogDataListener(log, logs, consumer));
+                    new MyLogDataListener(log, consumer));
 
             loaders.put(log, loader);
         }
@@ -124,12 +125,10 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
     protected class MyLogDataListener implements LogDataListener {
         private final LogView log;
-        private final LogView[] logs;
         private final BiConsumer<LoadNextResponse, Throwable> consumer;
 
-        public MyLogDataListener(LogView log, LogView[] logs, BiConsumer<LoadNextResponse, Throwable> consumer) {
+        public MyLogDataListener(LogView log, BiConsumer<LoadNextResponse, Throwable> consumer) {
             this.log = log;
-            this.logs = logs;
             this.consumer = consumer;
         }
 
@@ -142,7 +141,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
                 LogRecord oldLastRecord = data.size() == recordCount ? data.get(recordCount - 1).getFirst() : null;
 
-                if (logs.length > 1) {
+                if (loaders.size() > 1) {
                     for (Pair<LogRecord, Throwable> newRecord : newRecords) {
                         if (newRecord.getFirst().hasTime()) // Ignore records without time on log merging
                             data.add(newRecord);
@@ -181,7 +180,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
                 if (status.getError() == null)
                     LoadRecordTask.this.eof &= eof;
 
-                if (statuses.size() == logs.length)
+                if (statuses.size() == loaders.size())
                     finished = true;
             }
 
