@@ -5,6 +5,8 @@ import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
 import com.logviewer.utils.PredicateUtils;
 import com.logviewer.web.session.tasks.SearchPattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -15,6 +17,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class LocalFileRecordSearcher implements LogProcess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LocalFileRecordSearcher.class);
 
     private final Supplier<Snapshot> snapshotFactory;
 
@@ -137,6 +141,8 @@ public class LocalFileRecordSearcher implements LogProcess {
                 } catch (Throwable e) {
                     listener.accept(new SearchResult(e));
                 }
+            } catch (Throwable e) {
+                LOG.error("Failed to load records", e);
             }
         });
 
