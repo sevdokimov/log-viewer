@@ -24,7 +24,7 @@ public class LocalFileRecordLoader implements LogProcess {
     private final Position start;
 
     private final RecordPredicate filter;
-    private final Long timeLimitFomFilter;
+    private final Long timeLimitFromFilter;
     private final int recordCountLimit;
     private final boolean backward;
 
@@ -52,7 +52,7 @@ public class LocalFileRecordLoader implements LogProcess {
         this.sizeLimit = sizeLimit;
         this.hash = hash;
 
-        timeLimitFomFilter = PredicateUtils.extractTimeLimit(filter, !backward);
+        timeLimitFromFilter = PredicateUtils.extractTimeLimit(filter, !backward);
     }
 
     @Override
@@ -221,8 +221,8 @@ public class LocalFileRecordLoader implements LogProcess {
 
         @Override
         public boolean test(LogRecord record) {
-            if (timeLimitFomFilter != null && record.hasTime()) {
-                if (backward ? record.getTime() < timeLimitFomFilter : record.getTime() > timeLimitFomFilter) {
+            if (timeLimitFromFilter != null && record.hasTime()) {
+                if (backward ? record.getTime() < timeLimitFromFilter : record.getTime() > timeLimitFromFilter) {
                     stoppedByFilterTimeLimit = true;
                     return false;
                 }
