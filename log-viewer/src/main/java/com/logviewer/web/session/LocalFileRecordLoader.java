@@ -4,6 +4,8 @@ import com.logviewer.data2.*;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
 import com.logviewer.utils.PredicateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -15,6 +17,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class LocalFileRecordLoader implements LogProcess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LocalFileRecordLoader.class);
+
     private final Supplier<Snapshot> snapshotFactory;
 
     private final ExecutorService executor;
@@ -95,6 +100,8 @@ public class LocalFileRecordLoader implements LogProcess {
                 }
 
                 listener.onFinish(status, processedAllLined);
+            } catch (Throwable e) {
+                LOG.error("Failed to load records", e);
             }
         });
 
