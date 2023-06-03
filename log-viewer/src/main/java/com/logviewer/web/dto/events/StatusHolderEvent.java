@@ -17,7 +17,7 @@ public abstract class StatusHolderEvent extends BackendEvent {
         for (Map.Entry<String, Status> entry : statuses.entrySet()) {
             this.statuses.put(entry.getKey(), new RestStatus(entry.getValue()));
         }
-        
+
         this.stateVersion = stateVersion;
     }
 }

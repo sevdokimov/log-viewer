@@ -81,18 +81,16 @@ public class RemoteLog implements LogView {
         return new RemoteLogProcess<>(new RecordLoaderRemoteTask(path.getFile(), serializedFormat, start, backward, hash,
                 LvGsonUtils.GSON.toJson(filter, RecordPredicate.class), recordCount, sizeLimit), (o, error) -> {
             if (error != null) {
-                listener.onFinish(new Status(error), true);
+                listener.onFinish(new Status(error));
                 return;
             }
 
             if (o instanceof RecordList) {
                 listener.onData((RecordList) o);
-            } else if (o instanceof Pair) {
-                Pair<Status, Boolean> pair = (Pair<Status, Boolean>) o;
-
-                listener.onFinish(pair.getFirst(), pair.getSecond());
+            } else if (o instanceof Status) {
+                listener.onFinish((Status) o);
             } else if (o instanceof Throwable) {
-                listener.onFinish(new Status((Throwable) o), false);
+                listener.onFinish(new Status((Throwable) o));
             } else {
                 LOG.error("Unexpected message {}", o);
             }

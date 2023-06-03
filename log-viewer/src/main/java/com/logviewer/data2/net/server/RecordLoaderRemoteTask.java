@@ -7,7 +7,6 @@ import com.logviewer.data2.RecordList;
 import com.logviewer.data2.net.server.api.RemoteTaskContext;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.LvGsonUtils;
-import com.logviewer.utils.Pair;
 import com.logviewer.web.session.LogDataListener;
 import com.logviewer.web.session.LogProcess;
 import com.logviewer.web.session.Status;
@@ -48,8 +47,8 @@ public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
             }
 
             @Override
-            public void onFinish(@NonNull Status status, boolean eof) {
-                ctx.sendAndCloseChannel(Pair.of(status, eof));
+            public void onFinish(@NonNull Status status) {
+                ctx.sendAndCloseChannel(status);
             }
         });
     }

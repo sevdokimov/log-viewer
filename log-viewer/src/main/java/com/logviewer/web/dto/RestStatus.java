@@ -35,11 +35,20 @@ public class RestStatus {
     private long size;
     private long lastModification;
 
+    private long lastRecordOffset;
+    private long firstRecordOffset;
+    private int flags;
+
     public RestStatus(Status status) {
         if (status.getHash() != null) {
             this.hash = status.getHash();
             this.size = status.getSize();
             this.lastModification = status.getLastModification();
+
+            this.lastRecordOffset = status.getLastRecordOffset();
+            this.firstRecordOffset = status.getFirstRecordOffset();
+            
+            this.flags = status.getFlags();
         }
         else {
             Throwable exception = status.getError();
@@ -104,5 +113,13 @@ public class RestStatus {
 
     public long getSize() {
         return size;
+    }
+
+    public long getLastRecordOffset() {
+        return lastRecordOffset;
+    }
+
+    public int getFlags() {
+        return flags;
     }
 }

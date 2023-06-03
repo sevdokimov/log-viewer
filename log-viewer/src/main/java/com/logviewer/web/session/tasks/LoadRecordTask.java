@@ -36,7 +36,9 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
     protected final Map<String, Status> statuses = new HashMap<>();
     protected final List<Pair<LogRecord, Throwable>> data = new ArrayList<>();
-    protected boolean eof = true;
+
+    protected final Map<String, LogRecord> overLimitRecords = new HashMap<>();
+
     protected boolean finished;
 
     public LoadRecordTask(@NonNull SessionAdapter sender, @NonNull LogView[] logs, int recordCount, RecordPredicate filter,
@@ -65,7 +67,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
         if (logs.length == 0) {
             finished = true;
-            consumer.accept(new LoadNextResponse(Collections.emptyList(), statuses, true), null);
+            consumer.accept(new LoadNextResponse(Collections.emptyList(), Collections.emptyMap()), null);
             return;
         }
         
@@ -153,7 +155,11 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
                 }
 
                 if (data.size() > recordCount) {
-                    eof = false;
+                    for (int i = recordCount; i < data.size(); i++) {
+                        Pair<LogRecord, Throwable> pair = data.get(i);
+                        overLimitRecords.putIfAbsent(pair.getFirst().getLogId(), pair.getFirst());
+                    }
+
                     do {
                         data.remove(data.size() - 1);
                     } while (data.size() > recordCount);
@@ -170,15 +176,12 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
         }
 
         @Override
-        public void onFinish(@NonNull Status status, boolean eof) {
+        public void onFinish(@NonNull Status status) {
             synchronized (LoadRecordTask.this) {
                 if (finished)
                     return;
 
                 statuses.put(log.getId(), status);
-
-                if (status.getError() == null)
-                    LoadRecordTask.this.eof &= eof;
 
                 if (statuses.size() == loaders.size())
                     finished = true;
@@ -187,7 +190,27 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
             if (finished) {
                 if (backward)
                     Collections.reverse(data);
-                consumer.accept(new LoadNextResponse(data, statuses, LoadRecordTask.this.eof), null);
+
+                for (Map.Entry<String, Status> entry : statuses.entrySet()) {
+                    Status s = entry.getValue();
+                    String logId = entry.getKey();
+
+                    if (s.getError() != null)
+                        continue;
+
+                    LogRecord outOfResult = overLimitRecords.get(logId);
+                    if (outOfResult != null) {
+                        assert backward
+                                ? s.getLastRecordOffset() <= outOfResult.getStart()
+                                : s.getLastRecordOffset() >= outOfResult.getStart();
+
+                        entry.setValue(new Status(s,
+                                outOfResult.getStart(), false, false, true,
+                                s.getFirstRecordOffset(), (s.getFlags() & Status.FLAG_FIRST_RECORD_FILTER_MATCH) != 0));
+                    }
+                }
+
+                consumer.accept(new LoadNextResponse(data, statuses), null);
             }
         }
     }

@@ -6,5 +6,5 @@ import org.springframework.lang.NonNull;
 public interface LogDataListener {
     void onData(@NonNull RecordList data);
 
-    void onFinish(@NonNull Status status, boolean eof);
+    void onFinish(@NonNull Status status);
 }

@@ -77,8 +77,6 @@ public class LocalFileRecordSearcher implements LogProcess {
 
                     Predicate<String> matcher = pattern.matcher();
 
-                    final Status status = new Status(snapshot);
-
                     LvPredicateChecker predicateChecker = new LvPredicateChecker(snapshot.getLog());
 
                     Predicate<LogRecord> predicate = record -> {
@@ -137,6 +135,7 @@ public class LocalFileRecordSearcher implements LogProcess {
                         }
                     }
 
+                    Status status = new Status(snapshot, -1, false, false, true, -1, false);
                     listener.accept(new SearchResult(new RecordList(queue), status, hasSkippedLined[0], found[0]));
                 } catch (Throwable e) {
                     listener.accept(new SearchResult(e));

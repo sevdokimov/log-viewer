@@ -8,6 +8,7 @@ import com.logviewer.web.dto.events.DataHolderEvent;
 import com.logviewer.web.dto.events.EventSearchResponse;
 import com.logviewer.web.dto.events.StatusHolderEvent;
 import com.logviewer.web.session.SessionAdapter;
+import com.logviewer.web.session.Status;
 import org.junit.Assert;
 import org.springframework.lang.NonNull;
 
@@ -142,20 +143,28 @@ public class TestSessionAdapter implements SessionAdapter {
         return event -> TestUtils.checkOrder(event.data.records, Comparator.comparing(RestRecord::getText));
     }
 
-    public static Consumer<DataHolderEvent> hasNext() {
+    public static Consumer<StatusHolderEvent> hasNext() {
         return hasNext(true);
     }
 
-    public static Consumer<DataHolderEvent> hasNext(boolean hasNext) {
+    public static Consumer<StatusHolderEvent> hasNext(boolean hasNext) {
         return event -> {
-            assert event.data.hasNextLine == hasNext;
+            assertHasNextLine(event, hasNext);
         };
+    }
+
+    public static void assertHasNextLine(StatusHolderEvent event, boolean hasNext) {
+        if (hasNext) {
+            assert event.statuses.values().stream().anyMatch(s -> (s.getFlags() & Status.FLAG_EOF) == 0);
+        } else {
+            assert event.statuses.values().stream().allMatch(s -> (s.getFlags() & Status.FLAG_EOF) != 0);
+        }
     }
 
     public static Consumer<DataHolderEvent> records(boolean hasNextLine, String ... expectedRecords) {
         return event -> {
             TestUtils.check(event.data.records, expectedRecords);
-            Assert.assertEquals(hasNextLine, event.data.hasNextLine);
+            assertHasNextLine(event, hasNextLine);
         };
     }
 }

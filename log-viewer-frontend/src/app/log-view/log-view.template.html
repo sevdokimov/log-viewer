@@ -149,11 +149,11 @@
             <div #records id="records" (click)="clickRecord($event)" (contextmenu)="contextMenu($event)"></div>
         </div>
 
-        <div *ngIf="hasRecordAfter" id="loading-progress-bottom">
+        <div *ngIf="bottomBorder.hasNextLines" id="loading-progress-bottom">
             <img src="img/loader13.gif" alt="loading...">
         </div>
 
-        <div *ngIf="!hasRecordAfter && (hasRecordBefore || m.length > 0)" class="log-end"> ---------------- end
+        <div *ngIf="!bottomBorder.hasNextLines && (topBorder.hasNextLines || m.length > 0)" class="log-end"> ---------------- end
             ------------------------------- end ------------------------------- end -------------------------------
             end ------------------------------- end ------------------------------- end
             ------------------------------- end ------------------------------- end -------------------------------
@@ -175,7 +175,7 @@
         </div>
     </div>
 
-    <div *ngIf="logs && state === 0 && (!hasRecordAfter && !hasRecordBefore && m.length === 0 || vs.filesValidCount === 0)" class="empty-log-message-container">
+    <div *ngIf="logs && state === 0 && (!bottomBorder.hasNextLines && !topBorder.hasNextLines && m.length === 0 || vs.filesValidCount === 0)" class="empty-log-message-container">
         <div *ngIf="logs.length === 0" class="empty-log-message-container">
             <div id="no-log-paths" class="empty-log-message" style="font-size: 24px;">
                 Log path is not specified. You can select log in <a href="javascript:void(0)" [routerLink]="['/']">file browser</a>

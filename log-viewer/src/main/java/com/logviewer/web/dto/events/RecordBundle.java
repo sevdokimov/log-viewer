@@ -9,10 +9,7 @@ public class RecordBundle {
 
     public final List<RestRecord> records;
 
-    public final boolean hasNextLine;
-
     public RecordBundle(LoadNextResponse data) {
         records = RestRecord.fromPairList(data.getData());
-        hasNextLine = data.hasNextLine();
     }
 }

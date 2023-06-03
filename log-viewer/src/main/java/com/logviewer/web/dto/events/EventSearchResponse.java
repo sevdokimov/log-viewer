@@ -1,11 +1,14 @@
 package com.logviewer.web.dto.events;
 
 import com.logviewer.web.dto.RestRecord;
+import com.logviewer.web.session.Status;
 import com.logviewer.web.session.tasks.LoadNextResponse;
 import com.logviewer.web.session.tasks.SearchTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EventSearchResponse extends StatusHolderEvent {
 
@@ -13,7 +16,6 @@ public class EventSearchResponse extends StatusHolderEvent {
     public final long foundIdx;
     public final boolean hasSkippedLine;
     public final long requestId;
-    public final boolean hasNextLine;
 
     public EventSearchResponse(SearchTask.SearchResponse res, long stateVersion, long requestId, long foundIdx) {
         super(res.getStatuses(), stateVersion);
@@ -22,7 +24,6 @@ public class EventSearchResponse extends StatusHolderEvent {
         this.foundIdx = foundIdx;
         hasSkippedLine = res.hasSkippedLine();
         this.requestId = requestId;
-        hasNextLine = true;
     }
 
     public EventSearchResponse(SearchTask.SearchResponse res, long stateVersion, long requestId) {
@@ -30,7 +31,7 @@ public class EventSearchResponse extends StatusHolderEvent {
     }
 
     public EventSearchResponse(SearchTask.SearchResponse combRes, LoadNextResponse loadRes, long stateVersion, long requestId, boolean backward) {
-        super(combRes.getStatuses(), stateVersion);
+        super(combineStatuses(combRes, loadRes), stateVersion);
 
         this.requestId = requestId;
         hasSkippedLine = combRes.hasSkippedLine();
@@ -51,8 +52,22 @@ public class EventSearchResponse extends StatusHolderEvent {
 
             foundIdx = beforeOccurrence.size() - 1;
         }
+    }
 
-        hasNextLine = loadRes.hasNextLine();
+    private static Map<String, Status> combineStatuses(SearchTask.SearchResponse combRes, LoadNextResponse loadRes) {
+        Map<String, Status> res = new HashMap<>();
+
+        for (Map.Entry<String, Status> entry : combRes.getStatuses().entrySet()) {
+            if (entry.getValue().getError() != null) {
+                res.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        for (Map.Entry<String, Status> entry : loadRes.getStatuses().entrySet()) {
+            res.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+
+        return res;
     }
 
     @Override

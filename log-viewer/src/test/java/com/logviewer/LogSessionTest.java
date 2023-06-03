@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.logviewer.utils.TestSessionAdapter.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class LogSessionTest extends LogSessionTestBase {
 
@@ -217,15 +217,15 @@ public class LogSessionTest extends LogSessionTestBase {
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(true, "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
                 "150101 10:00:05 a", "150101 10:00:06 a"),
-                res -> assertFalse(res.hasNextLine),
-                res -> assertEquals(3, res.foundIdx));
+                res -> assertEquals(3, res.foundIdx),
+                hasNext(false));
 
         // load records after found line (backward)
         session.searchNext(new Position("z.log", TestUtils.date(0, 10), 0), true, 4, new SearchPattern("10:00:04 b"), hashes, 2, 9, true);
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(false, "150101 10:00:01 xxx b", "150101 10:00:02 xxx a", "150101 10:00:03 a", "150101 10:00:03 a", "150101 10:00:04 b",
                         "150101 10:00:05 a", "150101 10:00:06 a"),
-                res -> assertTrue(res.hasNextLine),
+                hasNext(true),
                 res -> assertEquals(4, res.foundIdx));
 
         // load records after found line (waiting)
@@ -235,14 +235,14 @@ public class LogSessionTest extends LogSessionTestBase {
         session.searchNext(new Position("z.log", TestUtils.date(0, 1), 0), false, 5, new SearchPattern("150101 10:00:03 a"), hashes, 2, 8, true);
         adapter.check(EventSearchResponse.class, stateVersion(2),
                 searchResult(false, "150101 10:00:02 xxx a", "150101 10:00:03 a"),
-                res -> assertTrue(res.hasNextLine),
+                hasNext(true),
                 res -> assertEquals(1, res.foundIdx));
 
         TestPredicate.unlock(lock);
 
         adapter.check(EventNextDataLoaded.class, resp -> {
             TestUtils.check(resp.data.records, "150101 10:00:03 a", "150101 10:00:04 b", "150101 10:00:05 a", "150101 10:00:06 a");
-            assertFalse(resp.data.hasNextLine);
+            assertHasNextLine(resp, false);
         });
     }
 

@@ -47,6 +47,7 @@ import {ContextMenuComponent, ContextMenuService} from '@perfectmemory/ngx-conte
 import {ContextMenuHandler} from '@app/log-view/context-menu';
 import {LogPathUtils} from '@app/utils/log-path-utills';
 import {OpenEvent} from '@app/log-navigator/log-navigator.component';
+import {Border} from '@app/log-view/border';
 
 @Component({
     selector: 'lv-log-view',
@@ -87,8 +88,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     readonly m: Record[] = [];
 
-    hasRecordBefore: boolean = true;
-    hasRecordAfter: boolean = true;
+    topBorder: Border = new Border()
+    bottomBorder: Border = new Border()
 
     shiftView: number = 0;
 
@@ -294,7 +295,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private loadRecordsIfNeededTop() {
-        if (!this.hasRecordBefore) {
+        if (!this.topBorder.hasNextLines) {
             if (this.shiftView < 0) {
                 this.shiftView = 0;
                 return;
@@ -316,13 +317,13 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
             if (i > 0) {
                 this.shiftView -= deletedPixels;
-                this.deleteRecords(0, i);
-                this.hasRecordBefore = true;
+                let deleted = this.deleteRecords(0, i);
+                this.topBorder.onDeleteRecords(deleted, false);
             }
             return;
         }
 
-        if (this.hasRecordBefore && this.shiftView < this.spareDataOutsizeViewBorder()) {
+        if (this.topBorder.hasNextLines && this.shiftView < this.spareDataOutsizeViewBorder()) {
             let neededRecords = Math.ceil((this.spareDataOutsizeViewBorder() - this.shiftView) / LogViewComponent.lineHeight);
             neededRecords = Math.max(neededRecords, Math.ceil(this.recordCountToLoad() / 3));
 
@@ -365,14 +366,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
 
             if (i > 0) {
-                this.deleteRecords(children.length - i, i);
-                this.hasRecordAfter = true;
+                let deleted = this.deleteRecords(children.length - i, i);
+                this.topBorder.onDeleteRecords(deleted, true);
             }
 
             return;
         }
 
-        if (this.hasRecordAfter && spareDateBottom < this.spareDataOutsizeViewBorder()) {
+        if (this.bottomBorder.hasNextLines && spareDateBottom < this.spareDataOutsizeViewBorder()) {
             this.requestNextRecords();
         }
     }
@@ -456,7 +457,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.shiftView += offset;
 
-        if (!this.hasRecordAfter
+        if (!this.bottomBorder.hasNextLines
             && logViewHeight - this.shiftView < this.logPane.nativeElement.clientHeight - LogViewComponent.lineHeight * 2 + 1) {
             let newVisibleHeight = this.getPageHeight() - LogViewComponent.lineHeight;
 
@@ -467,7 +468,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     scrollBegin() {
-        if (!this.hasRecordBefore) {
+        if (!this.topBorder.hasNextLines) {
             this.shiftView = 0;
         } else {
             this.cleanAndScrollToEdge(this.recordCountToLoad(), true);
@@ -479,7 +480,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private scrollEnd() {
-        if (!this.hasRecordAfter) {
+        if (!this.bottomBorder.hasNextLines) {
             this.moveLastRecordToBottom();
             this.loadRecordsIfNeeded();
         } else {
@@ -734,14 +735,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         let start: Position;
 
         if (d > 0) {
-            if (!this.hasRecordAfter) {
+            if (!this.bottomBorder.hasNextLines) {
                 this.showNotFoundMessage(d);
                 return;
             }
 
             start = Position.recordEnd(this.m[this.m.length - 1]);
         } else {
-            if (!this.hasRecordBefore) {
+            if (!this.topBorder.hasNextLines) {
                 this.showNotFoundMessage(d);
                 return;
             }
@@ -903,7 +904,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.incrementStateVersion();
 
         let backwardOnly =
-            !this.hasRecordAfter &&
+            !this.bottomBorder.hasNextLines &&
             !Position.containPosition(this.vs.selectedLine, this.m[mainRecordIdx]) &&
             this.getLogViewHeight() - this.shiftView <
             this.logPane.nativeElement.clientHeight;
@@ -1041,8 +1042,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     private cleanAndScrollToEdge(recordCountToLoad: number = this.recordCountToLoad(), isScrollToBegin: boolean = false) {
         this.shiftView = 0;
-        this.hasRecordBefore = !isScrollToBegin;
-        this.hasRecordAfter = isScrollToBegin;
+        if (isScrollToBegin) {
+
+        }
+        this.topBorder = new Border();
+        this.bottomBorder = new Border();
+
+        (isScrollToBegin ? this.topBorder : this.bottomBorder).hasNextLines = false;
+
         this.clearRecords();
 
         this.state = State.STATE_LOADING;
@@ -1143,9 +1150,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         LvUtils.clearElement(this.records.nativeElement);
     }
 
-    private deleteRecords(idx: number, count: number) {
+    private deleteRecords(idx: number, count: number): Record[] {
         LvUtils.assert(idx >= 0 && idx + count <= this.m.length);
-        this.m.splice(idx, count);
+        let removed = this.m.splice(idx, count);
 
         let parentDiv = <HTMLDivElement>this.records.nativeElement;
         for (let i = 0; i < count; i++) {
@@ -1155,6 +1162,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         LvUtils.assert(
             this.m.length === this.records.nativeElement.childElementCount
         );
+
+        return removed;
     }
 
     private addRecords(m: Record[], idx?: number) {
@@ -1226,12 +1235,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.addRecords(m);
 
         if (event.isScrollToBegin) {
-            this.hasRecordBefore = false;
-            this.hasRecordAfter = event.data.hasNextLine;
+            this.topBorder = Border.createTopBorder(Object.keys(this.vs.hashes));
+            this.bottomBorder = new Border(event);
             this.shiftView = 0;
         } else {
-            this.hasRecordAfter = false;
-            this.hasRecordBefore = event.data.hasNextLine;
+            this.bottomBorder = Border.createBottomBorderBorder(event, true);
+            this.topBorder = new Border(event);
             this.moveLastRecordToBottom();
         }
 
@@ -1259,7 +1268,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 return;
             }
 
-            this.hasRecordBefore = event.data.hasNextLine;
+            this.topBorder = new Border(event);
 
             if (m.length > 0) {
                 this.addRecords(m, 0);
@@ -1275,7 +1284,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 return;
             }
 
-            this.hasRecordAfter = event.data.hasNextLine;
+            this.bottomBorder = new Border(event);
 
             if (m.length > 0) {
                 if (this.m.length > 0 &&
@@ -1344,17 +1353,17 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 this.addRecords(data);
             }
         } else {
-            this.hasRecordAfter = true;
-            this.hasRecordBefore = true;
+            this.topBorder = new Border();
+            this.bottomBorder = new Border();
 
             this.clearRecords();
             this.addRecords(data);
         }
 
         if (req.d < 0) { // is backward search
-            this.hasRecordBefore = event.hasNextLine;
+            this.topBorder = new Border(event);
         } else {
-            this.hasRecordAfter = event.hasNextLine;
+            this.bottomBorder = new Border(event);
         }
 
         this.shiftView = 0;
@@ -1393,7 +1402,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         LvUtils.assert(this.m.length === 0);
         this.addRecords(m);
 
-        this.hasRecordAfter = event.data.hasNextLine;
+        this.bottomBorder = new Border(event)
 
         this.shiftView = event.shiftView;
 
@@ -1431,8 +1440,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.state = State.STATE_OPENED;
         this.modalWindow = null;
 
-        this.hasRecordBefore = event.data.hasNextLine;
-        this.hasRecordAfter = false;
+        this.topBorder = new Border(event);
+        this.bottomBorder = Border.createBottomBorderBorder(event, false);
 
         this.recRenderer.replaceRange(m, this.m, 0, this.m.length, this.records.nativeElement);
 
@@ -1459,8 +1468,8 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         this.modalWindow = null;
 
-        this.hasRecordBefore = event.topData.hasNextLine;
-        this.hasRecordAfter = event.bottomData.hasNextLine;
+        this.topBorder = new Border(event);
+        this.bottomBorder = new Border(event);
 
         let anchorOffset = this.headHeight(this.anchor) - this.shiftView;
 
@@ -1476,7 +1485,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     private onLogChanged(event: EventsLogChanged) {
         let hasNewChanges = this.vs.logChanged(event);
 
-        if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges) {
+        if (this.state === State.STATE_OPENED && !this.bottomBorder.hasNextLines && hasNewChanges) {
             this.requestNextRecords();
         }
     }

@@ -13,6 +13,13 @@ export interface LogFile {
     fields: FieldDescr[];
 }
 
+export interface RestStatusWithScanStatus extends RestStatus {
+    lastRecordOffset: number;
+    firstRecordOffset: number;
+
+    flags: number;
+}
+
 export interface RestStatus {
     hash: string;
     size: number;

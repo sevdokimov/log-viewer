@@ -182,7 +182,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
                 }
 
                 @Override
-                public void onFinish(@NonNull Status status, boolean eof) {
+                public void onFinish(@NonNull Status status) {
                     synchronized (SearchTask.this) {
                         if (finished)
                             return;
@@ -236,7 +236,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
         private final boolean hasSkippedLine;
 
         SearchResponse(List<Pair<LogRecord, Throwable>> data, Map<String, Status> statuses) {
-            super(data, statuses, data == null);
+            super(data, statuses);
 
             if (backward && data != null)
                 Collections.reverse(data);

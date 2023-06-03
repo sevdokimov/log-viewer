@@ -69,7 +69,6 @@ public class LocalFileRecordLoader implements LogProcess {
 
         future = executor.submit(() -> {
             try (Snapshot snapshot = snapshotFactory.get()) {
-                boolean processedAllLined;
                 Status status;
 
                 try {
@@ -78,28 +77,28 @@ public class LocalFileRecordLoader implements LogProcess {
 
                     MyRecordPredicate predicate = new MyRecordPredicate(snapshot);
 
-                    boolean hasMoreLine;
+                    boolean eof;
 
                     if (start == null) {
                         assert backward;
                         Long startTime = PredicateUtils.extractTimeLimit(filter, true);
                         if (startTime != null) {
-                            hasMoreLine = snapshot.processFromTimeBack(startTime, predicate);
+                            eof = snapshot.processFromTimeBack(startTime, predicate);
                         } else {
-                            hasMoreLine = snapshot.processRecordsBack(snapshot.getSize(), false, predicate);
+                            eof = snapshot.processRecordsBack(snapshot.getSize(), false, predicate);
                         }
                     } else {
-                        hasMoreLine = searchFromPosition(snapshot, predicate);
+                        eof = searchFromPosition(snapshot, predicate);
                     }
 
-                    processedAllLined = hasMoreLine || predicate.stoppedByFilterTimeLimit;
-                    status = new Status(snapshot);
+                    status = new Status(snapshot, predicate.lastRecordOffset, eof || predicate.lastRecordFilterTimeLimit,
+                            predicate.lastRecordFilterTimeLimit, predicate.lastRecordFilterMatch,
+                            predicate.firstRecordOffset, predicate.firstRecordFilterMatch);
                 } catch (Throwable e) {
-                    processedAllLined = false;
                     status = new Status(e);
                 }
 
-                listener.onFinish(status, processedAllLined);
+                listener.onFinish(status);
             } catch (Throwable e) {
                 LOG.error("Failed to load records", e);
             }
@@ -220,7 +219,12 @@ public class LocalFileRecordLoader implements LogProcess {
         private long readSize;
         private int recordCount;
 
-        private boolean stoppedByFilterTimeLimit;
+        private long firstRecordOffset = -1;
+        private boolean firstRecordFilterMatch;
+
+        private long lastRecordOffset = -1;
+        private boolean lastRecordFilterMatch;
+        private boolean lastRecordFilterTimeLimit;
 
         public MyRecordPredicate(Snapshot snapshot) {
             this.predicateChecker = new LvPredicateChecker(snapshot.getLog());
@@ -228,17 +232,28 @@ public class LocalFileRecordLoader implements LogProcess {
 
         @Override
         public boolean test(LogRecord record) {
+            lastRecordOffset = record.getStart();
+
+            boolean isFirstRecord = firstRecordOffset == -1;
+            if (isFirstRecord)
+                firstRecordOffset = lastRecordOffset;
+
             if (timeLimitFromFilter != null && record.hasTime()) {
                 if (backward ? record.getTime() < timeLimitFromFilter : record.getTime() > timeLimitFromFilter) {
-                    stoppedByFilterTimeLimit = true;
+                    lastRecordFilterTimeLimit = true;
+                    lastRecordFilterMatch = false;
                     return false;
                 }
             }
 
+            Pair<LogRecord, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
+            lastRecordFilterMatch = restRecord != null;
+
+            if (isFirstRecord)
+                firstRecordFilterMatch = restRecord != null;
+
             if (!timeOk(record))
                 return false;
-
-            Pair<LogRecord, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
 
             if (restRecord != null) {
                 recordCount++;

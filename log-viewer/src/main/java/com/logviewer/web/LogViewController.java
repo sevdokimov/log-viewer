@@ -187,7 +187,7 @@ public class LogViewController extends AbstractRestRequestHandler {
                     }
 
                     @Override
-                    public void onFinish(@NonNull Status status, boolean eof) {
+                    public void onFinish(@NonNull Status status) {
                         if (cnt.getCount() == 0)
                             return;
 

@@ -1,4 +1,4 @@
-import {LogFile, RestStatus} from './log-file';
+import {LogFile, RestStatusWithScanStatus} from './log-file';
 import {FieldTypeDescription} from './view-config.service';
 import {Record} from './record';
 import {Position} from './position';
@@ -67,13 +67,13 @@ export interface TextHighlighterConfig {
 }
 
 export interface StatusHolderEvent extends BackendEvent {
-    statuses: { [key: string]: RestStatus };
+    statuses: { [key: string]: RestStatusWithScanStatus };
     stateVersion: number;
 }
 
 export interface RecordBundle {
     records: Record[];
-    hasNextLine: boolean;
+    // hasNextLine: boolean; // todo !!!
 }
 
 export interface EventNextDataLoaded extends DataHolderEvent {

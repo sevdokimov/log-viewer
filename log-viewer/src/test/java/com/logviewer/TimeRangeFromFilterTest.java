@@ -41,7 +41,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         ResultListener res = process(r -> log.loadRecords(filter, 100, null, true, null, 1000000, r));
 
         assertEquals(Arrays.asList("555 3", "555 2", "555 1"), res.records.stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
-        assert res.eof;
+        assert res.status.isEof();
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resForwardFrom0 = process(r -> {
@@ -174,7 +174,7 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         private final List<LogRecord> records = new ArrayList<>();
         private final LinkedList<LogRecord> reversedRecords = new LinkedList<>();
 
-        private boolean eof;
+        private Status status;
 
         private final CountDownLatch finishWaiter = new CountDownLatch(1);
 
@@ -191,11 +191,11 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         }
 
         @Override
-        public void onFinish(@NonNull Status status, boolean eof) {
+        public void onFinish(@NonNull Status status) {
             if (status.getError() != null)
                 throw Utils.propagate(status.getError());
 
-            this.eof = eof;
+            this.status = status;
 
             assert finishWaiter.getCount() == 1;
             finishWaiter.countDown();
@@ -210,12 +210,16 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             ResultListener that = (ResultListener) o;
-            return eof == that.eof && (records.equals(that.records) || reversedRecords.equals(that.records));
+            return status.getSize() == that.status.getSize()
+                    && status.getLastModification() == that.status.getLastModification()
+                    && Objects.equals(status.getHash(), that.status.getHash())
+                    && Objects.equals(status.getError(), that.status.getError())
+                    && (records.equals(that.records) || reversedRecords.equals(that.records));
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(records, eof);
+            return Objects.hash(records, status);
         }
     }
 }
