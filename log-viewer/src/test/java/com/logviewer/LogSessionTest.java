@@ -26,22 +26,6 @@ import static org.junit.Assert.assertEquals;
 
 public class LogSessionTest extends LogSessionTestBase {
 
-//    protected static EditableConfig testConfig;
-//    protected static LogService testLogService;
-//
-//    static {
-//        testConfig = new EditableConfig();
-//        testLogService = new LogService(testConfig);
-//    }
-//
-//    @BeforeClass
-//    public static void beforeClass() throws Exception {
-//        if (LogContext.getLogService() != testLogService) {
-//            LogContext.init(testLogService, new InmemoryFavoritesService());
-//        }
-//    }
-//
-
     @Test
     public void testScrollDown() throws InterruptedException {
         ApplicationContext ctx = createContext(MultifileConfiguration.class);
@@ -51,17 +35,48 @@ public class LogSessionTest extends LogSessionTestBase {
         session.scrollToEdge(3, 2, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(2), recordsSorted(),
-                field("msg", "a 4", "b 4", "b 5"), hasNext());
+                field("msg", "a 4", "b 4", "b 5"), hasNext(),
+                firstScannedRecord(session, "/server-a.log", "150101 10:00:03 a 4", true),
+                firstScannedRecord(session, "/server-b.log", "150101 10:00:03 b 5", true)
+        );
 
         session.scrollToEdge(6, 3, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(3), recordsSorted(),
-                field("msg", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext());
+                field("msg", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(),
+                firstScannedRecord(session, "/server-a.log", "150101 10:00:03 a 4", true)
+        );
 
         session.scrollToEdge(100, 4, null, false);
 
         adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(4), recordsSorted(),
-                field("msg", "a 1", "a 2", "b 1", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(false));
+                field("msg", "a 1", "a 2", "b 1", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(false),
+                firstScannedRecord(session, "/server-a.log", "150101 10:00:03 a 4", true)
+        );
+    }
+
+    @Test
+    public void testScrollUp() throws InterruptedException {
+        ApplicationContext ctx = createContext(MultifileConfiguration.class);
+        LogSession session = LogSession.fromContext(adapter, ctx);
+
+        session.init(LogList.of(getTestLog("multilog/server-a.log"), getTestLog("multilog/server-b.log")));
+
+        session.scrollToEdge(3, 2, null, true);
+
+        adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(2), recordsSorted(),
+                field("msg", "a 1", "a 2", "b 1"), hasNext(),
+                firstScannedRecord(session, "/server-a.log", "150101 10:00:01 a 1", true),
+                firstScannedRecord(session, "/server-b.log", "150101 10:00:01 b 1", true)
+        );
+
+        session.scrollToEdge(100, 4, null, true);
+
+        adapter.skipAndCheck(EventScrollToEdgeResponse.class, noError(), stateVersion(4), recordsSorted(),
+                field("msg", "a 1", "a 2", "b 1", "b 2", "b 3", "a 3", "a 4", "b 4", "b 5"), hasNext(false),
+                firstScannedRecord(session, "/server-a.log", "150101 10:00:01 a 1", true),
+                firstScannedRecord(session, "/server-b.log", "150101 10:00:01 b 1", true)
+        );
     }
 
     @Test

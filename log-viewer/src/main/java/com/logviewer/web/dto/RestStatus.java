@@ -119,6 +119,10 @@ public class RestStatus {
         return lastRecordOffset;
     }
 
+    public long getFirstRecordOffset() {
+        return firstRecordOffset;
+    }
+
     public int getFlags() {
         return flags;
     }

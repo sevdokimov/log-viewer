@@ -1,17 +1,22 @@
 package com.logviewer.utils;
 
 import com.logviewer.TestUtils;
+import com.logviewer.data2.LogView;
 import com.logviewer.web.dto.RestRecord;
 import com.logviewer.web.dto.RestStatus;
 import com.logviewer.web.dto.events.BackendEvent;
 import com.logviewer.web.dto.events.DataHolderEvent;
 import com.logviewer.web.dto.events.EventSearchResponse;
 import com.logviewer.web.dto.events.StatusHolderEvent;
+import com.logviewer.web.session.LogSession;
 import com.logviewer.web.session.SessionAdapter;
 import com.logviewer.web.session.Status;
 import org.junit.Assert;
 import org.springframework.lang.NonNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -20,14 +25,15 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class TestSessionAdapter implements SessionAdapter {
 
-    public static final Object ANY = new Object();
-
-    private BlockingDeque<BackendEvent> events = new LinkedBlockingDeque<>();
+    private final BlockingDeque<BackendEvent> events = new LinkedBlockingDeque<>();
 
     @Override
     public void send(@NonNull BackendEvent event) {
@@ -145,6 +151,30 @@ public class TestSessionAdapter implements SessionAdapter {
 
     public static Consumer<StatusHolderEvent> hasNext() {
         return hasNext(true);
+    }
+
+    public static Consumer<StatusHolderEvent> firstScannedRecord(LogSession session, String file, String line, boolean matched) {
+        return event -> {
+            assert file.startsWith("/");
+
+            LogView log = Stream.of(session.getLogs()).filter(l -> l.getPath().getFile().endsWith(file)).findFirst().get();
+
+            RestStatus status = event.statuses.get(log.getId());
+            assertThat(status.getHash()).isNotNull();
+            assertThat(status.getErrorType()).isNull();
+            assertThat(status.getDetailedErrorMessage()).isNull();
+
+            try {
+                byte[] logContent = Files.readAllBytes(Paths.get(log.getPath().getFile()));
+                byte[] firstScannedRecordBytes = Arrays.copyOfRange(logContent, (int)status.getFirstRecordOffset(), logContent.length);
+
+                assertThat(new String(firstScannedRecordBytes)).startsWith(line);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            assertEquals(matched, (status.getFlags() & Status.FLAG_FIRST_RECORD_FILTER_MATCH) != 0);
+        };
     }
 
     public static Consumer<StatusHolderEvent> hasNext(boolean hasNext) {
