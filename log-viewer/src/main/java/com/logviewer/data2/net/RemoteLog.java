@@ -77,8 +77,8 @@ public class RemoteLog implements LogView {
     }
 
     @Override
-    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
-        return new RemoteLogProcess<>(new RecordLoaderRemoteTask(path.getFile(), serializedFormat, start, backward, hash,
+    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, Position stop, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
+        return new RemoteLogProcess<>(new RecordLoaderRemoteTask(path.getFile(), serializedFormat, start, stop, backward, hash,
                 LvGsonUtils.GSON.toJson(filter, RecordPredicate.class), recordCount, sizeLimit), (o, error) -> {
             if (error != null) {
                 listener.onFinish(new Status(error));

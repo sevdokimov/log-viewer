@@ -26,7 +26,7 @@ public interface LogView {
     boolean isConnected();
 
     LogProcess loadRecords(RecordPredicate filter, int recordCount,
-                           @Nullable Position start, boolean backward, @Nullable String hash, long sizeLimit,
+                           @Nullable Position start, Position stop, boolean backward, @Nullable String hash, long sizeLimit,
                            @NonNull LogDataListener loadListener);
 
     LogProcess createRecordSearcher(@NonNull Position start, boolean backward, RecordPredicate recordPredicate,

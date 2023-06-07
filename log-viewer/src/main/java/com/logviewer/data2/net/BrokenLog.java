@@ -30,7 +30,7 @@ public abstract class BrokenLog implements LogView {
     }
 
     @Override
-    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
+    public LogProcess loadRecords(RecordPredicate filter, int recordCount, Position start, Position stop, boolean backward, String hash, long sizeLimit, @NonNull LogDataListener listener) {
         return new DummyLogProcess(() -> listener.onFinish(new Status(error)));
     }
 

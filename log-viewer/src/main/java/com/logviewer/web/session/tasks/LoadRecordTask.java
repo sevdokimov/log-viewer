@@ -24,6 +24,8 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
 
     @Nullable
     protected final Position start;
+    @Nullable
+    protected final Position stop;
 
     protected final boolean backward;
 
@@ -42,11 +44,12 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
     protected boolean finished;
 
     public LoadRecordTask(@NonNull SessionAdapter sender, @NonNull LogView[] logs, int recordCount, RecordPredicate filter,
-                          @Nullable Position start, boolean backward, @Nullable Map<String, String> hashes) {
+                          @Nullable Position start, @Nullable Position stop, boolean backward, @Nullable Map<String, String> hashes) {
         super(sender, logs);
 
         this.recordCount = recordCount;
         this.start = start;
+        this.stop = stop;
         this.hashes = hashes;
         assert recordCount > 0;
 
@@ -75,7 +78,7 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
             String hash = hashes == null ? null : hashes.get(log.getId());
 
             LogProcess loader = log.loadRecords(filter, recordCount,
-                    start, backward, hash, MAX_BATCH_SIZE,
+                    start, stop, backward, hash, MAX_BATCH_SIZE,
                     new MyLogDataListener(log, consumer));
 
             loaders.put(log, loader);

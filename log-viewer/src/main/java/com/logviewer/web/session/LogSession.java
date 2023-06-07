@@ -169,8 +169,7 @@ public class LogSession {
 
         filter = CompositeRecordPredicate.and(filters);
 
-        CompletableFuture<LoadNextResponse> execution = execute(new LoadRecordTask(sender, logs, recordCount, filter, permalink.getOffset(),
-                false, permalink.getHashes()));
+        CompletableFuture<LoadNextResponse> execution = execute(new LoadRecordTask(sender, logs, recordCount, filter, permalink.getOffset(), null, false, permalink.getHashes()));
 
         execution.whenComplete(new LogExecutionHandler<LoadNextResponse>() {
 
@@ -246,8 +245,7 @@ public class LogSession {
             pos = new Position(logId, 0, 0);
         }
 
-        CompletableFuture<LoadNextResponse> future = execute(new LoadRecordTask(sender, logs, recordCount, this.filter,
-                pos, !isScrollToBegin, null));
+        CompletableFuture<LoadNextResponse> future = execute(new LoadRecordTask(sender, logs, recordCount, this.filter, pos, null, !isScrollToBegin, null));
 
         future.whenComplete(new LogExecutionHandler<LoadNextResponse>() {
             @Override
@@ -262,7 +260,7 @@ public class LogSession {
         if (!updateStateVersionAndFilters(stateVersion, filter))
             return;
 
-        LoadRecordTask task = new LoadRecordTask(sender, logs, recordCount, this.filter, null, true, null);
+        LoadRecordTask task = new LoadRecordTask(sender, logs, recordCount, this.filter, null, null, true, null);
 
         CompletableFuture<LoadNextResponse> ex = execute(task);
 
@@ -281,8 +279,8 @@ public class LogSession {
         if (!updateStateVersionAndFilters(stateVersion, filter))
             return;
 
-        LoadRecordTask topLoadTask = new LoadRecordTask(sender, logs, topRecordCount, this.filter, start, true, hashes);
-        LoadRecordTask bottomLoadTask = new LoadRecordTask(sender, logs, bottomRecordCount, this.filter, start, false, hashes);
+        LoadRecordTask topLoadTask = new LoadRecordTask(sender, logs, topRecordCount, this.filter, start, null, true, hashes);
+        LoadRecordTask bottomLoadTask = new LoadRecordTask(sender, logs, bottomRecordCount, this.filter, start, null, false, hashes);
 
         CompletableFuture<LoadNextResponse> topLoadFut = execute(topLoadTask);
         CompletableFuture<LoadNextResponse> bottomLoadFut = execute(bottomLoadTask);
@@ -328,7 +326,7 @@ public class LogSession {
             }
         }
 
-        CompletableFuture<LoadNextResponse> execution = execute(new LoadRecordTask(sender, logs, recordCount, filter, start, backward, hashes));
+        CompletableFuture<LoadNextResponse> execution = execute(new LoadRecordTask(sender, logs, recordCount, filter, start, null, backward, hashes));
         execution.whenComplete(new LogExecutionHandler<LoadNextResponse>() {
             @Override
             protected void handle(LoadNextResponse res) {
@@ -397,8 +395,7 @@ public class LogSession {
                 SendEventTask sendEventTask = new SendEventTask(searchResponse);
                 lvTimer.schedule(sendEventTask, waitForDataTimeoutMS);
 
-                LoadRecordTask loadRecordTask = new LoadRecordTask(sender, logs, recordCount, filter,
-                        new Position(found, backward), backward, hashes);
+                LoadRecordTask loadRecordTask = new LoadRecordTask(sender, logs, recordCount, filter, new Position(found, backward), null, backward, hashes);
 
                 execute(loadRecordTask).whenComplete(new LogExecutionHandler<LoadNextResponse>() {
                     @Override

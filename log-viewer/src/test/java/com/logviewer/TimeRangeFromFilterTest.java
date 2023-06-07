@@ -38,42 +38,42 @@ public class TimeRangeFromFilterTest extends AbstractLogTest {
         RecordPredicate filter = CompositeRecordPredicate.and(new TestPredicate(), new DatePredicate(date("150101 10:00:05"), true),
                 new DatePredicate(date("150101 10:00:05"), false));
 
-        ResultListener res = process(r -> log.loadRecords(filter, 100, null, true, null, 1000000, r));
+        ResultListener res = process(r -> log.loadRecords(filter, 100, null, null, true, null, 1000000, r));
 
         assertEquals(Arrays.asList("555 3", "555 2", "555 1"), res.records.stream().map(r -> r.getFieldText("msg")).collect(Collectors.toList()));
         assert res.status.isEof();
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resForwardFrom0 = process(r -> {
-            return log.loadRecords(filter, 100, new Position(log.getId(), 0, 0), false, null, 1000000, r);
+            return log.loadRecords(filter, 100, new Position(log.getId(), 0, 0), null, false, null, 1000000, r);
         });
 
         assertEquals(res, resForwardFrom0);
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resForwardFrom5 = process(r -> {
-            return log.loadRecords(filter, 100, new Position(log.getId(), 0, recordIndex(log, "150101 10:00:05 555 1")), false, null, 1000000, r);
+            return log.loadRecords(filter, 100, new Position(log.getId(), 0, recordIndex(log, "150101 10:00:05 555 1")), null, false, null, 1000000, r);
         });
 
         assertEquals(res, resForwardFrom5);
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resBackwardFrom6 = process(r -> {
-            return log.loadRecords(filter, 100, new Position(log.getId(), 0, recordIndex(log, "150101 10:00:06 666 3")), true, null, 1000000, r);
+            return log.loadRecords(filter, 100, new Position(log.getId(), 0, recordIndex(log, "150101 10:00:06 666 3")), null, true, null, 1000000, r);
         });
 
         assertEquals(res, resBackwardFrom6);
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resForeignLog = process(r -> {
-            return log.loadRecords(filter, 100, new Position("zzz", date("150101 10:00:02"), 0), false, null, 1000000, r);
+            return log.loadRecords(filter, 100, new Position("zzz", date("150101 10:00:02"), 0), null, false, null, 1000000, r);
         });
 
         assertEquals(res, resForeignLog);
         assertEquals(TestPredicate.getPassed().size(), res.records.size());
 
         ResultListener resForeignLogBack = process(r -> {
-            return log.loadRecords(filter, 100, new Position("zzz", date("150101 10:00:08"), 0), true, null, 1000000, r);
+            return log.loadRecords(filter, 100, new Position("zzz", date("150101 10:00:08"), 0), null, true, null, 1000000, r);
         });
 
         assertEquals(res, resForeignLogBack);

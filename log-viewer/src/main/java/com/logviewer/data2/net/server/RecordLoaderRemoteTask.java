@@ -17,6 +17,7 @@ public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
     private final String file;
     private final String format;
     private final Position start;
+    private final Position stop;
     private final boolean backward;
     private final String hash;
     private final String filter;
@@ -24,11 +25,12 @@ public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
     private final long sizeLimit;
 
     public RecordLoaderRemoteTask(String file, String format,
-                           Position start, boolean backward, String hash,
-                           String filter, int recordCountLimit, long sizeLimit) {
+                                  Position start, Position stop,
+                                  boolean backward, String hash, String filter, int recordCountLimit, long sizeLimit) {
         this.file = file;
         this.format = format;
         this.start = start;
+        this.stop = stop;
         this.backward = backward;
         this.hash = hash;
         this.filter = filter;
@@ -40,7 +42,7 @@ public class RecordLoaderRemoteTask extends AbstractDataLoaderTask<Object> {
     public LogProcess createLogProcessTask(RemoteTaskContext<Object> ctx) {
         Log log = ctx.getLogService().openLog(file, LvGsonUtils.GSON.fromJson(format, LogFormat.class));
 
-        return log.loadRecords(LvGsonUtils.GSON.fromJson(filter, RecordPredicate.class), recordCountLimit, start, backward, hash, sizeLimit, new LogDataListener() {
+        return log.loadRecords(LvGsonUtils.GSON.fromJson(filter, RecordPredicate.class), recordCountLimit, start, stop, backward, hash, sizeLimit, new LogDataListener() {
             @Override
             public void onData(@NonNull RecordList data) {
                 ctx.send(data);

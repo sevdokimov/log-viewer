@@ -27,6 +27,7 @@ public class LocalFileRecordLoader implements LogProcess {
     private final LogDataListener listener;
 
     private final Position start;
+    private final Position stop;
 
     private final RecordPredicate filter;
     private final Long timeLimitFromFilter;
@@ -45,12 +46,14 @@ public class LocalFileRecordLoader implements LogProcess {
 
     public LocalFileRecordLoader(Supplier<Snapshot> snapshotFactory, @NonNull ExecutorService executor,
                                  LogDataListener listener,
-                                 @Nullable Position start, RecordPredicate filter, boolean backward,
+                                 @Nullable Position start, @Nullable Position stop,
+                                 RecordPredicate filter, boolean backward,
                                  int recordCountLimit, long sizeLimit, @Nullable String hash) {
         this.snapshotFactory = snapshotFactory;
         this.executor = executor;
         this.listener = listener;
         this.start = start;
+        this.stop = stop;
         this.filter = filter;
         this.recordCountLimit = recordCountLimit;
         this.backward = backward;
@@ -232,28 +235,31 @@ public class LocalFileRecordLoader implements LogProcess {
 
         @Override
         public boolean test(LogRecord record) {
-            lastRecordOffset = record.getStart();
-
             boolean isFirstRecord = firstRecordOffset == -1;
-            if (isFirstRecord)
-                firstRecordOffset = lastRecordOffset;
 
             if (timeLimitFromFilter != null && record.hasTime()) {
                 if (backward ? record.getTime() < timeLimitFromFilter : record.getTime() > timeLimitFromFilter) {
+                    if (isFirstRecord)
+                        firstRecordOffset = lastRecordOffset;
+
+                    lastRecordOffset = record.getStart();
                     lastRecordFilterTimeLimit = true;
                     lastRecordFilterMatch = false;
                     return false;
                 }
             }
 
+            if (!timeOk(record))
+                return false;
+
+            if (isFirstRecord)
+                firstRecordOffset = lastRecordOffset;
+
             Pair<LogRecord, Throwable> restRecord = predicateChecker.applyFilter(record, filter);
             lastRecordFilterMatch = restRecord != null;
 
             if (isFirstRecord)
                 firstRecordFilterMatch = restRecord != null;
-
-            if (!timeOk(record))
-                return false;
 
             if (restRecord != null) {
                 recordCount++;
@@ -262,7 +268,35 @@ public class LocalFileRecordLoader implements LogProcess {
                 listener.onData(new RecordList(restRecord));
             }
 
-            return recordCount < recordCountLimit && readSize < sizeLimit;
+            return recordCount < recordCountLimit && readSize < sizeLimit && (stop == null || (backward ? isUpper(stop, record) : isLower(stop, record)));
+        }
+
+        private boolean isUpper(Position position, LogRecord record) {
+            if (position.getLogId().equals(record.getLogId()))
+                return position.getLocalPosition() < record.getStart();
+
+            long posTime = position.getTime();
+            if (posTime <= 0 || !record.hasTime())
+                return false;
+
+            if (posTime == record.getTime())
+                return position.getLogId().compareTo(record.getLogId()) < 0;
+
+            return posTime < record.getTime();
+        }
+
+        private boolean isLower(Position position, LogRecord record) {
+            if (position.getLogId().equals(record.getLogId()))
+                return position.getLocalPosition() > record.getStart();
+
+            long posTime = position.getTime();
+            if (posTime <= 0 || !record.hasTime())
+                return false;
+
+            if (posTime == record.getTime())
+                return position.getLogId().compareTo(record.getLogId()) > 0;
+
+            return posTime > record.getTime();
         }
     }
 

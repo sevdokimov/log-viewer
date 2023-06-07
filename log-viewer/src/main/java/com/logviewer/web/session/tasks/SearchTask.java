@@ -152,7 +152,7 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
             String hash = hashes.get(log.getId());
             assert hash != null;
 
-            LogProcess recordLoader = log.loadRecords(filter, maxRecordToLoad, start, !backward, hash, Long.MAX_VALUE, new LogDataListener() {
+            LogProcess recordLoader = log.loadRecords(filter, maxRecordToLoad, start, null, !backward, hash, Long.MAX_VALUE, new LogDataListener() {
                 @Override
                 public void onData(@NonNull RecordList data) {
                     assert recordComparator.compare(data.get(0), lastReturnedRecord) < 0;

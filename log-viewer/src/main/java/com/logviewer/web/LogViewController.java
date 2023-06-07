@@ -170,7 +170,7 @@ public class LogViewController extends AbstractRestRequestHandler {
         Position start = new Position(logView.getId(), 0, 0);
         
         LogProcess logProcess = logView.loadRecords(CompositeRecordPredicate.and(filters), Integer.MAX_VALUE, start,
-                false, null, Long.MAX_VALUE, new LogDataListener() {
+                null, false, null, Long.MAX_VALUE, new LogDataListener() {
                     @Override
                     public void onData(@NonNull RecordList data) {
                         if (cnt.getCount() == 0)

@@ -704,9 +704,9 @@ public class Log implements LogView {
 
     @Override
     public LogProcess loadRecords(RecordPredicate filter, int recordCountLimit,
-                                  @Nullable Position start, boolean backward, String hash, long sizeLimit,
+                                  @Nullable Position start, Position stop, boolean backward, String hash, long sizeLimit,
                                   @NonNull LogDataListener loadListener) {
-        return new LocalFileRecordLoader(this::createSnapshot, executor, loadListener, start, filter, backward,
+        return new LocalFileRecordLoader(this::createSnapshot, executor, loadListener, start, stop, filter, backward,
                 recordCountLimit, sizeLimit, hash);
     }
 
