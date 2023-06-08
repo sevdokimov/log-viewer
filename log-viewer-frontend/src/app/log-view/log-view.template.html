@@ -219,32 +219,24 @@
     </div>
 </div>
 
-<div class="sl-overlay" [style.display]="modalWindow === 'findProgress' ? 'block' : 'none'">
-    <div class="modal-background sl-overlay"></div>
+<div *ngIf="modalWindow" [ngSwitch]="modalWindow" class="sl-overlay">
+    <div *ngIf="modalWindow !== 'transparent'" class="modal-background sl-overlay"></div>
 
-    <div class="sl-dialog sl-dialog-small">
+    <div *ngSwitchCase="'findProgress'" class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
                 <img src="assets/progress.gif" alt="..."> search... <a href="javascript:void(0)" (click)="cancelSearch()">cancel</a>
             </div>
         </div>
     </div>
-</div>
 
-<div class="sl-overlay" [style.display]="modalWindow === 'filterChanging' ? 'block' : 'none'">
-    <div class="modal-background sl-overlay"></div>
-
-    <div class="sl-dialog sl-dialog-small">
+    <div *ngSwitchCase="'filterChanging'" class="sl-dialog sl-dialog-small">
         <div style="display: table; width: 100%; height: 100%; text-align: center;">
             <div style="display: table-cell; vertical-align: middle;">
                 <img src="assets/progress.gif" alt="..."> applying filters ...
             </div>
         </div>
     </div>
-</div>
-
-<div *ngIf="modalWindow" [ngSwitch]="modalWindow" class="sl-overlay">
-    <div class="modal-background sl-overlay"></div>
 
     <div *ngSwitchCase="'disconnected'" class="sl-stretchable-dialog">
         <div>
