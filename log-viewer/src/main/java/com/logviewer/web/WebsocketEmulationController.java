@@ -135,6 +135,8 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
         private final String userName;
 
+        private final Runnable timeoutTask = () -> close("timeout");
+
         public ConnectionSession(@NonNull String sessionId, @NonNull String userName) {
             this.sessionId = sessionId;
             this.userName = userName;
@@ -168,8 +170,8 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
                         ArrayList<ToUiMessage> res = new ArrayList<>(toUiQueue);
                         toUiQueue.clear();
 
-                        asyncContextChecker = new TimeoutChecker(); // Close logSession is UI doesn't connect long time.
-                        timer.schedule(asyncContextChecker, waitConnectionTimeout);
+                        // Close logSession is UI doesn't connect long time.
+                        asyncContextChecker = timer.schedule(timeoutTask, waitConnectionTimeout);
 
                         LOG.debug("return response [sessionId={}, sentMessages={}", sessionId, res.size());
 
@@ -178,8 +180,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
                         asyncContext = request.startAsync();
                         asyncContext.setTimeout(connectionHoldTime + 10_000);
 
-                        asyncContextChecker = new AsyncContextCloser(asyncContext);
-                        timer.schedule(asyncContextChecker, connectionHoldTime);
+                        asyncContextChecker = timer.schedule(asyncContextCloserTask(asyncContext), connectionHoldTime);
 
                         LOG.debug("connection has held [sessionId={}]", sessionId);
 
@@ -285,7 +286,6 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
         private void sendResponseQueueToAsync() {
             assert Thread.holdsLock(toUiQueue);
 
-            assert asyncContextChecker instanceof AsyncContextCloser;
             asyncContextChecker.cancel();
 
             boolean success = false;
@@ -298,8 +298,8 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
                 asyncContext.complete();
                 asyncContext = null;
 
-                asyncContextChecker = new TimeoutChecker(); // Close logSession is UI doesn't connect long time.
-                timer.schedule(asyncContextChecker, waitConnectionTimeout);
+                // Close logSession is UI doesn't connect long time.
+                asyncContextChecker = timer.schedule(timeoutTask, waitConnectionTimeout);
 
                 success = true;
             } catch (IOException e) {
@@ -310,18 +310,10 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
             }
         }
 
+        private Runnable asyncContextCloserTask(AsyncContext ctx) {
+            WeakReference<AsyncContext> expectedContext = new WeakReference<>(ctx);
 
-
-        private class AsyncContextCloser extends TimerTask {
-
-            private final WeakReference<AsyncContext> expectedContext;
-
-            public AsyncContextCloser(AsyncContext asyncContext) {
-                expectedContext = new WeakReference<>(asyncContext);
-            }
-
-            @Override
-            public void run() {
+            return () -> {
                 synchronized (toUiQueue) {
                     if (closed.get())
                         return;
@@ -332,14 +324,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
                     sendResponseQueueToAsync();
                 }
-            }
-        }
-
-        private class TimeoutChecker extends TimerTask {
-            @Override
-            public void run() {
-                close("timeout");
-            }
+            };
         }
     }
 

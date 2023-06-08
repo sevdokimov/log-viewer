@@ -586,7 +586,7 @@ public class LogSession {
                         return;
 
                     sender.send(eventSearchResponse);
-                } catch (RuntimeException e) {
+                } catch (Throwable e) {
                     LOG.error("Failed to send message", e);
                 }
 

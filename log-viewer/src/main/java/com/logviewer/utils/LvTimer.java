@@ -9,33 +9,65 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LvTimer extends Timer {
+public class LvTimer {
 
     private static final Logger LOG = LoggerFactory.getLogger(LvTimer.class);
 
     private final Map<Object, Boolean> uniqueTaskMap = new ConcurrentHashMap<>();
 
-    public LvTimer() {
-        super("log-viewer-timer", true);
-    }
+    private final Timer timer = new Timer("log-viewer-timer", true);
 
     public boolean scheduleTask(@NonNull Object key, @NonNull Runnable task, long delay) {
         if (uniqueTaskMap.putIfAbsent(key, true) == null) {
-            schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        uniqueTaskMap.remove(key);
-                        task.run();
-                    } catch (Throwable e) {
-                        LOG.error("Failed to execute scheduled task", e);
-                    }
-                }
-            }, delay);
+            boolean scheduled = false;
+
+            try {
+                timer.schedule(new TimerTaskImpl(() -> {
+                    uniqueTaskMap.remove(key);
+                    task.run();
+                }), delay);
+
+                scheduled = true;
+            } finally {
+                if (!scheduled)
+                    uniqueTaskMap.remove(key);
+            }
 
             return true;
         }
 
         return false;
+    }
+
+    public void cancel() {
+        timer.cancel();
+    }
+
+    public TimerTask schedule(Runnable run, long delay) {
+        TimerTaskImpl task = new TimerTaskImpl(run);
+        timer.schedule(task, delay);
+        return task;
+    }
+
+    public void schedule(TimerTask timerTask, long delay) {
+        timer.schedule(timerTask, delay);
+    }
+
+    private static class TimerTaskImpl extends TimerTask {
+
+        private final Runnable run;
+
+        public TimerTaskImpl(Runnable run) {
+            this.run = run;
+        }
+
+        @Override
+        public void run() {
+            try {
+                run.run();
+            } catch (Throwable e) {
+                LOG.error("Failed to execute timer task", e);
+            }
+        }
     }
 }
