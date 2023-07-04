@@ -8,7 +8,8 @@ export class Position {
         if (!p1 && !p2) { return true; }
         if (!p1 || !p2) { return false; }
             
-        return p1.logId === p2.logId && p1.time === p2.time && p1.o === p2.o;
+        // tslint:disable-next-line:triple-equals
+        return p1.logId === p2.logId && p1.time == p2.time && p1.o === p2.o;
     }
 
      static recordStart(record: Record): Position {
@@ -17,6 +18,11 @@ export class Position {
 
     static recordEnd(record: Record): Position {
         return new Position(record.logId, record.time, record.end);
+    }
+
+    static firstLine(): Position {
+        let dateInPastNano = '100000000000000' // 1970-01-02 03:46:40
+        return  new Position('', dateInPastNano, 0); // a date in distant past
     }
 
     static containPosition(position: Position, record: Record): boolean {

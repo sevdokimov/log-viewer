@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.Assert.*;
+
 public class LogGrowTest extends AbstractWebTestCase {
 
     @Test
@@ -89,15 +91,69 @@ public class LogGrowTest extends AbstractWebTestCase {
 
         Files.write(tmpLog, IntStream.rangeClosed(1, 30).mapToObj(String::valueOf).collect(Collectors.joining("\n")).getBytes());
 
-        recordByText("5");
-
-        notExist(By.xpath("//div[@id='records']/div[@class='record'][last()][text()='30']"));
+        recordByText("30");
+        checkLastRecord("30");
 
         Number recordCount = (Number) driver.executeScript("return arguments[0].childElementCount", driver.findElement(By.id("records")));
         assert recordCount.longValue() > 5;
         assert recordCount.longValue() < 29;
+    }
 
-        recordByText("1");
+    private static void writeLog(Path path, int lineCount) throws IOException {
+        Files.write(path, IntStream.rangeClosed(1, lineCount)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining("\n")).getBytes());
+    }
+
+    @Test
+    public void logNoAutoScrolldownSelectedLine() throws IOException {
+        Path tmpLog = tmpDir.resolve("test.log");
+        writeLog(tmpLog, 1);
+
+        openLog(tmpLog);
+        setHeight(5);
+        driver.navigate().refresh();
+
+        WebElement lastRecord = checkLastRecord("1");
+        lastRecord.click();
+        assertEquals("1", driver.findElement(By.cssSelector("#records > .selected-line")).getText());
+
+        writeLog(tmpLog, 30);
+
+        lastRecord.isDisplayed();
+        recordByText("3");
+        recordByText("2");
+
+        notExist(By.xpath("//div[@id='records']/div[@class='record'][normalize-space(.)='30']"));
+
+        Number recordCount = (Number) driver.executeScript("return arguments[0].childElementCount", driver.findElement(By.id("records")));
+        assert recordCount.longValue() > 5;
+        assert recordCount.longValue() < 29;
+    }
+
+    @Test
+    public void logNoAutoscrollIfNoSpaceAtBottom() throws IOException, InterruptedException {
+        Path tmpLog = tmpDir.resolve("test.log");
+        writeLog(tmpLog, 6);
+
+        openLog(tmpLog);
+        setHeight(5);
+        driver.navigate().refresh();
+
+        checkLastRecord("6");
+
+        // Scroll to head
+        new Actions(driver).sendKeys(Keys.HOME).perform();
+
+        waitFor(() -> recordByText("1").isDisplayed());
+
+        writeLog(tmpLog, 30);
+
+        WebElement r7 = driver.findElement(By.xpath("//div[@id='records']/div[@class='record'][normalize-space(.)='7']"));
+
+        assertFalse(r7.isDisplayed());
+
+        assertTrue(recordByText("1").isDisplayed());
     }
 
     @Test

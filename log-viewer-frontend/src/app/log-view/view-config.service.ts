@@ -73,6 +73,10 @@ export class ViewConfigService {
         return res;
     }
 
+    isAutoscrollEnabled(): boolean {
+        return !this.uiConfig?.properties['disable-autoscroll']
+    }
+
     private static generateNodeLabels(nodes: string[]): { [key: string]: string } {
         let res: { [key: string]: string } = {};
 

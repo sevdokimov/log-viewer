@@ -957,6 +957,14 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         }, 600);
     }
 
+    private hasVisibleSelectedLine(): boolean {
+        if (!this.vs.selectedLine)
+            return false;
+
+        let mainRecord = this.getMainRecord(false)
+        return mainRecord != null && Position.containPosition(this.vs.selectedLine, this.m[mainRecord]) // selected line may be out of the visible vew
+    }
+
     private getMainRecord(revert?: boolean): number {
         let offset = 0;
 
@@ -1015,39 +1023,42 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         return this.visibleRecordCount() + 1;
     }
 
-    private requestNextRecords() {
-        if (this.logs?.length > 0) {
-            let spareDateBottom = this.getLogViewHeight() - this.shiftView - this.logPane.nativeElement.clientHeight;
-            let recordsToLoad = Math.ceil((this.spareDataOutsizeViewBorder() - spareDateBottom) / LogViewComponent.lineHeight);
+    private requestNextRecords(recordsToLoad?: number) {
+        if (!(this.logs?.length > 0) || recordsToLoad <= 0) {
+            return;
+        }
 
-            if (recordsToLoad > 0) {
-                recordsToLoad = Math.max(recordsToLoad, Math.ceil(this.recordCountToLoad() / 3));
+        if (recordsToLoad == null) {
+            let spareDataBottom = this.getLogViewHeight() - this.shiftView - this.logPane.nativeElement.clientHeight;
+            recordsToLoad = Math.ceil((this.spareDataOutsizeViewBorder() - spareDataBottom) / LogViewComponent.lineHeight);
+            if (recordsToLoad <= 0)
+                return;
 
-                let offset: Position;
-                if (this.m.length === 0) {
-                    if (this.logs.length === 1) {
-                        offset = new Position(this.logs[0].id, null, 0);
-                    } else {
-                        let dateInPastNano = '100000000000000' // 1970-01-02 03:46:40
-                        offset = new Position('', dateInPastNano, 0); // a date in distant past
-                    }
-                } else {
-                    offset = Position.recordEnd(this.m[this.m.length - 1]);
-                }
+            recordsToLoad = Math.max(recordsToLoad, Math.ceil(this.recordCountToLoad() / 3));
+        }
 
-                if (!Position.equals(offset, this.loadingNextBottom)) {
-                    this.commService.send(
-                        new Command('loadNext', {
-                            start: offset,
-                            backward: false,
-                            recordCount: recordsToLoad,
-                            hashes: this.vs.hashes,
-                            stateVersion: this.stateVersion,
-                        })
-                    );
-                    this.loadingNextBottom = offset;
-                }
+        let offset: Position;
+        if (this.m.length === 0) {
+            if (this.logs.length === 1) {
+                offset = new Position(this.logs[0].id, null, 0);
+            } else {
+                offset = Position.firstLine();
             }
+        } else {
+            offset = Position.recordEnd(this.m[this.m.length - 1]);
+        }
+
+        if (!Position.equals(offset, this.loadingNextBottom)) {
+            this.commService.send(
+                new Command('loadNext', {
+                    start: offset,
+                    backward: false,
+                    recordCount: recordsToLoad,
+                    hashes: this.vs.hashes,
+                    stateVersion: this.stateVersion,
+                })
+            );
+            this.loadingNextBottom = offset;
         }
     }
 
@@ -1287,6 +1298,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 return;
             }
 
+            let scroll = !this.hasRecordAfter && !event.data.hasNextLine
+                && !this.searchRequest && !this.hasVisibleSelectedLine() && this.hasEmptySpaceAtBottom()
+                && this.viewConfig.isAutoscrollEnabled()
+
             this.hasRecordAfter = event.data.hasNextLine;
 
             if (m.length > 0) {
@@ -1298,6 +1313,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                 }
 
                 this.addRecords(m);
+
+                if (scroll && !this.hasEmptySpaceAtBottom()) {
+                    this.scrollEnd()
+                }
             }
         }
 
@@ -1488,9 +1507,17 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     private onLogChanged(event: EventsLogChanged) {
         let hasNewChanges = this.vs.logChanged(event);
 
-        if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges) {
-            this.requestNextRecords();
+        if (this.state === State.STATE_OPENED && !this.hasRecordAfter && hasNewChanges && !this.loadingNextBottom) {
+            if (this.searchRequest || this.hasVisibleSelectedLine() || !this.hasEmptySpaceAtBottom() || !this.viewConfig.isAutoscrollEnabled()) {
+                this.requestNextRecords();
+            } else {
+                this.requestNextRecords(this.recordCountToLoad() * 5);
+            }
         }
+    }
+
+    private hasEmptySpaceAtBottom() {
+        return this.logView.nativeElement.clientHeight - this.shiftView < this.logPane.nativeElement.clientHeight
     }
 
     @BackendEventHandler()
