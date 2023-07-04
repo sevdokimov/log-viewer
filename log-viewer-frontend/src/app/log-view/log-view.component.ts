@@ -172,14 +172,21 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.activeFilterChanged();
     }
 
-    setSelectedLine(idx: number) {
-        if (this.vs.selectedLine != null) {
-            if (Position.containPosition(this.vs.selectedLine, this.m[idx])) { return; }
-        }
-
+    unselectedLine() {
         $('.record.selected-line', this.records.nativeElement).removeClass(
             'selected-line'
         );
+
+        this.vs.selectedLine = null;
+    }
+
+    setSelectedLine(idx: number) {
+        if (this.vs.selectedLine != null) {
+            if (Position.containPosition(this.vs.selectedLine, this.m[idx])) { return; }
+
+            this.unselectedLine();
+        }
+
         $(this.records.nativeElement.children[idx]).addClass('selected-line');
 
         this.vs.selectedLine = Position.recordStart(this.m[idx]);
@@ -271,6 +278,11 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             if (e.parentElement && e.parentElement.id === 'records') {
                 let index = LogViewComponent.getLineIndex(e);
 
+                if (e.classList.contains('selected-line') && event.ctrlKey) {
+                    this.unselectedLine()
+                    return;
+                }
+                
                 this.setSelectedLine(index);
 
                 if ((<Element>event.target).classList.contains('rec-pointer')) {
