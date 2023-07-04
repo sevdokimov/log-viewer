@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,9 @@ public class LogGeneratorService implements InitializingBean, DisposableBean {
     private static final Logger log = LoggerFactory.getLogger(LogGeneratorService.class);
 
     private static final int THREAD_COUNT = 6;
+
+    @Value("${server.port:8080}")
+    private int logViewerPort;
 
     private ExecutorService executorService;
 
@@ -40,6 +44,10 @@ public class LogGeneratorService implements InitializingBean, DisposableBean {
         }
     }
 
+    public String logViewerUrl() {
+        return "Log Viewer URL: http://localhost:" + logViewerPort + "/logs";
+    }
+
     private void generate() {
         Random rnd = new Random();
 
@@ -47,7 +55,7 @@ public class LogGeneratorService implements InitializingBean, DisposableBean {
             while (true) {
                 Thread.sleep(rnd.nextInt(6000));
 
-                int x = rnd.nextInt(10);
+                int x = rnd.nextInt(11);
                 switch (x) {
                     case 0:
                     case 1:
@@ -79,6 +87,9 @@ public class LogGeneratorService implements InitializingBean, DisposableBean {
                         }
                         break;
 
+                    case 10:
+                        log.info(logViewerUrl());
+                        break;
                     default:
                         throw new IllegalStateException();
                 }

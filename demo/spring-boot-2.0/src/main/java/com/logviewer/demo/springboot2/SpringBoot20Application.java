@@ -4,8 +4,10 @@ import com.logviewer.demo.LogGeneratorService;
 import com.logviewer.logLibs.LogConfigurationLoader;
 import com.logviewer.springboot.LogViewerSpringBootConfig;
 import com.logviewer.springboot.LogViewerWebsocketConfig;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -30,7 +32,9 @@ public class SpringBoot20Application {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringBoot20Application.class, args);
+		ConfigurableApplicationContext context = SpringApplication.run(SpringBoot20Application.class, args);
+
+		LoggerFactory.getLogger(SpringBoot20Application.class).info("\n\n\n{}\n\n", context.getBean(LogGeneratorService.class).logViewerUrl());
 	}
 
 }
