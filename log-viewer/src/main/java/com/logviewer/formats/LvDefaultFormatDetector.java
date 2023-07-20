@@ -13,7 +13,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -159,6 +164,22 @@ public class LvDefaultFormatDetector {
 
                         StringBuilder sb = new StringBuilder();
                         sb.append("%d{dd.MM.yy").append(dtSep).append("HH:mm:ss");
+
+                        appendMsIfPresent(sb, matcher);
+                        appendTimeZoneIfPresent(sb, matcher);
+
+                        sb.append('}');
+
+                        return sb.toString();
+                    }
+            ),
+
+            // (Month + day only) Jul  5 15:04:01, Jul 19 15:04:01
+            Pair.of(
+                    Pattern.compile("\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (?:[012]\\d|3[10]| ?\\d) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    matcher -> {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("%d{MMM [ ]d HH:mm:ss");
 
                         appendMsIfPresent(sb, matcher);
                         appendTimeZoneIfPresent(sb, matcher);
