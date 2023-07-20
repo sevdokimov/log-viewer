@@ -248,6 +248,8 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[Jan 5 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
         checkLine("[Oct  5 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
         checkLine("[Dec 15 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
+        checkLine("[Dec 15 10:30:33] foo", "[%d{MMM [ ]d HH:mm:ss}] %m%n");
+        checkLine("[Dec 15 10:30:33 +0300] foo", "[%d{MMM [ ]d HH:mm:ss z}] %m%n");
     }
 
     private Log4jLogFormat detect(String resourceName) {

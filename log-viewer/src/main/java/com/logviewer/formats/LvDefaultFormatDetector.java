@@ -176,7 +176,7 @@ public class LvDefaultFormatDetector {
 
             // (Month + day only) Jul  5 15:04:01, Jul 19 15:04:01
             Pair.of(
-                    Pattern.compile("\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (?:[012]\\d|3[10]| ?\\d) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
+                    Pattern.compile("\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (?:[012]\\d|3[10]| ?[1-9]) (?:0\\d|1\\d|2[0-3]):[0-5]\\d:[0-5]\\d" + MS_TZ + "\\b"),
                     matcher -> {
                         StringBuilder sb = new StringBuilder();
                         sb.append("%d{MMM [ ]d HH:mm:ss");
