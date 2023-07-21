@@ -1,7 +1,7 @@
 LogViewer can be added to existing Spring Boot application as a library. The library provides the log-viewer servlet.
 You can map the servlet to any URL and it will show logs. Log configuration will be detected automatically.
 
-The library is `io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.5`
+The library is `io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.6`
 
 <details>
   <summary>Maven configuration</summary>
@@ -12,7 +12,7 @@ The library is `io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.5`
     <dependency>
         <groupId>io.github.sevdokimov.logviewer</groupId>
         <artifactId>log-viewer-spring-boot</artifactId>
-        <version>1.0.5</version>
+        <version>1.0.6</version>
     </dependency>
 </dependencies>
 ```
@@ -25,7 +25,7 @@ The library is `io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.5`
   
 ```groovy
 dependencies {
-    implementation 'io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.5'
+    implementation 'io.github.sevdokimov.logviewer:log-viewer-spring-boot:1.0.6'
 }
 ```
   </p>
