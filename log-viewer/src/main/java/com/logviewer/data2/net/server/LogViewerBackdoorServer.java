@@ -49,6 +49,9 @@ public class LogViewerBackdoorServer implements InitializingBean, DisposableBean
     public synchronized void startup() throws IOException {
         assert socket == null;
 
+        if (port <= 0)
+            return;
+        
         InetSocketAddress socketAddress;
 
         if (!serverInterface.isEmpty()) {
@@ -98,10 +101,12 @@ public class LogViewerBackdoorServer implements InitializingBean, DisposableBean
 
         closed = true;
 
-        try {
-            socket.close();
-        } catch (IOException e) {
-            LOG.error("Failed to close log server", e);
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LOG.error("Failed to close log server", e);
+            }
         }
 
         for (IncomeConnection connection : connections.toArray(new IncomeConnection[0])) {
