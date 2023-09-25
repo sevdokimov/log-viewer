@@ -12,17 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -33,8 +27,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.logviewer.files.FileTypes.GZ;
+import static com.logviewer.files.FileTypes.ZIP;
 
 public class Log implements LogView {
 
@@ -170,6 +167,25 @@ public class Log implements LogView {
         return tempFile;
     }
 
+    private Path decompressAndCopyZipFile() throws IOException {
+        Path tempFile = Files.createTempFile(Utils.getTempDir(), "unpacked-zip-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
+        tempFile.toFile().deleteOnExit();
+
+        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(file))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            while(zipEntry != null){
+
+                if (!zipEntry.getName().endsWith(File.separator)) {
+                    Files.copy(zis, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                }
+                zipEntry = null;
+            }
+        }
+
+        return tempFile;
+    }
+
+
     public class LogSnapshot implements Snapshot {
 
         private final long size;
@@ -257,14 +273,17 @@ public class Log implements LogView {
                     if (realDataFile != null)
                         return realDataFile;
 
-                    if (GZ.getPattern().matcher(file.toString()).matches()) {
-                        if (!unpackArchive) {
-                            throw new IOException("Cannot open Gzip file because unpacking Gzip archives is disabled. " +
-                                    "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
-                                    "Be caution, automatic unpacking Gzip can fill up all the disk space.");
-                        }
+                    boolean isGzipFile = GZ.getPattern().matcher(file.toString()).matches();
+                    boolean isZipFile = ZIP.getPattern().matcher(file.toString()).matches();
 
-                        res = decompressAndCopyGZipFile();
+                    if (isGzipFile || isZipFile ) {
+                        if (!unpackArchive) {
+                            throw new IOException("Cannot open Gzip/zip file because unpacking archives is disabled. " +
+                                    "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
+                                    "Be caution, automatic unpacking archive files can fill up all the disk space.");
+                        }
+                        res = isGzipFile ? decompressAndCopyGZipFile(): decompressAndCopyZipFile();
+
                     } else {
                         res = file;
                     }
