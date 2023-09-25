@@ -75,7 +75,7 @@ public class LogbackLogFormatTest extends AbstractLogTest {
     public void dateFieldFormat() {
         LogbackLogFormat logFormat = new LogbackLogFormat("[%date{yyyy MM-dd_HH:mm:ss.SSS}] [%thread] %-5level %logger{35} - %X{pipelineId}%X{contentId}%msg%n");
 
-        LvLayoutSimpleDateNode dateNode = (LvLayoutSimpleDateNode) Stream.of(logFormat.getDelegate().getLayout())
+        LvLayoutSimpleDateNode dateNode = (LvLayoutSimpleDateNode) Stream.of(((DefaultFieldSet)logFormat.getDelegate()).getLayout())
                 .filter(f -> f instanceof LvLayoutSimpleDateNode).findFirst().orElse(null);
 
         LogFormat.FieldDescriptor dateField = logFormat.getFields()[logFormat.getFieldIndexByName("date")];

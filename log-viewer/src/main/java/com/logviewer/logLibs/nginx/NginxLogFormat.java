@@ -110,7 +110,7 @@ public class NginxLogFormat extends AbstractPatternLogFormat {
     }
 
     @Override
-    public String getHumanReadableString() {
-        return "nginx: " + getPattern();
+    protected String getFormatName() {
+        return "nginx";
     }
 }

@@ -137,7 +137,7 @@ public class RegexLogFormat implements LogFormat, Cloneable {
                 throw new IllegalArgumentException("'dateFieldIdx' is specified, but 'datePattern' is null");
 
             if (!LvDateUtils.isDateFormatFull(new SimpleDateFormat(datePattern)))
-                throw new IllegalArgumentException("Invalid date format. Format must include date and time");
+                throw new IllegalArgumentException("Invalid date format. Format must include date and time. Date pattern: " + datePattern);
 
             FastDateTimeParser.createFormatter(datePattern, null, null);// validate date format
         }

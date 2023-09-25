@@ -1,0 +1,11 @@
+foo
+2021-08-07 11:00:00 INFO message in format "%d %p %m%n"
+[WARN] 2021-08-07 12:00:00 message in format "[%p] %d %m%n"
+[WARN] 2021-08-07 13:00:00 message in format "[%p] %d %m%n"
+foo
+bar
+[WARN] 2021-08-07 14:00:00 message in format "[%p] %d %m%n"
+[WARN] 2021-08-07 15:00:00 message in format "[%p] %d %m%n"
+2021-08-07 16:00:00 ERROR message in format "%d %p %m%n"
+xxx
+yyy

@@ -137,6 +137,14 @@ public class LogRecord implements Comparable<LogRecord>, Externalizable {
         return fieldNames.keySet();
     }
 
+    /**
+     * An array containing field positions. The start offset of a field with index "i" is located in getFieldPositions()[i * 2],
+     * the end is in getFieldPositions()[i * 2 + 1]
+     */
+    public int[] getFieldPositions() {
+        return fieldPositions;
+    }
+
     @Override
     public String toString() {
         return message;

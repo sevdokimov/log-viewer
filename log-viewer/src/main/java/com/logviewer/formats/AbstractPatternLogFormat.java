@@ -7,6 +7,7 @@ import com.logviewer.formats.utils.LvLayoutStretchNode;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 import java.nio.charset.Charset;
 import java.util.*;
@@ -35,12 +36,23 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     private final String pattern;
 
+    private final String[] patterns;
+
     private List<String> customLevels = new ArrayList<>();
 
-    private transient volatile DefaultFieldSet fieldSet;
+    private transient volatile FieldSet fieldSet;
 
     public AbstractPatternLogFormat(@NonNull String pattern) {
         this.pattern = pattern;
+        this.patterns = null;
+    }
+
+    public AbstractPatternLogFormat(@NonNull String[] patterns) {
+        this.pattern = null;
+        this.patterns = patterns;
+
+        if (patterns.length == 0)
+            throw new IllegalArgumentException();
     }
 
     @Override
@@ -74,8 +86,32 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
         this.fieldSet = null;
     }
 
+    @Nullable
     public String getPattern() {
         return pattern;
+    }
+
+    @Nullable
+    public String[] getPatterns() {
+        return patterns;
+    }
+
+    protected abstract String getFormatName();
+
+    @Override
+    public final String getHumanReadableString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getFormatName()).append(": ");
+
+        if (!StringUtils.isEmpty(pattern)) {
+            sb.append(pattern);
+        } else {
+            sb.append('(');
+            sb.append(String.join(" | ", patterns));
+            sb.append(')');
+        }
+
+        return sb.toString();
     }
 
     public List<String> getCustomLevels() {
@@ -119,12 +155,23 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
         return getDelegate().getFields();
     }
 
-    protected DefaultFieldSet getDelegate() {
-        DefaultFieldSet res = this.fieldSet;
+    protected FieldSet getDelegate() {
+        FieldSet res = this.fieldSet;
 
         if (res == null) {
-            LvLayoutNode[] nodes = parseLayout(pattern);
-            res = new DefaultFieldSet(locale, charset, nodes);
+            if (!StringUtils.isEmpty(pattern)) {
+                LvLayoutNode[] nodes = parseLayout(pattern);
+                res = new DefaultFieldSet(locale, charset, nodes);
+            } else {
+                assert patterns != null;
+
+                LvLayoutNode[][] nodes = new LvLayoutNode[patterns.length][];
+                for (int i = 0; i < patterns.length; i++) {
+                    nodes[i] = parseLayout(patterns[i]);
+                }
+
+                res = new CompoundFieldSet(locale, charset, nodes);
+            }
 
             fieldSet = res;
         }
@@ -136,8 +183,11 @@ public abstract class AbstractPatternLogFormat implements LogFormat {
 
     @Override
     public void validate() throws IllegalArgumentException {
-        if (pattern == null || pattern.isEmpty())
-            throw new RuntimeException("'pattern' field is empty");
+        if (StringUtils.isEmpty(pattern) && (patterns == null || patterns.length == 0))
+            throw new IllegalArgumentException("'pattern' and 'patterns' fields are empty, one of them must be filled");
+
+        if (!StringUtils.isEmpty(pattern) && (patterns != null && patterns.length > 0))
+            throw new IllegalArgumentException("'pattern' and 'patterns' fields are not empty, one of them must be empty");
 
         getDelegate();
     }

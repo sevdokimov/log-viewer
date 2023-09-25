@@ -25,6 +25,10 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
         super(pattern);
     }
 
+    public LogbackLogFormat(@NonNull String ... patterns) {
+        super(patterns);
+    }
+
     @Override
     protected LvLayoutNode[] parseLayout(@NonNull String pattern) throws IllegalArgumentException {
         Node t;
@@ -172,7 +176,7 @@ public class LogbackLogFormat extends AbstractPatternLogFormat {
     }
 
     @Override
-    public String getHumanReadableString() {
-        return "logback: " + getPattern();
+    protected String getFormatName() {
+        return "logback";
     }
 }

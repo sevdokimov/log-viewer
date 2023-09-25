@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongSupplier;
 
-public class DefaultFieldSet {
+public class DefaultFieldSet implements FieldSet {
 
     private final Charset charset;
 
@@ -93,17 +93,29 @@ public class DefaultFieldSet {
         return name;
     }
 
+    @Override
     public LogFormat.FieldDescriptor[] getFields() {
         return fields;
     }
 
+    @Override
     @NonNull
     public LogReader createReader() {
         return new LogReaderImpl();
     }
 
+    @Override
     public boolean hasFullDate() {
         return dateNodeIndex >= 0;
+    }
+
+    @Nullable
+    public LogFormat.FieldDescriptor getDateField() {
+        if (dateNodeIndex < 0)
+            return null;
+
+        int dateFieldIndex = fieldIndex[dateNodeIndex];
+        return fields[dateFieldIndex];
     }
 
     public static boolean canAppendTail(@NonNull LvLayoutNode[] nodes) {

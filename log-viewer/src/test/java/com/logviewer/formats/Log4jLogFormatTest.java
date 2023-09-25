@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 
@@ -306,7 +308,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
 //        if (true)
 //            return;
 
-        String serializedRegexpFormat = "{\n" +
+        String serializedFormat = "{\n" +
                 "  \"type\": \"Log4jLogFormat\",\n" +
                 "  \"realLog4j\": false,\n" +
                 "  \"charset\": \"ISO-8859-1\",\n" +
@@ -315,7 +317,7 @@ public class Log4jLogFormatTest extends AbstractLogTest {
                 "  \"pattern\": \"%d{yyyy-MM-dd HH:mm:ss Z} %m%n\"\n" +
                 "}\n";
 
-        Log4jLogFormat logFormat = (Log4jLogFormat) LvGsonUtils.GSON.fromJson(serializedRegexpFormat, LogFormat.class);
+        Log4jLogFormat logFormat = (Log4jLogFormat) LvGsonUtils.GSON.fromJson(serializedFormat, LogFormat.class);
 
         assertEquals(StandardCharsets.ISO_8859_1, logFormat.getCharset());
         assertEquals(false, logFormat.isRealLog4j());
@@ -356,5 +358,48 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         Log log = getLogService().openLog(getTestLog("format-detection/level-date.log"));
         AbstractPatternLogFormat format = (AbstractPatternLogFormat) log.getFormat();
         assertEquals(Collections.emptyList(), format.getCustomLevels());
+    }
+
+    @Test
+    public void multiPattern() throws IOException {
+        Log4jLogFormat format = new Log4jLogFormat("%d{yyyy-MM-dd HH:mm:ss} %p %m%n", "[%p] %d{yyyy-MM-dd HH:mm:ss} %m%n");
+
+        assertEquals(Arrays.asList("date", "level", "msg"), Stream.of(format.getFields()).map(LogFormat.FieldDescriptor::name).collect(Collectors.toList()));
+
+        String file = getTestLog("multi-pattern.log");
+
+        List<LogRecord> log = new ArrayList<>();
+        readLog(log, getLogService().openLog(file, format), false);
+
+        assertEquals("foo", log.get(0).getMessage());
+
+        checkFields(log.get(1), "2021-08-07 11:00:00", "INFO", "message in format \"%d %p %m%n\"");
+        checkFields(log.get(2), "2021-08-07 12:00:00", "WARN", "message in format \"[%p] %d %m%n\"");
+        checkFields(log.get(3), "2021-08-07 13:00:00", "WARN", "message in format \"[%p] %d %m%n\"\nfoo\nbar");
+        checkFields(log.get(4), "2021-08-07 14:00:00", "WARN", "message in format \"[%p] %d %m%n\"");
+        checkFields(log.get(5), "2021-08-07 15:00:00", "WARN", "message in format \"[%p] %d %m%n\"");
+        checkFields(log.get(6), "2021-08-07 16:00:00", "ERROR", "message in format \"%d %p %m%n\"\nxxx\nyyy");
+
+        List<LogRecord> logBackwardRead = new ArrayList<>();
+        readLog(logBackwardRead, getLogService().openLog(file, format), true);
+        Collections.reverse(logBackwardRead);
+
+        assertArrayEquals(log.stream().map(LogRecord::getMessage).toArray(), logBackwardRead.stream().map(LogRecord::getMessage).toArray());
+    }
+
+    private void readLog(List<LogRecord> res, Log log, boolean backward) throws IOException {
+        try (Snapshot snapshot = log.createSnapshot()) {
+            if (backward) {
+                snapshot.processRecordsBack(snapshot.getSize(), true, record -> {
+                    res.add(record);
+                    return true;
+                });
+            } else {
+                snapshot.processRecords(0, record -> {
+                    res.add(record);
+                    return true;
+                });
+            }
+        }
     }
 }

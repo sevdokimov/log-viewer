@@ -74,6 +74,10 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
         super(pattern);
     }
 
+    public Log4jLogFormat(@NonNull String ... patterns) {
+        super(patterns);
+    }
+
     public boolean isRealLog4j() {
         return realLog4j;
     }
@@ -299,7 +303,7 @@ public class Log4jLogFormat extends AbstractPatternLogFormat {
     }
 
     @Override
-    public String getHumanReadableString() {
-        return "log4j: " + getPattern();
+    protected String getFormatName() {
+        return "log4j";
     }
 }
