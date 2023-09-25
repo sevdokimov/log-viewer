@@ -242,6 +242,14 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[21.10.02_23:39:39,999] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS}] %m%n");
         checkLine("[21.10.02_23:39:39,999 +0000] 00001720 Receive: ParsedData", "[%d{dd.MM.yy_HH:mm:ss,SSS z}] %m%n");
         checkLine("[21.13.02_23:39:39,999] 00001720 Receive: ParsedData", null);
+
+        checkLine("[Jan  15 10:30:33.999] foo", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("[Jan 35 10:30:33.999] foo", LvDefaultFormatDetector.UNKNOWN_FORMAT);
+        checkLine("[Jan 5 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
+        checkLine("[Oct  5 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
+        checkLine("[Dec 15 10:30:33.999] foo", "[%d{MMM [ ]d HH:mm:ss.SSS}] %m%n");
+        checkLine("[Dec 15 10:30:33] foo", "[%d{MMM [ ]d HH:mm:ss}] %m%n");
+        checkLine("[Dec 15 10:30:33 +0300] foo", "[%d{MMM [ ]d HH:mm:ss z}] %m%n");
     }
 
     private Log4jLogFormat detect(String resourceName) {
