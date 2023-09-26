@@ -12,14 +12,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -28,7 +32,7 @@ import java.util.function.Predicate;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 import static com.logviewer.files.FileTypes.GZ;
 import static com.logviewer.files.FileTypes.ZIP;
@@ -61,9 +65,6 @@ public class Log implements LogView {
     private final Object logChangedTaskKey = new Object();
 
     private final Path file;
-
-    private volatile Path realDataFile;
-    private final Object realFileMux = new Object();
 
     private final String id;
 
@@ -150,63 +151,55 @@ public class Log implements LogView {
         }
     }
 
-    private Path decompressAndCopyGZipFile() throws IOException {
-        Path tempFile = Files.createTempFile(Utils.getTempDir(), "unpacked-gz-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
-        tempFile.toFile().deleteOnExit();
-
-        try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(file));
-             OutputStream fos = Files.newOutputStream(tempFile)) {
-
-            byte[] buffer = new byte[1024 * 10];
-            int len;
-            while ((len = gis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-            }
+    private static void decompressGZipFile(Path file, Path unpackedFile) throws IOException {
+        try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(file))) {
+            Files.copy(gis, unpackedFile, StandardCopyOption.REPLACE_EXISTING);
         }
-
-        return tempFile;
     }
 
-    private Path decompressAndCopyZipFile() throws IOException {
-        Path tempFile = Files.createTempFile(Utils.getTempDir(), "unpacked-zip-", "-" + file.getName(file.getNameCount() - 1) + ".tmp");
-        tempFile.toFile().deleteOnExit();
+    private static void decompressZipFile(Path file, Path unpackedFile) throws IOException {
+        try (ZipFile zipFile = new ZipFile(file.toFile())) {
+            ZipEntry fileEntry = null;
 
-        try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(file))) {
-            ZipEntry zipEntry = zis.getNextEntry();
-            while(zipEntry != null){
+            for (ZipEntry zipEntry : Collections.list(zipFile.entries())) {
+                if (zipEntry.isDirectory())
+                    continue;
 
-                if (!zipEntry.getName().endsWith(File.separator)) {
-                    Files.copy(zis, tempFile, StandardCopyOption.REPLACE_EXISTING);
+                if (fileEntry != null) {
+                    throw new IOException("Failed to read the zip archive: the archive contains more than one file. " +
+                            "Log-viewer expects that the zip archive contains exactly one log file");
                 }
-                zipEntry = null;
-            }
-        }
 
-        return tempFile;
+                fileEntry = zipEntry;
+            }
+
+            if (fileEntry == null) {
+                throw new IOException("Failed to read the zip archive: no files in the the archive. " +
+                        "Log-viewer expects that the zip archive contains exactly one log file");
+            }
+
+            Files.copy(zipFile.getInputStream(fileEntry), unpackedFile, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
 
     public class LogSnapshot implements Snapshot {
 
-        private final long size;
-        private final long lastModification;
-        private final IOException error;
-        private final String hash;
+        private long size;
+        private long lastModification;
+        private IOException error;
+        private String hash;
+
+        private Path unpackedFile;
 
         private SeekableByteChannel channel;
         private BufferedFile buf;
 
-        private final LogIndex logIndex;
+        private LogIndex logIndex;
 
 //        private Exception stacktrace = new Exception();
 
         LogSnapshot() throws LogCrashedException {
-            long size = 0;
-            long lastModification = 0;
-            IOException error = null;
-            String hash = null;
-            LogIndex logIndex = null;
-
             synchronized (Log.this) {
                 boolean success = false;
 
@@ -223,13 +216,20 @@ public class Log implements LogView {
                     if (!attrs.isRegularFile())
                         throw new IOException("Not a file");
 
-                    size = attrs.size();
                     lastModification = attrs.lastModifiedTime().toMillis();
+                    size = attrs.size();
+
+                    // Unpack archive is needed
+                    unpackArchiveIfNeeded();
 
                     if (cachedHashTimestamp == lastModification) {
                         hash = cachedHash;
                     } else {
-                        hash = calculateHash(size);
+                         if (unpackedFile != null) { // Zip or GZ archive
+                             hash = Long.toHexString(lastModification);
+                        } else {
+                             hash = calculateHash(size);
+                         }
 
                         if (!hash.equals(cachedHash)) {
                             Log.this.logIndex = new LogIndex();
@@ -249,12 +249,6 @@ public class Log implements LogView {
                         Utils.closeQuietly(this);
                 }
             }
-
-            this.size = size;
-            this.lastModification = lastModification;
-            this.error = error;
-            this.hash = hash;
-            this.logIndex = logIndex;
         }
 
         @Override
@@ -266,33 +260,46 @@ public class Log implements LogView {
             return lastModification;
         }
 
-        private Path getDataRealFile() throws IOException {
-            Path res = realDataFile;
-            if (res == null) {
-                synchronized (realFileMux) {
-                    if (realDataFile != null)
-                        return realDataFile;
+        private void unpackArchiveIfNeeded() throws IOException {
+            String fileName = file.getFileName().toString();
+            boolean isGzipFile = GZ.getPattern().matcher(fileName).matches();
+            boolean isZipFile = ZIP.getPattern().matcher(fileName).matches();
 
-                    boolean isGzipFile = GZ.getPattern().matcher(file.toString()).matches();
-                    boolean isZipFile = ZIP.getPattern().matcher(file.toString()).matches();
+            if (!isGzipFile && !isZipFile)
+                return;
 
-                    if (isGzipFile || isZipFile ) {
-                        if (!unpackArchive) {
-                            throw new IOException("Cannot open Gzip/zip file because unpacking archives is disabled. " +
-                                    "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
-                                    "Be caution, automatic unpacking archive files can fill up all the disk space.");
-                        }
-                        res = isGzipFile ? decompressAndCopyGZipFile(): decompressAndCopyZipFile();
-
-                    } else {
-                        res = file;
-                    }
-
-                    realDataFile = res;
-                }
+            if (!unpackArchive) {
+                throw new IOException("Cannot open Gzip/zip file because unpacking archives is disabled. " +
+                        "It can be enabled using `" + UNPACK_GZ_ARCHIVES + "=true` configuration property. " +
+                        "Be caution, automatic unpacking archive files can fill up all the disk space.");
             }
 
-            return res;
+            unpackedFile = Utils.getTempDir().resolve("unpacked-" + fileName + DEFAULT_ID_GENERATOR.apply(file.toString()) + ".log");
+
+            BasicFileAttributes unpackedAttrs;
+            try {
+                unpackedAttrs = Files.readAttributes(unpackedFile, BasicFileAttributes.class);
+            } catch (NoSuchFileException ignored) {
+                unpackedAttrs = null;
+            }
+
+            if (unpackedAttrs == null || unpackedAttrs.lastModifiedTime().toMillis() != lastModification) {
+                LOG.info("Unpacking {} into {}...", file, unpackedFile);
+                if (isGzipFile) {
+                    decompressGZipFile(file, unpackedFile);
+                } else {
+                    decompressZipFile(file, unpackedFile);
+                }
+
+                Files.setLastModifiedTime(unpackedFile, FileTime.fromMillis(lastModification));
+
+                if (unpackedAttrs == null)
+                    unpackedFile.toFile().deleteOnExit();
+
+                unpackedAttrs = Files.readAttributes(unpackedFile, BasicFileAttributes.class);
+            }
+
+            size = unpackedAttrs.size();
         }
 
         private SeekableByteChannel getChannel() throws IOException {
@@ -300,7 +307,7 @@ public class Log implements LogView {
                 if (error != null)
                     throw new IOException(error);
 
-                channel = Files.newByteChannel(getDataRealFile(), StandardOpenOption.READ);
+                channel = Files.newByteChannel(unpackedFile == null ? file : unpackedFile, StandardOpenOption.READ);
             }
 
             buf = new BufferedFile(channel, size);
@@ -684,15 +691,19 @@ public class Log implements LogView {
 
         @Override
         public boolean isValidHash(@NonNull String hash) {
-            long tLong = Long.parseUnsignedLong(hash, 16);
-
-            int hashSize = (int) ((tLong >>> 32) & 0xff);
-
-            if (hashSize == hashSize(size)) { // Compare size of block used to has calculation.
-                return hash.equals(this.hash);
-            }
-
             try {
+                long tLong = Long.parseUnsignedLong(hash, 16);
+
+                if (unpackedFile != null) { // Hash is Long.toHexString(lastModification) for Zip and GZ archive.
+                    return tLong == lastModification;
+                }
+
+                int hashSize = (int) ((tLong >>> 32) & 0xff);
+
+                if (hashSize == hashSize(size)) { // Compare size of block used to has calculation.
+                    return hash.equals(this.hash);
+                }
+
                 return calculateHash(hashSize).equals(hash);
             } catch (LogCrashedException | IOException e) {
                 return false;
