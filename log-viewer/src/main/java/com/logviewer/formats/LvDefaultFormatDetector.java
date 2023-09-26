@@ -1,6 +1,7 @@
 package com.logviewer.formats;
 
 import com.logviewer.data2.LogFormat;
+import com.logviewer.files.FileTypes;
 import com.logviewer.formats.utils.FastDateTimeParser;
 import com.logviewer.logLibs.log4j.Log4jLogFormat;
 import com.logviewer.logLibs.nginx.NginxLogFormat;
@@ -11,17 +12,18 @@ import org.springframework.lang.Nullable;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class LvDefaultFormatDetector {
 
@@ -192,21 +194,45 @@ public class LvDefaultFormatDetector {
     );
 
     private static int readBuffer(@NonNull Path path, byte[] data) {
-        int length = 0;
+        try {
+            String name = path.getFileName().toString();
+            if (FileTypes.GZ.getPattern().matcher(name).matches()) {
+                try (GZIPInputStream in = new GZIPInputStream(Files.newInputStream(path))) {
+                    return readBuffer(in, data);
+                }
+            } else if (FileTypes.ZIP.getPattern().matcher(name).matches()) {
+                try (ZipFile zipFile = new ZipFile(path.toFile())) {
+                    List<? extends ZipEntry> entries = Collections.list(zipFile.entries()).stream()
+                            .filter(e -> !e.isDirectory())
+                            .collect(Collectors.toList());
 
-        try (FileInputStream in = new FileInputStream(path.toFile())) {
-            while (length < data.length) {
-                int n = in.read(data, length, data.length - length);
-                if (n < 0)
-                    return length;
+                    if (entries.size() != 1)
+                        return -1;
 
-                length += n;
+                    return readBuffer(zipFile.getInputStream(entries.get(0)), data);
+                }
+            } else {
+                try (FileInputStream in = new FileInputStream(path.toFile())) {
+                    return readBuffer(in, data);
+                }
             }
-
-            return length;
         } catch (IOException e) {
             return -1;
         }
+    }
+
+    private static int readBuffer(@NonNull InputStream in, byte[] data) throws IOException {
+        int length = 0;
+
+        while (length < data.length) {
+            int n = in.read(data, length, data.length - length);
+            if (n < 0)
+                return length;
+
+            length += n;
+        }
+
+        return length;
     }
 
     private static int findLineEnd(byte[] data, int length) {

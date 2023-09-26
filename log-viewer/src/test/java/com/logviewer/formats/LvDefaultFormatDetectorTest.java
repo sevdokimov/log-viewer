@@ -252,6 +252,30 @@ public class LvDefaultFormatDetectorTest extends AbstractLogTest {
         checkLine("[Dec 15 10:30:33 +0300] foo", "[%d{MMM [ ]d HH:mm:ss z}] %m%n");
     }
 
+    @Test
+    public void testGzArchive() {
+        Log4jLogFormat format = detect("/testdata/gz/search.log.gz");
+        assertEquals("%d{yyyy-MM-dd HH:mm:ss} %m%n", format.getPattern());
+    }
+
+    @Test
+    public void testZipArchive() {
+        Log4jLogFormat format = detect("/testdata/gz/search.zip");
+        assertEquals("%d{yyyy-MM-dd HH:mm:ss} %m%n", format.getPattern());
+    }
+
+    @Test
+    public void testBrokenZipArchive() {
+        Log4jLogFormat format = detect("/testdata/gz/broken-archive.zip");
+        assertNull(format);
+    }
+
+    @Test
+    public void testMoreThanOneItemInZip() {
+        Log4jLogFormat format = detect("/testdata/gz/more-than-one-item.zip");
+        assertNull(format);
+    }
+
     private Log4jLogFormat detect(String resourceName) {
         URL url = getClass().getResource(resourceName);
         assert url.getProtocol().equals("file");
