@@ -1,4 +1,4 @@
-Configuration is located in `log-viewer-1.0.6/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
+Configuration is located in `log-viewer-1.0.7/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
 
 ### List of available log files
 
@@ -158,9 +158,10 @@ format = {
 }  
 ```
 `pattern` - Format of log lines defined the same way as in [Log4j configuration](https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout) <br>
-`charset` - _(optional)_ file encoding name
-`locale`  - _(optional)_ custom locale  
-`customLevels`  - _(optional)_ custom levels
+`patterns` - A list of possible log line formats. May be used when the log contains lines in diffrent formats. Either `pattern` or `patterns` fields must be present <br>
+`charset` - _(optional)_ file encoding name <br>
+`locale`  - _(optional)_ custom locale <br>  
+`customLevels`  - _(optional)_ custom levels <br>
 
 ###### Logback format
 
@@ -175,10 +176,11 @@ format = {
   customLevels: ["XXX", "YYY"]
 }
 ```       
-`pattern` - Format of log lines defined the same way as in [Logback configuration](http://logback.qos.ch/manual/layouts.html) <br>
-`charset` - _(optional)_ file encoding name
-`locale`  - _(optional)_ custom locale  
-`customLevels`  - _(optional)_ custom levels
+`pattern` - Format of log lines defined the same way as in [Logback configuration](http://logback.qos.ch/manual/layouts.html) <br> 
+`patterns` - A list of possible log line formats. May be used when the log contains lines in diffrent formats. Either `pattern` or `patterns` fields must be present <br>
+`charset` - _(optional)_ file encoding name <br>
+`locale`  - _(optional)_ custom locale <br>  
+`customLevels`  - _(optional)_ custom levels <br>
 
 ###### Regex format
 
