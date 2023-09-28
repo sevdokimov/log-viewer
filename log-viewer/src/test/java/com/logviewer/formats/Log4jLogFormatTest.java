@@ -387,6 +387,15 @@ public class Log4jLogFormatTest extends AbstractLogTest {
         assertArrayEquals(log.stream().map(LogRecord::getMessage).toArray(), logBackwardRead.stream().map(LogRecord::getMessage).toArray());
     }
 
+    @Test
+    public void spaceInLevel() {
+        Log4jLogFormat format = new Log4jLogFormat("%d{yyyy-MM-dd HH:mm:ss} %p %m%n");
+        format.addCustomLevels(Collections.singletonList("REQUEST SUCCESS"));
+
+        LogRecord logRecord = read(format, "2023-09-12 11:00:00 REQUEST SUCCESS message");
+        checkFields(logRecord, "2023-09-12 11:00:00", "REQUEST SUCCESS", "message");
+    }
+
     private void readLog(List<LogRecord> res, Log log, boolean backward) throws IOException {
         try (Snapshot snapshot = log.createSnapshot()) {
             if (backward) {
