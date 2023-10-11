@@ -63,11 +63,11 @@ public class LogViewerAutoConfig {
     }
 
     @Bean
-    public LvFileAccessManagerImpl lvLogManager(@Value("${log-viewer.accessible-files.pattern:}") List<String> accessiblePatterns) {
+    public LvFileAccessManagerImpl lvLogManager(@Value("${log-viewer.accessible-files.pattern:}") String[] accessiblePatterns) {
         LvFileAccessManagerImpl res = new LvFileAccessManagerImpl(null);
 
         Stream<PathPattern> files = getLogFormats().keySet().stream().map(PathPattern::file);
-        Stream<PathPattern> dirs = accessiblePatterns.stream().map(PathPattern::fromPattern);
+        Stream<PathPattern> dirs = Stream.of(accessiblePatterns).map(PathPattern::fromPattern);
 
         res.setPaths(Stream.concat(files, dirs).collect(Collectors.toList()));
         return res;
