@@ -35,7 +35,7 @@ pass several "log" query parameters, for example: _h<span>tt</span>p://localhost
 Note: all log files must have full timestamp, otherwise LogViewer cannot merge them.
 
 Also, LogViewer can be embedded into another java web application, if you don't want to run it as a standalone process.
-See [embedding to Spring Boot application](_docs/embadded-spring-boot.md) or [embedding to java web application](_docs/embadded.md)
+See [embedding to Spring Boot application](_docs/embedded-spring-boot.md) or [embedding to java web application](_docs/embedded.md)
 
 ### Configuration
 
