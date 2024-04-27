@@ -3,7 +3,7 @@ package com.logviewer.tests.utils;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
-import org.openqa.selenium.devtools.v112.emulation.Emulation;
+import org.openqa.selenium.devtools.v123.emulation.Emulation;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.util.HashMap;
