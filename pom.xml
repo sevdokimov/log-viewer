@@ -35,6 +35,7 @@
                 <module>demo/spring-boot-2.0</module>
                 <module>demo/spring-boot-2.3</module>
                 <module>demo/spring-boot-2.3-log4j</module>
+                <module>demo/spring-boot-3.2</module>
             </modules>
         </profile>
 

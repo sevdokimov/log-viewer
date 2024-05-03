@@ -20,8 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,7 +73,7 @@ public class LogViewController extends AbstractRestRequestHandler {
     }
 
     @Endpoint(method = {FormSubmitEvent.MethodType.GET, FormSubmitEvent.MethodType.POST})
-    public void download(HttpServletRequest request, HttpServletResponse response) throws IOException, ExecutionException {
+    public void download(LvServletRequest request, LvServletResponse response) throws IOException, ExecutionException {
         String filtersJson = request.getParameter("filters");
         RecordPredicate[] filters;
         if (filtersJson == null || filtersJson.isEmpty()) {
@@ -299,7 +297,7 @@ public class LogViewController extends AbstractRestRequestHandler {
         return a.length() < b.length() ? a : b;
     }
 
-    private static void setDisposition(HttpServletResponse response, String fileName) throws UnsupportedEncodingException {
+    private static void setDisposition(LvServletResponse response, String fileName) throws UnsupportedEncodingException {
         String headerVal = String.format("attachment;filename=\"%s\";filename*=UTF-8''%s", fileName, URLEncoder.encode(fileName, "UTF-8"));
         response.setHeader("Content-Disposition", headerVal);
     }

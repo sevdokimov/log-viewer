@@ -3,8 +3,12 @@ package com.logviewer;
 import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.web.LogViewerServlet;
+import com.logviewer.web.LogViewerServletHandler;
 import com.logviewer.web.LogViewerWebsocket;
-import com.typesafe.config.*;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
+import com.typesafe.config.ConfigValue;
+import com.typesafe.config.ConfigValueType;
 import org.eclipse.jetty.jaas.JAASLoginService;
 import org.eclipse.jetty.jaas.spi.LdapLoginModule;
 import org.eclipse.jetty.security.*;
@@ -36,7 +40,9 @@ import javax.websocket.server.ServerEndpointConfig;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LogViewerMain {
@@ -107,7 +113,7 @@ public class LogViewerMain {
             URL webAppUrl = new URL(webXmlStr.substring(0, webXmlStr.length() - "WEB-INF/web.xml".length()));
 
             webAppCtx.setBaseResource(Resource.newResource(webAppUrl));
-            webAppCtx.setAttribute(LogViewerServlet.SPRING_CONTEXT_PROPERTY, appCtx);
+            webAppCtx.setAttribute(LogViewerServletHandler.SPRING_CONTEXT_PROPERTY, appCtx);
 
             if (authenticationEnabled) {
                 if (authenticationLdapEnabled) {

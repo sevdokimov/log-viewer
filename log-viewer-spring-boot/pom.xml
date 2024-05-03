@@ -17,11 +17,6 @@
 
     <url>https://github.com/sevdokimov/log-viewer</url>
 
-
-    <properties>
-        <spring-boot.version>2.3.1.RELEASE</spring-boot.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -59,6 +54,12 @@
             <groupId>javax.websocket</groupId>
             <artifactId>javax.websocket-api</artifactId>
             <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>10.1.20</version>
             <scope>provided</scope>
         </dependency>
 

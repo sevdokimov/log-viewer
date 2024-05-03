@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
  * foo(HttpServletRequest request, HttpServletResponse response)
  * foo(HttpServletRequest request, HttpServletResponse response, T requestBody)
  *
- * @see AbstractRestRequestHandler#process(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+ * @see AbstractRestRequestHandler#process(LvServletRequest, LvServletResponse)
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

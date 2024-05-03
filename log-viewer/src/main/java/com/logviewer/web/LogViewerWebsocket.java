@@ -2,16 +2,18 @@ package com.logviewer.web;
 
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.utils.LvGsonUtils;
+import com.logviewer.utils.RuntimeInterruptedException;
 import com.logviewer.utils.Utils;
 import com.logviewer.web.dto.events.BackendErrorEvent;
+import com.logviewer.web.dto.events.BackendEvent;
 import com.logviewer.web.rmt.MethodCall;
 import com.logviewer.web.rmt.RemoteInvoker;
 import com.logviewer.web.session.LogSession;
+import com.logviewer.web.session.SessionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.NonNull;
 
 import javax.websocket.Endpoint;
 import javax.websocket.*;
@@ -24,6 +26,8 @@ import static javax.websocket.CloseReason.CloseCodes.NORMAL_CLOSURE;
 public class LogViewerWebsocket extends Endpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogViewerWebsocket.class);
+
+    private static final String LOG_SESSION = "log-session";
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -44,7 +48,50 @@ public class LogViewerWebsocket extends Endpoint {
             }
         }
 
-        webSession.addMessageHandler(new LogWebSocketHandler(webSession, context));
+        SessionAdapter sessionAdapter = event -> sendMessage(webSession, event);
+
+        LogSession session = LogSession.fromContext(sessionAdapter, applicationContext);
+
+        webSession.getUserProperties().put(LOG_SESSION, session);
+
+        //noinspection Convert2Lambda
+        webSession.addMessageHandler(new MessageHandler.Whole<String>() {
+            @Override
+            public void onMessage(String message) {
+                try {
+                    MethodCall call = LvGsonUtils.GSON.fromJson(message, MethodCall.class);
+
+                    RemoteInvoker.call(session, call);
+                } catch (Throwable e) {
+                    if (e instanceof InvocationTargetException) {
+                        // an expected exception, the exception is mentioned in "throws" list in method declaration.
+                        e = ((InvocationTargetException) e).getTargetException();
+                    }
+
+                    LOG.error("Remote method execution error", e);
+
+                    sessionAdapter.send(new BackendErrorEvent(Utils.getStackTraceAsString(e)));
+                }
+            }
+        });
+    }
+
+    private void sendMessage(Session webSession, BackendEvent event) {
+        String json = LvGsonUtils.GSON.toJson(event);
+
+        synchronized (webSession) {
+            if (Thread.currentThread().isInterrupted())
+                throw new RuntimeInterruptedException();
+            if (LOG.isDebugEnabled())
+                LOG.debug("Send message " + json);
+
+            webSession.getAsyncRemote().sendText(json, result -> {
+                if (!result.isOK() && webSession.isOpen()) {
+                    LOG.error("Failed to send message", result.getException());
+                    Utils.closeQuietly(webSession);
+                }
+            });
+        }
     }
 
     @Override
@@ -54,11 +101,9 @@ public class LogViewerWebsocket extends Endpoint {
     }
 
     private void close(Session session) {
-        for (MessageHandler handler : session.getMessageHandlers()) {
-            if (handler instanceof LogWebSocketHandler) {
-                ((LogWebSocketHandler) handler).close();
-            }
-        }
+        LogSession logSession = (LogSession) session.getUserProperties().get(LOG_SESSION);
+        if (logSession != null)
+            logSession.shutdown();
     }
 
     @Override
@@ -80,39 +125,5 @@ public class LogViewerWebsocket extends Endpoint {
             return "<anonymous>";
 
         return userPrincipal.getName();
-    }
-
-    private static class LogWebSocketHandler implements MessageHandler.Whole<String> {
-        private final LogSession session;
-
-        private final WebsocketSessionAdapter sessionAdapter;
-
-        LogWebSocketHandler(Session webSession, @NonNull ApplicationContext applicationContext) {
-            sessionAdapter = new WebsocketSessionAdapter(webSession);
-            session = LogSession.fromContext(sessionAdapter, applicationContext);
-        }
-
-        public void close() {
-            session.shutdown();
-        }
-
-        @Override
-        public void onMessage(String message) {
-            try {
-                MethodCall call = LvGsonUtils.GSON.fromJson(message, MethodCall.class);
-
-                RemoteInvoker.call(session, call);
-            } catch (Throwable e) {
-                if (e instanceof InvocationTargetException) {
-                    // an expected exception, the exception is mentioned in "throws" list in method declaration.
-                    e = ((InvocationTargetException)e).getTargetException();
-                }
-
-                LOG.error("Remote method execution error", e);
-
-                sessionAdapter.send(new BackendErrorEvent(Utils.getStackTraceAsString(e)));
-            }
-        }
-
     }
 }

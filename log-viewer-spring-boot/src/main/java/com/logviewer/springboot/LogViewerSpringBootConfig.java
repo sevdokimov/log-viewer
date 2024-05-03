@@ -2,14 +2,17 @@ package com.logviewer.springboot;
 
 import com.logviewer.config.LogViewerAutoConfig;
 import com.logviewer.config.LvConfigBase;
-import com.logviewer.web.LogViewerServlet;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.stream.Stream;
 
 @Import({LogViewerAutoConfig.class, LvConfigBase.class})
 @Configuration
@@ -23,10 +26,24 @@ public class LogViewerSpringBootConfig {
 
     @Bean
     public ServletRegistrationBean logViewerServlet(Environment environment) {
-        ServletRegistrationBean<LogViewerServlet> servlet = new ServletRegistrationBean<>();
-        servlet.setName("logViewerServlet");
-        servlet.setAsyncSupported(true);
-        servlet.setServlet(new LogViewerServlet());
+        ServletRegistrationBean servletReg = new ServletRegistrationBean();
+        servletReg.setName("logViewerServlet");
+        servletReg.setAsyncSupported(true);
+
+        // Log-viewer supports both "javax.servlet.*" and "jakarta.servlet.*"
+
+        Class servletClass = JakartaSupport.loadJavaxOrJakartaClass(getClass().getClassLoader(), "com.logviewer.web.LogViewerServlet");
+
+        Object servletInstance;
+
+        try {
+            servletInstance = servletClass.getConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
+        Method setServlet = Stream.of(ServletRegistrationBean.class.getMethods()).filter(m -> m.getName().equals("setServlet")).findFirst().get();
+        ReflectionUtils.invokeMethod(setServlet, servletReg, servletInstance);
 
         String logServletPath = environment.getProperty(LOG_VIEWER_URL_MAPPING, DEFAULT_LOG_PATH);
         if (!logServletPath.endsWith("*")) {
@@ -36,13 +53,13 @@ public class LogViewerSpringBootConfig {
             logServletPath += "*";
         }
 
-        servlet.setUrlMappings(Collections.singletonList(logServletPath));
+        servletReg.setUrlMappings(Collections.singletonList(logServletPath));
 
         String websocketPath = environment.getProperty(LOG_VIEWER_WEBSOCKET_PATH);
         if (websocketPath != null && !websocketPath.isEmpty()) {
-            servlet.addInitParameter("web-socket-path", websocketPath);
+            servletReg.addInitParameter("web-socket-path", websocketPath);
         }
 
-        return servlet;
+        return servletReg;
     }
 }

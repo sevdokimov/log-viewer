@@ -1,5 +1,6 @@
 package com.logviewer.web;
 
+import com.logviewer.utils.DelegateProxy;
 import com.logviewer.utils.LvGsonUtils;
 import com.logviewer.utils.LvTimer;
 import com.logviewer.utils.Utils;
@@ -16,9 +17,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -128,7 +126,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
         private long uiMessageCounter;
         private final List<ToUiMessage> toUiQueue = new ArrayList<>();
 
-        private AsyncContext asyncContext;
+        private LvAsyncContext asyncContext;
         private TimerTask asyncContextChecker;
 
         private final AtomicBoolean closed = new AtomicBoolean();
@@ -144,7 +142,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
             logSession = LogSession.fromContext(this::sendEvent, applicationContext);
         }
 
-        Object handleRequest(HttpServletRequest request, ToBackendMessage[] requests) throws Throwable {
+        Object handleRequest(LvServletRequest request, ToBackendMessage[] requests) throws Throwable {
             try {
                 addRequestToQueue(requests);
 
@@ -160,7 +158,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
                     if (asyncContext != null) {
                         LOG.debug("release held connection [sessionId={}, sentMessages={}]", sessionId, toUiQueue.size());
 
-                        writeResponse(asyncContext.getResponse(), toUiQueue);
+                        writeResponse(DelegateProxy.create(LvServletResponse.class, asyncContext.getResponse()), toUiQueue);
                         toUiQueue.clear();
                         asyncContext.complete();
                         asyncContext = null;
@@ -177,7 +175,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
                         return res;
                     } else {
-                        asyncContext = request.startAsync();
+                        asyncContext = DelegateProxy.create(LvAsyncContext.class, request.startAsync());
                         asyncContext.setTimeout(connectionHoldTime + 10_000);
 
                         asyncContextChecker = timer.schedule(asyncContextCloserTask(asyncContext), connectionHoldTime);
@@ -272,7 +270,7 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
             }
         }
 
-        private void writeResponse(ServletResponse resp, @Nullable List<ToUiMessage> res) throws IOException {
+        private void writeResponse(LvServletResponse resp, @Nullable List<ToUiMessage> res) throws IOException {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
 
@@ -292,8 +290,8 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
 
             try {
                 LOG.debug("release held connection [sessionId={}, sentMessages={}]", sessionId, toUiQueue.size());
-                
-                writeResponse(asyncContext.getResponse(), toUiQueue);
+
+                writeResponse(DelegateProxy.create(LvServletResponse.class, asyncContext.getResponse()), toUiQueue);
                 toUiQueue.clear();
                 asyncContext.complete();
                 asyncContext = null;
@@ -310,16 +308,16 @@ public class WebsocketEmulationController extends AbstractRestRequestHandler {
             }
         }
 
-        private Runnable asyncContextCloserTask(AsyncContext ctx) {
-            WeakReference<AsyncContext> expectedContext = new WeakReference<>(ctx);
+        private Runnable asyncContextCloserTask(LvAsyncContext ctx) {
+            WeakReference<Object> expectedContext = new WeakReference<>(DelegateProxy.getDelegate(ctx));
 
             return () -> {
                 synchronized (toUiQueue) {
                     if (closed.get())
                         return;
 
-                    AsyncContext context = expectedContext.get();
-                    if (context == null || context != asyncContext)
+                    Object context = expectedContext.get();
+                    if (context == null || context != DelegateProxy.getDelegate(asyncContext))
                         return;
 
                     sendResponseQueueToAsync();

@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StreamUtils;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.swing.text.html.FormSubmitEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +19,7 @@ import java.util.Map;
 
 public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
-    private final ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
+    private final ThreadLocal<LvServletRequest> request = new ThreadLocal<>();
 
     private static final Logger log = LoggerFactory.getLogger(AbstractRestRequestHandler.class);
 
@@ -40,7 +37,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
     }
 
     @NonNull
-    protected HttpServletRequest getRequest() {
+    protected LvServletRequest getRequest() {
         return request.get();
     }
 
@@ -66,7 +63,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
         return Integer.parseInt(s);
     }
 
-    private static void validateMethodType(HttpServletRequest req, FormSubmitEvent.MethodType[] method) {
+    private static void validateMethodType(LvServletRequest req, FormSubmitEvent.MethodType[] method) {
         try {
             FormSubmitEvent.MethodType methodType = FormSubmitEvent.MethodType.valueOf(req.getMethod());
 
@@ -76,10 +73,10 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
 
         }
 
-        throw new RestException(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "Wrong method: " + req.getMethod());
+        throw new RestException(405, "Wrong method: " + req.getMethod());
     }
 
-    private Object loadBody(Class<?> type, HttpServletRequest req) throws IOException {
+    private Object loadBody(Class<?> type, LvServletRequest req) throws IOException {
         String str = StreamUtils.copyToString(req.getInputStream(), StandardCharsets.UTF_8);
 
         if (type == String.class)
@@ -91,7 +88,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
         return LvGsonUtils.GSON.fromJson(str, type);
     }
 
-    public final void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public final void process(LvServletRequest req, LvServletResponse resp) throws IOException {
         request.set(req);
 
         try {
@@ -114,13 +111,13 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
             Class<?>[] parameterTypes = method.getParameterTypes();
             if (parameterTypes.length == 0) {
                 args = Utils.EMPTY_OBJECTS;
-            } else if (Arrays.equals(parameterTypes, new Class[]{HttpServletRequest.class, HttpServletResponse.class})) {
+            } else if (Arrays.equals(parameterTypes, new Class[]{LvServletRequest.class, LvServletResponse.class})) {
                 args = new Object[]{req, resp};
-            } else if (Arrays.equals(parameterTypes, new Class[]{HttpServletRequest.class})) {
+            } else if (Arrays.equals(parameterTypes, new Class[]{LvServletRequest.class})) {
                 args = new Object[]{req};
             } else if (parameterTypes.length == 1) {
                 args = new Object[]{loadBody(parameterTypes[0], req)};
-            } else if (parameterTypes.length == 3 && parameterTypes[0] == HttpServletRequest.class && parameterTypes[1] == HttpServletResponse.class) {
+            } else if (parameterTypes.length == 3 && parameterTypes[0] == LvServletRequest.class && parameterTypes[1] == LvServletResponse.class) {
                 args = new Object[]{req, resp, loadBody(parameterTypes[2], req)};
             } else {
                 throw new RuntimeException("Invalid method signature");
@@ -144,7 +141,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
                     throw Utils.propagate(e);
                 }
 
-                if (res instanceof AsyncContext || method.getReturnType() == void.class)
+                if (res instanceof LvAsyncContext || method.getReturnType() == void.class)
                     return;
 
                 resp.setContentType("application/json");
@@ -167,7 +164,7 @@ public abstract class AbstractRestRequestHandler implements AutoCloseable {
         }
     }
 
-    private void sendResponse(HttpServletResponse resp, int code, String message) throws IOException {
+    private void sendResponse(LvServletResponse resp, int code, String message) throws IOException {
         if (resp.isCommitted()) {
             throw new IllegalStateException("Response already committed");
         } else {
