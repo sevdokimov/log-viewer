@@ -30,10 +30,10 @@ public class SearchTask extends SessionTask<SearchTask.SearchResponse> {
 
     private boolean finished;
 
-    public SearchTask(SessionAdapter sender, LogView[] logs, Position start, int recordCount, boolean backward,
+    public SearchTask(LogView[] logs, Position start, int recordCount, boolean backward,
                       @NonNull SearchPattern pattern,
                       @NonNull Map<String, String> hashes, @Nullable RecordPredicate filter) {
-        super(sender, logs);
+        super(logs);
 
         this.start = start;
         this.recordCount = recordCount;

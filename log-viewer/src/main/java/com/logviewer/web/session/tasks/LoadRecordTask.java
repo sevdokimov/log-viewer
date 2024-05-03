@@ -6,7 +6,10 @@ import com.logviewer.data2.Position;
 import com.logviewer.data2.RecordList;
 import com.logviewer.filters.RecordPredicate;
 import com.logviewer.utils.Pair;
-import com.logviewer.web.session.*;
+import com.logviewer.web.session.LogDataListener;
+import com.logviewer.web.session.LogProcess;
+import com.logviewer.web.session.SessionTask;
+import com.logviewer.web.session.Status;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -39,9 +42,9 @@ public class LoadRecordTask extends SessionTask<LoadNextResponse> {
     protected boolean eof = true;
     protected boolean finished;
 
-    public LoadRecordTask(@NonNull SessionAdapter sender, @NonNull LogView[] logs, int recordCount, RecordPredicate filter,
+    public LoadRecordTask(@NonNull LogView[] logs, int recordCount, RecordPredicate filter,
                           @Nullable Position start, boolean backward, @Nullable Map<String, String> hashes) {
-        super(sender, logs);
+        super(logs);
 
         this.recordCount = recordCount;
         this.start = start;
