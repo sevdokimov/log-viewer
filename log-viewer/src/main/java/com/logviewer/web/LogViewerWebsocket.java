@@ -50,7 +50,7 @@ public class LogViewerWebsocket extends Endpoint {
 
         SessionAdapter sessionAdapter = event -> sendMessage(webSession, event);
 
-        LogSession session = LogSession.fromContext(sessionAdapter, applicationContext);
+        LogSession session = LogSession.fromContext(sessionAdapter, context);
 
         webSession.getUserProperties().put(LOG_SESSION, session);
 

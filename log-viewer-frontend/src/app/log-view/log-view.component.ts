@@ -217,7 +217,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
                 this.setSelectedLine(index);
 
-                this.openContextMenu(index,  event);
+                this.openContextMenu(index, event);
                 break;
             }
         }
@@ -262,8 +262,10 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
             target.replaceWith($('<img src="assets/progress.gif">')[0])
 
-            this.commService.send(new Command('loadLogContent', {logId: rec.logId, recordStart: rec.start,
-                offset: rec.start + rec.loadedTextLengthBytes, end: rec.end}))
+            this.commService.send(new Command('loadLogContent', {
+                logId: rec.logId, recordStart: rec.start,
+                offset: rec.start + rec.loadedTextLengthBytes, end: rec.end
+            }))
 
             return;
         }
@@ -282,7 +284,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
                     this.unselectedLine()
                     return;
                 }
-                
+
                 this.setSelectedLine(index);
 
                 if ((<Element>event.target).classList.contains('rec-pointer')) {
@@ -917,8 +919,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         let backwardOnly =
             !this.hasRecordAfter &&
             !Position.containPosition(this.vs.selectedLine, this.m[mainRecordIdx]) &&
-            this.getLogViewHeight() - this.shiftView <
-            this.logPane.nativeElement.clientHeight;
+            this.getLogViewHeight() - this.shiftView < this.logPane.nativeElement.clientHeight;
 
         if (backwardOnly) {
             this.commService.send(
