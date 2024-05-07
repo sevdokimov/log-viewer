@@ -1,6 +1,7 @@
 package com.logviewer.data2.net;
 
 import com.logviewer.data2.FileAttributes;
+import com.logviewer.data2.LogRecord;
 import com.logviewer.data2.LogView;
 import com.logviewer.data2.Position;
 import com.logviewer.filters.RecordPredicate;
@@ -44,6 +45,13 @@ public abstract class BrokenLog implements LogView {
     @Override
     public CompletableFuture<Throwable> tryRead() {
         return CompletableFuture.completedFuture(error);
+    }
+
+    @Override
+    public CompletableFuture<LogRecord> readRecordAt(long offset) {
+        CompletableFuture<LogRecord> res = new CompletableFuture<>();
+        res.completeExceptionally(error);
+        return res;
     }
 
     @Override

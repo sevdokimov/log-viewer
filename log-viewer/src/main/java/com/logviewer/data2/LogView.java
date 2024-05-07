@@ -39,6 +39,8 @@ public interface LogView {
 
     CompletableFuture<Throwable> tryRead();
 
+    CompletableFuture<LogRecord> readRecordAt(long offset);
+
     /**
      * Reads a piece of the log.
      * @param offset The offset in the log.

@@ -45,7 +45,7 @@ public class LocalFileRecordLoader implements LogProcess {
 
     public LocalFileRecordLoader(Supplier<Snapshot> snapshotFactory, @NonNull ExecutorService executor,
                                  LogDataListener listener,
-                                 @Nullable Position start, RecordPredicate filter, boolean backward,
+                                 @Nullable Position start, @Nullable RecordPredicate filter, boolean backward,
                                  int recordCountLimit, long sizeLimit, @Nullable String hash) {
         this.snapshotFactory = snapshotFactory;
         this.executor = executor;

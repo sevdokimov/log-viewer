@@ -85,11 +85,11 @@ export interface EventScrollToEdgeResponse extends DataHolderEvent {
     isScrollToBegin: boolean;
 }
 
-export interface EventResponseAfterFilterChangedSingle
+export interface EventResponseAfterFilterScrollDown
     extends DataHolderEvent {
 }
 
-export interface EventResponseAfterFilterChanged extends StatusHolderEvent {
+export interface EventResponseAfterLoadDataAroundPosition extends StatusHolderEvent {
     topData: RecordBundle;
     bottomData: RecordBundle;
 }

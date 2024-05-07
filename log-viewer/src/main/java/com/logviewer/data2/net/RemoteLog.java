@@ -130,6 +130,21 @@ public class RemoteLog implements LogView {
     }
 
     @Override
+    public CompletableFuture<LogRecord> readRecordAt(long offset) {
+        CompletableFuture<LogRecord> res = new CompletableFuture<>();
+
+        remoteNodeService.startTask(node, new LoadOneRecordTask(path.getFile(), serializedFormat, offset), (r, error) -> {
+            if (error != null) {
+                res.completeExceptionally(error);
+            } else {
+                res.complete(r);
+            }
+        });
+
+        return res;
+    }
+
+    @Override
     public CompletableFuture<Pair<String, Integer>> loadContent(long offset, int length) {
         CompletableFuture<Pair<String, Integer>> res = new CompletableFuture<>();
 

@@ -12,6 +12,8 @@ import java.util.Objects;
 
 public class Position implements Serializable {
 
+    public static final Position FIRST_RECORD = new Position("", Utils.MAX_TIME_MILLIS, 0);
+
     private final String logId;
 
     @JsonAdapter(GsonNanosecondsAdapter.class)
@@ -44,7 +46,7 @@ public class Position implements Serializable {
     }
 
     public long getTime() {
-        return time;
+        return time == null ? 0 : time;
     }
 
     public long getLocalPosition() {

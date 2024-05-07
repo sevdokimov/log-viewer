@@ -26,8 +26,8 @@ import {
     BackendErrorEvent,
     EventInitByPermalink,
     EventNextDataLoaded,
-    EventResponseAfterFilterChanged,
-    EventResponseAfterFilterChangedSingle,
+    EventResponseAfterFilterScrollDown,
+    EventResponseAfterLoadDataAroundPosition,
     EventScrollToEdgeResponse,
     EventSearchResponse,
     EventSetViewState,
@@ -149,7 +149,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
     goToTailAfterBrokenLink() {
         let p = this.createParams();
-        this.router.navigate([], {queryParams: p});
+        this.router.navigate([], {queryParams: p, preserveFragment: true});
         this.modalWindow = null;
         this.cleanAndScrollToEdge();
     }
@@ -168,14 +168,12 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     private filtersChanged() {
-        this.router.navigate([], {queryParams: this.createParams()});
+        this.router.navigate([], {queryParams: this.createParams(), preserveFragment: true});
         this.activeFilterChanged();
     }
 
     unselectedLine() {
-        $('.record.selected-line', this.records.nativeElement).removeClass(
-            'selected-line'
-        );
+        $('.record.selected-line', this.records.nativeElement).removeClass('selected-line');
 
         this.vs.selectedLine = null;
     }
@@ -184,7 +182,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (this.vs.selectedLine != null) {
             if (Position.containPosition(this.vs.selectedLine, this.m[idx])) { return; }
 
-            this.unselectedLine();
+            $('.record.selected-line', this.records.nativeElement).removeClass('selected-line');
         }
 
         $(this.records.nativeElement.children[idx]).addClass('selected-line');
@@ -923,7 +921,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
 
         if (backwardOnly) {
             this.commService.send(
-                new Command('loadingDataAfterFilterChangedSingle', {
+                new Command('changeFiltersAndScrollDown', {
                     recordCount: this.recordCountToLoad(),
                     stateVersion: this.stateVersion,
                     filter: this.effectiveFilters,
@@ -937,7 +935,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
 
             this.commService.send(
-                new Command('loadingDataAfterFilterChanged', {
+                new Command('changeFiltersAndLoadData', {
                     topRecordCount,
                     bottomRecordCount: this.recordCountToLoad() - topRecordCount + 1,
                     stateVersion: this.stateVersion,
@@ -1420,7 +1418,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
             }
         }
 
-        this.vs.selectedLine = event.selectedLine;
+        this.vs.setSelectedWithoutFragmentChange(event.selectedLine);
 
         LvUtils.assert(this.m.length === 0);
         this.addRecords(m);
@@ -1436,7 +1434,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         if (event.filterStateUrlParam)
             queryParams.filters = event.filterStateUrlParam;
 
-        this.router.navigate([], {queryParams});
+        this.router.navigate([], {queryParams, fragment: this.vs.createFragment()});
 
         this.state = State.STATE_OPENED;
 
@@ -1449,7 +1447,7 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     @BackendEventHandler()
-    private onResponseAfterFilterChangedSingle(event: EventResponseAfterFilterChangedSingle) {
+    private onResponseAfterFilterChangedScrollDown(event: EventResponseAfterFilterScrollDown) {
         if (!this.handleStatuses(event) || this.state !== State.STATE_WAIT_FOR_NEW_FILTERS) {
             return;
         }
@@ -1474,8 +1472,9 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
     }
 
     @BackendEventHandler()
-    private onResponseAfterFilterChanged(event: EventResponseAfterFilterChanged) {
-        if (!this.handleStatuses(event) || this.state !== State.STATE_WAIT_FOR_NEW_FILTERS) {
+    private onResponseAfterLoadDataAroundPosition(event: EventResponseAfterLoadDataAroundPosition) {
+        if (!this.handleStatuses(event)
+            || (this.state !== State.STATE_WAIT_FOR_NEW_FILTERS && this.state !== State.STATE_LOADING)) {
             return;
         }
 
@@ -1494,12 +1493,38 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.hasRecordBefore = event.topData.hasNextLine;
         this.hasRecordAfter = event.bottomData.hasNextLine;
 
-        let anchorOffset = this.headHeight(this.anchor) - this.shiftView;
+        let selectedOffsetInUrl = this.getSelectedRowFromFragment();
 
-        this.recRenderer.replaceRange(top, this.m, 0, this.anchor, this.records.nativeElement);
-        this.recRenderer.replaceRange(bottom, this.m, top.length, this.m.length, this.records.nativeElement);
+        let selectedPosition = null;
 
-        this.shiftView = this.headHeight(top.length) - anchorOffset;
+        if (selectedOffsetInUrl) {
+            let selectedRecordPredicate = (r: Record) => {
+                return r.logId === selectedOffsetInUrl.logId && r.start <= selectedOffsetInUrl.offset && r.end >= selectedOffsetInUrl.offset
+            };
+
+            let selectedRecord = top.find(selectedRecordPredicate) || bottom.find(selectedRecordPredicate)
+            if (selectedRecord) {
+                selectedPosition = Position.recordStart(selectedRecord)
+            }
+        }
+
+        this.vs.selectedLine = selectedPosition;
+
+        if (this.anchor) {
+            let anchorOffset = this.headHeight(this.anchor) - this.shiftView;
+
+            this.recRenderer.replaceRange(top, this.m, 0, this.anchor, this.records.nativeElement);
+            this.recRenderer.replaceRange(bottom, this.m, top.length, this.m.length, this.records.nativeElement);
+
+            this.shiftView = this.headHeight(top.length) - anchorOffset;
+        } else {
+            this.clearRecords();
+            this.addRecords(top)
+            this.addRecords(bottom)
+            this.shiftView = 0;
+            if (top.length)
+                this.scrollToLine(top.length - 1)
+        }
 
         this.loadRecordsIfNeeded();
     }
@@ -1554,8 +1579,49 @@ export class LogViewComponent implements OnInit, OnDestroy, AfterViewChecked, Ba
         this.filterPanelStateService.filterChanges.subscribe(() => this.filtersChanged());
 
         if (!event.initByPermalink) {
+            let selectedOffsetInUrl = this.getSelectedRowFromFragment();
+
+            if (selectedOffsetInUrl) {
+                this.commService.send(
+                    new Command('loadDataAroundPosition', {
+                        topRecordCount: this.recordCountToLoad(),
+                        bottomRecordCount: this.recordCountToLoad(),
+                        stateVersion: this.stateVersion,
+                        hashes: this.vs.hashes,
+                        logId: selectedOffsetInUrl.logId,
+                        offset: selectedOffsetInUrl.offset,
+                    })
+                );
+
+                this.anchor = null;
+                return;
+            }
+
             this.cleanAndScrollToEdge(this.visibleRecordCount() * 2);
         }
+    }
+
+    private getSelectedRowFromFragment(): {logId: string, offset: number} {
+        let fragment = this.route.snapshot.fragment;
+        if (!fragment)
+            return null;
+
+        let matcher = fragment.match(/^(?:(.+)-)?p(\d+)$/i)
+        if (!matcher) {
+            console.error('Invalid URL fragment: ' + fragment)
+            return null;
+        }
+
+        let logId = matcher[1]
+        if (!logId) {
+            if (this.logs.length !== 1) {
+                console.error('Invalid URL fragment, logId is missed: ' + fragment);
+                return null;
+            }
+            logId = this.logs[0].id
+        }
+
+        return {logId, offset: parseInt(matcher[2], 10)}
     }
 
     private setGlobalSavedFilters(globalSavedFilters: { [p: string]: string }) {

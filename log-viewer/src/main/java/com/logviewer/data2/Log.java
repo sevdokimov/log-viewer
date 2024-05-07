@@ -733,7 +733,7 @@ public class Log implements LogView {
     }
 
     @Override
-    public LogProcess loadRecords(RecordPredicate filter, int recordCountLimit,
+    public LogProcess loadRecords(@Nullable RecordPredicate filter, int recordCountLimit,
                                   @Nullable Position start, boolean backward, String hash, long sizeLimit,
                                   @NonNull LogDataListener loadListener) {
         return new LocalFileRecordLoader(this::createSnapshot, executor, loadListener, start, filter, backward,
@@ -795,6 +795,26 @@ public class Log implements LogView {
         try (Snapshot snapshot = createSnapshot()) {
             return CompletableFuture.completedFuture(snapshot.getError());
         }
+    }
+
+    @Override
+    public CompletableFuture<LogRecord> readRecordAt(long offset) {
+        CompletableFuture<LogRecord> res = new CompletableFuture<>();
+        executor.submit(() -> {
+            try (Snapshot snapshot = createSnapshot()) {
+                boolean notFound = snapshot.processRecords(offset, false, r -> {
+                    res.complete(r);
+                    return false;
+                });
+                if (notFound) {
+                    res.complete(null);
+                }
+            } catch (Throwable t) {
+                res.completeExceptionally(t);
+            }
+        });
+
+        return res;
     }
 
     @Override

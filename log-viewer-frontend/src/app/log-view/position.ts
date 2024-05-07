@@ -30,7 +30,7 @@ export class Position {
 
         return (
             position.logId === record.logId &&
-            position.time === record.time &&
+            (position.time == null || position.time === record.time) &&
             (record.start <= position.o && position.o <= record.end)
         );
     }

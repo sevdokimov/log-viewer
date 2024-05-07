@@ -35,6 +35,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class LogSession {
@@ -258,7 +259,7 @@ public class LogSession {
     }
 
     @Remote
-    public synchronized void loadingDataAfterFilterChangedSingle(int recordCount, long stateVersion, @Nullable RecordPredicate[] filter) {
+    public synchronized void changeFiltersAndScrollDown(int recordCount, long stateVersion, @Nullable RecordPredicate[] filter) {
         if (!updateStateVersionAndFilters(stateVersion, filter))
             return;
 
@@ -269,20 +270,92 @@ public class LogSession {
         ex.whenComplete(new LogExecutionHandler<LoadNextResponse>() {
             @Override
             protected void handle(LoadNextResponse res) {
-                sender.send(new EventResponseAfterFilterChangedSingle(res.getStatuses(), stateVersion, res));
+                sender.send(new EventResponseAfterFilterScrollDown(res.getStatuses(), stateVersion, res));
             }
         });
     }
 
     @Remote
-    public synchronized void loadingDataAfterFilterChanged(int topRecordCount, int bottomRecordCount,
-                                                           long stateVersion, Map<String, String> hashes, @Nullable RecordPredicate[] filter,
-                                                           Position start) {
+    public synchronized void changeFiltersAndLoadData(int topRecordCount, int bottomRecordCount,
+                                                      long stateVersion, Map<String, String> hashes, @Nullable RecordPredicate[] filter,
+                                                      Position start) {
         if (!updateStateVersionAndFilters(stateVersion, filter))
             return;
 
-        LoadRecordTask topLoadTask = new LoadRecordTask(logs, topRecordCount, this.filter, start, true, hashes);
-        LoadRecordTask bottomLoadTask = new LoadRecordTask(logs, bottomRecordCount, this.filter, start, false, hashes);
+        loadDataAroundPosition0(topRecordCount, bottomRecordCount, stateVersion, hashes, start);
+    }
+
+    public LogView findLog(String logId) {
+        for (LogView l : logs) {
+            if (l.getId().equals(logId)) {
+                return l;
+            }
+        }
+
+        return null;
+    }
+
+    private void loadPosition(@NonNull String logId, long offset, Map<String, String> hashes, Consumer<Position> consumer) {
+        try {
+            LogView log = findLog(logId);
+            if (log == null)
+                throw new IllegalArgumentException("Log not found: " + logId);
+
+            LoadRecordTask loadTask = new LoadRecordTask(new LogView[]{log}, 1, null, new Position(logId, 0, offset), false, hashes);
+            CompletableFuture<LoadNextResponse> future = execute(loadTask);
+            future.whenComplete((res, error) -> {
+                Position p = Position.FIRST_RECORD;
+
+                if (error == null) {
+                    if (res.getData().size() > 0 && res.getData().get(0).getSecond() == null) {
+                        LogRecord logRecord = res.getData().get(0).getFirst();
+                        p = new Position(logId, logRecord.getTime(), logRecord.getStart());
+                    }
+                }
+
+                consumer.accept(p);
+            });
+        } catch (Throwable e) {
+            handleTaskError(e);
+            consumer.accept(Position.FIRST_RECORD); // read log from the beginning if any problem
+        }
+    }
+
+    @Remote
+    public synchronized void loadDataAroundPosition(int topRecordCount, int bottomRecordCount,
+                                                    long stateVersion, Map<String, String> hashes,
+                                                    String logId, long offset) {
+        if (!checkStateVersion(stateVersion))
+            return;
+
+        LogView log = findLog(logId);
+        if (log == null) {
+            LOG.warn("Log not found: {}", logId);
+            loadDataAroundPosition0(topRecordCount, bottomRecordCount, stateVersion, hashes, Position.FIRST_RECORD);
+        } else {
+            log.readRecordAt(offset).whenComplete(Wrappers.of(LOG, (r, error) -> {
+                if (!checkStateVersion(stateVersion))
+                    return;
+
+                Position position = logs.length == 1 ? new Position(logId, 0, 0) : Position.FIRST_RECORD;
+
+                if (error != null) {
+                    LOG.warn("Failed to load log event [file={}, offset={}]", log.getPath(), offset, error);
+                } else {
+                    if (r != null)
+                        position = new Position(r);
+                }
+
+                loadDataAroundPosition0(topRecordCount, bottomRecordCount, stateVersion, hashes, position);
+            }));
+        }
+    }
+
+    private synchronized void loadDataAroundPosition0(int topRecordCount, int bottomRecordCount,
+                                                      long stateVersion, Map<String, String> hashes,
+                                                      Position position) {
+        LoadRecordTask topLoadTask = new LoadRecordTask(logs, topRecordCount, this.filter, position, true, hashes);
+        LoadRecordTask bottomLoadTask = new LoadRecordTask(logs, bottomRecordCount, this.filter, position, false, hashes);
 
         CompletableFuture<LoadNextResponse> topLoadFut = execute(topLoadTask);
         CompletableFuture<LoadNextResponse> bottomLoadFut = execute(bottomLoadTask);
@@ -309,7 +382,7 @@ public class LogSession {
 
         topLoadFut.thenAcceptBoth(bottomLoadFut, (top, bottom) -> {
             if (stateVersion == this.stateVersion) {
-                sender.send(new EventResponseAfterFilterChanged(bottom.getStatuses(), stateVersion, top, bottom));
+                sender.send(new EventResponseAfterLoadDataAroundPosition(bottom.getStatuses(), stateVersion, top, bottom));
             }
         });
     }

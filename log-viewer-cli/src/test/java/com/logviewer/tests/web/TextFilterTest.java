@@ -347,15 +347,15 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         assertThat(getRecord().size(), is(7));
 
-        WebElement record = recordByText("[2012.01.01 00:01][exec-1] b").findElement(By.cssSelector(".rec-text"));
+        By record = By.xpath("//div[contains(@class,'record')][normalize-space(.)='[2012.01.01 00:01][exec-1] b']/div[@class='rec-text']");
 
-        new Actions(driver).contextClick(record).perform();
+        new Actions(driver).contextClick(driver.findElement(record)).perform();
         notExist(ONLY_EVENT_CONTAINIG); // no selection - no "Only events containing" menu item
         new Actions(driver).sendKeys(Keys.ESCAPE).perform(); // close context menu
 
-        select(record);
+        select(driver.findElement(record));
 
-        new Actions(driver).contextClick(record).perform();
+        new Actions(driver).contextClick(driver.findElement(record)).perform();
 
         new Actions(driver).moveToElement(driver.findElement(MENU)).perform();
 
@@ -370,9 +370,9 @@ public class TextFilterTest extends AbstractWebTestCase {
 
         checkRecordCount(7);
 
-        select(record);
+        select(driver.findElement(record));
 
-        new Actions(driver).contextClick(record).perform();
+        new Actions(driver).contextClick(driver.findElement(record)).perform();
 
         new Actions(driver).moveToElement(driver.findElement(MENU)).perform();
 

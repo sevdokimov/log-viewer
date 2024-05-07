@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class CopyPermalinkTest extends AbstractWebTestCase {
@@ -35,6 +36,8 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         String link0 = copyPermalink();
         assert link0.contains("state=");
 
+        String url = driver.getCurrentUrl();
+
         new Actions(driver).sendKeys(Keys.DOWN, Keys.DOWN).perform();
 
         assert !recordByText("1").isDisplayed();
@@ -45,8 +48,6 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
         assert r5.getAttribute("className").contains("selected-line");
 
         String link1 = copyPermalink();
-
-        String url = driver.getCurrentUrl();
 
         driver.get(link0);
         assert recordByText("1").isDisplayed();
@@ -63,7 +64,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         notExist(By.id("brokenLinkGoTail"));
 
-        assert !driver.getCurrentUrl().contains("state=");
+        assertThat(driver.getCurrentUrl()).doesNotContain("state=");
     }
 
     @Test
@@ -120,7 +121,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         waitForRecordsLoading();
         assertEquals("[2012.01.01 00:01][exec-1] b\n[2012.01.01 00:03][exec-100] d", getVisibleRecords());
-        assert driver.getCurrentUrl().contains("filters=%7B%22");
+        assertThat(driver.getCurrentUrl()).contains("filters=%7B%22");
     }
 
     @Test
@@ -151,7 +152,7 @@ public class CopyPermalinkTest extends AbstractWebTestCase {
 
         checkLastRecord("19");
 
-        assert !driver.getCurrentUrl().contains("state=");
+        assertThat(driver.getCurrentUrl()).doesNotContain("state=");
     }
 
     @Test

@@ -5,14 +5,14 @@ import com.logviewer.web.session.tasks.LoadNextResponse;
 
 import java.util.Map;
 
-public class EventResponseAfterFilterChangedSingle extends DataHolderEvent {
+public class EventResponseAfterFilterScrollDown extends DataHolderEvent {
 
-    public EventResponseAfterFilterChangedSingle(Map<String, Status> statuses, long stateVersion, LoadNextResponse res) {
+    public EventResponseAfterFilterScrollDown(Map<String, Status> statuses, long stateVersion, LoadNextResponse res) {
         super(statuses, stateVersion, res);
     }
 
     @Override
     public String getName() {
-        return "onResponseAfterFilterChangedSingle";
+        return "onResponseAfterFilterChangedScrollDown";
     }
 }

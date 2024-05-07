@@ -6,6 +6,7 @@ import com.logviewer.TestUtils;
 import com.logviewer.config.LogViewerServerConfig;
 import com.logviewer.config.LvTestConfig;
 import com.logviewer.data2.FavoriteLogService;
+import com.logviewer.data2.Log;
 import com.logviewer.data2.LogContextHolder;
 import com.logviewer.data2.LogService;
 import com.logviewer.impl.InmemoryFavoritesService;
@@ -130,6 +131,8 @@ public abstract class AbstractWebTestCase implements LogPage {
         InmemoryFavoritesService favoritesService = ctx.getBean(InmemoryFavoritesService.class);
         favoritesService.setEditable(true);
         favoritesService.clear();
+
+        Log.setLogIdGenerator(path -> Paths.get(path).getFileName().toString());
     }
 
     protected static <E extends Throwable> void withNewServer(TestUtils.ExceptionalRunnable<E> run) throws Exception, E {
@@ -359,7 +362,7 @@ public abstract class AbstractWebTestCase implements LogPage {
 
     protected WebElement recordByText(@NonNull String text) {
         text = text.replaceAll("\\s+", " ");
-        return driver.findElement(By.xpath("//div[@id='records']/div[@class='record'][normalize-space(.)='" + text + "']"));
+        return driver.findElement(By.xpath("//div[@id='records']/div[contains(@class,'record')][normalize-space(.)='" + text + "']"));
     }
 
     protected WebElement lastRecord() {

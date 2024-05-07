@@ -2,10 +2,11 @@ import {Injectable} from '@angular/core';
 import {Position} from './position';
 import {ErrorType, RestStatus} from '@app/log-view/log-file';
 import {EventsLogChanged, StatusHolderEvent} from '@app/log-view/backend-events';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Injectable()
 export class ViewStateService {
-    selectedLine: Position;
+    private _selectedLine: Position;
 
     hashes: { [key: string]: string };
     statuses: { [key: string]: RestStatus } = {};
@@ -15,6 +16,38 @@ export class ViewStateService {
     filesValidCount: number;
 
     size: number;
+
+    constructor(private route: ActivatedRoute, private router: Router) {
+
+    }
+
+    get selectedLine(): Position {
+        return this._selectedLine
+    }
+
+    setSelectedWithoutFragmentChange(selectedLine: Position) {
+        this._selectedLine = selectedLine;
+    }
+
+    createFragment() {
+        if (!this._selectedLine)
+            return null;
+
+        let fragment: string = 'p' + this._selectedLine.o;
+
+        if (Object.keys(this.statuses).length > 1) {
+            fragment = this._selectedLine.logId + '-' + fragment;
+        }
+
+        return fragment;
+    }
+
+    set selectedLine(selectedLine: Position) {
+        this._selectedLine = selectedLine;
+
+        let newLocation = ('' + window.location).replace(/#[^#]+$/, '')
+        window.location.replace(newLocation + '#' + (this.createFragment() ?? ''))
+    }
 
     logChanged(event: EventsLogChanged): boolean {
         let hasNewChanges = false;
