@@ -1,4 +1,4 @@
-Configuration is located in `log-viewer-1.0.7/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
+Configuration is located in `log-viewer-1.0.10/config.conf`, the file has [HOCON](https://github.com/lightbend/config)
 
 ### List of available log files
 
