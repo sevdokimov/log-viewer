@@ -14,7 +14,7 @@ public class JakartaSupport {
 
     }
 
-    private static boolean useJakarta(ClassLoader classLoader) {
+    public static boolean useJakarta(ClassLoader classLoader) {
         try {
             classLoader.loadClass("jakarta.servlet.http.HttpServlet");
             return true;
