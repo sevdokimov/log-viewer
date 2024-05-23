@@ -99,8 +99,8 @@ public class BufferedFile {
 
         long winPos = page << WINDOW_SIZE_BITS;
 
-        buf.position(0);
-        buf.limit((int) Math.min(size - winPos, WINDOW_SIZE));
+        Utils.setPositionSafely(buf, 0);
+        Utils.setLimitSafely(buf, (int) Math.min(size - winPos, WINDOW_SIZE));
 
         channel.position(winPos);
 
@@ -113,8 +113,8 @@ public class BufferedFile {
     private void loadTwoPages(long page) throws IOException {
         long winPos = page << WINDOW_SIZE_BITS;
 
-        buf.position(0);
-        buf.limit((int) Math.min(size - winPos, WINDOW_SIZE * 2));
+        Utils.setPositionSafely(buf, 0);
+        Utils.setLimitSafely(buf, (int) Math.min(size - winPos, WINDOW_SIZE * 2));
         assert buf.limit() > WINDOW_SIZE;
 
         channel.position(winPos);
@@ -130,8 +130,8 @@ public class BufferedFile {
 
         long winPos = (loadedPage + 1) << WINDOW_SIZE_BITS;
 
-        buf.limit(WINDOW_SIZE + (int) Math.min(size - winPos, WINDOW_SIZE));
-        buf.position(WINDOW_SIZE);
+        Utils.setLimitSafely(buf, WINDOW_SIZE + (int) Math.min(size - winPos, WINDOW_SIZE));
+        Utils.setPositionSafely(buf, WINDOW_SIZE);
 
         channel.position(winPos);
 
@@ -182,8 +182,8 @@ public class BufferedFile {
 
         long winPos = loadedPage << WINDOW_SIZE_BITS;
         int newPosition = (int) (position - winPos);
-        buf.limit((int) (newPosition + length));
-        buf.position(newPosition);
+        Utils.setLimitSafely(buf, (int) (newPosition + length));
+        Utils.setPositionSafely(buf, newPosition);
         return buf;
     }
 
