@@ -8,6 +8,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -398,5 +399,27 @@ public class Utils {
         }
 
         return Pair.of(out.toString(), in.position());
+    }
+
+    /**
+     * We cannot call {@link ByteBuffer#position(int)} directly because it doesn't work with Java 8. In the Java 8
+     * the return type is {@link ByteBuffer}, but in Java 11 the return type is {@link Buffer}.
+     * This method calls `position(int)` on {@link Buffer} class. It works with both Java 8 and Java 11.
+     */
+    public static void setPositionSafely(ByteBuffer byteBuffer, int newPosition) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Buffer buffer = byteBuffer;
+        buffer.position(newPosition);
+    }
+
+    /**
+     * We cannot call {@link ByteBuffer#limit(int)} directly because it doesn't work with Java 8. In the Java 8
+     * the return type is {@link ByteBuffer}, but in Java 11 the return type is {@link Buffer}.
+     * This method calls `position(int)` on {@link Buffer} class. It works with both Java 8 and Java 11.
+     */
+    public static void setLimitSafely(ByteBuffer byteBuffer, int newLimit) {
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        Buffer buffer = byteBuffer;
+        buffer.limit(newLimit);
     }
 }

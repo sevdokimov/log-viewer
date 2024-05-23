@@ -47,7 +47,7 @@ public class MessageReader {
 
             readingCount = true;
             buffer = null;
-            countBuffer.position(0);
+            Utils.setPositionSafely(countBuffer, 0);
 
             return res;
         }
