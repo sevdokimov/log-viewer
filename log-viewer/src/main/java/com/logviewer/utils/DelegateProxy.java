@@ -1,5 +1,7 @@
 package com.logviewer.utils;
 
+import org.springframework.util.ClassUtils;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -38,19 +40,28 @@ public class DelegateProxy implements InvocationHandler {
         }
     }
 
-    private static Map<Method, Method> getDelegeteMethodsMap(Class<?> requiredClass, Class<?> delegateClass) {
+    private static Method findMethod(Class<?>[] allItf, String name, Class<?>[] args) {
+        for (Class<?> itf : allItf) {
+            try {
+                return itf.getMethod(name, args);
+            } catch (NoSuchMethodException ignored) {
+
+            }
+        }
+
+        throw new RuntimeException("Method not found: " + name);
+    }
+
+    private static Map<Method, Method> getDelegeteMethodsMap(Class<?> requiredClass, Object delegateClass) {
         Map<Class<?>, Map<Method, Method>> clsCache = METHOD_MAP.computeIfAbsent(requiredClass, reqClass -> new ConcurrentHashMap<>());
 
-        return clsCache.computeIfAbsent(delegateClass, delegateCls -> {
+        return clsCache.computeIfAbsent(delegateClass.getClass(), delegateCls -> {
             Map<Method, Method> res = new HashMap<>();
 
+            Class<?>[] allItf = ClassUtils.getAllInterfaces(delegateClass);
+
             for (Method method : requiredClass.getMethods()) {
-                try {
-                    Method delegateMethod = delegateClass.getMethod(method.getName(), method.getParameterTypes());
-                    res.put(method, delegateMethod);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
+                res.put(method, findMethod(allItf, method.getName(), method.getParameterTypes()));
             }
 
             return res;
@@ -58,7 +69,7 @@ public class DelegateProxy implements InvocationHandler {
     }
 
     public static <T, D> T create(Class<T> requiredClass, D delegate) {
-        Map<Method, Method> methodsMap = getDelegeteMethodsMap(requiredClass, delegate.getClass());
+        Map<Method, Method> methodsMap = getDelegeteMethodsMap(requiredClass, delegate);
 
         return (T)Proxy.newProxyInstance(DelegateProxy.class.getClassLoader(), new Class[]{requiredClass},
                 new DelegateProxy(methodsMap, delegate));

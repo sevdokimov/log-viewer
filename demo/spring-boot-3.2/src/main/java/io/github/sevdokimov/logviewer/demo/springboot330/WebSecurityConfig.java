@@ -19,6 +19,9 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/secured").authenticated()
                 .anyRequest().permitAll());
+
+        http.csrf().disable();
+
         return http.build();
     }
 

@@ -34,7 +34,13 @@ public class DelegateProxyTest {
 
     }
 
-    public static class TestClass {
+    public interface TestInterface2 {
+
+        String getS();
+
+    }
+
+    public static class TestClass implements TestInterface2 {
         public String getS() {
             return "s";
         }
